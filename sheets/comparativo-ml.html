@@ -1,0 +1,792 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cuadro Comparativo · PyTorch · TensorFlow · Scikit-learn · JAX · Keras · XGBoost</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=IBM+Plex+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --paper: #f1ead9;
+    --paper-deep: #e8dfc7;
+    --ink: #1a1814;
+    --ink-soft: #4a463d;
+    --ink-mute: #807a6c;
+    --rust: #b8421f;
+    --rust-deep: #8a2f15;
+    --teal: #1f4c4a;
+    --olive: #6b6a2f;
+    --rule: #1a1814;
+    --paper-card: #f7f1e1;
+    --shadow: 4px 4px 0 var(--ink);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'IBM Plex Sans', sans-serif;
+    background: var(--paper);
+    color: var(--ink);
+    line-height: 1.55;
+    font-weight: 400;
+    background-image:
+      radial-gradient(circle at 20% 30%, rgba(184,66,31,0.04) 0%, transparent 50%),
+      radial-gradient(circle at 80% 70%, rgba(31,76,74,0.04) 0%, transparent 50%);
+    min-height: 100vh;
+  }
+
+  /* Grain overlay */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0.4;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.15'/%3E%3C/svg%3E");
+    z-index: 1;
+  }
+
+  .container { max-width: 1400px; margin: 0 auto; padding: 60px 40px; position: relative; z-index: 2; }
+
+  /* HEADER */
+  header { border-bottom: 3px solid var(--ink); padding-bottom: 40px; margin-bottom: 60px; position: relative; }
+  .eyebrow {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.25em;
+    color: var(--rust);
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .eyebrow::before, .eyebrow::after {
+    content: '';
+    height: 1px;
+    background: var(--rust);
+    flex: 0 0 30px;
+  }
+  .eyebrow::after { flex: 1; }
+
+  h1 {
+    font-family: 'Instrument Serif', serif;
+    font-size: clamp(48px, 7vw, 96px);
+    line-height: 0.95;
+    font-weight: 400;
+    letter-spacing: -0.02em;
+    margin-bottom: 24px;
+  }
+  h1 em { color: var(--rust); font-style: italic; }
+
+  .lede {
+    font-family: 'Instrument Serif', serif;
+    font-style: italic;
+    font-size: 22px;
+    color: var(--ink-soft);
+    max-width: 720px;
+    line-height: 1.4;
+  }
+
+  .meta-row {
+    display: flex;
+    gap: 32px;
+    margin-top: 32px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: var(--ink-mute);
+  }
+  .meta-row span strong { color: var(--ink); }
+
+  /* QUICK MATRIX */
+  .matrix-section { margin-bottom: 80px; }
+  .section-title {
+    font-family: 'Instrument Serif', serif;
+    font-size: 36px;
+    margin-bottom: 8px;
+    font-weight: 400;
+  }
+  .section-title em { color: var(--rust); font-style: italic; }
+  .section-sub {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    color: var(--ink-mute);
+    margin-bottom: 28px;
+  }
+
+  .matrix-wrap { overflow-x: auto; border: 2px solid var(--ink); background: var(--paper-card); box-shadow: var(--shadow); }
+  table.matrix {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+    min-width: 900px;
+  }
+  table.matrix th {
+    background: var(--ink);
+    color: var(--paper);
+    padding: 14px 16px;
+    text-align: left;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    font-weight: 500;
+    border-right: 1px solid var(--ink-soft);
+  }
+  table.matrix th:last-child { border-right: none; }
+  table.matrix td {
+    padding: 14px 16px;
+    border-bottom: 1px solid rgba(26,24,20,0.15);
+    border-right: 1px solid rgba(26,24,20,0.15);
+    vertical-align: top;
+  }
+  table.matrix td:last-child { border-right: none; }
+  table.matrix tr:last-child td { border-bottom: none; }
+  table.matrix tr:hover td { background: rgba(184,66,31,0.06); }
+  .tech-name { font-weight: 600; font-family: 'Instrument Serif', serif; font-size: 22px; }
+  .badge {
+    display: inline-block;
+    padding: 3px 8px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    border: 1px solid var(--ink);
+    background: var(--paper);
+    margin-right: 4px;
+  }
+  .badge.rust { background: var(--rust); color: var(--paper); border-color: var(--rust); }
+  .badge.teal { background: var(--teal); color: var(--paper); border-color: var(--teal); }
+  .badge.olive { background: var(--olive); color: var(--paper); border-color: var(--olive); }
+
+  /* DETAIL CARDS */
+  .detail-section { margin-bottom: 60px; }
+  .cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(420px, 1fr));
+    gap: 0;
+    border-top: 2px solid var(--ink);
+    border-left: 2px solid var(--ink);
+  }
+  .card {
+    background: var(--paper-card);
+    border-right: 2px solid var(--ink);
+    border-bottom: 2px solid var(--ink);
+    padding: 32px;
+    position: relative;
+    transition: background 0.3s ease;
+  }
+  .card:hover { background: var(--paper); }
+
+  .card-header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-bottom: 4px;
+    border-bottom: 1px solid var(--ink);
+    padding-bottom: 12px;
+  }
+  .card-name {
+    font-family: 'Instrument Serif', serif;
+    font-size: 42px;
+    line-height: 1;
+    font-weight: 400;
+  }
+  .card-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--ink-mute);
+    letter-spacing: 0.15em;
+  }
+  .card-tagline {
+    font-family: 'Instrument Serif', serif;
+    font-style: italic;
+    font-size: 17px;
+    color: var(--rust);
+    margin-bottom: 20px;
+    margin-top: 12px;
+  }
+
+  .card-section { margin-bottom: 18px; }
+  .card-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    color: var(--ink-mute);
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .card-label::before {
+    content: '';
+    width: 8px;
+    height: 8px;
+    background: var(--rust);
+    display: inline-block;
+  }
+  .card-label.good::before { background: var(--teal); }
+  .card-label.bad::before { background: var(--rust-deep); }
+  .card-label.diff::before { background: var(--olive); }
+
+  .card-text { font-size: 14.5px; color: var(--ink-soft); line-height: 1.55; }
+  .card-text strong { color: var(--ink); font-weight: 600; }
+
+  .yes-no-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-top: 8px;
+    padding-top: 16px;
+    border-top: 1px dashed var(--ink-mute);
+  }
+  .yes-no-block { font-size: 13.5px; }
+  .yes-no-block .heading {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    margin-bottom: 8px;
+    padding: 4px 6px;
+    display: inline-block;
+  }
+  .yes-no-block.yes .heading { background: var(--teal); color: var(--paper); }
+  .yes-no-block.no .heading { background: var(--rust); color: var(--paper); }
+  .yes-no-block ul { list-style: none; }
+  .yes-no-block li {
+    padding: 4px 0 4px 14px;
+    position: relative;
+    color: var(--ink-soft);
+    line-height: 1.4;
+  }
+  .yes-no-block.yes li::before { content: '✓'; position: absolute; left: 0; color: var(--teal); font-weight: bold; }
+  .yes-no-block.no li::before { content: '✕'; position: absolute; left: 0; color: var(--rust); font-weight: bold; }
+
+  /* DECISION SECTION */
+  .decision-section {
+    margin-top: 80px;
+    background: var(--ink);
+    color: var(--paper);
+    padding: 60px 50px;
+    position: relative;
+  }
+  .decision-section .section-title { color: var(--paper); }
+  .decision-section .section-title em { color: #e8a35e; }
+  .decision-section .section-sub { color: rgba(241,234,217,0.5); }
+
+  .decision-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 28px;
+    margin-top: 32px;
+  }
+  .decision-item {
+    border-left: 3px solid #e8a35e;
+    padding-left: 20px;
+  }
+  .decision-q {
+    font-family: 'Instrument Serif', serif;
+    font-style: italic;
+    font-size: 22px;
+    margin-bottom: 12px;
+    color: #e8a35e;
+    line-height: 1.25;
+  }
+  .decision-a {
+    font-size: 14.5px;
+    color: rgba(241,234,217,0.85);
+  }
+  .decision-a strong { color: var(--paper); }
+
+  /* FOOTER */
+  footer {
+    margin-top: 80px;
+    padding-top: 40px;
+    border-top: 3px solid var(--ink);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: var(--ink-mute);
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  /* DECORATIVE ASTERISK */
+  .asterisk {
+    font-family: 'Instrument Serif', serif;
+    font-size: 80px;
+    color: var(--rust);
+    line-height: 0.5;
+    display: inline-block;
+    transform: translateY(0.15em);
+  }
+
+  @media (max-width: 720px) {
+    .container { padding: 32px 20px; }
+    .cards-grid { grid-template-columns: 1fr; }
+    .yes-no-grid { grid-template-columns: 1fr; }
+    .meta-row { flex-direction: column; gap: 8px; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <header>
+    <div class="eyebrow">Guía Comparativa · ML & Deep Learning · 2026</div>
+    <h1>Seis herramientas, <em>seis filosofías</em>.<br>Una sola decisión.</h1>
+    <p class="lede">Un análisis honesto sobre qué hace cada framework, qué <em>no</em> hace, y cuándo elegirlo. Sin marketing, sin religión de framework.</p>
+    <div class="meta-row">
+      <span><strong>6</strong> tecnologías</span>
+      <span><strong>8</strong> dimensiones de análisis</span>
+      <span>Idioma: <strong>Español</strong></span>
+      <span>Formato: <strong>Cuadro comparativo</strong></span>
+    </div>
+  </header>
+
+  <!-- MATRIZ RÁPIDA -->
+  <section class="matrix-section">
+    <h2 class="section-title">Matriz <em>de un vistazo</em> <span class="asterisk">*</span></h2>
+    <p class="section-sub">// Categorización rápida — para los que tienen prisa</p>
+    <div class="matrix-wrap">
+      <table class="matrix">
+        <thead>
+          <tr>
+            <th style="width: 14%;">Tecnología</th>
+            <th style="width: 14%;">Categoría</th>
+            <th style="width: 11%;">Nivel API</th>
+            <th style="width: 11%;">GPU/TPU</th>
+            <th style="width: 14%;">Curva aprendizaje</th>
+            <th style="width: 18%;">Mejor para</th>
+            <th style="width: 18%;">Creador</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="tech-name">PyTorch</span></td>
+            <td><span class="badge rust">Deep Learning</span></td>
+            <td>Bajo–medio</td>
+            <td>Sí, nativo</td>
+            <td>Media</td>
+            <td>Investigación, NLP, visión</td>
+            <td>Meta (Facebook)</td>
+          </tr>
+          <tr>
+            <td><span class="tech-name">TensorFlow</span></td>
+            <td><span class="badge rust">Deep Learning</span></td>
+            <td>Bajo–alto</td>
+            <td>Sí, incluye TPU</td>
+            <td>Media–alta</td>
+            <td>Producción, móvil, edge</td>
+            <td>Google Brain</td>
+          </tr>
+          <tr>
+            <td><span class="tech-name">Scikit-learn</span></td>
+            <td><span class="badge teal">ML Clásico</span></td>
+            <td>Alto</td>
+            <td>No (CPU)</td>
+            <td>Baja</td>
+            <td>Datos tabulares pequeños/medianos</td>
+            <td>Comunidad / INRIA</td>
+          </tr>
+          <tr>
+            <td><span class="tech-name">JAX</span></td>
+            <td><span class="badge rust">Comp. Numérica</span></td>
+            <td>Bajo</td>
+            <td>Sí, optimizado XLA</td>
+            <td>Alta</td>
+            <td>Research vanguardia, cómputo científico</td>
+            <td>Google Research</td>
+          </tr>
+          <tr>
+            <td><span class="tech-name">Keras</span></td>
+            <td><span class="badge rust">Deep Learning</span></td>
+            <td>Muy alto</td>
+            <td>Sí (vía backend)</td>
+            <td>Muy baja</td>
+            <td>Prototipado, enseñanza</td>
+            <td>F. Chollet (Google)</td>
+          </tr>
+          <tr>
+            <td><span class="tech-name">XGBoost</span></td>
+            <td><span class="badge olive">Gradient Boosting</span></td>
+            <td>Medio</td>
+            <td>Limitado (entrena en GPU)</td>
+            <td>Baja–media</td>
+            <td>Datos tabulares, alta precisión</td>
+            <td>T. Chen / DMLC</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- TARJETAS DETALLADAS -->
+  <section class="detail-section">
+    <h2 class="section-title">Análisis <em>profundo</em></h2>
+    <p class="section-sub">// Qué hace, qué no hace, qué la diferencia, cuándo usarla</p>
+
+    <div class="cards-grid">
+
+      <!-- PYTORCH -->
+      <article class="card">
+        <div class="card-header">
+          <span class="card-name">PyTorch</span>
+          <span class="card-num">01 / 06</span>
+        </div>
+        <p class="card-tagline">"El framework de los investigadores."</p>
+
+        <div class="card-section">
+          <div class="card-label">Qué es</div>
+          <p class="card-text">Framework de deep learning de código abierto creado por Meta. Ofrece tensores con aceleración GPU y un sistema de <strong>autograd dinámico</strong> que permite construir redes neuronales como si fueran código Python normal.</p>
+        </div>
+
+        <div class="card-section">
+          <div class="card-label">Qué hace</div>
+          <p class="card-text">Construye, entrena y despliega redes neuronales. Soporta CUDA, MPS (Apple Silicon) y aceleradores. Tiene ecosistema rico: <strong>TorchVision</strong>, <strong>TorchAudio</strong>, <strong>TorchServe</strong>, y es la base de Hugging Face Transformers.</p>
+        </div>
+
+        <div class="card-section">
+          <div class="card-label diff">Lo que hace que otros NO</div>
+          <p class="card-text">Grafos computacionales <strong>dinámicos</strong> (define-by-run): puedes hacer <code>if</code>, bucles y debugging con <code>print()</code> dentro del modelo. Es <em>el</em> framework de la investigación moderna — la mayoría de papers nuevos publican código en PyTorch.</p>
+        </div>
+
+        <div class="card-section">
+          <div class="card-label bad">Lo que NO hace bien</div>
+          <p class="card-text">No es ideal para ML clásico (no tiene <code>RandomForest</code> ni <code>SVM</code>). El despliegue en producción, aunque mejorado con <strong>TorchScript</strong> y <strong>ExecuTorch</strong>, históricamente fue menos pulido que TensorFlow.</p>
+        </div>
+
+        <div class="yes-no-grid">
+          <div class="yes-no-block yes">
+            <div class="heading">Úsalo cuando</div>
+            <ul>
+              <li>Investigas o experimentas con arquitecturas nuevas</li>
+              <li>Quieres debugging fácil y código pythónico</li>
+              <li>Usas Hugging Face o modelos open source</li>
+              <li>Necesitas control fino del training loop</li>
+            </ul>
+          </div>
+          <div class="yes-no-block no">
+            <div class="heading">Evítalo cuando</div>
+            <ul>
+              <li>Tu problema es ML clásico tabular</li>
+              <li>El equipo no tiene experiencia en Python avanzado</li>
+              <li>Necesitas TFLite o despliegue web maduro</li>
+              <li>Solo quieres entrenar una regresión simple</li>
+            </ul>
+          </div>
+        </div>
+      </article>
+
+      <!-- TENSORFLOW -->
+      <article class="card">
+        <div class="card-header">
+          <span class="card-name">TensorFlow</span>
+          <span class="card-num">02 / 06</span>
+        </div>
+        <p class="card-tagline">"El framework de los ingenieros de producción."</p>
+
+        <div class="card-section">
+          <div class="card-label">Qué es</div>
+          <p class="card-text">Framework de deep learning de Google, diseñado desde el inicio pensando en escalar de la laptop al datacenter. Desde la versión 2.x usa <strong>Keras como API por defecto</strong> y soporta <em>eager execution</em>.</p>
+        </div>
+
+        <div class="card-section">
+          <div class="card-label">Qué hace</div>
+          <p class="card-text">Construye y entrena redes neuronales con soporte para CPU, GPU y <strong>TPU nativo</strong>. Ofrece un ecosistema completo: <strong>TFX</strong> (pipelines), <strong>TF Serving</strong> (despliegue), <strong>TFLite</strong> (móvil/embedded), <strong>TF.js</strong> (navegador).</p>
+        </div>
+
+        <div class="card-section">
+          <div class="card-label diff">Lo que hace que otros NO</div>
+          <p class="card-text">El <strong>ecosistema de producción más completo</strong> del mercado: del prototipo a un Android, navegador o Raspberry Pi sin cambiar de framework. Soporte de <strong>TPUs</strong> nativo y maduro.</p>
+        </div>
+
+        <div class="card-section">
+          <div class="card-label bad">Lo que NO hace bien</div>
+          <p class="card-text">Ha perdido terreno frente a PyTorch en investigación académica. Su API histórica (TF 1.x) era notoriamente compleja, y aunque TF 2.x mejoró, arrastra <strong>deuda de complejidad</strong>. No hace ML clásico.</p>
+        </div>
+
+        <div class="yes-no-grid">
+          <div class="yes-no-block yes">
+            <div class="heading">Úsalo cuando</div>
+            <ul>
+              <li>Necesitas desplegar modelos a escala empresarial</li>
+              <li>Vas a TPUs de Google Cloud</li>
+              <li>El destino es móvil, web o IoT/edge</li>
+              <li>Tu equipo es de MLOps tanto como de ML</li>
+            </ul>
+          </div>
+          <div class="yes-no-block no">
+            <div class="heading">Evítalo cuando</div>
+            <ul>
+              <li>Estás haciendo investigación experimental</li>
+              <li>Quieres seguir papers recientes (mayoría usan PyTorch)</li>
+              <li>Eres principiante absoluto en DL</li>
+              <li>Tu problema es ML tabular clásico</li>
+            </ul>
+          </div>
+        </div>
+      </article>
+
+      <!-- SCIKIT-LEARN -->
+      <article class="card">
+        <div class="card-header">
+          <span class="card-name">Scikit-learn</span>
+          <span class="card-num">03 / 06</span>
+        </div>
+        <p class="card-tagline">"La navaja suiza del ML clásico."</p>
+
+        <div class="card-section">
+          <div class="card-label">Qué es</div>
+          <p class="card-text">Librería Python de <strong>machine learning clásico</strong> (no deep learning). Construida sobre NumPy, SciPy y matplotlib. Su API <code>.fit() / .predict()</code> se ha vuelto el estándar de facto en toda la industria.</p>
+        </div>
+
+        <div class="card-section">
+          <div class="card-label">Qué hace</div>
+          <p class="card-text">Clasificación, regresión, clustering, reducción de dimensionalidad, selección de modelos, preprocesamiento, <strong>pipelines</strong> reproducibles, validación cruzada y métricas. Decenas de algoritmos clásicos perfectamente implementados.</p>
+        </div>
+
+        <div class="card-section">
+          <div class="card-label diff">Lo que hace que otros NO</div>
+          <p class="card-text">La <strong>API más consistente y elegante</strong> del ecosistema ML: cualquier modelo se entrena igual. Documentación impecable. Es la primera herramienta que debe tocar cualquier data scientist antes de saltar a algo más complejo.</p>
+        </div>
+
+        <div class="card-section">
+          <div class="card-label bad">Lo que NO hace</div>
+          <p class="card-text">No hace deep learning. No usa GPU de forma nativa. No escala bien a datasets de cientos de millones de filas. No hace <em>online learning</em> robusto. No procesa imágenes ni texto crudos sin extracción de features previa.</p>
+        </div>
+
+        <div class="yes-no-grid">
+          <div class="yes-no-block yes">
+            <div class="heading">Úsalo cuando</div>
+            <ul>
+              <li>Trabajas con datos tabulares estructurados</li>
+              <li>Necesitas un baseline rápido y honesto</li>
+              <li>Estás aprendiendo ML</li>
+              <li>El dataset cabe en memoria (hasta ~10M filas)</li>
+            </ul>
+          </div>
+          <div class="yes-no-block no">
+            <div class="heading">Evítalo cuando</div>
+            <ul>
+              <li>Trabajas con imágenes, audio o texto crudo</li>
+              <li>Tu dataset es masivo (centenas de millones)</li>
+              <li>Necesitas redes neuronales</li>
+              <li>Quieres GPU para entrenar más rápido</li>
+            </ul>
+          </div>
+        </div>
+      </article>
+
+      <!-- JAX -->
+      <article class="card">
+        <div class="card-header">
+          <span class="card-name">JAX</span>
+          <span class="card-num">04 / 06</span>
+        </div>
+        <p class="card-tagline">"NumPy con esteroides — y un compilador."</p>
+
+        <div class="card-section">
+          <div class="card-label">Qué es</div>
+          <p class="card-text">Librería de Google para <strong>computación numérica de alto rendimiento</strong>. Combina una API casi idéntica a NumPy con autodiferenciación, compilación JIT vía XLA, y paralelización automática en GPU/TPU.</p>
+        </div>
+
+        <div class="card-section">
+          <div class="card-label">Qué hace</div>
+          <p class="card-text">Ofrece transformaciones <strong>componibles</strong>: <code>grad</code> (derivadas), <code>jit</code> (compila), <code>vmap</code> (vectoriza), <code>pmap</code> (paraleliza entre dispositivos). Sobre JAX se construyen frameworks como <strong>Flax</strong>, <strong>Haiku</strong> y <strong>Equinox</strong>.</p>
+        </div>
+
+        <div class="card-section">
+          <div class="card-label diff">Lo que hace que otros NO</div>
+          <p class="card-text">Filosofía <strong>funcional pura</strong>: las transformaciones se componen como funciones matemáticas. Esto permite optimizaciones imposibles en otros frameworks. Es la herramienta interna de DeepMind para entrenar modelos masivos como Gemini.</p>
+        </div>
+
+        <div class="card-section">
+          <div class="card-label bad">Lo que NO hace bien</div>
+          <p class="card-text">No es un framework "completo": para hacer DL necesitas Flax o Haiku encima. Tiene <strong>menos modelos pre-entrenados</strong> que PyTorch, ecosistema más pequeño y curva de aprendizaje empinada (efectos secundarios prohibidos, PRNG explícito).</p>
+        </div>
+
+        <div class="yes-no-grid">
+          <div class="yes-no-block yes">
+            <div class="heading">Úsalo cuando</div>
+            <ul>
+              <li>Haces investigación de vanguardia que necesita velocidad</li>
+              <li>Tu problema es científico (física, química, biología)</li>
+              <li>Necesitas paralelizar entre muchas TPUs</li>
+              <li>Te gusta la programación funcional</li>
+            </ul>
+          </div>
+          <div class="yes-no-block no">
+            <div class="heading">Evítalo cuando</div>
+            <ul>
+              <li>Eres principiante en DL</li>
+              <li>Quieres usar modelos pre-entrenados de la comunidad</li>
+              <li>Necesitas despliegue tradicional en producción</li>
+              <li>Vienes de un equipo OOP sin cultura funcional</li>
+            </ul>
+          </div>
+        </div>
+      </article>
+
+      <!-- KERAS -->
+      <article class="card">
+        <div class="card-header">
+          <span class="card-name">Keras</span>
+          <span class="card-num">05 / 06</span>
+        </div>
+        <p class="card-tagline">"Deep learning para humanos."</p>
+
+        <div class="card-section">
+          <div class="card-label">Qué es</div>
+          <p class="card-text">API de <strong>alto nivel</strong> para construir redes neuronales con código mínimo. Desde <strong>Keras 3</strong> es <em>multi-backend</em>: el mismo código corre sobre TensorFlow, PyTorch o JAX según prefieras.</p>
+        </div>
+
+        <div class="card-section">
+          <div class="card-label">Qué hace</div>
+          <p class="card-text">Permite definir modelos capa por capa (<code>Sequential</code>) o con la API funcional. Ofrece <code>model.fit()</code>, callbacks, métricas, capas listas para usar (CNN, RNN, Transformer) y un workflow muy ergonómico.</p>
+        </div>
+
+        <div class="card-section">
+          <div class="card-label diff">Lo que hace que otros NO</div>
+          <p class="card-text"><strong>Simplicidad radical</strong>: una red neuronal entera en 5 líneas. Y desde Keras 3, eres <em>backend-agnostic</em>: pruebas tu modelo en TF, PyTorch y JAX cambiando una variable de entorno.</p>
+        </div>
+
+        <div class="card-section">
+          <div class="card-label bad">Lo que NO hace bien</div>
+          <p class="card-text">Esa simplicidad se paga con <strong>menos control</strong>: training loops totalmente personalizados, gradientes manuales, o arquitecturas muy exóticas se sienten incómodas. Las abstracciones a veces ocultan bugs sutiles.</p>
+        </div>
+
+        <div class="yes-no-grid">
+          <div class="yes-no-block yes">
+            <div class="heading">Úsalo cuando</div>
+            <ul>
+              <li>Estás aprendiendo deep learning</li>
+              <li>Quieres prototipar rápido (CNN, RNN, Transformer estándar)</li>
+              <li>Quieres flexibilidad de backend (TF/PyTorch/JAX)</li>
+              <li>Enseñas DL a otros</li>
+            </ul>
+          </div>
+          <div class="yes-no-block no">
+            <div class="heading">Evítalo cuando</div>
+            <ul>
+              <li>Tu arquitectura es muy custom o exótica</li>
+              <li>Necesitas control total del training loop</li>
+              <li>Replicas papers con código complejo en PyTorch puro</li>
+              <li>Quieres optimizar cada microsegundo</li>
+            </ul>
+          </div>
+        </div>
+      </article>
+
+      <!-- XGBOOST -->
+      <article class="card">
+        <div class="card-header">
+          <span class="card-name">XGBoost</span>
+          <span class="card-num">06 / 06</span>
+        </div>
+        <p class="card-tagline">"El campeón silencioso de los datos tabulares."</p>
+
+        <div class="card-section">
+          <div class="card-label">Qué es</div>
+          <p class="card-text">Librería de <strong>gradient boosting</strong> sobre árboles de decisión, ultra-optimizada en C++ con bindings para Python, R, Java, Scala, etc. Hermana de <strong>LightGBM</strong> y <strong>CatBoost</strong>, que cumplen un rol similar.</p>
+        </div>
+
+        <div class="card-section">
+          <div class="card-label">Qué hace</div>
+          <p class="card-text">Entrena ensambles de árboles con boosting iterativo. Maneja valores faltantes nativamente, ofrece regularización L1/L2, soporta GPU, y se integra con la API de Scikit-learn (<code>.fit()</code>/<code>.predict()</code>).</p>
+        </div>
+
+        <div class="card-section">
+          <div class="card-label diff">Lo que hace que otros NO</div>
+          <p class="card-text">Es el <strong>rey absoluto de Kaggle</strong> en problemas tabulares: una y otra vez supera a redes neuronales en datos estructurados. Velocidad y precisión que ni siquiera Scikit-learn alcanza en gradient boosting clásico.</p>
+        </div>
+
+        <div class="card-section">
+          <div class="card-label bad">Lo que NO hace</div>
+          <p class="card-text">No procesa imágenes, texto crudo ni audio: necesita <strong>features tabulares</strong>. No hace deep learning. Requiere feature engineering — no aprende representaciones por sí solo. Tuning de hiperparámetros puede ser tedioso.</p>
+        </div>
+
+        <div class="yes-no-grid">
+          <div class="yes-no-block yes">
+            <div class="heading">Úsalo cuando</div>
+            <ul>
+              <li>Tienes datos tabulares estructurados</li>
+              <li>Necesitas la mayor precisión posible</li>
+              <li>Compites en Kaggle o ganas dinero con scoring</li>
+              <li>Casos de fraude, riesgo crediticio, churn</li>
+            </ul>
+          </div>
+          <div class="yes-no-block no">
+            <div class="heading">Evítalo cuando</div>
+            <ul>
+              <li>Trabajas con imágenes, audio, texto, video</li>
+              <li>Tu dataset es minúsculo (decenas de filas)</li>
+              <li>Necesitas extrapolación fuera del rango de entrenamiento</li>
+              <li>Quieres un modelo súper interpretable (usa regresión)</li>
+            </ul>
+          </div>
+        </div>
+      </article>
+
+    </div>
+  </section>
+
+  <!-- DECISIÓN RÁPIDA -->
+  <section class="decision-section">
+    <h2 class="section-title">Decisión <em>rápida</em></h2>
+    <p class="section-sub">// Si pudieras hacer una sola pregunta, sería esta</p>
+
+    <div class="decision-grid">
+      <div class="decision-item">
+        <p class="decision-q">"Mis datos son una tabla con columnas y filas."</p>
+        <p class="decision-a">Empieza con <strong>Scikit-learn</strong> para baseline. Si necesitas más precisión, salta a <strong>XGBoost</strong>. No toques redes neuronales hasta agotar estas opciones.</p>
+      </div>
+
+      <div class="decision-item">
+        <p class="decision-q">"Mi problema es imágenes, texto o audio."</p>
+        <p class="decision-a">Necesitas deep learning. Usa <strong>PyTorch</strong> si vienes de research o Hugging Face; <strong>TensorFlow</strong> si tu meta es producción móvil/edge; <strong>Keras</strong> si quieres simplicidad.</p>
+      </div>
+
+      <div class="decision-item">
+        <p class="decision-q">"Estoy aprendiendo desde cero."</p>
+        <p class="decision-a">Aprende <strong>Scikit-learn</strong> primero (ML clásico). Luego <strong>Keras</strong> para tu primera red neuronal. PyTorch puro y JAX vienen <em>después</em>, no antes.</p>
+      </div>
+
+      <div class="decision-item">
+        <p class="decision-q">"Voy a desplegar en móvil o navegador."</p>
+        <p class="decision-a"><strong>TensorFlow</strong> es claramente la opción adulta: <strong>TFLite</strong> para Android/iOS, <strong>TF.js</strong> para navegador. PyTorch tiene ExecuTorch pero está menos maduro.</p>
+      </div>
+
+      <div class="decision-item">
+        <p class="decision-q">"Hago research y quiero publicar papers."</p>
+        <p class="decision-a"><strong>PyTorch</strong> es el estándar de facto en investigación. Si vas por modelos masivos en TPU o quieres velocidad pura, considera <strong>JAX + Flax</strong>.</p>
+      </div>
+
+      <div class="decision-item">
+        <p class="decision-q">"Tengo poco tiempo y solo quiero un modelo decente."</p>
+        <p class="decision-a">Para tabular: <strong>XGBoost</strong> con hiperparámetros por defecto. Para visión/NLP: un modelo pre-entrenado de Hugging Face en <strong>PyTorch</strong>. No reinventes la rueda.</p>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <span>Cuadro comparativo · Mayo 2026</span>
+    <span>Hecho con buena tipografía y café</span>
+    <span>★ ★ ★</span>
+  </footer>
+
+</div>
+</body>
+</html>

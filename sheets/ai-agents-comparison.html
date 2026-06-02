@@ -1,0 +1,1049 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Agent Frameworks — Tabla Comparativa 2026</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,600;1,9..144,300&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0e0e11;
+    --bg2: #16161c;
+    --bg3: #1e1e27;
+    --bg4: #26262f;
+    --border: #2e2e3a;
+    --border2: #3d3d4e;
+    --text: #e8e8f0;
+    --text2: #9090a8;
+    --text3: #5a5a70;
+    --accent: #7c6af7;
+    --accent2: #a98af7;
+    --green: #3ecf8e;
+    --green-bg: #0d2a1e;
+    --amber: #f5a623;
+    --amber-bg: #2a1e0a;
+    --red: #f75c5c;
+    --red-bg: #2a0d0d;
+    --blue: #4ab3f4;
+    --blue-bg: #0d1e2a;
+    --purple: #c084fc;
+    --purple-bg: #1e0d2a;
+    --teal: #2dd4bf;
+    --teal-bg: #0d2220;
+    --coral: #fb923c;
+    --coral-bg: #2a1505;
+    --pink: #f472b6;
+    --pink-bg: #2a0d1a;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    font-size: 14px;
+    line-height: 1.6;
+  }
+  /* Header */
+  header {
+    padding: 3rem 2rem 2rem;
+    border-bottom: 1px solid var(--border);
+    background: linear-gradient(180deg, #13101f 0%, var(--bg) 100%);
+    position: relative;
+    overflow: hidden;
+  }
+  header::before {
+    content: '';
+    position: absolute;
+    top: -80px; left: 50%;
+    transform: translateX(-50%);
+    width: 600px; height: 300px;
+    background: radial-gradient(ellipse, rgba(124,106,247,0.12) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .header-tag {
+    display: inline-block;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    color: var(--accent2);
+    text-transform: uppercase;
+    border: 1px solid rgba(124,106,247,0.3);
+    padding: 3px 10px;
+    border-radius: 20px;
+    margin-bottom: 1rem;
+  }
+  h1 {
+    font-family: 'Fraunces', serif;
+    font-size: clamp(2rem, 4vw, 3.2rem);
+    font-weight: 600;
+    color: var(--text);
+    line-height: 1.1;
+    margin-bottom: 0.5rem;
+  }
+  h1 span { color: var(--accent2); font-style: italic; }
+  .subtitle {
+    color: var(--text2);
+    font-size: 15px;
+    font-weight: 300;
+    max-width: 600px;
+  }
+  .header-meta {
+    margin-top: 1.5rem;
+    display: flex;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+  }
+  .meta-pill {
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    color: var(--text3);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .meta-pill span { color: var(--text2); }
+
+  /* Controls */
+  .controls {
+    padding: 1.25rem 2rem;
+    background: var(--bg2);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    align-items: center;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .search-wrap {
+    position: relative;
+    flex: 1;
+    min-width: 200px;
+    max-width: 320px;
+  }
+  .search-wrap svg {
+    position: absolute;
+    left: 10px; top: 50%;
+    transform: translateY(-50%);
+    opacity: 0.4;
+    pointer-events: none;
+  }
+  input[type="search"] {
+    width: 100%;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 8px 12px 8px 34px;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  input[type="search"]:focus { border-color: var(--accent); }
+  input[type="search"]::placeholder { color: var(--text3); }
+  .filter-group {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .filter-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--text3);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-right: 2px;
+  }
+  .filter-btn {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 5px 12px;
+    font-size: 12px;
+    color: var(--text2);
+    cursor: pointer;
+    transition: all 0.15s;
+    font-family: 'DM Sans', sans-serif;
+    white-space: nowrap;
+  }
+  .filter-btn:hover { border-color: var(--border2); color: var(--text); }
+  .filter-btn.active {
+    background: rgba(124,106,247,0.15);
+    border-color: var(--accent);
+    color: var(--accent2);
+  }
+  .count-badge {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--text3);
+    margin-left: auto;
+  }
+
+  /* Columns toggle */
+  .col-toggle {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    padding: 0.75rem 2rem;
+    background: var(--bg);
+    border-bottom: 1px solid var(--border);
+    align-items: center;
+  }
+  .col-toggle-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--text3);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-right: 4px;
+  }
+  .col-btn {
+    background: none;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 3px 10px;
+    font-size: 11px;
+    color: var(--text3);
+    cursor: pointer;
+    transition: all 0.15s;
+    font-family: 'DM Mono', monospace;
+  }
+  .col-btn.active {
+    background: var(--bg3);
+    border-color: var(--border2);
+    color: var(--text2);
+  }
+
+  /* Table */
+  .table-container {
+    overflow-x: auto;
+    padding: 1.5rem 2rem 3rem;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: auto;
+    min-width: 900px;
+  }
+  thead th {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    padding: 10px 14px;
+    text-align: left;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text3);
+    white-space: nowrap;
+    position: sticky;
+    top: 57px;
+    z-index: 10;
+    cursor: pointer;
+    user-select: none;
+    transition: color 0.15s;
+  }
+  thead th:hover { color: var(--text2); }
+  thead th.sorted { color: var(--accent2); }
+  thead th .sort-arrow { margin-left: 4px; opacity: 0.5; }
+  thead th.sorted .sort-arrow { opacity: 1; }
+
+  tbody tr {
+    transition: background 0.1s;
+    border-bottom: 1px solid var(--border);
+  }
+  tbody tr:hover { background: var(--bg2); }
+  tbody td {
+    border-right: 1px solid var(--border);
+    padding: 12px 14px;
+    vertical-align: top;
+    font-size: 13px;
+    color: var(--text2);
+    max-width: 260px;
+  }
+  tbody td:first-child { max-width: none; }
+  tbody td.name-cell {
+    min-width: 160px;
+    position: sticky;
+    left: 0;
+    background: var(--bg);
+    z-index: 5;
+    border-right: 1px solid var(--border2);
+  }
+  tbody tr:hover td.name-cell { background: var(--bg2); }
+
+  .tool-name {
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 500;
+    font-size: 14px;
+    color: var(--text);
+    margin-bottom: 3px;
+  }
+  .tool-maker {
+    font-size: 11px;
+    color: var(--text3);
+    font-family: 'DM Mono', monospace;
+  }
+
+  /* Badges */
+  .badge {
+    display: inline-block;
+    font-size: 11px;
+    font-family: 'DM Mono', monospace;
+    font-weight: 500;
+    padding: 2px 8px;
+    border-radius: 12px;
+    white-space: nowrap;
+    margin: 2px 2px 2px 0;
+    letter-spacing: 0.03em;
+  }
+  .badge-green { background: var(--green-bg); color: var(--green); border: 1px solid rgba(62,207,142,0.2); }
+  .badge-amber { background: var(--amber-bg); color: var(--amber); border: 1px solid rgba(245,166,35,0.2); }
+  .badge-red { background: var(--red-bg); color: var(--red); border: 1px solid rgba(247,92,92,0.2); }
+  .badge-blue { background: var(--blue-bg); color: var(--blue); border: 1px solid rgba(74,179,244,0.2); }
+  .badge-purple { background: var(--purple-bg); color: var(--purple); border: 1px solid rgba(192,132,252,0.2); }
+  .badge-teal { background: var(--teal-bg); color: var(--teal); border: 1px solid rgba(45,212,191,0.2); }
+  .badge-coral { background: var(--coral-bg); color: var(--coral); border: 1px solid rgba(251,146,60,0.2); }
+  .badge-pink { background: var(--pink-bg); color: var(--pink); border: 1px solid rgba(244,114,182,0.2); }
+  .badge-gray { background: var(--bg3); color: var(--text3); border: 1px solid var(--border); }
+
+  /* Stars / rating */
+  .stars { color: var(--amber); font-size: 12px; letter-spacing: -1px; }
+  .stars-empty { color: var(--border2); }
+
+  /* List in cell */
+  .cell-list { list-style: none; padding: 0; }
+  .cell-list li {
+    padding: 2px 0;
+    font-size: 12px;
+    color: var(--text2);
+    display: flex;
+    gap: 5px;
+  }
+  .cell-list li::before { content: '·'; color: var(--text3); flex-shrink: 0; }
+
+  /* Pros/Cons */
+  .pro { color: var(--green); font-size: 12px; display: block; padding: 1px 0; }
+  .con { color: var(--red); font-size: 12px; display: block; padding: 1px 0; }
+  .pro::before { content: '+ '; }
+  .con::before { content: '- '; }
+
+  /* State indicator */
+  .state-dot {
+    display: inline-block;
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    margin-right: 5px;
+    vertical-align: middle;
+  }
+  .state-active { background: var(--green); box-shadow: 0 0 6px rgba(62,207,142,0.5); }
+  .state-growing { background: var(--blue); box-shadow: 0 0 6px rgba(74,179,244,0.4); }
+  .state-stable { background: var(--amber); box-shadow: 0 0 4px rgba(245,166,35,0.3); }
+  .state-declining { background: var(--red); }
+  .state-beta { background: var(--purple); box-shadow: 0 0 4px rgba(192,132,252,0.4); }
+
+  /* Pricing cell */
+  .price-free { color: var(--green); font-weight: 500; }
+  .price-paid { color: var(--coral); font-weight: 500; }
+  .price-freemium { color: var(--amber); font-weight: 500; }
+
+  /* No results */
+  .no-results {
+    text-align: center;
+    padding: 4rem 2rem;
+    color: var(--text3);
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: 1.2rem;
+  }
+
+  /* Legend */
+  .legend {
+    display: flex;
+    gap: 1.5rem;
+    padding: 1rem 2rem;
+    border-bottom: 1px solid var(--border);
+    flex-wrap: wrap;
+  }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    color: var(--text3);
+    font-family: 'DM Mono', monospace;
+  }
+
+  /* Tooltip */
+  [data-tip] {
+    position: relative;
+    cursor: help;
+  }
+  [data-tip]::after {
+    content: attr(data-tip);
+    position: absolute;
+    bottom: 125%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--bg4);
+    border: 1px solid var(--border2);
+    color: var(--text);
+    font-size: 11px;
+    padding: 6px 10px;
+    border-radius: 6px;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s;
+    z-index: 200;
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 400;
+    max-width: 240px;
+    white-space: normal;
+    text-align: center;
+  }
+  [data-tip]:hover::after { opacity: 1; }
+
+  .hidden-row { display: none; }
+  .hidden-col { display: none; }
+
+  footer {
+    text-align: center;
+    padding: 2rem;
+    color: var(--text3);
+    font-size: 12px;
+    font-family: 'DM Mono', monospace;
+    border-top: 1px solid var(--border);
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-tag">Mayo 2026 · 20 herramientas</div>
+  <h1>AI Agent <span>Frameworks</span></h1>
+  <p class="subtitle">Guía comparativa completa para elegir el stack correcto al construir agentes de inteligencia artificial.</p>
+  <div class="header-meta">
+    <div class="meta-pill">🗓 <span>Actualizado Mayo 2026</span></div>
+    <div class="meta-pill">⚙️ <span>20 herramientas cubiertas</span></div>
+    <div class="meta-pill">🔍 <span>Filtrable · Ordenable</span></div>
+  </div>
+</header>
+
+<div class="controls">
+  <div class="search-wrap">
+    <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+    <input type="search" id="search" placeholder="Buscar herramienta..." autocomplete="off">
+  </div>
+  <div class="filter-group">
+    <span class="filter-label">Tipo:</span>
+    <button class="filter-btn active" data-filter="all">Todos</button>
+    <button class="filter-btn" data-filter="framework">Framework de código</button>
+    <button class="filter-btn" data-filter="visual">Builder visual</button>
+    <button class="filter-btn" data-filter="observability">Observabilidad</button>
+    <button class="filter-btn" data-filter="multi-agent">Multi-agente</button>
+  </div>
+  <div class="filter-group">
+    <span class="filter-label">Precio:</span>
+    <button class="filter-btn" data-filter="free">Open source</button>
+    <button class="filter-btn" data-filter="paid">De pago</button>
+    <button class="filter-btn" data-filter="freemium">Freemium</button>
+  </div>
+  <span class="count-badge" id="count-badge">20 herramientas</span>
+</div>
+
+<div class="col-toggle">
+  <span class="col-toggle-label">Columnas:</span>
+  <button class="col-btn active" data-col="tipo">Tipo</button>
+  <button class="col-btn active" data-col="qhace">Qué hace</button>
+  <button class="col-btn active" data-col="qnohaace">Qué no hace</button>
+  <button class="col-btn active" data-col="diferencia">Diferencial</button>
+  <button class="col-btn active" data-col="cuando-si">Úsalo si…</button>
+  <button class="col-btn active" data-col="cuando-no">No lo uses si…</button>
+  <button class="col-btn active" data-col="precio">Precio</button>
+  <button class="col-btn active" data-col="pros">Ventajas</button>
+  <button class="col-btn active" data-col="cons">Desventajas</button>
+  <button class="col-btn active" data-col="estado">Estado 2026</button>
+  <button class="col-btn active" data-col="lenguaje">Lenguaje</button>
+</div>
+
+<div class="legend">
+  <div class="legend-item"><span class="state-dot state-active"></span> Muy activo</div>
+  <div class="legend-item"><span class="state-dot state-growing"></span> Creciendo</div>
+  <div class="legend-item"><span class="state-dot state-stable"></span> Estable</div>
+  <div class="legend-item"><span class="state-dot state-declining"></span> En declive</div>
+  <div class="legend-item"><span class="state-dot state-beta"></span> Beta/nuevo</div>
+  <div class="legend-item"><span class="badge badge-green" style="font-size:10px">Open Source</span> Código abierto</div>
+  <div class="legend-item"><span class="badge badge-amber" style="font-size:10px">Freemium</span> Gratis con límites</div>
+  <div class="legend-item"><span class="badge badge-coral" style="font-size:10px">De pago</span> Requiere suscripción</div>
+</div>
+
+<div class="table-container">
+  <table id="main-table">
+    <thead>
+      <tr>
+        <th style="min-width:160px; left:0; position:sticky; z-index:15; background:var(--bg2)">Herramienta</th>
+        <th class="col-tipo" data-col="tipo">Tipo</th>
+        <th class="col-qhace" data-col="qhace" style="min-width:200px">Qué hace</th>
+        <th class="col-qnohaace" data-col="qnohaace" style="min-width:180px">Qué NO hace</th>
+        <th class="col-diferencia" data-col="diferencia" style="min-width:180px">Diferencial clave</th>
+        <th class="col-cuando-si" data-col="cuando-si" style="min-width:180px">Úsalo si…</th>
+        <th class="col-cuando-no" data-col="cuando-no" style="min-width:180px">No lo uses si…</th>
+        <th class="col-precio" data-col="precio">Precio</th>
+        <th class="col-pros" data-col="pros" style="min-width:160px">Ventajas</th>
+        <th class="col-cons" data-col="cons" style="min-width:160px">Desventajas</th>
+        <th class="col-estado" data-col="estado" style="min-width:140px">Estado 2026</th>
+        <th class="col-lenguaje" data-col="lenguaje">Lenguaje</th>
+      </tr>
+    </thead>
+    <tbody id="table-body">
+    </tbody>
+  </table>
+  <div class="no-results" id="no-results" style="display:none">No se encontraron herramientas con esos filtros.</div>
+</div>
+
+<footer>Tabla comparativa AI Agent Frameworks · Mayo 2026 · Datos aproximados, verificar precios y features oficiales antes de decidir.</footer>
+
+<script>
+const tools = [
+  {
+    name: "CrewAI",
+    maker: "CrewAI Inc.",
+    tipo: "framework",
+    tipoBadge: "badge-purple",
+    tipoLabel: "Framework multi-agente",
+    qhace: "Orquesta múltiples agentes con roles, tareas y flujos colaborativos. Soporta agentes con memoria, herramientas y procesos secuenciales o jerárquicos.",
+    qnohace: "No provee UI visual, no es plataforma de producción completa. No tiene monitoreo integrado avanzado ni gestión de pipelines ML.",
+    diferencia: "Abstracción de 'crew' (equipo) donde cada agente tiene rol específico. Muy fácil de leer y definir. La más popular para multi-agente con Python.",
+    cuandosi: ["Necesitas múltiples agentes especializados", "Quieres código legible y mantenible", "Prototipado rápido de sistemas multi-agente", "Teams pequeños/medianos"],
+    cuandonot: ["Requieres control fino de flujo de estados", "Workloads enterprise críticos sin supervisión humana", "Necesitas UI para no-técnicos"],
+    precio: "freemium",
+    precioLabel: "OSS + CrewAI Cloud",
+    pros: ["API muy intuitiva", "Gran comunidad", "Rápido de prototipar", "Buena docs"],
+    cons: ["Limitado en flujos complejos de estado", "Cloud puede ser costoso", "Menos control que LangGraph"],
+    estado: "active",
+    estadoLabel: "Muy activo",
+    estadoDesc: "Una de las más usadas en 2026. v0.70+ estable.",
+    lenguajes: ["Python"]
+  },
+  {
+    name: "LangChain",
+    maker: "LangChain Inc.",
+    tipo: "framework",
+    tipoBadge: "badge-teal",
+    tipoLabel: "Framework de chains/agentes",
+    qhace: "Conecta LLMs con herramientas, memoria y fuentes de datos vía 'chains' o agentes LCEL. El ecosistema más amplio para construir aplicaciones LLM.",
+    qnohace: "No orquesta múltiples agentes autónomos de forma nativa (para eso está LangGraph). No es plataforma de deployment. No tiene UI visual.",
+    diferencia: "El framework más maduro y con mayor ecosistema. Cientos de integraciones. LCEL permite componer pipelines declarativamente.",
+    cuandosi: ["Necesitas muchas integraciones out-of-the-box", "RAG + agentes simples", "Quieres el mayor ecosistema disponible", "Migrar código legado LangChain"],
+    cuandonot: ["Flujos multi-agente complejos (usa LangGraph)", "Aversión a abstracciones pesadas", "Equipos que prefieren código explícito"],
+    precio: "freemium",
+    precioLabel: "OSS + LangSmith Cloud",
+    pros: ["Ecosistema gigante", "Maduro y estable", "Documentación extensa", "Miles de integraciones"],
+    cons: ["API cambia frecuentemente", "Abstracciones pueden oscurecer bugs", "Curva de aprendizaje alta", "Verboso"],
+    estado: "stable",
+    estadoLabel: "Estable",
+    estadoDesc: "Maduro pero LangGraph lo está desplazando para casos complejos.",
+    lenguajes: ["Python", "JS/TS"]
+  },
+  {
+    name: "LangGraph",
+    maker: "LangChain Inc.",
+    tipo: "framework",
+    tipoBadge: "badge-teal",
+    tipoLabel: "Framework de grafo de estados",
+    qhace: "Modela agentes y flujos multi-agente como grafos de estados con nodos, edges y ciclos. Permite control de flujo explícito, human-in-the-loop y persistencia de estado.",
+    qnohace: "No simplifica el prototipado rápido. No tiene UI visual propia. No es opinionado sobre qué hace cada agente.",
+    diferencia: "Control total del flujo como máquina de estados. Ideal para workflows donde el estado importa mucho y necesitas interrupciones/reanudaciones.",
+    cuandosi: ["Flujos complejos con ramificaciones y ciclos", "Human-in-the-loop obligatorio", "Necesitas persistir estado entre pasos", "Sistemas de producción críticos"],
+    cuandonot: ["Prototipado rápido", "Flujos lineales simples", "Sin experiencia con grafos/máquinas de estado"],
+    precio: "freemium",
+    precioLabel: "OSS + LangSmith",
+    pros: ["Control de flujo explícito", "Human-in-the-loop nativo", "Persistencia de estado robusta", "Muy flexible"],
+    cons: ["Más verboso que CrewAI", "Curva de aprendizaje alta", "Boilerplate considerable"],
+    estado: "active",
+    estadoLabel: "Muy activo",
+    estadoDesc: "El estándar emergente para agentes de producción en 2026.",
+    lenguajes: ["Python", "JS/TS"]
+  },
+  {
+    name: "Google ADK",
+    maker: "Google DeepMind",
+    tipo: "framework",
+    tipoBadge: "badge-blue",
+    tipoLabel: "Framework de agentes",
+    qhace: "Agent Development Kit de Google. Construye agentes y sistemas multi-agente con integración nativa a Gemini, Vertex AI, Search Grounding y herramientas de Google.",
+    qnohace: "No es agnóstico de modelo (opinionado hacia Gemini). No tiene comunidad tan grande como LangChain. No es ideal para stacks no-Google.",
+    diferencia: "Integración profunda con el stack de Google: Gemini, Vertex AI, Google Search, Maps, etc. La mejor opción si ya usas GCP.",
+    cuandosi: ["Stack 100% Google Cloud", "Necesitas Search Grounding de Google", "Quieres Gemini como LLM principal", "Proyectos enterprise en GCP"],
+    cuandonot: ["Stack multi-cloud o AWS/Azure", "Quieres modelo agnóstico", "Comunidad y ecosistema amplio"],
+    precio: "free",
+    precioLabel: "Open Source (Apache 2.0)",
+    pros: ["Integración nativa con GCP", "Soporte oficial de Google", "Search grounding integrado", "Buena para producción en GCP"],
+    cons: ["Lock-in a Google", "Comunidad pequeña vs LangChain", "Menos integraciones externas", "Documentación irregular"],
+    estado: "growing",
+    estadoLabel: "Creciendo",
+    estadoDesc: "Lanzado en 2025, ganando tracción rápidamente en el ecosistema GCP.",
+    lenguajes: ["Python", "Java"]
+  },
+  {
+    name: "Claude SDK (Anthropic)",
+    maker: "Anthropic",
+    tipo: "framework",
+    tipoBadge: "badge-pink",
+    tipoLabel: "SDK + Agentes",
+    qhace: "SDK oficial de Anthropic para usar Claude vía API. Incluye soporte nativo para tool use, computer use, extended thinking y el protocolo MCP para conectar herramientas.",
+    qnohace: "No es un framework de orquestación multi-agente. No gestiona memoria de largo plazo nativamente. No tiene UI de construcción.",
+    diferencia: "Acceso directo a capacidades únicas de Claude: computer use, extended thinking, MCP nativo. La mejor opción cuando Claude es el LLM core.",
+    cuandosi: ["Claude es el modelo elegido", "Necesitas computer use o extended thinking", "Integración con servidores MCP", "Proyectos simples de 1 agente"],
+    cuandonot: ["Necesitas multi-agente complejo (combinar con LangGraph)", "Quieres framework agnóstico de modelo", "Necesitas UI visual"],
+    precio: "freemium",
+    precioLabel: "SDK gratis + API de pago",
+    pros: ["Acceso a features únicas de Claude", "MCP nativo", "Computer use", "Extended thinking", "Muy bien documentado"],
+    cons: ["Solo funciona con Claude", "No tiene orquestación multi-agente", "Costo de API puede ser alto"],
+    estado: "active",
+    estadoLabel: "Muy activo",
+    estadoDesc: "SDK maduro con actualizaciones frecuentes. MCP adoptado ampliamente en 2026.",
+    lenguajes: ["Python", "JS/TS"]
+  },
+  {
+    name: "Strands Agents",
+    maker: "AWS / Amazon",
+    tipo: "framework",
+    tipoBadge: "badge-amber",
+    tipoLabel: "Framework de agentes",
+    qhace: "Framework open source de AWS para construir agentes con integración nativa a Bedrock, S3, Lambda y el ecosistema de AWS. Diseño minimalista orientado a producción.",
+    qnohace: "No tiene comunidad grande todavía. No es agnóstico de nube. Limitado fuera del stack AWS.",
+    diferencia: "La apuesta de AWS para agentes. Integración nativa con Amazon Bedrock y todos los servicios cloud de AWS. Diseño simple y directo.",
+    cuandosi: ["Infraestructura 100% en AWS", "Usas Amazon Bedrock como LLM provider", "Necesitas integración con S3, Lambda, etc.", "Equipos AWS-first"],
+    cuandonot: ["Stack no-AWS", "Quieres ecosistema grande y comunidad activa", "Necesitas framework agnóstico de nube"],
+    precio: "free",
+    precioLabel: "Open Source (Apache 2.0)",
+    pros: ["Integración nativa AWS", "Simple y directo", "Soporte oficial Amazon", "Buena para producción en AWS"],
+    cons: ["Comunidad pequeña", "Lock-in AWS", "Ecosistema limitado", "Documentación en desarrollo"],
+    estado: "growing",
+    estadoLabel: "Creciendo",
+    estadoDesc: "Lanzado en 2025 por AWS. Creciendo con el ecosistema Bedrock.",
+    lenguajes: ["Python"]
+  },
+  {
+    name: "PydanticAI",
+    maker: "Pydantic / Samuel Colvin",
+    tipo: "framework",
+    tipoBadge: "badge-teal",
+    tipoLabel: "Framework tipado para agentes",
+    qhace: "Framework para construir agentes con Python type-safety nativa, validación con Pydantic v2, inyección de dependencias y outputs estructurados. Agnóstico de modelo.",
+    qnohace: "No tiene sistema de orquestación multi-agente complejo. No tiene UI. No es para no-programadores.",
+    diferencia: "Type safety y outputs estructurados como ciudadanos de primera clase. Código Python idiomático, validación automática de respuestas del LLM.",
+    cuandosi: ["Valoras type safety y validación estricta", "Outputs estructurados son críticos", "Python como lenguaje principal", "APIs y microservicios con LLMs"],
+    cuandonot: ["Prototipado sin preocuparte por tipos", "Multi-agente complejo (usa LangGraph)", "Necesitas UI visual"],
+    precio: "free",
+    precioLabel: "Open Source (MIT)",
+    pros: ["Type safety nativo", "Outputs estructurados robustos", "Python idiomático", "Agnóstico de modelo", "Muy testeable"],
+    cons: ["Ecosistema pequeño", "Menos features de agente", "Comunidad nueva", "Documentación limitada"],
+    estado: "growing",
+    estadoLabel: "Creciendo",
+    estadoDesc: "Ganando popularidad en 2026 entre equipos que priorizan calidad de código.",
+    lenguajes: ["Python"]
+  },
+  {
+    name: "Langfuse",
+    maker: "Langfuse GmbH",
+    tipo: "observability",
+    tipoBadge: "badge-coral",
+    tipoLabel: "Observabilidad LLM",
+    qhace: "Plataforma de observabilidad, trazabilidad, evaluación y gestión de prompts para aplicaciones LLM. Registra traces, métricas de costo, latencia y calidad.",
+    qnohace: "No construye agentes. No orquesta modelos. No es framework de desarrollo. Solo observa y evalúa lo que ya tienes.",
+    diferencia: "Open source con self-hosting, alternativa más económica a LangSmith. Especializado en evaluación y gestión de prompts a escala.",
+    cuandosi: ["Necesitas observabilidad de LLMs en producción", "Quieres self-hosting por privacidad", "Evaluar calidad de outputs sistemáticamente", "Equipo consciente de costos"],
+    cuandonot: ["Aún en prototipado (sobrecarga)", "Tu app es trivial/de una sola llamada", "No te preocupa la calidad/costo en producción"],
+    precio: "freemium",
+    precioLabel: "OSS self-host gratis + Cloud pago",
+    pros: ["Open source / self-hosteable", "Gestión de prompts", "Evaluaciones integradas", "Integra con todo", "Más barato que LangSmith"],
+    cons: ["Self-hosting requiere infra", "UI menos pulida que LangSmith", "Menor integración con LangChain"],
+    estado: "active",
+    estadoLabel: "Muy activo",
+    estadoDesc: "Estándar de facto para observabilidad open source de LLMs en 2026.",
+    lenguajes: ["SDK: Python", "JS/TS", "API REST"]
+  },
+  {
+    name: "LangSmith",
+    maker: "LangChain Inc.",
+    tipo: "observability",
+    tipoBadge: "badge-teal",
+    tipoLabel: "Observabilidad LLM",
+    qhace: "Plataforma de trazabilidad, evaluación, debugging y CI/CD para aplicaciones LLM. Se integra perfectamente con LangChain y LangGraph.",
+    qnohace: "No construye agentes. No es open source. No se puede self-hostear en el plan estándar.",
+    diferencia: "La mejor integración con el ecosistema LangChain/LangGraph. UI muy pulida, evaluaciones, comparación de experimentos y dataset management.",
+    cuandosi: ["Ya usas LangChain o LangGraph", "Necesitas debugging avanzado de chains", "Quieres CI/CD para LLMs", "Equipos que pagan por conveniencia"],
+    cuandonot: ["No usas LangChain (pierdes valor)", "Necesitas self-hosting (usa Langfuse)", "Presupuesto ajustado"],
+    precio: "freemium",
+    precioLabel: "Free tier limitado + Cloud pago",
+    pros: ["Integración perfecta con LangChain", "UI muy pulida", "Evaluaciones y datasets", "CI/CD para LLMs", "Datasets y fine-tuning"],
+    cons: ["Costoso a escala", "No open source", "Vendor lock-in con LangChain", "Sin self-hosting"],
+    estado: "active",
+    estadoLabel: "Muy activo",
+    estadoDesc: "El líder para equipos usando LangChain. Muy activo en 2026.",
+    lenguajes: ["Python", "JS/TS"]
+  },
+  {
+    name: "Agno (ex Phidata)",
+    maker: "Agno AI",
+    tipo: "framework",
+    tipoBadge: "badge-purple",
+    tipoLabel: "Framework de agentes",
+    qhace: "Framework Python para construir agentes con memoria, conocimiento (RAG), herramientas y storage. Soporta agentes multimodales y equipos de agentes.",
+    qnohace: "No tiene UI de no-código. No es tan extensible como LangChain. Menor ecosistema.",
+    diferencia: "Batería incluida: storage, memoria, RAG y herramientas out-of-the-box. Más simple que LangChain para casos típicos. Buen balance entre simplicidad y poder.",
+    cuandosi: ["Quieres memoria + RAG integrados sin configuración extensa", "Agentes con storage nativo", "Proyectos medianos que necesitan todo incluido"],
+    cuandonot: ["Necesitas el ecosistema completo de LangChain", "Workflows de estado complejo (usa LangGraph)", "Comunidad grande como soporte"],
+    precio: "freemium",
+    precioLabel: "OSS + Agno Cloud",
+    pros: ["Batería incluida", "Memoria y RAG nativos", "Fácil de empezar", "Código limpio", "Multimodal"],
+    cons: ["Ecosistema pequeño", "Renombrado recientemente (confusión)", "Menos integraciones que LangChain"],
+    estado: "growing",
+    estadoLabel: "Creciendo",
+    estadoDesc: "Renombrado de Phidata a Agno en 2024-25. Ganando tracción.",
+    lenguajes: ["Python"]
+  },
+  {
+    name: "Gumloop",
+    maker: "Gumloop Inc.",
+    tipo: "visual",
+    tipoBadge: "badge-green",
+    tipoLabel: "Builder visual no-code",
+    qhace: "Plataforma no-code/low-code para automatizar workflows con IA arrastrando bloques. Enfocada en automatización de tareas de conocimiento y scraping con IA.",
+    qnohace: "No es adecuado para lógica de agente compleja o personalizada. No apto para ingenieros que quieren control de código. Limitado en integraciones vs Make/Zapier.",
+    diferencia: "Combina automatización de workflows con capacidades de IA generativa nativas (scraping, extracción de datos, resúmenes) sin escribir código.",
+    cuandosi: ["Equipos no-técnicos que quieren IA", "Automatizar tareas de conocimiento repetitivas", "Scraping + procesamiento con IA", "Demos y MVPs rápidos"],
+    cuandonot: ["Lógica de agente compleja o custom", "Necesitas versionado y código en repo", "Flujos que requieren mucha personalización"],
+    precio: "freemium",
+    precioLabel: "Free tier + planes desde $97/mes",
+    pros: ["Sin código", "Fácil de usar", "IA integrada en scraping", "Buen para no-técnicos", "Rápido para demos"],
+    cons: ["Costoso para uso intensivo", "Control limitado", "Vendor lock-in", "Sin versionado en git"],
+    estado: "growing",
+    estadoLabel: "Creciendo",
+    estadoDesc: "Crecimiento rápido en el mercado no-code IA en 2025-2026.",
+    lenguajes: ["No-code"]
+  },
+  {
+    name: "Stack AI",
+    maker: "Stack AI Inc.",
+    tipo: "visual",
+    tipoBadge: "badge-green",
+    tipoLabel: "Builder visual enterprise",
+    qhace: "Plataforma enterprise de construcción visual de apps y agentes con IA, con foco en flujos de datos internos, formularios y automatización empresarial con datos privados.",
+    qnohace: "No es adecuado para código custom complejo. No compite con frameworks de código como LangChain. Sin self-hosting en plan básico.",
+    diferencia: "Enfoque enterprise con conectores a bases de datos privadas, permisos, SSO y compliance. La opción más enterprise-ready del builder visual.",
+    cuandosi: ["Empresa grande que necesita IA interna", "Flujos con datos sensibles/privados", "Necesitas SSO y permisos granulares", "Sin capacidad técnica para código"],
+    cuandonot: ["Startup o equipo pequeño con dev resources", "Necesitas lógica de agente muy custom", "Presupuesto limitado"],
+    precio: "paid",
+    precioLabel: "Desde $499/mes (enterprise)",
+    pros: ["Enterprise-ready", "Datos privados seguros", "SSO y permisos", "Buen soporte", "Conectores empresariales"],
+    cons: ["Muy costoso", "Flexibilidad limitada", "Vendor lock-in", "Overkill para equipos pequeños"],
+    estado: "stable",
+    estadoLabel: "Estable",
+    estadoDesc: "Nicho enterprise sólido. Compite con Retool AI en el segmento corporativo.",
+    lenguajes: ["No-code / Low-code"]
+  },
+  {
+    name: "Microsoft AutoGen",
+    maker: "Microsoft Research",
+    tipo: "multi-agent",
+    tipoBadge: "badge-blue",
+    tipoLabel: "Framework multi-agente",
+    qhace: "Framework de Microsoft para orquestar conversaciones multi-agente. Los agentes se comunican entre sí como personas en un chat. Soporta agentes humanos en el loop.",
+    qnohace: "No es plataforma de deployment. La abstracción de 'chat' puede ser limitante para flujos no conversacionales. Ecosistema aún maturando.",
+    diferencia: "Paradigma de agentes que se comunican vía mensajes de chat, muy natural e intuitivo. Soporte oficial de Microsoft con integración a Azure AI.",
+    cuandosi: ["Multi-agente donde los agentes debaten/colaboran", "Integración con Azure OpenAI", "Stack Microsoft", "Investigación y experimentación"],
+    cuandonot: ["Workflows determinísticos (usa LangGraph)", "Producción sin Azure", "Necesitas control de estado complejo"],
+    precio: "free",
+    precioLabel: "Open Source (MIT)",
+    pros: ["Modelo conversacional intuitivo", "Soporte Microsoft", "Human-in-the-loop nativo", "Activa comunidad", "Agnóstico de modelo"],
+    cons: ["Paradigma de chat puede ser limitante", "Difícil de depurar conversaciones largas", "Overhead en flujos simples"],
+    estado: "active",
+    estadoLabel: "Muy activo",
+    estadoDesc: "AutoGen 0.4+ reescrito. Uno de los frameworks más citados en research 2026.",
+    lenguajes: ["Python", ".NET"]
+  },
+  {
+    name: "OpenAI Swarm",
+    maker: "OpenAI",
+    tipo: "multi-agent",
+    tipoBadge: "badge-amber",
+    tipoLabel: "Framework experimental multi-agente",
+    qhace: "Framework educativo/experimental de OpenAI para entender handoffs entre agentes. Muestra cómo pasar contexto y control de un agente a otro con patrones simples.",
+    qnohace: "NO es para producción según OpenAI. No tiene persistencia, no escala, no tiene features de producción. Es para aprender patrones de multi-agente.",
+    diferencia: "Extremadamente simple por diseño. Solo dos conceptos: agents y handoffs. Ideal para entender los fundamentos antes de usar un framework más completo.",
+    cuandosi: ["Aprender patrones de multi-agente", "Prototipado conceptual", "Educación y demos", "Entender handoffs de agentes"],
+    cuandonot: ["NUNCA en producción", "Proyectos reales de cualquier tamaño", "Necesitas persistencia, memoria o escala"],
+    precio: "free",
+    precioLabel: "Open Source (MIT)",
+    pros: ["Extremadamente simple", "Ideal para aprender", "Código mínimo", "Conceptos claros"],
+    cons: ["NO apto para producción", "Sin features de producción", "Abandonado en gran medida", "Solo para GPT/OpenAI"],
+    estado: "stable",
+    estadoLabel: "Mantenimiento mínimo",
+    estadoDesc: "Proyecto educativo. No recibe features nuevas. OpenAI prefiere que uses su Agents SDK.",
+    lenguajes: ["Python"]
+  },
+  {
+    name: "Langflow / Flowise",
+    maker: "DataStax (Langflow) / FlowiseAI",
+    tipo: "visual",
+    tipoBadge: "badge-green",
+    tipoLabel: "Builder visual open source",
+    qhace: "Interfaces visuales drag-and-drop para construir flujos LLM y agentes. Langflow es más enterprise (adquirido por DataStax), Flowise más community-driven.",
+    qnohace: "Flujos muy complejos son difíciles de mantener visualmente. Sin control fino de lógica custom. Debugging difícil en producción.",
+    diferencia: "Open source y self-hosteable. Puedes exportar los flujos como código Python (Langflow). Gran alternativa a n8n + IA para flujos visuales.",
+    cuandosi: ["Prototipado visual rápido", "Equipos que prefieren visual pero quieren OSS", "Self-hosting obligatorio", "Demostraciones a stakeholders"],
+    cuandonot: ["Flujos de producción complejos (mantenimiento difícil)", "Equipos con fuerte cultura de código", "Necesitas versionado serio"],
+    precio: "freemium",
+    precioLabel: "OSS gratis + Langflow Cloud pago",
+    pros: ["Código abierto", "Self-hosteable", "Visual e intuitivo", "Gran comunidad", "Exportable a código"],
+    cons: ["Difícil de escalar en prod", "Debugging visual complejo", "Dos proyectos separados (fragmentación)"],
+    estado: "active",
+    estadoLabel: "Muy activo",
+    estadoDesc: "Langflow adquirido por DataStax en 2024. Ambos proyectos activos y con comunidades grandes.",
+    lenguajes: ["No-code (Python internamente)"]
+  },
+  // 5 adicionales relevantes 2026
+  {
+    name: "OpenAI Agents SDK",
+    maker: "OpenAI",
+    tipo: "framework",
+    tipoBadge: "badge-amber",
+    tipoLabel: "Framework de agentes",
+    qhace: "SDK oficial de OpenAI para construir agentes de producción. Sucesor de Swarm. Incluye handoffs, guardrails, tracing nativo, herramientas y soporte para Responses API.",
+    qnohace: "No es agnóstico de modelo (diseñado para GPT-4o/o3). No tiene la riqueza de integraciones de LangChain. Sin UI visual.",
+    diferencia: "El SDK oficial de OpenAI para producción. Guardrails y safety integrados, tracing nativo, y la mejor integración con GPT-4o, o3 y futuras herramientas de OpenAI.",
+    cuandosi: ["OpenAI como proveedor de LLM preferido", "Quieres el stack oficial y soporte de OpenAI", "Guardrails de safety importantes", "Stack simple para producción con GPT"],
+    cuandonot: ["Quieres agnóstico de modelo", "Necesitas multi-agente complejo orquestado", "Preocupado por vendor lock-in OpenAI"],
+    precio: "free",
+    precioLabel: "Open Source + API de pago",
+    pros: ["Oficial de OpenAI", "Guardrails integrados", "Tracing nativo", "Bien documentado", "Listo para producción"],
+    cons: ["Lock-in a OpenAI", "Comunidad más pequeña que LangChain", "Nuevo (ecosistema en desarrollo)"],
+    estado: "active",
+    estadoLabel: "Muy activo",
+    estadoDesc: "Lanzado en 2025 como reemplazo de Swarm. Actualizaciones constantes en 2026.",
+    lenguajes: ["Python", "Node.js"]
+  },
+  {
+    name: "Mastra",
+    maker: "Mastra AI",
+    tipo: "framework",
+    tipoBadge: "badge-teal",
+    tipoLabel: "Framework TypeScript para agentes",
+    qhace: "Framework TypeScript/Node.js para construir agentes con workflows, memoria, RAG y evals integrados. El equivalente JS de LangChain pero más moderno y con mejor DX.",
+    qnohace: "No tiene el ecosistema de Python. No tiene UI visual. Ecosistema más pequeño que LangChain.",
+    diferencia: "El framework más completo y moderno para agentes en TypeScript/JavaScript. Integración nativa con Next.js, Vercel y el ecosistema JS. Muy buena DX.",
+    cuandosi: ["Stack JavaScript/TypeScript", "Aplicaciones web con Next.js", "Fullstack developers que quieren agentes en JS", "RAG + agentes en TypeScript"],
+    cuandonot: ["Prefieres Python", "Necesitas el ecosistema Python (ML, data science)", "Quieres la comunidad más grande"],
+    precio: "free",
+    precioLabel: "Open Source (Apache 2.0)",
+    pros: ["Mejor DX en TypeScript", "Integración Next.js nativa", "Moderna API", "Workflows tipados", "Evals integradas"],
+    cons: ["Ecosistema pequeño vs Python", "Comunidad en crecimiento", "Pocas integraciones vs LangChain"],
+    estado: "growing",
+    estadoLabel: "Creciendo muy rápido",
+    estadoDesc: "El framework JS de agentes que más creció en 2025-2026. Muy popular en la comunidad Vercel/Next.js.",
+    lenguajes: ["TypeScript", "JavaScript"]
+  },
+  {
+    name: "Smolagents",
+    maker: "Hugging Face",
+    tipo: "framework",
+    tipoBadge: "badge-coral",
+    tipoLabel: "Framework minimalista de agentes",
+    qhace: "Framework minimalista de Hugging Face para agentes que ejecutan código Python como herramienta principal (CodeAgent). Muy simple, pocas abstracciones, muy transparente.",
+    qnohace: "No es para multi-agente complejo. Sin UI. Sin gestión de estado avanzada. Sin todas las integraciones de LangChain.",
+    diferencia: "El paradigma de 'Code as action': el agente escribe y ejecuta código Python directamente como su herramienta principal. Extremadamente simple y transparente.",
+    cuandosi: ["Tareas de data science y análisis", "Quieres agente que ejecute código Python", "Proyectos con Hugging Face models", "Simplicidad por encima de todo"],
+    cuandonot: ["Multi-agente complejo", "Producción con muchas integraciones", "Equipos que no quieren ejecutar código arbitrario"],
+    precio: "free",
+    precioLabel: "Open Source (Apache 2.0)",
+    pros: ["Extremadamente simple", "Code-first", "Agnóstico de modelo", "Integración HF Hub", "Muy transparente"],
+    cons: ["Riesgo de seguridad (ejecución de código)", "Pocas abstracciones (más trabajo manual)", "Ecosistema limitado"],
+    estado: "growing",
+    estadoLabel: "Creciendo",
+    estadoDesc: "Ganando tracción en la comunidad Hugging Face y ML research en 2025-2026.",
+    lenguajes: ["Python"]
+  },
+  {
+    name: "n8n + AI nodes",
+    maker: "n8n GmbH",
+    tipo: "visual",
+    tipoBadge: "badge-green",
+    tipoLabel: "Automatización visual con IA",
+    qhace: "Plataforma de automatización de workflows (tipo Zapier pero open source) con nodos nativos de IA: agentes, cadenas LLM, generación de texto/imagen, herramientas.",
+    qnohace: "No es framework de desarrollo de agentes. No para lógica de agente muy custom. Limitado para flujos de razonamiento complejo.",
+    diferencia: "Open source, self-hosteable, con 400+ integraciones y nodos de IA nativos. La mejor opción para automatizar procesos de negocio con IA sin vendor lock-in.",
+    cuandosi: ["Automatizar procesos de negocio con IA", "Integrar LLMs con cientos de apps (CRM, email, Slack)", "Self-hosting obligatorio", "Equipo no-técnico o semi-técnico"],
+    cuandonot: ["Lógica de razonamiento de agente muy compleja", "Necesitas control fino de código", "Flujos de datos ML puros"],
+    precio: "freemium",
+    precioLabel: "OSS gratis (self-host) + Cloud desde $20/mes",
+    pros: ["Open source y self-hosteable", "400+ integraciones", "IA nativa bien integrada", "Comunidad gigante", "Plantillas"],
+    cons: ["No es framework de agentes propiamente", "Debugging complejo en flujos grandes", "UI puede ser lenta con muchos nodos"],
+    estado: "active",
+    estadoLabel: "Muy activo",
+    estadoDesc: "Uno de los proyectos de automatización que más creció en 2025-2026 con la integración de IA.",
+    lenguajes: ["No-code (JS internamente)"]
+  },
+  {
+    name: "Dify",
+    maker: "Dify AI (LangGenius)",
+    tipo: "visual",
+    tipoBadge: "badge-green",
+    tipoLabel: "Plataforma visual LLMOps",
+    qhace: "Plataforma visual para construir, desplegar y operar apps LLM: chatbots, agentes, RAG pipelines y workflows. Incluye prompt management, evaluaciones y API automática.",
+    qnohace: "No es framework de código. Control limitado sobre lógica custom. Sin la flexibilidad de LangChain/LangGraph para casos edge.",
+    diferencia: "La solución más completa de builder visual + operaciones LLM. Genera automáticamente API REST para tu app. Cubre todo el ciclo: build, deploy, monitor.",
+    cuandosi: ["Quieres backend + frontend de IA sin código", "Necesitas API automática de tu agente", "RAG visual + chatbots para clientes", "Iteración rápida de producto IA"],
+    cuandonot: ["Control total de lógica de agente", "Equipos que prefieren código puro", "Flujos de agente muy complejos y custom"],
+    precio: "freemium",
+    precioLabel: "OSS gratis + Cloud desde $59/mes",
+    pros: ["API automática generada", "RAG visual completo", "Self-hosteable", "UI muy pulida", "LLMOps integrado"],
+    cons: ["Menos flexible que código puro", "Self-hosting complejo (Docker)", "Costo cloud puede escalar"],
+    estado: "active",
+    estadoLabel: "Muy activo",
+    estadoDesc: "Uno de los proyectos de mayor crecimiento en GitHub 2025. Muy popular en Asia y comunidades enterprise.",
+    lenguajes: ["No-code (Python/TS internamente)"]
+  }
+];
+
+const tbody = document.getElementById('table-body');
+const searchInput = document.getElementById('search');
+const filterBtns = document.querySelectorAll('.filter-btn');
+const colBtns = document.querySelectorAll('.col-btn');
+const countBadge = document.getElementById('count-badge');
+const noResults = document.getElementById('no-results');
+
+let activeFilter = 'all';
+let activeSearch = '';
+let hiddenCols = new Set();
+
+function stateClass(s) {
+  if (s === 'active') return 'state-active';
+  if (s === 'growing') return 'state-growing';
+  if (s === 'stable') return 'state-stable';
+  if (s === 'declining') return 'state-declining';
+  if (s === 'beta') return 'state-beta';
+  return 'state-stable';
+}
+
+function priceBadge(p) {
+  if (p === 'free') return '<span class="badge badge-green">Open Source</span>';
+  if (p === 'freemium') return '<span class="badge badge-amber">Freemium</span>';
+  if (p === 'paid') return '<span class="badge badge-coral">De pago</span>';
+  return '';
+}
+
+function renderRow(tool) {
+  const cols = [
+    { key: 'tipo', content: `<span class="badge ${tool.tipoBadge}">${tool.tipoLabel}</span>` },
+    { key: 'qhace', content: `<span style="font-size:12px;color:var(--text2)">${tool.qhace}</span>` },
+    { key: 'qnohaace', content: `<span style="font-size:12px;color:var(--text2)">${tool.qnohace}</span>` },
+    { key: 'diferencia', content: `<span style="font-size:12px;color:var(--text)">${tool.diferencia}</span>` },
+    { key: 'cuando-si', content: '<ul class="cell-list">' + tool.cuandosi.map(i=>`<li>${i}</li>`).join('') + '</ul>' },
+    { key: 'cuando-no', content: '<ul class="cell-list">' + tool.cuandonot.map(i=>`<li>${i}</li>`).join('') + '</ul>' },
+    { key: 'precio', content: `${priceBadge(tool.precio)}<br><span style="font-size:11px;color:var(--text3);font-family:'DM Mono',monospace;margin-top:4px;display:block">${tool.precioLabel}</span>` },
+    { key: 'pros', content: tool.pros.map(p=>`<span class="pro">${p}</span>`).join('') },
+    { key: 'cons', content: tool.cons.map(c=>`<span class="con">${c}</span>`).join('') },
+    { key: 'estado', content: `<span class="state-dot ${stateClass(tool.estado)}"></span><span style="font-size:12px;color:var(--text2)">${tool.estadoLabel}</span><br><span style="font-size:11px;color:var(--text3);margin-top:4px;display:block">${tool.estadoDesc}</span>` },
+    { key: 'lenguaje', content: tool.lenguajes.map(l=>`<span class="badge badge-gray">${l}</span>`).join(' ') }
+  ];
+
+  const colsHtml = cols.map(c =>
+    `<td class="col-${c.key}" style="${hiddenCols.has(c.key) ? 'display:none' : ''}">${c.content}</td>`
+  ).join('');
+
+  return `<tr data-tipo="${tool.tipo}" data-precio="${tool.precio}" data-name="${tool.name.toLowerCase()}">
+    <td class="name-cell">
+      <div class="tool-name">${tool.name}</div>
+      <div class="tool-maker">${tool.maker}</div>
+    </td>
+    ${colsHtml}
+  </tr>`;
+}
+
+function renderTable() {
+  const search = activeSearch.toLowerCase();
+  const rows = tools.filter(t => {
+    const matchSearch = !search || 
+      t.name.toLowerCase().includes(search) || 
+      t.maker.toLowerCase().includes(search) || 
+      t.qhace.toLowerCase().includes(search) ||
+      t.tipoLabel.toLowerCase().includes(search) ||
+      t.lenguajes.join(' ').toLowerCase().includes(search);
+    
+    let matchFilter = true;
+    if (activeFilter !== 'all') {
+      if (['framework','visual','observability','multi-agent'].includes(activeFilter)) {
+        matchFilter = t.tipo === activeFilter;
+      } else {
+        matchFilter = t.precio === activeFilter;
+      }
+    }
+    return matchSearch && matchFilter;
+  });
+
+  tbody.innerHTML = rows.map(renderRow).join('');
+  
+  const count = rows.length;
+  countBadge.textContent = `${count} herramienta${count !== 1 ? 's' : ''}`;
+  noResults.style.display = count === 0 ? 'block' : 'none';
+  document.getElementById('main-table').style.display = count === 0 ? 'none' : '';
+}
+
+// Search
+searchInput.addEventListener('input', e => {
+  activeSearch = e.target.value;
+  renderTable();
+});
+
+// Filter buttons
+filterBtns.forEach(btn => {
+  btn.addEventListener('click', () => {
+    const f = btn.dataset.filter;
+    if (['all','framework','visual','observability','multi-agent'].includes(f)) {
+      filterBtns.forEach(b => {
+        if (['all','framework','visual','observability','multi-agent'].includes(b.dataset.filter)) b.classList.remove('active');
+      });
+    } else {
+      filterBtns.forEach(b => {
+        if (['free','paid','freemium'].includes(b.dataset.filter)) b.classList.remove('active');
+      });
+    }
+    btn.classList.toggle('active');
+    if (f === 'all') {
+      activeFilter = 'all';
+    } else {
+      activeFilter = btn.classList.contains('active') ? f : 'all';
+    }
+    renderTable();
+  });
+});
+
+// Column toggles
+colBtns.forEach(btn => {
+  btn.addEventListener('click', () => {
+    const col = btn.dataset.col;
+    btn.classList.toggle('active');
+    if (btn.classList.contains('active')) {
+      hiddenCols.delete(col);
+    } else {
+      hiddenCols.add(col);
+    }
+    document.querySelectorAll(`.col-${col}`).forEach(el => {
+      el.style.display = hiddenCols.has(col) ? 'none' : '';
+    });
+  });
+});
+
+renderTable();
+</script>
+</body>
+</html>

@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GitOps & Deployment Landscape 2026</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#080c12;
+  --surface:#0e1520;
+  --surface2:#151f2e;
+  --surface3:#1a2840;
+  --border:#1e2d3d;
+  --border2:#253550;
+  --text:#c9d6e3;
+  --text-muted:#6b8196;
+  --text-dim:#364758;
+  --green:#3ddc84;
+  --green-dim:rgba(61,220,132,.12);
+  --amber:#f0a140;
+  --amber-dim:rgba(240,161,64,.12);
+  --blue:#5ea9f7;
+  --blue-dim:rgba(94,169,247,.12);
+  --red:#e8605a;
+  --red-dim:rgba(232,96,90,.1);
+  --purple:#b48ef7;
+  --purple-dim:rgba(180,142,247,.12);
+  --teal:#4ec9b0;
+  --teal-dim:rgba(78,201,176,.1);
+}
+body{font-family:'IBM Plex Sans',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;padding:2.5rem 2rem}
+a{color:var(--blue);text-decoration:none}
+
+header{margin-bottom:2rem}
+.eyebrow{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--green);margin-bottom:.6rem;display:flex;align-items:center;gap:8px}
+.eyebrow::before{content:'';display:block;width:20px;height:1px;background:var(--green)}
+h1{font-size:1.65rem;font-weight:600;color:#e8f0f8;margin-bottom:.4rem;letter-spacing:-.01em}
+.subtitle{color:var(--text-muted);font-size:.88rem;line-height:1.6;max-width:640px}
+
+.controls{display:flex;gap:.75rem;margin-bottom:1.5rem;flex-wrap:wrap;align-items:center}
+.pill-group{display:flex;gap:3px;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:4px}
+button{
+  font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:500;
+  padding:6px 14px;border:none;border-radius:5px;cursor:pointer;
+  background:transparent;color:var(--text-muted);transition:all .15s;white-space:nowrap;letter-spacing:.03em
+}
+button:hover{background:var(--surface2);color:var(--text)}
+button.active{color:#e8f0f8;background:var(--surface3)}
+.pill-group.tabs button.active{background:var(--blue-dim);color:var(--blue)}
+.pill-group.filters button.active{background:var(--green-dim);color:var(--green)}
+
+.stats-bar{display:flex;gap:1.5rem;margin-bottom:1.5rem;flex-wrap:wrap}
+.stat{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text-muted);display:flex;align-items:center;gap:6px}
+.stat-dot{width:8px;height:8px;border-radius:50%}
+.dot-g{background:var(--green)}
+.dot-a{background:var(--amber)}
+.dot-m{background:var(--text-dim)}
+
+.legend{display:flex;gap:1rem;margin-bottom:1.75rem;flex-wrap:wrap}
+.legend-item{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text-muted)}
+
+.badge{
+  display:inline-flex;align-items:center;
+  font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:500;
+  padding:2px 8px;border-radius:20px;white-space:nowrap;border:1px solid transparent
+}
+.b-gitops{background:var(--green-dim);color:var(--green);border-color:rgba(61,220,132,.25)}
+.b-partial{background:var(--amber-dim);color:var(--amber);border-color:rgba(240,161,64,.25)}
+.b-no{background:var(--surface2);color:var(--text-muted);border-color:var(--border)}
+.b-free{background:var(--teal-dim);color:var(--teal);border-color:rgba(78,201,176,.2)}
+.b-freemium{background:var(--amber-dim);color:var(--amber);border-color:rgba(240,161,64,.2)}
+.b-paid{background:var(--red-dim);color:var(--red);border-color:rgba(232,96,90,.2)}
+.b-oss{background:var(--purple-dim);color:var(--purple);border-color:rgba(180,142,247,.2)}
+
+.counter{margin-left:auto;font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text-dim)}
+
+.wrap{overflow-x:auto;border:1px solid var(--border);border-radius:10px}
+table{width:100%;min-width:900px;border-collapse:collapse;font-size:12.5px}
+thead tr{background:var(--surface);border-bottom:1px solid var(--border)}
+th{
+  font-family:'IBM Plex Mono',monospace;font-size:9.5px;font-weight:500;
+  text-transform:uppercase;letter-spacing:.1em;color:var(--text-dim);
+  padding:10px 14px;text-align:left;white-space:nowrap
+}
+td{padding:13px 14px;vertical-align:top;border-bottom:1px solid var(--border);line-height:1.55;color:var(--text)}
+tr:last-child td{border-bottom:none}
+tbody tr:hover td{background:rgba(255,255,255,.018)}
+
+.section-row td{
+  background:var(--surface);border-bottom:1px solid var(--border2);
+  font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:600;
+  letter-spacing:.12em;text-transform:uppercase;color:var(--blue);
+  padding:9px 18px
+}
+
+.tool-name{font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:600;color:#e8f0f8;margin-bottom:5px}
+.badges-row{display:flex;flex-wrap:wrap;gap:4px}
+
+.col-tool{min-width:145px;max-width:165px}
+.col-gitops{min-width:100px;white-space:nowrap}
+.col-does{min-width:200px;max-width:230px;color:var(--text)}
+.col-doesnt{min-width:185px;max-width:215px;color:var(--text-muted)}
+.col-use{min-width:160px}
+.col-avoid{min-width:160px}
+
+ul.pts{list-style:none;padding:0;margin:0}
+ul.pts li{padding:1px 0;padding-left:13px;position:relative;font-size:12px;line-height:1.5}
+ul.pts li::before{content:'·';position:absolute;left:2px;color:var(--text-dim)}
+.use-li li::before{color:var(--teal)}
+.avoid-li li::before{color:var(--red)}
+
+.empty{padding:3rem;text-align:center;color:var(--text-dim);font-family:'IBM Plex Mono',monospace;font-size:12px}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="eyebrow">mlops · deployment · gitops landscape</div>
+  <h1>GitOps &amp; Deployment Landscape 2026</h1>
+  <p class="subtitle">Comparativa de herramientas de deployment: GitOps y no-GitOps, dentro y fuera de Kubernetes. Mayo 2026.</p>
+</header>
+
+<div class="controls">
+  <div class="pill-group tabs">
+    <button class="active" onclick="setSection('k8s')">⎈ &nbsp;Kubernetes</button>
+    <button onclick="setSection('nonk8s')">🐳 &nbsp;No Kubernetes</button>
+    <button onclick="setSection('all')">Todos</button>
+  </div>
+  <div class="pill-group filters">
+    <button class="active" onclick="setFilter('all')">Todos</button>
+    <button onclick="setFilter('gitops')">GitOps ✓</button>
+    <button onclick="setFilter('no')">No GitOps</button>
+  </div>
+  <span class="counter" id="counter">12 herramientas</span>
+</div>
+
+<div class="legend">
+  <div class="legend-item"><span class="badge b-gitops">✓ GitOps</span> Reconcilia estado desde Git continuamente</div>
+  <div class="legend-item"><span class="badge b-partial">~ Parcial</span> Patrones GitOps sin reconciliación completa</div>
+  <div class="legend-item"><span class="badge b-no">✗ No GitOps</span> CD / automation clásico (push-based)</div>
+  <div class="legend-item"><span class="badge b-oss">OSS</span> Open Source</div>
+  <div class="legend-item"><span class="badge b-free">Free</span> <span class="badge b-freemium">Freemium</span> <span class="badge b-paid">Paid</span></div>
+</div>
+
+<div class="wrap">
+  <table id="main-table">
+    <thead>
+      <tr>
+        <th class="col-tool">Herramienta</th>
+        <th class="col-gitops">¿GitOps?</th>
+        <th class="col-does">Qué hace</th>
+        <th class="col-doesnt">Qué NO hace</th>
+        <th class="col-use">Úsalo si…</th>
+        <th class="col-avoid">Evítalo si…</th>
+      </tr>
+    </thead>
+    <tbody id="tbody"></tbody>
+  </table>
+</div>
+
+<script>
+const data={
+  k8s:[
+    {
+      name:"Argo CD",gitops:"yes",pricing:"free",oss:true,
+      does:"Sincroniza el estado deseado en Git → cluster K8s. UI web rica, diff visual, RBAC, multi-tenant, SSO, sync automático o manual. La herramienta GitOps K8s más adoptada del mercado (2026).",
+      doesnt:"No es pipeline CI. No buildea imágenes. No gestiona infra fuera de K8s (use Crossplane para eso). No detecta cambios hechos fuera de Git que no estén en sus CRDs.",
+      use:["CD en producción K8s con UI para el equipo","Multi-tenant con RBAC estricto","Auditoría visual de drift entre Git y cluster","Migraciones graduales a GitOps: manual sync al inicio"],
+      avoid:["Si no usás K8s","Si necesitás CI integrado sin herramientas adicionales","Deploy a VMs o bare metal","Workflows que requieren pipelines de aprobación muy complejos (Spinnaker lo hace mejor)"]
+    },
+    {
+      name:"Flux CD",gitops:"yes",pricing:"free",oss:true,
+      does:"Operador GitOps nativo K8s. Monitorea Git y registros OCI, reconcilia automáticamente. Más lightweight que Argo, operator-first. Soporta Helm y Kustomize nativo. CNCF graduated.",
+      doesnt:"Sin UI propia (existen UIs de terceros como Weave GitOps). Sin CI integrado. Curva más alta para equipos nuevos en K8s.",
+      use:["GitOps automation-first sin UI (CLI + alertas)","Multi-repo y multi-entorno con Helm + Kustomize","Integración en pipelines donde Argo sería overkill","Base para construir plataformas internas (platform engineering)"],
+      avoid:["Si el equipo necesita UI nativa rica","Ambientes non-K8s","Si Argo CD ya está adoptado y no hay razón de migrar"]
+    },
+    {
+      name:"Rancher Fleet",gitops:"yes",pricing:"free",oss:true,
+      does:"GitOps a escala masiva: gestiona miles de clusters K8s desde un repo Git. Propagation policies por grupo de cluster. Parte del ecosistema Rancher/SUSE. Ideal para edge computing.",
+      doesnt:"Dependencia fuerte del ecosistema Rancher. Experiencia cruda como standalone sin Rancher Manager. No es liviano para single-cluster.",
+      use:["Edge computing con 100+ clusters K8s","Enterprises con deployment consistente a gran escala multi-región","Flota de clusters donde Argo/Flux se volvería complejo de gestionar"],
+      avoid:["Single cluster simple (Argo o Flux son mejores)","Sin ecosistema Rancher","Startups o proyectos de escala pequeña"]
+    },
+    {
+      name:"Weave GitOps",gitops:"yes",pricing:"freemium",oss:true,
+      does:"Capa UI y plataforma enterprise construida sobre Flux. Agrega dashboards de reconciliación, policies (OPA), RBAC avanzado y progressive delivery. Producto de Weaveworks.",
+      doesnt:"El core gratuito es esencialmente Flux sin extras. Features enterprise (OIDC avanzado, policies, team management) son pagas. Cierto vendor lock-in con Weaveworks.",
+      use:["Flux + UI sin armar todo custom","Equipos enterprise que necesitan compliance y auditoría sobre GitOps","Organizaciones que quieren soporte comercial sobre Flux"],
+      avoid:["Si Flux puro alcanza tus necesidades","Presupuesto muy ajustado sin licencia enterprise","Si preferís no depender de un vendor sobre OSS"]
+    },
+    {
+      name:"Helm",gitops:"no",pricing:"free",oss:true,
+      does:"Package manager estándar de facto para K8s. Empaqueta manifests en charts reutilizables con templating Go. Maneja versiones de releases, rollback de charts, dependencias. Amplio ecosistema de charts públicos (Artifact Hub).",
+      doesnt:"No es GitOps. No reconcilia ni detecta drift. Por sí solo es imperativo (helm install/upgrade). No es un CD tool. Sin monitoreo continuo del estado del cluster.",
+      use:["Distribuir apps K8s complejas con config variable","Combinado con Argo CD o Flux para GitOps (Argo gestiona Helm charts)","Consumir charts de terceros (Prometheus, Grafana, cert-manager)"],
+      avoid:["Como única herramienta de CD (necesitás algo que lo invoque)","Si buscás reconciliación automática por sí sola","Deployments muy simples donde YAML directo es suficiente"]
+    },
+    {
+      name:"Kustomize",gitops:"no",pricing:"free",oss:true,
+      does:"Customización de manifests YAML K8s sin templates. Usa overlays y patches para manejar diferencias entre entornos (dev/staging/prod). Integrado en kubectl (kubectl apply -k). Sin DSL externo.",
+      doesnt:"No despliega por sí solo. Sin reconciliación. No es un CD tool. Solo transforma YAML antes de aplicarlo. No reemplaza Helm para apps complejas con muchos parámetros.",
+      use:["Gestionar variaciones por entorno sobre la misma base","Complemento de Flux/Argo en workflows GitOps (muy común combinarlo)","Equipos que prefieren YAML puro sobre templates"],
+      avoid:["Apps que ya usan Helm charts complejos con valores variables","Como única herramienta de deploy (necesitás kubectl o un GitOps tool que lo invoque)"]
+    },
+    {
+      name:"Tekton",gitops:"no",pricing:"free",oss:true,
+      does:"Framework CI/CD nativo K8s vía CRDs (Tasks, Pipelines, EventListeners). Base de Red Hat OpenShift Pipelines. Muy extensible y portable. Cada step es un container en el cluster.",
+      doesnt:"No es GitOps. No reconcilia estado de aplicaciones. Alta complejidad operativa vs GitHub Actions. Dashboard oficial básico.",
+      use:["CI/CD completamente nativo en K8s sin salir del cluster","Builds de imágenes Docker en el mismo cluster","Pipelines CI complejos multi-step cuando no podés usar SaaS CI"],
+      avoid:["Equipos sin K8s expertise (GitHub Actions es más simple)","Si un SaaS CI resuelve tu caso (no reinventes la rueda)","Ambientes non-K8s"]
+    },
+    {
+      name:"Jenkins X",gitops:"partial",pricing:"free",oss:true,
+      does:"CI/CD opinionado para K8s con patrones GitOps: auto-crea PRs de promoción entre entornos (dev→staging→prod). Usa Tekton internamente. Preview environments automáticos por PR.",
+      doesnt:"Muy opinionado: difícil adaptar a workflows existentes. Comunidad más pequeña. Alto acoplamiento con su stack interno. Poco activo en 2025-2026 vs Argo/Flux.",
+      use:["Equipos nuevos que quieren GitOps + CI integrado desde cero en K8s","Organizaciones que aceptan el tooling opinionado sin customización"],
+      avoid:["Si ya tenés un CI separado (GitHub Actions, GitLab CI)","Proyectos legacy que no pueden refactorizar su workflow","Equipos chicos sin DevOps dedicado full-time"]
+    },
+    {
+      name:"Spinnaker",gitops:"no",pricing:"free",oss:true,
+      does:"CD multi-cloud enterprise creado por Netflix y Google. Soporta K8s, EC2, GCE, ECS. Canary deployments, pipelines con aprobaciones manuales complejas, webhooks, rollback. Legacy robusto.",
+      doesnt:"No es GitOps. Muy pesado de operar (docenas de microservicios de Spinnaker mismo). En franca decadencia en proyectos nuevos frente a Argo CD.",
+      use:["Enterprises multi-cloud legacy que ya lo tienen instalado y funcionando","Pipelines con flujos de aprobación muy complejos y multi-equipo","Casos donde se despliega a EC2/GCE además de K8s"],
+      avoid:["Proyectos nuevos (Argo CD es mejor elección)","Equipos pequeños (operarlo es costoso)","K8s-only sin legacy multi-cloud"]
+    },
+    {
+      name:"Crossplane",gitops:"partial",pricing:"free",oss:true,
+      does:"IaC via CRDs de K8s. Provisiona recursos cloud (RDS, S3, GKE clusters, VPCs) declarativamente. Combinado con Argo CD o Flux logra GitOps completo para infraestructura. CNCF graduated.",
+      doesnt:"No es un CD tool de aplicaciones. Requiere K8s para funcionar. No reemplaza Terraform en todos los casos. Curva de aprendizaje alta (providers, compositions, XRDs).",
+      use:["IaC declarativa gestionada via GitOps (Argo CD + Crossplane)","Platform engineering: self-service infra para developers","Organizaciones que quieren un control plane unificado K8s para app + infra"],
+      avoid:["Si Terraform te alcanza y no querés K8s para IaC","Sin equipo de platform engineering dedicado","Proyectos que necesitan provisionar infra rápidamente sin curva de aprendizaje"]
+    },
+    {
+      name:"Karmada",gitops:"no",pricing:"free",oss:true,
+      does:"Gestión multi-cluster K8s con API compatible con K8s nativa. Propagation policies para distribuir workloads entre clusters. Failover multi-cluster. CNCF sandbox (2026).",
+      doesnt:"No es GitOps. No reconcilia desde Git. Es orquestación entre clusters, no deployment desde repositorios. Requiere K8s en todos los clusters.",
+      use:["High availability multi-cluster multi-región","Distribución de carga entre clusters por latencia o capacidad","Federación de clusters existentes"],
+      avoid:["Single cluster deployments","Si buscás GitOps (Argo CD o Flux son la respuesta)","Proyectos sin necesidad real de multi-cluster"]
+    },
+    {
+      name:"Argo Rollouts",gitops:"no",pricing:"free",oss:true,
+      does:"Progressive delivery para K8s: canary, blue/green, análisis automático de métricas (Prometheus, Datadog, New Relic) para promover o revertir automáticamente. Plugin para kubectl y UI.",
+      doesnt:"No es GitOps por sí solo. Complementa a Argo CD (no lo reemplaza). No gestiona pipelines CI ni el proceso de build.",
+      use:["Deployments a producción con validación automática de métricas","Canary con rollback automático sin intervención humana","Blue/green sin downtime con análisis cuantitativo"],
+      avoid:["Apps sin necesidad de progressive delivery","Sin sistema de métricas ya establecido (Prometheus/Datadog)","Si kubectl rollout undo resuelve tus rollbacks"]
+    }
+  ],
+  nonk8s:[
+    {
+      name:"Atlantis",gitops:"yes",pricing:"free",oss:true,
+      does:"GitOps para Terraform / OpenTofu. Ejecuta terraform plan en cada PR y terraform apply al mergear a main. La infra como código se gestiona y audita 100% desde Git. Muy popular (2026).",
+      doesnt:"Solo para Terraform / OpenTofu / Terragrunt. No despliega aplicaciones. No gestiona K8s workloads ni containers. No sirve para Pulumi o CDK.",
+      use:["Equipos con Terraform que quieren GitOps en IaC","Revisión colaborativa de cambios de infra en PRs","Compliance: apply solo vía Git merge, sin acceso directo a la CLI de infra"],
+      avoid:["Si no usás Terraform/Tofu","Deploy de aplicaciones (no es su rol)","Si usás Pulumi, Ansible o CloudFormation para IaC"]
+    },
+    {
+      name:"Dokploy",gitops:"partial",pricing:"free",oss:true,
+      does:"PaaS self-hosted sobre Docker / Docker Swarm. Auto-deploy desde Git via webhooks (GitHub, GitLab, Bitbucket). UI para gestionar apps, bases de datos, certificados TLS. Alternativa económica a Heroku/Render/Railway.",
+      doesnt:"Sin reconciliación continua de estado (no GitOps puro). Sin drift detection. Proyecto relativamente nuevo (2024): ecosistema en maduración, comunidad pequeña.",
+      use:["Startups y side projects en VPS propio con presupuesto ajustado","Equipos sin expertise en K8s que quieren CI/CD simple","Alternativa económica a plataformas PaaS pagas"],
+      avoid:["Workloads enterprise con alta disponibilidad real","GitOps con reconciliación y drift detection","Compliance estricto (HIPAA, SOC2)","Si Kubernetes ya es el estándar de tu org"]
+    },
+    {
+      name:"Kamal",gitops:"no",pricing:"free",oss:true,
+      does:"Deploy de apps Docker a servidores bare metal / VPS vía SSH. Zero-downtime con health checks y traefik. Sin K8s, sin orquestadores. Creado por 37signals (Basecamp/HEY). Simple, pragmático y activo en 2026.",
+      doesnt:"No es GitOps. Sin UI. Sin autoscaling automático. Sin reconciliación de estado. Se ejecuta manualmente o desde un job de CI. Single/multi server manual.",
+      use:["Deploy a VPS propios o servidores dedicados","Proyectos Ruby/Rails (stack nativo de 37signals)","Equipos que conscientemente rechazan la complejidad de K8s","Apps con tráfico predecible sin necesidad de autoscaling"],
+      avoid:["Workloads con autoscaling dinámico requerido","Multi-cloud o cargas muy distribuidas","Si ya tenés orquestación en K8s o Nomad"]
+    },
+    {
+      name:"Ansible / AWX",gitops:"no",pricing:"freemium",oss:true,
+      does:"Automatización agentless vía SSH y playbooks YAML. Configura servidores, despliega apps, orquesta tareas complejas. AWX (open source) y Ansible Automation Platform (Red Hat, pago) agregan UI, RBAC, scheduling.",
+      doesnt:"No es GitOps (playbooks son imperativos, no declaran estado deseado con reconciliación). Sin drift detection continuo nativo. Sin reconciliación automática.",
+      use:["Configuración y hardening de VMs / bare metal","Deploy de apps en infra legacy no-containerizada","Automatización de tareas ops complejas y multi-servidor","Complemento de Terraform para configuración post-provisioning"],
+      avoid:["GitOps real con reconciliación continua","Workloads containerizados modernos (K8s + Argo es mejor)","Alta frecuencia de deploy automatizado donde el modelo push-based genera bottlenecks"]
+    },
+    {
+      name:"Chef Infra",gitops:"no",pricing:"freemium",oss:true,
+      does:"Configuration management con cookbooks en Ruby DSL. Modelo pull: agentes en los nodos consultan Chef Server periódicamente y aplican la config deseada. Muy maduro (2009). Robusto para miles de nodos.",
+      doesnt:"No es GitOps. Ruby DSL tiene alta curva de aprendizaje. En decadencia frente a Ansible y Terraform en proyectos nuevos. Sin soporte nativo para containers.",
+      use:["Enterprises con infra legacy de Chef ya instalada (no migrar sin justificación)","Gestión de configuración de miles de nodos on-premise","Casos donde el modelo pull de agentes es un requerimiento"],
+      avoid:["Proyectos nuevos: Ansible es más simple y tiene más tracción","Ambientes containerizados","Equipos sin skills en Ruby o Chef DSL"]
+    },
+    {
+      name:"Puppet Enterprise",gitops:"no",pricing:"freemium",oss:true,
+      does:"Configuration management declarativo con Puppet DSL. Modelo pull con agentes. Robusto para compliance y auditoría en enterprises. Detección de drift de configuración en nodos. Muy usado en regulated industries.",
+      doesnt:"No es GitOps en el sentido moderno. DSL propio con curva alta. Costoso en versión enterprise. En declive en proyectos nuevos vs Ansible. Sin soporte nativo para containers/K8s.",
+      use:["Compliance estricto (HIPAA, PCI DSS) en bare metal/VMs","Gestión de configuración a gran escala legacy","Industrias reguladas donde la auditoría de nodos es crítica"],
+      avoid:["Proyectos nuevos o startups (Ansible es más accesible)","Workloads containerizados o K8s","Equipos con presupuesto ajustado (enterprise es caro)"]
+    },
+    {
+      name:"HashiCorp Nomad",gitops:"no",pricing:"freemium",oss:true,
+      does:"Orquestador multi-runtime (Docker, VMs, JARs, binarios nativos). Mucho más simple de operar que K8s. Integra nativamente con Consul (service mesh) y Vault (secrets) del ecosistema HashiCorp.",
+      doesnt:"No GitOps nativo (sin reconciliación desde Git out-of-the-box). Ecosistema más pequeño que K8s. Sin CRDs ni el extenso tooling de K8s (CNI avanzado, CSI, etc.).",
+      use:["Workloads mixtos: containers + binarios + JVMs en el mismo orquestador","Equipos que encuentran K8s demasiado complejo para sus necesidades","Organizaciones ya en el stack HashiCorp (Vault + Consul + Nomad)"],
+      avoid:["Si K8s ya es el estándar de tu organización","Si necesitás el vasto ecosistema de K8s","GitOps nativo sin integración adicional personalizada"]
+    },
+    {
+      name:"Portainer",gitops:"no",pricing:"freemium",oss:true,
+      does:"UI web para gestionar Docker standalone, Docker Swarm, K8s y Nomad. Stacks (compose) desplegables desde repositorios Git via webhooks. Simplifica operaciones day-2. Portainer BE (Business Edition) agrega RBAC avanzado.",
+      doesnt:"No es GitOps real: sin reconciliación continua ni drift detection. La integración Git es webhook/manual, no declarativa con estado deseado.",
+      use:["Equipos sin expertise en CLI de Docker o K8s","SMEs gestionando VPS propios con Docker","Gestión visual rápida de stacks en entornos simples"],
+      avoid:["GitOps estricto con reconciliación","Automatización avanzada sin intervención manual","Reemplazo de Argo CD o Flux en producción enterprise"]
+    },
+    {
+      name:"Dokku",gitops:"no",pricing:"free",oss:true,
+      does:"Mini-Heroku self-hosted. Deploy via git push dokku main. Buildpacks y Dockerfiles. TLS automático (Let's Encrypt), plugins para bases de datos (Postgres, Redis, MySQL). Muy maduro y estable. Single-server.",
+      doesnt:"No es GitOps: git push es imperativo, no declara estado con reconciliación. Sin UI (solo CLI). Sin multi-server ni clustering. Escala muy limitada.",
+      use:["Side projects, apps personales y portfolios","Dev environments rápidos y descartables","DX de Heroku sin el costo mensual"],
+      avoid:["Producción con alta disponibilidad real","Múltiples servidores o equipos grandes","Si la app crece y necesita K8s o Nomad"]
+    },
+    {
+      name:"Woodpecker CI",gitops:"no",pricing:"free",oss:true,
+      does:"CI/CD self-hosted ligero. Fork comunitario de Drone CI post-licenciamiento. Pipelines en YAML, Docker-native. Fácil instalación (docker compose). Sin vendor lock-in. Activo en 2026.",
+      doesnt:"No es GitOps. No reconcilia estado. Es runner de pipelines CI/CD, no un sistema de deployment continuo con reconciliación de estado.",
+      use:["CI/CD self-hosted en servidores propios o air-gapped","Alternativa a GitHub Actions para repos privados sin depender de SaaS","Equipos con restricciones de datos que no pueden usar CI cloud"],
+      avoid:["Si GitHub Actions / GitLab CI ya resuelve tu caso (son más ricos en features)","GitOps real","Grandes equipos con pipelines muy complejos con miles de steps"]
+    },
+    {
+      name:"Dagger",gitops:"no",pricing:"freemium",oss:true,
+      does:"Motor de CI/CD portable: define pipelines en código real (Go, Python, TypeScript, PHP) en lugar de YAML. Corre igual en local y en cualquier CI (GitHub Actions, GitLab, Jenkins). Cada step es un container. Dagger Cloud es el SaaS.",
+      doesnt:"No es GitOps. No reconcilia estado de aplicaciones. Es una capa de abstracción sobre pipelines, no un sistema de deployment continuo con estado deseado.",
+      use:["Portabilidad de pipelines entre diferentes sistemas CI","Reproducir exactamente el CI localmente para debug","Equipos hartos del YAML arcaico de CI que prefieren código tipado"],
+      avoid:["GitOps / reconciliación continua (no es su propósito)","Si tu equipo ya domina las herramientas CI y no ve valor en migrar","Proyectos simples donde un script de bash en CI es suficiente"]
+    },
+    {
+      name:"Capistrano",gitops:"no",pricing:"free",oss:true,
+      does:"Deploy remoto vía SSH con Ruby DSL. Multi-servidor con releases en directorio, rollback a versiones anteriores, hooks por etapa (before/after deploy). Probado en producción por +15 años. Legacy muy estable.",
+      doesnt:"No es GitOps. No maneja containers. Sin UI. Desarrollo prácticamente inactivo. Muy acoplado a stacks Ruby/Rails. No gestiona configuración de servidores.",
+      use:["Apps Rails legacy en VMs o bare metal que no justifican migrar","Equipos con flujo de deploy probado y sin presión de cambiar","Rollback rápido a releases anteriores en infra SSH clásica"],
+      avoid:["Proyectos nuevos (Kamal es la alternativa moderna de 37signals)","Stacks non-Ruby","Containers / K8s / cualquier arquitectura moderna"]
+    }
+  ]
+};
+
+let section='k8s', filter='all';
+
+function badge(v){
+  if(v==='yes') return '<span class="badge b-gitops">✓ GitOps</span>';
+  if(v==='partial') return '<span class="badge b-partial">~ Parcial</span>';
+  return '<span class="badge b-no">✗ No GitOps</span>';
+}
+function pbadge(v){
+  if(v==='free') return '<span class="badge b-free">Free</span>';
+  if(v==='freemium') return '<span class="badge b-freemium">Freemium</span>';
+  return '<span class="badge b-paid">Paid</span>';
+}
+function row(t){
+  return`<tr>
+    <td class="col-tool">
+      <div class="tool-name">${t.name}</div>
+      <div class="badges-row" style="margin-top:5px">${pbadge(t.pricing)}${t.oss?' <span class="badge b-oss">OSS</span>':''}</div>
+    </td>
+    <td class="col-gitops">${badge(t.gitops)}</td>
+    <td class="col-does" style="font-size:12px">${t.does}</td>
+    <td class="col-doesnt" style="font-size:12px">${t.doesnt}</td>
+    <td class="col-use"><ul class="pts use-li">${t.use.map(u=>`<li>${u}</li>`).join('')}</ul></td>
+    <td class="col-avoid"><ul class="pts avoid-li">${t.avoid.map(a=>`<li>${a}</li>`).join('')}</ul></td>
+  </tr>`;
+}
+function sectionRow(label,n){
+  return`<tr class="section-row"><td colspan="6">⎈ ${label} &nbsp;(${n})</td></tr>`;
+}
+
+function applyFilter(arr){
+  if(filter==='gitops') return arr.filter(t=>t.gitops==='yes'||t.gitops==='partial');
+  if(filter==='no') return arr.filter(t=>t.gitops==='no');
+  return arr;
+}
+
+function render(){
+  const tbody=document.getElementById('tbody');
+  let html='';
+  let total=0;
+
+  if(section==='k8s'){
+    const tools=applyFilter(data.k8s);
+    total=tools.length;
+    tools.forEach(t=>html+=row(t));
+  } else if(section==='nonk8s'){
+    const tools=applyFilter(data.nonk8s);
+    total=tools.length;
+    tools.forEach(t=>html+=row(t));
+  } else {
+    const k=applyFilter(data.k8s);
+    const n=applyFilter(data.nonk8s);
+    total=k.length+n.length;
+    if(k.length){
+      html+=`<tr class="section-row"><td colspan="6">⎈ &nbsp;Kubernetes Ecosystem &nbsp;(${k.length})</td></tr>`;
+      k.forEach(t=>html+=row(t));
+    }
+    if(n.length){
+      html+=`<tr class="section-row"><td colspan="6">🐳 &nbsp;No Kubernetes &nbsp;(${n.length})</td></tr>`;
+      n.forEach(t=>html+=row(t));
+    }
+  }
+
+  if(!total) html=`<tr><td colspan="6" class="empty">No hay herramientas que coincidan con el filtro seleccionado.</td></tr>`;
+  tbody.innerHTML=html;
+  document.getElementById('counter').textContent=`${total} herramienta${total!==1?'s':''}`;
+}
+
+function setSection(s){
+  section=s;
+  document.querySelectorAll('.tabs button').forEach((b,i)=>{
+    b.classList.toggle('active',['k8s','nonk8s','all'][i]===s);
+  });
+  render();
+}
+function setFilter(f){
+  filter=f;
+  document.querySelectorAll('.filters button').forEach((b,i)=>{
+    b.classList.toggle('active',['all','gitops','no'][i]===f);
+  });
+  render();
+}
+
+render();
+</script>
+</body>
+</html>

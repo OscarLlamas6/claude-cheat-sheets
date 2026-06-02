@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gestión de Dispositivos Móviles — Cuadro Comparativo</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0d0f14;--surface:#14171f;--surface2:#1c2030;
+  --border:rgba(255,255,255,.07);--border2:rgba(255,255,255,.13);
+  --text:#e8eaf0;--muted:#7a8099;
+  --mdm:#4ade80;--mdm-dim:rgba(74,222,128,.1);--mdm-b:rgba(74,222,128,.28);
+  --emm:#60a5fa;--emm-dim:rgba(96,165,250,.1);--emm-b:rgba(96,165,250,.28);
+  --uem:#c084fc;--uem-dim:rgba(192,132,252,.1);--uem-b:rgba(192,132,252,.28);
+  --mam:#fb923c;--mam-dim:rgba(251,146,60,.1);--mam-b:rgba(251,146,60,.28);
+  --mtd:#f87171;--mtd-dim:rgba(248,113,113,.1);--mtd-b:rgba(248,113,113,.28);
+  --yes:#4ade80;--no:#f87171;
+  --fd:'Syne',sans-serif;--fm:'DM Mono',monospace;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:var(--fm);min-height:100vh;line-height:1.6}
+header{padding:2.8rem 2rem 2rem;border-bottom:1px solid var(--border);position:relative;overflow:hidden}
+header::before{content:'';position:absolute;top:-80px;left:-80px;width:380px;height:380px;background:radial-gradient(circle,rgba(96,165,250,.07) 0%,transparent 70%);pointer-events:none}
+.header-inner{max-width:1100px;margin:0 auto}
+.hlabel{font-size:10.5px;letter-spacing:.18em;color:var(--muted);text-transform:uppercase;margin-bottom:.5rem}
+header h1{font-family:var(--fd);font-size:clamp(1.6rem,4vw,2.7rem);font-weight:800;letter-spacing:-.02em;line-height:1.1}
+header h1 span{color:var(--emm)}
+.hsub{margin-top:.65rem;font-size:13px;color:var(--muted);max-width:600px}
+.htags{display:flex;flex-wrap:wrap;gap:7px;margin-top:1.4rem}
+.htag{font-size:11px;font-family:var(--fm);padding:3px 10px;border-radius:4px;border:1px solid;letter-spacing:.05em}
+.main{max-width:1100px;margin:0 auto;padding:2rem}
+.rel-box{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.4rem 1.8rem;margin-bottom:1.8rem}
+.rel-title{font-family:var(--fd);font-size:10.5px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:1rem}
+.diagram{display:flex;align-items:center;flex-wrap:wrap;gap:6px}
+.d-box{padding:7px 13px;border-radius:6px;font-family:var(--fd);font-size:12px;font-weight:700;border:1px solid;letter-spacing:.03em;white-space:nowrap}
+.d-arrow{color:var(--muted);font-size:14px;padding:0 2px}
+.d-mdm{background:var(--mdm-dim);border-color:var(--mdm-b);color:var(--mdm)}
+.d-emm{background:var(--emm-dim);border-color:var(--emm-b);color:var(--emm)}
+.d-uem{background:var(--uem-dim);border-color:var(--uem-b);color:var(--uem)}
+.d-plus{background:var(--surface2);border-color:var(--border2);color:var(--muted);font-size:11px}
+.d-note{font-size:11px;color:var(--muted);margin-top:9px}
+.tabs{display:flex;gap:3px;border-bottom:1px solid var(--border);margin-bottom:1.8rem;overflow-x:auto;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tab{font-family:var(--fd);font-size:13px;font-weight:600;padding:.55rem 1rem;border:none;background:transparent;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;white-space:nowrap;transition:color .15s,border-color .15s}
+.tab:hover{color:var(--text)}
+.tab[data-c="mdm"].active{border-color:var(--mdm);color:var(--mdm)}
+.tab[data-c="emm"].active{border-color:var(--emm);color:var(--emm)}
+.tab[data-c="uem"].active{border-color:var(--uem);color:var(--uem)}
+.tab[data-c="mam"].active{border-color:var(--mam);color:var(--mam)}
+.tab[data-c="mtd"].active{border-color:var(--mtd);color:var(--mtd)}
+.panel{display:none;animation:fi .2s ease}
+.panel.active{display:block}
+@keyframes fi{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+.hero{border:1px solid;border-radius:12px;padding:1.6rem 1.8rem;margin-bottom:1.4rem;position:relative;overflow:hidden}
+.hero::after{content:attr(data-abbr);position:absolute;right:-12px;top:-18px;font-family:var(--fd);font-size:7rem;font-weight:800;opacity:.04;line-height:1;pointer-events:none;user-select:none}
+.hero-top{display:flex;align-items:center;gap:1rem;margin-bottom:.9rem}
+.hero-icon{width:48px;height:48px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;border:1px solid}
+.hero-meta h2{font-family:var(--fd);font-size:1.25rem;font-weight:700}
+.hero-meta .fn{font-size:12px;color:var(--muted);letter-spacing:.04em}
+.hero-desc{font-size:13.5px;line-height:1.75;color:#bcc2d8;max-width:800px}
+.scope-row{display:flex;align-items:center;gap:9px;margin-top:.9rem;font-size:11px;letter-spacing:.06em}
+.pips{display:flex;gap:4px}
+.pip{width:9px;height:9px;border-radius:50%;border:1.5px solid currentColor}
+.pip.on{background:currentColor}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:11px;margin-bottom:11px}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.1rem 1.2rem}
+.card-title{font-family:var(--fd);font-size:11.5px;font-weight:600;letter-spacing:.09em;text-transform:uppercase;margin-bottom:.9rem;display:flex;align-items:center;gap:6px}
+.ct-yes{color:var(--yes)}.ct-no{color:var(--no)}.ct-when{color:#60a5fa}.ct-now{color:#fb923c}.ct-tool{color:var(--muted)}
+.lst{list-style:none;display:flex;flex-direction:column;gap:6px}
+.lst li{font-size:12.5px;color:#bcc2d8;display:flex;align-items:flex-start;gap:7px;line-height:1.5}
+.b{flex-shrink:0;margin-top:5px;width:5px;height:5px;border-radius:50%}
+.b-yes{background:var(--yes)}.b-no{background:var(--no)}.b-wh{background:#60a5fa}.b-nw{background:#fb923c}
+.card-yes{border-left:3px solid var(--yes)}.card-no{border-left:3px solid var(--no)}
+.tools-s{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.1rem 1.2rem;margin-bottom:11px}
+.tg{display:grid;grid-template-columns:repeat(auto-fill,minmax(148px,1fr));gap:7px;margin-top:9px}
+.tc{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:9px 11px;transition:border-color .15s}
+.tc:hover{border-color:var(--border2)}
+.tn{font-family:var(--fd);font-size:12.5px;font-weight:600;color:var(--text)}
+.ts{font-size:11px;color:var(--muted);margin-top:2px}
+.tb{display:inline-block;font-size:9px;font-family:var(--fm);padding:2px 6px;border-radius:3px;margin-top:4px;letter-spacing:.04em;text-transform:uppercase;font-weight:500}
+.hot{color:#fbbf24;font-size:9px;margin-left:3px;vertical-align:middle}
+#panel-mdm .hero{background:linear-gradient(135deg,rgba(74,222,128,.05) 0%,transparent 60%);border-color:var(--mdm-b)}
+#panel-mdm .hero-icon{background:var(--mdm-dim);border-color:var(--mdm-b);color:var(--mdm)}
+#panel-mdm .hero-meta h2{color:var(--mdm)}
+#panel-mdm .scope-row{color:var(--mdm)}
+#panel-mdm .tb{background:var(--mdm-dim);color:var(--mdm)}
+#panel-emm .hero{background:linear-gradient(135deg,rgba(96,165,250,.05) 0%,transparent 60%);border-color:var(--emm-b)}
+#panel-emm .hero-icon{background:var(--emm-dim);border-color:var(--emm-b);color:var(--emm)}
+#panel-emm .hero-meta h2{color:var(--emm)}
+#panel-emm .scope-row{color:var(--emm)}
+#panel-emm .tb{background:var(--emm-dim);color:var(--emm)}
+#panel-uem .hero{background:linear-gradient(135deg,rgba(192,132,252,.05) 0%,transparent 60%);border-color:var(--uem-b)}
+#panel-uem .hero-icon{background:var(--uem-dim);border-color:var(--uem-b);color:var(--uem)}
+#panel-uem .hero-meta h2{color:var(--uem)}
+#panel-uem .scope-row{color:var(--uem)}
+#panel-uem .tb{background:var(--uem-dim);color:var(--uem)}
+#panel-mam .hero{background:linear-gradient(135deg,rgba(251,146,60,.05) 0%,transparent 60%);border-color:var(--mam-b)}
+#panel-mam .hero-icon{background:var(--mam-dim);border-color:var(--mam-b);color:var(--mam)}
+#panel-mam .hero-meta h2{color:var(--mam)}
+#panel-mam .scope-row{color:var(--mam)}
+#panel-mam .tb{background:var(--mam-dim);color:var(--mam)}
+#panel-mtd .hero{background:linear-gradient(135deg,rgba(248,113,113,.05) 0%,transparent 60%);border-color:var(--mtd-b)}
+#panel-mtd .hero-icon{background:var(--mtd-dim);border-color:var(--mtd-b);color:var(--mtd)}
+#panel-mtd .hero-meta h2{color:var(--mtd)}
+#panel-mtd .scope-row{color:var(--mtd)}
+#panel-mtd .tb{background:var(--mtd-dim);color:var(--mtd)}
+@media(max-width:640px){.g2{grid-template-columns:1fr}.diagram{flex-direction:column}}
+footer{border-top:1px solid var(--border);padding:1.4rem 2rem;text-align:center;font-size:11px;color:var(--muted);letter-spacing:.05em}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <p class="hlabel">// Gestión de Dispositivos Empresariales &mdash; Referencia Mayo 2026</p>
+    <h1>Manage <span>Mobile</span> Devices</h1>
+    <p class="hsub">Cuadro comparativo de los principales paradigmas y tecnologías para la gestión de endpoints en entornos empresariales modernos.</p>
+    <div class="htags">
+      <span class="htag" style="color:var(--mdm);border-color:var(--mdm-b);background:var(--mdm-dim)">MDM</span>
+      <span class="htag" style="color:var(--emm);border-color:var(--emm-b);background:var(--emm-dim)">EMM</span>
+      <span class="htag" style="color:var(--uem);border-color:var(--uem-b);background:var(--uem-dim)">UEM</span>
+      <span class="htag" style="color:var(--mam);border-color:var(--mam-b);background:var(--mam-dim)">MAM</span>
+      <span class="htag" style="color:var(--mtd);border-color:var(--mtd-b);background:var(--mtd-dim)">MTD</span>
+    </div>
+  </div>
+</header>
+
+<div class="main">
+
+  <div class="rel-box">
+    <p class="rel-title">Relaci&oacute;n de alcance y evoluci&oacute;n</p>
+    <div class="diagram">
+      <span class="d-box d-mdm">MDM</span>
+      <span class="d-arrow">&#8834;</span>
+      <span class="d-box d-emm">EMM = MDM + MAM + MCM</span>
+      <span class="d-arrow">&#8834;</span>
+      <span class="d-box d-uem">UEM = EMM + PC + Mac + IoT</span>
+      <span class="d-arrow">&nbsp;+&nbsp;</span>
+      <span class="d-box d-plus">MTD &mdash; seguridad (complementario a todos)</span>
+    </div>
+    <p class="d-note">Cada paradigma extiende al anterior. MTD es ortogonal: se integra sobre MDM, EMM o UEM para a&ntilde;adir detecci&oacute;n activa de amenazas.</p>
+  </div>
+
+  <div class="tabs">
+    <button class="tab active" data-c="mdm" onclick="show('mdm',this)">&#128241; MDM</button>
+    <button class="tab" data-c="emm" onclick="show('emm',this)">&#128188; EMM</button>
+    <button class="tab" data-c="uem" onclick="show('uem',this)">&#128421; UEM</button>
+    <button class="tab" data-c="mam" onclick="show('mam',this)">&#128230; MAM <small style="font-size:10px;opacity:.55">+adicional</small></button>
+    <button class="tab" data-c="mtd" onclick="show('mtd',this)">&#128737; MTD <small style="font-size:10px;opacity:.55">+adicional</small></button>
+  </div>
+
+  <!-- MDM -->
+  <div id="panel-mdm" class="panel active">
+    <div class="hero" data-abbr="MDM">
+      <div class="hero-top">
+        <div class="hero-icon">&#128241;</div>
+        <div class="hero-meta"><h2>MDM</h2><p class="fn">Mobile Device Management</p></div>
+      </div>
+      <p class="hero-desc">Capa fundacional de la movilidad empresarial. El administrador gestiona el <strong>dispositivo f&iacute;sico como unidad</strong>: lo enrola, configura, bloquea o borra de forma remota y aplica pol&iacute;ticas sobre el hardware y el sistema operativo. No distingue ni separa datos personales de corporativos dentro del mismo dispositivo.</p>
+      <div class="scope-row"><span>ALCANCE</span><div class="pips"><div class="pip on"></div><div class="pip"></div><div class="pip"></div><div class="pip"></div><div class="pip"></div></div><span>Solo dispositivo f&iacute;sico</span></div>
+    </div>
+    <div class="g2">
+      <div class="card">
+        <p class="card-title ct-yes">&#10022; Qu&eacute; hace</p>
+        <ul class="lst">
+          <li><span class="b b-yes"></span>Enrollment y registro centralizado de dispositivos (iOS, Android, Windows Mobile)</li>
+          <li><span class="b b-yes"></span>Borrado remoto completo (full wipe) y bloqueo del equipo</li>
+          <li><span class="b b-yes"></span>Pol&iacute;ticas de contrase&ntilde;a, PIN, biometr&iacute;a y cifrado del dispositivo</li>
+          <li><span class="b b-yes"></span>Inventario de hardware: modelo, OS, IMEI, almacenamiento, bater&iacute;a</li>
+          <li><span class="b b-yes"></span>Distribuci&oacute;n de perfiles: Wi-Fi, VPN, APN, certificados digitales</li>
+          <li><span class="b b-yes"></span>Control de actualizaciones del sistema operativo</li>
+          <li><span class="b b-yes"></span>Modo quiosco y restricci&oacute;n de funciones del dispositivo</li>
+          <li><span class="b b-yes"></span>Geolocalización y geofencing del equipo</li>
+        </ul>
+      </div>
+      <div class="card">
+        <p class="card-title ct-no">&#10022; Qu&eacute; NO hace</p>
+        <ul class="lst">
+          <li><span class="b b-no"></span>Gesti&oacute;n granular a nivel de aplicaci&oacute;n (no puede borrar solo datos de una app)</li>
+          <li><span class="b b-no"></span>Separar datos corporativos de personales en el mismo dispositivo</li>
+          <li><span class="b b-no"></span>Gestionar PCs, laptops, Macs ni estaciones de trabajo Windows</li>
+          <li><span class="b b-no"></span>Detectar malware, amenazas de red o phishing en tiempo real</li>
+          <li><span class="b b-no"></span>Gesti&oacute;n de identidad, SSO ni autenticaci&oacute;n federada</li>
+          <li><span class="b b-no"></span>Control de documentos y contenido corporativo (DRM, MCM)</li>
+          <li><span class="b b-no"></span>Proteger datos cuando el dispositivo no est&aacute; enrolado</li>
+        </ul>
+      </div>
+    </div>
+    <div class="g2">
+      <div class="card card-yes">
+        <p class="card-title ct-when">&#10022; Cu&aacute;ndo usarlo</p>
+        <ul class="lst">
+          <li><span class="b b-wh"></span>Dispositivos 100% corporativos &mdash; COBO (Corporate Owned, Business Only)</li>
+          <li><span class="b b-wh"></span>Flotas de tablets o smartphones de uso &uacute;nico: quioscos, punto de venta, campo</li>
+          <li><span class="b b-wh"></span>No hay escenario BYOD: todos los equipos pertenecen a la empresa</li>
+          <li><span class="b b-wh"></span>Presupuesto limitado y necesidades de gesti&oacute;n b&aacute;sicas</li>
+          <li><span class="b b-wh"></span>Entornos educativos con dispositivos compartidos y supervisados</li>
+          <li><span class="b b-wh"></span>Dispositivos rugosos, industriales o lectores de c&oacute;digo de barras</li>
+        </ul>
+      </div>
+      <div class="card card-no">
+        <p class="card-title ct-now">&#10022; Cu&aacute;ndo NO usarlo</p>
+        <ul class="lst">
+          <li><span class="b b-nw"></span>BYOD: el full wipe borra tambi&eacute;n datos personales del empleado</li>
+          <li><span class="b b-nw"></span>Necesitas control granular de aplicaciones espec&iacute;ficas</li>
+          <li><span class="b b-nw"></span>Empleados remotos con laptops y PCs que tambi&eacute;n debes gestionar</li>
+          <li><span class="b b-nw"></span>Alta regulaci&oacute;n (salud, finanzas) que exige separaci&oacute;n de contenido</li>
+          <li><span class="b b-nw"></span>Necesitas visibilidad de amenazas o cumplimiento de seguridad avanzado</li>
+          <li><span class="b b-nw"></span>Contratistas o freelancers que no aceptan enrolar sus equipos</li>
+        </ul>
+      </div>
+    </div>
+    <div class="tools-s">
+      <p class="card-title ct-tool">&#10022; Herramientas y plataformas &mdash; 2026</p>
+      <div class="tg">
+        <div class="tc"><p class="tn">Microsoft Intune<span class="hot">&#9733;</span></p><p class="ts">L&iacute;der del mercado, nube</p><span class="tb">Top 2026</span></div>
+        <div class="tc"><p class="tn">Jamf Pro<span class="hot">&#9733;</span></p><p class="ts">Especialista Apple: Mac, iOS, iPadOS</p><span class="tb">Apple-first</span></div>
+        <div class="tc"><p class="tn">VMware Workspace ONE</p><p class="ts">Enterprise, Broadcom</p><span class="tb">Enterprise</span></div>
+        <div class="tc"><p class="tn">Kandji<span class="hot">&#9733;</span></p><p class="ts">Apple-only, moderno, blueprints</p><span class="tb">Emergente</span></div>
+        <div class="tc"><p class="tn">Cisco Meraki SM</p><p class="ts">Integrado con red Cisco</p><span class="tb">NetOps</span></div>
+        <div class="tc"><p class="tn">Mosyle</p><p class="ts">Apple Business &amp; EDU, cloud</p><span class="tb">EDU</span></div>
+        <div class="tc"><p class="tn">SOTI MobiControl</p><p class="ts">IoT, rugosos, industria</p><span class="tb">Industrial</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- EMM -->
+  <div id="panel-emm" class="panel">
+    <div class="hero" data-abbr="EMM">
+      <div class="hero-top">
+        <div class="hero-icon">&#128188;</div>
+        <div class="hero-meta"><h2>EMM</h2><p class="fn">Enterprise Mobility Management</p></div>
+      </div>
+      <p class="hero-desc">Supersede a MDM a&ntilde;adiendo <strong>MAM (gesti&oacute;n de aplicaciones)</strong> y <strong>MCM (gesti&oacute;n de contenido)</strong>. Crea un contenedor corporativo separado dentro del dispositivo, siendo el est&aacute;ndar para flotas mixtas (BYOD + corporativo). Permite borrado selectivo: solo datos de empresa sin tocar los personales.</p>
+      <div class="scope-row"><span>ALCANCE</span><div class="pips"><div class="pip on"></div><div class="pip on"></div><div class="pip on"></div><div class="pip"></div><div class="pip"></div></div><span>Dispositivo + Apps + Contenido</span></div>
+    </div>
+    <div class="g2">
+      <div class="card">
+        <p class="card-title ct-yes">&#10022; Qu&eacute; hace</p>
+        <ul class="lst">
+          <li><span class="b b-yes"></span>Todo lo que hace MDM, m&aacute;s gesti&oacute;n a nivel de aplicaci&oacute;n</li>
+          <li><span class="b b-yes"></span>Distribuci&oacute;n, actualizaci&oacute;n y eliminaci&oacute;n de apps corporativas</li>
+          <li><span class="b b-yes"></span>Contenedor seguro (work profile) que separa datos personales/corporativos</li>
+          <li><span class="b b-yes"></span>Borrado selectivo: solo datos corporativos, respetando los personales</li>
+          <li><span class="b b-yes"></span>Pol&iacute;ticas por app: copy/paste, captura de pantalla, c&aacute;mara</li>
+          <li><span class="b b-yes"></span>Distribuci&oacute;n de documentos y protecci&oacute;n de contenido (MCM)</li>
+          <li><span class="b b-yes"></span>Integraci&oacute;n con Active Directory / Entra ID, SSO y MFA</li>
+          <li><span class="b b-yes"></span>Gesti&oacute;n de correo, calendario y contactos corporativos</li>
+        </ul>
+      </div>
+      <div class="card">
+        <p class="card-title ct-no">&#10022; Qu&eacute; NO hace</p>
+        <ul class="lst">
+          <li><span class="b b-no"></span>Gestionar PCs, Macs ni estaciones de trabajo Windows de escritorio</li>
+          <li><span class="b b-no"></span>Gesti&oacute;n unificada de IoT, wearables o dispositivos no convencionales</li>
+          <li><span class="b b-no"></span>Detecci&oacute;n y respuesta a amenazas en tiempo real (necesita MTD)</li>
+          <li><span class="b b-no"></span>Gesti&oacute;n de activos de TI completa para endpoints de escritorio</li>
+          <li><span class="b b-no"></span>Reemplaza un IdP nativo (depende de integraci&oacute;n con Azure AD, Okta, etc.)</li>
+          <li><span class="b b-no"></span>Automatizaci&oacute;n de flujos ITSM m&aacute;s all&aacute; del dispositivo</li>
+        </ul>
+      </div>
+    </div>
+    <div class="g2">
+      <div class="card card-yes">
+        <p class="card-title ct-when">&#10022; Cu&aacute;ndo usarlo</p>
+        <ul class="lst">
+          <li><span class="b b-wh"></span>Flota mixta: dispositivos corporativos y BYOD en la misma empresa</li>
+          <li><span class="b b-wh"></span>Necesitas separar datos personales/corporativos respetando privacidad</li>
+          <li><span class="b b-wh"></span>Control de qu&eacute; apps corporativas se instalan y sus pol&iacute;ticas</li>
+          <li><span class="b b-wh"></span>Distribuci&oacute;n controlada de documentos sensibles a m&oacute;viles</li>
+          <li><span class="b b-wh"></span>Medianas y grandes empresas con pol&iacute;ticas de movilidad formales</li>
+          <li><span class="b b-wh"></span>Sectores regulados: banca, salud, legal</li>
+        </ul>
+      </div>
+      <div class="card card-no">
+        <p class="card-title ct-now">&#10022; Cu&aacute;ndo NO usarlo</p>
+        <ul class="lst">
+          <li><span class="b b-nw"></span>Organizaciones muy peque&ntilde;as sin BYOD ni necesidades de app management</li>
+          <li><span class="b b-nw"></span>Solo necesitas gestionar laptops y PCs &mdash; considera UEM directamente</li>
+          <li><span class="b b-nw"></span>Tu flota ya incluye muchos PCs y servidores: ir directo a UEM es m&aacute;s eficiente</li>
+          <li><span class="b b-nw"></span>Contratistas temporales sin dispositivos de empresa</li>
+          <li><span class="b b-nw"></span>Privacidad del empleado imposibilita instalar cualquier agente</li>
+        </ul>
+      </div>
+    </div>
+    <div class="tools-s">
+      <p class="card-title ct-tool">&#10022; Herramientas y plataformas &mdash; 2026</p>
+      <div class="tg">
+        <div class="tc"><p class="tn">Microsoft Intune<span class="hot">&#9733;</span></p><p class="ts">Suite completa, integra M365</p><span class="tb">Top 2026</span></div>
+        <div class="tc"><p class="tn">VMware Workspace ONE</p><p class="ts">Broadcom, enterprise grade</p><span class="tb">Enterprise</span></div>
+        <div class="tc"><p class="tn">IBM MaaS360<span class="hot">&#9733;</span></p><p class="ts">Watson AI, seguridad avanzada</p><span class="tb">AI-driven</span></div>
+        <div class="tc"><p class="tn">Citrix Endpoint Mgmt</p><p class="ts">Microapps, virtualizaci&oacute;n, VDI</p><span class="tb">VDI</span></div>
+        <div class="tc"><p class="tn">BlackBerry UEM</p><p class="ts">Seguridad m&aacute;xima, gov &amp; defense</p><span class="tb">Gov/Defense</span></div>
+        <div class="tc"><p class="tn">SOTI ONE Platform</p><p class="ts">EMM + IoT + rugged, log&iacute;stica</p><span class="tb">Industrial</span></div>
+        <div class="tc"><p class="tn">Hexnode UEM</p><p class="ts">Precio competitivo, multiplataforma</p><span class="tb">SMB</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- UEM -->
+  <div id="panel-uem" class="panel">
+    <div class="hero" data-abbr="UEM">
+      <div class="hero-top">
+        <div class="hero-icon">&#128421;</div>
+        <div class="hero-meta"><h2>UEM</h2><p class="fn">Unified Endpoint Management</p></div>
+      </div>
+      <p class="hero-desc">La evoluci&oacute;n definitiva: gestiona <strong>todos los endpoints desde una sola consola</strong> &mdash; smartphones, tablets, laptops Windows, macOS, Linux, Chromebooks, wearables e IoT. Elimina la fragmentaci&oacute;n de herramientas y aplica pol&iacute;ticas consistentes en toda la superficie del endpoint de la organizaci&oacute;n.</p>
+      <div class="scope-row"><span>ALCANCE</span><div class="pips"><div class="pip on"></div><div class="pip on"></div><div class="pip on"></div><div class="pip on"></div><div class="pip on"></div></div><span>Todos los endpoints: m&oacute;vil + PC + IoT</span></div>
+    </div>
+    <div class="g2">
+      <div class="card">
+        <p class="card-title ct-yes">&#10022; Qu&eacute; hace</p>
+        <ul class="lst">
+          <li><span class="b b-yes"></span>Todo lo de EMM + gesti&oacute;n completa de Windows 10/11, macOS, Linux</li>
+          <li><span class="b b-yes"></span>Consola &uacute;nica para toda la flota: m&oacute;viles, laptops, PCs</li>
+          <li><span class="b b-yes"></span>Gesti&oacute;n de parches de OS y software en todos los endpoints</li>
+          <li><span class="b b-yes"></span>Integraci&oacute;n Zero Trust: compliance de dispositivo para acceso condicional</li>
+          <li><span class="b b-yes"></span>Autoprovisionamiento zero-touch (Autopilot, Apple ADE, Android zero-touch)</li>
+          <li><span class="b b-yes"></span>Inventario y gesti&oacute;n de activos de TI unificado</li>
+          <li><span class="b b-yes"></span>Soporte para IoT, wearables y dispositivos no convencionales</li>
+          <li><span class="b b-yes"></span>Analytics de endpoints y reporting de cumplimiento unificado</li>
+        </ul>
+      </div>
+      <div class="card">
+        <p class="card-title ct-no">&#10022; Qu&eacute; NO hace</p>
+        <ul class="lst">
+          <li><span class="b b-no"></span>Detecci&oacute;n y respuesta activa a amenazas (requiere EDR/MTD integrado)</li>
+          <li><span class="b b-no"></span>Gesti&oacute;n de identidades y accesos (necesita IAM/IdP externo)</li>
+          <li><span class="b b-no"></span>Monitoreo de tr&aacute;fico de red (requiere NDR o SIEM)</li>
+          <li><span class="b b-no"></span>Desarrollo ni despliegue de aplicaciones propias</li>
+          <li><span class="b b-no"></span>Gesti&oacute;n de infraestructura cloud (VMs, servidores) &mdash; eso es otra capa</li>
+          <li><span class="b b-no"></span>Reemplaza por s&iacute; solo a una estrategia de seguridad completa</li>
+        </ul>
+      </div>
+    </div>
+    <div class="g2">
+      <div class="card card-yes">
+        <p class="card-title ct-when">&#10022; Cu&aacute;ndo usarlo</p>
+        <ul class="lst">
+          <li><span class="b b-wh"></span>Grandes organizaciones con flota mixta: m&oacute;viles + laptops + PCs</li>
+          <li><span class="b b-wh"></span>Quieres reemplazar m&uacute;ltiples herramientas por una sola consola</li>
+          <li><span class="b b-wh"></span>Estrategia Zero Trust que requiere compliance de endpoint para acceso</li>
+          <li><span class="b b-wh"></span>Trabajo remoto masivo: necesitas gestionar laptops igual que m&oacute;viles</li>
+          <li><span class="b b-wh"></span>Alta regulaci&oacute;n que exige visibilidad total de todos los endpoints</li>
+          <li><span class="b b-wh"></span>Consolidaci&oacute;n de herramientas para reducir costos operativos de IT</li>
+        </ul>
+      </div>
+      <div class="card card-no">
+        <p class="card-title ct-now">&#10022; Cu&aacute;ndo NO usarlo</p>
+        <ul class="lst">
+          <li><span class="b b-nw"></span>Organizaci&oacute;n peque&ntilde;a con solo smartphones &mdash; MDM/EMM es suficiente</li>
+          <li><span class="b b-nw"></span>Presupuesto muy ajustado: UEM implica licencias y complejidad mayor</li>
+          <li><span class="b b-nw"></span>Solo gestionas dispositivos Apple &mdash; Jamf cubre ese nicho mejor</li>
+          <li><span class="b b-nw"></span>Sin equipo de IT maduro para administrar una plataforma tan amplia</li>
+          <li><span class="b b-nw"></span>Startup muy joven sin procesos de gesti&oacute;n establecidos</li>
+        </ul>
+      </div>
+    </div>
+    <div class="tools-s">
+      <p class="card-title ct-tool">&#10022; Herramientas y plataformas &mdash; 2026</p>
+      <div class="tg">
+        <div class="tc"><p class="tn">Microsoft Intune + MEM<span class="hot">&#9733;</span></p><p class="ts">L&iacute;der absoluto, integra M365/Entra</p><span class="tb">Top 2026</span></div>
+        <div class="tc"><p class="tn">VMware Workspace ONE<span class="hot">&#9733;</span></p><p class="ts">UEM completo, multi-OS</p><span class="tb">Enterprise</span></div>
+        <div class="tc"><p class="tn">IBM MaaS360</p><p class="ts">Watson AI, seguridad avanzada</p><span class="tb">AI-driven</span></div>
+        <div class="tc"><p class="tn">ManageEngine Endpoint Central<span class="hot">&#9733;</span></p><p class="ts">Precio competitivo, muy completo</p><span class="tb">SMB/Mid</span></div>
+        <div class="tc"><p class="tn">Ivanti Neurons for UEM</p><p class="ts">Self-healing endpoint, automation</p><span class="tb">AI/Auto</span></div>
+        <div class="tc"><p class="tn">BlackBerry UEM</p><p class="ts">Gov, defensa, seguridad m&aacute;xima</p><span class="tb">Gov/Defense</span></div>
+        <div class="tc"><p class="tn">Jamf + Jamf Connect</p><p class="ts">UEM para entornos 100% Apple</p><span class="tb">Apple-only</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MAM -->
+  <div id="panel-mam" class="panel">
+    <div class="hero" data-abbr="MAM">
+      <div class="hero-top">
+        <div class="hero-icon">&#128230;</div>
+        <div class="hero-meta"><h2>MAM</h2><p class="fn">Mobile Application Management</p></div>
+      </div>
+      <p class="hero-desc">Gestiona <strong>solo las aplicaciones</strong>, sin tocar el dispositivo. No requiere enrollment del equipo: ideal para BYOD puro donde la empresa no puede (ni quiere) controlar el hardware, pero s&iacute; proteger sus datos dentro de aplicaciones corporativas espec&iacute;ficas. Funciona con o sin una capa MDM/EMM debajo.</p>
+      <div class="scope-row"><span>ALCANCE</span><div class="pips"><div class="pip"></div><div class="pip on"></div><div class="pip"></div><div class="pip"></div><div class="pip"></div></div><span>Solo apps (sin tocar el dispositivo)</span></div>
+    </div>
+    <div class="g2">
+      <div class="card">
+        <p class="card-title ct-yes">&#10022; Qu&eacute; hace</p>
+        <ul class="lst">
+          <li><span class="b b-yes"></span>Distribuci&oacute;n y actualizaci&oacute;n de apps corporativas sin enrolar el dispositivo</li>
+          <li><span class="b b-yes"></span>Pol&iacute;ticas de protecci&oacute;n de datos dentro de la app (App Protection Policies)</li>
+          <li><span class="b b-yes"></span>Bloqueo de copy/paste, captura de pantalla y acceso a almacenamiento externo</li>
+          <li><span class="b b-yes"></span>Borrado selectivo: solo datos corporativos de la app, respetando lo personal</li>
+          <li><span class="b b-yes"></span>App wrapping: a&ntilde;adir pol&iacute;ticas a apps existentes sin modificar el c&oacute;digo</li>
+          <li><span class="b b-yes"></span>SDK de MAM para que apps propias incluyan protecci&oacute;n nativa</li>
+          <li><span class="b b-yes"></span>Autenticaci&oacute;n obligatoria (PIN de app, biometr&iacute;a) independiente del OS</li>
+          <li><span class="b b-yes"></span>Control de qu&eacute; apps corporativas pueden compartir datos entre s&iacute;</li>
+        </ul>
+      </div>
+      <div class="card">
+        <p class="card-title ct-no">&#10022; Qu&eacute; NO hace</p>
+        <ul class="lst">
+          <li><span class="b b-no"></span>Control del dispositivo f&iacute;sico (no puede bloquearlo ni borrarlo)</li>
+          <li><span class="b b-no"></span>Ver inventario de hardware ni estado de bater&iacute;a o almacenamiento</li>
+          <li><span class="b b-no"></span>Aplicar pol&iacute;ticas de contrase&ntilde;a del sistema operativo</li>
+          <li><span class="b b-no"></span>Gestionar configuraciones de Wi-Fi, VPN ni certificados del sistema</li>
+          <li><span class="b b-no"></span>Detectar si el dispositivo est&aacute; comprometido (jailbreak/root) sin integraci&oacute;n MTD</li>
+          <li><span class="b b-no"></span>Gestionar apps no "envueltas" o sin SDK MAM integrado</li>
+        </ul>
+      </div>
+    </div>
+    <div class="g2">
+      <div class="card card-yes">
+        <p class="card-title ct-when">&#10022; Cu&aacute;ndo usarlo</p>
+        <ul class="lst">
+          <li><span class="b b-wh"></span>BYOD puro: empleados usan sus propios dispositivos y no aceptan enrollment</li>
+          <li><span class="b b-wh"></span>Contratistas y freelancers que acceden a apps corporativas temporalmente</li>
+          <li><span class="b b-wh"></span>Complemento a MDM/EMM/UEM para proteger apps en dispositivos enrolados</li>
+          <li><span class="b b-wh"></span>Solo necesitas proteger 2-3 apps cr&iacute;ticas (correo, Teams, OneDrive)</li>
+          <li><span class="b b-wh"></span>Pa&iacute;ses con leyes de privacidad estrictas donde no puedes tocar el dispositivo</li>
+          <li><span class="b b-wh"></span>Inicio r&aacute;pido sin fricción para organizaciones sin IT maduro</li>
+        </ul>
+      </div>
+      <div class="card card-no">
+        <p class="card-title ct-now">&#10022; Cu&aacute;ndo NO usarlo</p>
+        <ul class="lst">
+          <li><span class="b b-nw"></span>Necesitas control del hardware (quioscos, dispositivos dedicados)</li>
+          <li><span class="b b-nw"></span>Debes garantizar cifrado de disco a nivel de OS, no solo de la app</li>
+          <li><span class="b b-nw"></span>Alta regulaci&oacute;n que exige verificar el estado del dispositivo (compliance)</li>
+          <li><span class="b b-nw"></span>Muchas apps internas que no puedes envolver f&aacute;cilmente</li>
+          <li><span class="b b-nw"></span>Necesitas visibilidad completa del endpoint, no solo de las apps</li>
+        </ul>
+      </div>
+    </div>
+    <div class="tools-s">
+      <p class="card-title ct-tool">&#10022; Herramientas y plataformas &mdash; 2026</p>
+      <div class="tg">
+        <div class="tc"><p class="tn">Microsoft Intune MAM<span class="hot">&#9733;</span></p><p class="ts">App Protection Policies, sin enrollment</p><span class="tb">Top 2026</span></div>
+        <div class="tc"><p class="tn">VMware Workspace ONE MAM</p><p class="ts">App wrapping, SDK, tunneling</p><span class="tb">Enterprise</span></div>
+        <div class="tc"><p class="tn">BlackBerry Dynamics<span class="hot">&#9733;</span></p><p class="ts">Contenedor seguro de apps, gov</p><span class="tb">Gov/Defense</span></div>
+        <div class="tc"><p class="tn">Citrix Endpoint Mgmt MAM</p><p class="ts">Microapps, virtualizaci&oacute;n de apps</p><span class="tb">VDI/Apps</span></div>
+        <div class="tc"><p class="tn">IBM MaaS360 MAM</p><p class="ts">App catalog, wrapping integrado</p><span class="tb">AI-driven</span></div>
+        <div class="tc"><p class="tn">AppConfig Community</p><p class="ts">Est&aacute;ndar abierto para configuraci&oacute;n de apps</p><span class="tb">Est&aacute;ndar</span></div>
+        <div class="tc"><p class="tn">Jamf Connect + Pro</p><p class="ts">MAM para ecosistema Apple</p><span class="tb">Apple</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MTD -->
+  <div id="panel-mtd" class="panel">
+    <div class="hero" data-abbr="MTD">
+      <div class="hero-top">
+        <div class="hero-icon">&#128737;</div>
+        <div class="hero-meta"><h2>MTD</h2><p class="fn">Mobile Threat Defense</p></div>
+      </div>
+      <p class="hero-desc">Capa de <strong>seguridad y detecci&oacute;n activa de amenazas</strong> espec&iacute;fica para dispositivos m&oacute;viles. A diferencia de MDM/EMM/UEM que son de gesti&oacute;n, MTD es de protecci&oacute;n: detecta malware, ataques de red, apps maliciosas y phishing en tiempo real. Se integra como capa complementaria encima de cualquier soluci&oacute;n de gesti&oacute;n existente.</p>
+      <div class="scope-row"><span>ALCANCE</span><div class="pips"><div class="pip"></div><div class="pip"></div><div class="pip"></div><div class="pip on"></div><div class="pip on"></div></div><span>Seguridad y amenazas (ortogonal a los dem&aacute;s)</span></div>
+    </div>
+    <div class="g2">
+      <div class="card">
+        <p class="card-title ct-yes">&#10022; Qu&eacute; hace</p>
+        <ul class="lst">
+          <li><span class="b b-yes"></span>Detecci&oacute;n de malware y apps maliciosas en tiempo real (on-device y nube)</li>
+          <li><span class="b b-yes"></span>An&aacute;lisis de amenazas de red: ataques MITM, redes Wi-Fi falsas (evil twin)</li>
+          <li><span class="b b-yes"></span>Detecci&oacute;n de jailbreak y root del dispositivo</li>
+          <li><span class="b b-yes"></span>Protecci&oacute;n contra phishing en apps de mensajer&iacute;a, SMS y navegador</li>
+          <li><span class="b b-yes"></span>An&aacute;lisis de vulnerabilidades del OS y apps instaladas</li>
+          <li><span class="b b-yes"></span>Telemetr&iacute;a y alertas integradas con SIEM (Splunk, Sentinel)</li>
+          <li><span class="b b-yes"></span>Remediaci&oacute;n autom&aacute;tica: cuarentena y bloqueo de acceso condicional</li>
+          <li><span class="b b-yes"></span>Risk score del dispositivo para frameworks Zero Trust</li>
+        </ul>
+      </div>
+      <div class="card">
+        <p class="card-title ct-no">&#10022; Qu&eacute; NO hace</p>
+        <ul class="lst">
+          <li><span class="b b-no"></span>Gesti&oacute;n del dispositivo: no puede borrarlo, bloquearlo ni configurarlo</li>
+          <li><span class="b b-no"></span>Distribuci&oacute;n de aplicaciones corporativas</li>
+          <li><span class="b b-no"></span>Gesti&oacute;n de identidad ni SSO</li>
+          <li><span class="b b-no"></span>Aplicar pol&iacute;ticas de contrase&ntilde;a ni cifrado del OS</li>
+          <li><span class="b b-no"></span>Reemplazar a MDM/EMM/UEM &mdash; es complementario, no sustituto</li>
+          <li><span class="b b-no"></span>Proteger endpoints de escritorio (para eso existe EDR/XDR)</li>
+        </ul>
+      </div>
+    </div>
+    <div class="g2">
+      <div class="card card-yes">
+        <p class="card-title ct-when">&#10022; Cu&aacute;ndo usarlo</p>
+        <ul class="lst">
+          <li><span class="b b-wh"></span>Sectores de alta regulaci&oacute;n: salud, finanzas, gobierno, defensa</li>
+          <li><span class="b b-wh"></span>Empleados con acceso a datos muy sensibles desde m&oacute;viles</li>
+          <li><span class="b b-wh"></span>Complementar MDM/EMM/UEM con visibilidad de amenazas reales</li>
+          <li><span class="b b-wh"></span>Estrategia Zero Trust que requiere risk score del dispositivo</li>
+          <li><span class="b b-wh"></span>Cumplimiento de HIPAA, PCI-DSS, ISO 27001, ENS</li>
+          <li><span class="b b-wh"></span>Usuarios m&oacute;viles con acceso a recursos cr&iacute;ticos de red corporativa</li>
+        </ul>
+      </div>
+      <div class="card card-no">
+        <p class="card-title ct-now">&#10022; Cu&aacute;ndo NO usarlo</p>
+        <ul class="lst">
+          <li><span class="b b-nw"></span>Como &uacute;nica soluci&oacute;n: siempre debe acompa&ntilde;ar un MDM/EMM/UEM</li>
+          <li><span class="b b-nw"></span>Dispositivos de uso b&aacute;sico sin acceso a recursos corporativos sensibles</li>
+          <li><span class="b b-nw"></span>Presupuesto muy limitado sin madurez previa en MDM/EMM</li>
+          <li><span class="b b-nw"></span>Alta resistencia de usuarios a instalar agentes de seguridad</li>
+          <li><span class="b b-nw"></span>Organizaciones sin gesti&oacute;n b&aacute;sica a&uacute;n &mdash; primero establece MDM</li>
+        </ul>
+      </div>
+    </div>
+    <div class="tools-s">
+      <p class="card-title ct-tool">&#10022; Herramientas y plataformas &mdash; 2026</p>
+      <div class="tg">
+        <div class="tc"><p class="tn">Microsoft Defender for Endpoint<span class="hot">&#9733;</span></p><p class="ts">Integrado con Intune, M365 Defender</p><span class="tb">Top 2026</span></div>
+        <div class="tc"><p class="tn">CrowdStrike Falcon<span class="hot">&#9733;</span></p><p class="ts">Falcon for Mobile, AI-driven XDR</p><span class="tb">XDR/AI</span></div>
+        <div class="tc"><p class="tn">Lookout Mobile Security<span class="hot">&#9733;</span></p><p class="ts">MTD puro, larga trayectoria</p><span class="tb">MTD l&iacute;der</span></div>
+        <div class="tc"><p class="tn">Zimperium zIPS</p><p class="ts">ML on-device, sin nube, privacidad</p><span class="tb">On-device ML</span></div>
+        <div class="tc"><p class="tn">SentinelOne Singularity</p><p class="ts">XDR unificado con m&oacute;vil</p><span class="tb">XDR</span></div>
+        <div class="tc"><p class="tn">Check Point Harmony Mobile</p><p class="ts">Threat prevention multicapa</p><span class="tb">Enterprise</span></div>
+        <div class="tc"><p class="tn">Pradeo Security</p><p class="ts">MTD europeo, GDPR-friendly</p><span class="tb">EU/Privacy</span></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<footer>Referencia de estudio &mdash; Gesti&oacute;n de Dispositivos M&oacute;viles Empresariales &mdash; Mayo 2026</footer>
+
+<script>
+function show(id, btn) {
+  document.querySelectorAll('.panel').forEach(function(p){ p.classList.remove('active'); });
+  document.querySelectorAll('.tab').forEach(function(t){ t.classList.remove('active'); });
+  document.getElementById('panel-' + id).classList.add('active');
+  btn.classList.add('active');
+}
+</script>
+</body>
+</html>

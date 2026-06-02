@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Comparativa de Herramientas LLM</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Sora:wght@300;400;500;600&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0d0f14;
+    --surface: #13161e;
+    --surface2: #1a1e29;
+    --border: #252a38;
+    --border2: #2e3447;
+    --text: #e8eaf2;
+    --text-muted: #7880a0;
+    --text-dim: #444c6a;
+    --accent: #6c8cff;
+    --green: #3dd68c;
+    --red: #ff5e6c;
+    --amber: #f5b942;
+    --purple: #b06cff;
+    --teal: #2dd4bf;
+    --coral: #ff7c5c;
+    --pink: #f472b6;
+    --lime: #84cc16;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Sora', sans-serif;
+    font-size: 14px;
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  /* HEADER */
+  .header {
+    padding: 48px 40px 32px;
+    border-bottom: 1px solid var(--border);
+    background: linear-gradient(180deg, #111520 0%, var(--bg) 100%);
+  }
+
+  .header-tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--accent);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+
+  .header h1 {
+    font-size: 32px;
+    font-weight: 600;
+    color: #fff;
+    letter-spacing: -0.02em;
+    margin-bottom: 8px;
+  }
+
+  .header p {
+    font-size: 14px;
+    color: var(--text-muted);
+    max-width: 560px;
+  }
+
+  /* FILTERS */
+  .filters-bar {
+    padding: 20px 40px;
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    align-items: center;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .filter-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--text-dim);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-right: 4px;
+  }
+
+  .filter-btn {
+    padding: 5px 14px;
+    border-radius: 6px;
+    border: 1px solid var(--border2);
+    background: transparent;
+    color: var(--text-muted);
+    font-family: 'Sora', sans-serif;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .filter-btn:hover {
+    border-color: var(--accent);
+    color: var(--text);
+  }
+
+  .filter-btn.active {
+    background: rgba(108, 140, 255, 0.12);
+    border-color: var(--accent);
+    color: var(--accent);
+    font-weight: 500;
+  }
+
+  .filter-count {
+    font-size: 10px;
+    opacity: 0.55;
+    margin-left: 3px;
+  }
+
+  /* TABLE WRAPPER */
+  .table-wrap {
+    overflow-x: auto;
+    padding: 32px 40px;
+    min-height: 60vh;
+  }
+
+  /* TABLE */
+  table {
+    border-collapse: collapse;
+    width: max-content;
+    min-width: 100%;
+  }
+
+  /* TOOL HEADER */
+  thead th.criterion-col {
+    position: sticky;
+    left: 0;
+    z-index: 10;
+    background: var(--bg);
+    min-width: 150px;
+    padding: 0 16px 20px 0;
+    vertical-align: bottom;
+    border-bottom: 1px solid var(--border2);
+  }
+
+  thead th.tool-col {
+    min-width: 200px;
+    max-width: 220px;
+    padding: 0 0 20px 16px;
+    vertical-align: bottom;
+    border-bottom: 1px solid var(--border2);
+    border-left: 1px solid var(--border);
+  }
+
+  .tool-header {
+    border-top: 3px solid var(--tool-color, #444);
+    padding-top: 14px;
+    padding-left: 16px;
+    padding-right: 12px;
+  }
+
+  .tool-name {
+    font-size: 15px;
+    font-weight: 600;
+    color: #fff;
+    font-family: 'JetBrains Mono', monospace;
+    margin-bottom: 3px;
+  }
+
+  .tool-badge {
+    font-size: 10px;
+    color: var(--text-muted);
+    margin-bottom: 10px;
+    letter-spacing: 0.03em;
+  }
+
+  .tool-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+
+  .tag {
+    display: inline-block;
+    font-size: 9px;
+    font-weight: 500;
+    padding: 2px 7px;
+    border-radius: 4px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  .tag-oss    { background: rgba(61,214,140,0.12); color: var(--green); border: 1px solid rgba(61,214,140,0.25); }
+  .tag-prop   { background: rgba(255,94,108,0.12); color: var(--red); border: 1px solid rgba(255,94,108,0.25); }
+  .tag-prod   { background: rgba(245,185,66,0.12); color: var(--amber); border: 1px solid rgba(245,185,66,0.25); }
+  .tag-gui    { background: rgba(108,140,255,0.12); color: var(--accent); border: 1px solid rgba(108,140,255,0.25); }
+
+  /* ROWS */
+  tbody tr { border-bottom: 1px solid var(--border); }
+  tbody tr:last-child { border-bottom: none; }
+
+  tbody td.criterion-col {
+    position: sticky;
+    left: 0;
+    z-index: 5;
+    padding: 12px 16px 12px 0;
+    font-size: 11px;
+    font-weight: 500;
+    white-space: nowrap;
+    vertical-align: top;
+    background: var(--bg);
+  }
+
+  .criterion-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 3px 8px;
+    border-radius: 4px;
+  }
+
+  .crit-es    { color: var(--accent); background: rgba(108,140,255,0.08); }
+  .crit-noes  { color: var(--amber); background: rgba(245,185,66,0.08); }
+  .crit-hace  { color: var(--green); background: rgba(61,214,140,0.08); }
+  .crit-nohace { color: var(--red); background: rgba(255,94,108,0.08); }
+  .crit-si    { color: var(--teal); background: rgba(45,212,191,0.08); }
+  .crit-no    { color: var(--red); background: rgba(255,94,108,0.08); }
+  .crit-precio { color: var(--purple); background: rgba(176,108,255,0.08); }
+  .crit-oss   { color: var(--lime); background: rgba(132,204,22,0.08); }
+
+  tbody td.data-col {
+    padding: 12px 16px;
+    font-size: 12px;
+    line-height: 1.65;
+    vertical-align: top;
+    border-left: 1px solid var(--border);
+    color: var(--text-muted);
+    max-width: 220px;
+    min-width: 200px;
+  }
+
+  td.data-col.col-si   { color: #56e0a0; }
+  td.data-col.col-no   { color: #ff7080; }
+  td.data-col.col-oss-y { color: var(--green); }
+  td.data-col.col-oss-n { color: var(--red); }
+  td.data-col.col-precio { color: var(--text); }
+
+  /* HOVER ROW */
+  tbody tr:hover td { background: rgba(255,255,255,0.02) !important; }
+  tbody tr:hover td.criterion-col { background: rgba(255,255,255,0.02) !important; }
+
+  /* SCROLL HINT */
+  .scroll-hint {
+    font-size: 11px;
+    color: var(--text-dim);
+    text-align: right;
+    padding: 0 40px 16px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  /* LEGEND */
+  .legend {
+    padding: 20px 40px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    background: var(--surface);
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    color: var(--text-muted);
+  }
+
+  .legend-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+  }
+
+  /* NO RESULTS */
+  .no-results {
+    padding: 60px 40px;
+    text-align: center;
+    color: var(--text-dim);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-tag">// Guía de Herramientas LLM</div>
+  <h1>Comparativa de Runtimes & Servidores LLM</h1>
+  <p>7 herramientas para correr modelos de lenguaje localmente — qué son, qué hacen, cuándo usarlas y cuándo no.</p>
+</div>
+
+<div class="filters-bar">
+  <span class="filter-label">filtrar →</span>
+  <button class="filter-btn active" onclick="setFilter('all')">Todos <span class="filter-count">(7)</span></button>
+  <button class="filter-btn" onclick="setFilter('opensource')">Open Source <span class="filter-count">(6)</span></button>
+  <button class="filter-btn" onclick="setFilter('production')">Producción <span class="filter-count">(2)</span></button>
+  <button class="filter-btn" onclick="setFilter('personal')">Uso Personal <span class="filter-count">(5)</span></button>
+  <button class="filter-btn" onclick="setFilter('gui')">Con GUI <span class="filter-count">(3)</span></button>
+</div>
+
+<div class="table-wrap" id="table-wrap"></div>
+<div class="scroll-hint">← desplázate horizontalmente para ver todas las herramientas →</div>
+
+<div class="legend">
+  <div class="legend-item"><div class="legend-dot" style="background:var(--green)"></div> Open Source</div>
+  <div class="legend-item"><div class="legend-dot" style="background:var(--red)"></div> Propietario</div>
+  <div class="legend-item"><div class="legend-dot" style="background:var(--amber)"></div> Apto para Producción</div>
+  <div class="legend-item"><div class="legend-dot" style="background:var(--accent)"></div> Tiene GUI</div>
+</div>
+
+<script>
+const TOOLS = [
+  {
+    id: 'ollama', name: 'Ollama', badge: 'CLI + API Server', color: '#2DD4BF',
+    ossVal: true, prodVal: false, guiVal: false, freeVal: true,
+    es: 'Gestor de modelos LLM con servidor HTTP integrado. Runtime basado en llama.cpp con una capa amigable encima y su propio registro de modelos (como Docker pero para LLMs).',
+    noes: 'No es un motor de inferencia propio (usa llama.cpp). No tiene GUI visual. No es un framework de producción a gran escala.',
+    hace: 'Descarga y gestiona modelos desde su registro, expone API compatible con OpenAI, cambia de modelo con un comando, se integra fácilmente con OpenWebUI.',
+    nohace: 'No escala eficientemente a multi-GPU. Sin batching avanzado. Sin interfaz gráfica. Sin métricas de producción detalladas.',
+    si: 'Desarrollo local rápido, prototipado, integrar LLMs en apps propias, uso cotidiano en laptop o desktop con GPU modesta.',
+    no: 'Producción con alta concurrencia. Necesitas control fino del runtime. Métricas avanzadas de serving.',
+    precio: 'Gratis (100%)',
+    oss: 'Sí — MIT',
+  },
+  {
+    id: 'llamaserver', name: 'llama-server', badge: 'CLI + API (llama.cpp)', color: '#B06CFF',
+    ossVal: true, prodVal: true, guiVal: false, freeVal: true,
+    es: 'Servidor HTTP incluido en llama.cpp: el motor de inferencia en C++ más optimizado que existe, especialmente para CPU. Es la base interna de muchas otras herramientas.',
+    noes: 'No es una solución completa (sin gestión de modelos). No es plug-and-play. No tiene UI de ningún tipo.',
+    hace: 'Inferencia ultraoptimizada en CPU y GPU (GGUF, quantización 2-8 bit), API OpenAI-compatible, funciona en edge devices y Raspberry Pi.',
+    nohace: 'No descarga ni gestiona modelos. Sin UI. Configuración 100% manual. Sin gestión de sesiones ni usuarios.',
+    si: 'Máximo control en CPU, edge computing, hardware muy limitado, incrustar en proyectos C/C++, Raspberry Pi.',
+    no: 'Quieres plug-and-play. Necesitas gestión de modelos. Sin experiencia en línea de comandos.',
+    precio: 'Gratis (100%)',
+    oss: 'Sí — MIT',
+  },
+  {
+    id: 'lmstudio', name: 'LM Studio', badge: 'App de escritorio', color: '#F472B6',
+    ossVal: false, prodVal: false, guiVal: true, freeVal: true,
+    es: 'Aplicación de escritorio con GUI completa y muy pulida para correr LLMs localmente. La opción más amigable para usuarios no técnicos. Multiplataforma.',
+    noes: 'No es open source. No está hecho para servidores ni producción. No tiene CLI potente. No es headless.',
+    hace: 'GUI para descargar, gestionar y chatear con modelos. Servidor local con API OpenAI-compatible. Soporte GGUF. Busqueda de modelos integrada.',
+    nohace: 'Sin CLI real. Sin extensibilidad avanzada. No apto para automatización seria. No soporta todos los formatos. Uso comercial requiere licencia.',
+    si: 'Usuarios no técnicos, explorar modelos fácilmente, demos rápidas, integrar via API local con otras apps.',
+    no: 'Servidores, CI/CD, automatización, cuando open source es requisito, uso comercial sin licencia paga.',
+    precio: 'Gratis (personal) / Pago (comercial)',
+    oss: 'No — Propietario',
+  },
+  {
+    id: 'vllm', name: 'vLLM', badge: 'Motor de Producción', color: '#6C8CFF',
+    ossVal: true, prodVal: true, guiVal: false, freeVal: true,
+    es: 'Motor de inferencia de alto rendimiento para producción. Inventor de PagedAttention. El estándar de la industria para serving LLM a escala.',
+    noes: 'No es para laptops o uso personal. Sin GUI. Requiere GPU NVIDIA potente en su uso típico.',
+    hace: 'Serving masivo con batching continuo, PagedAttention, API OpenAI-compatible, multi-GPU y multi-nodo, LoRA dinámico en caliente.',
+    nohace: 'Sin soporte CPU real. No corre en hardware modesto. Instalación compleja. Sin interfaz web. Sin gestión visual de modelos.',
+    si: 'APIs LLM de producción, alto volumen de requests simultáneos, data centers, infraestructura de IA empresarial a gran escala.',
+    no: 'Uso personal, laptop, hardware sin GPU NVIDIA potente, proyectos pequeños o simples prototipos.',
+    precio: 'Gratis (100%)',
+    oss: 'Sí — Apache 2.0',
+  },
+  {
+    id: 'tgwebui', name: 'Text Gen WebUI', badge: 'UI Web avanzada (oobabooga)', color: '#F5B942',
+    ossVal: true, prodVal: false, guiVal: true, freeVal: true,
+    es: 'UI web completa (oobabooga) para interactuar con LLMs locales. Soporta múltiples backends de inferencia: llama.cpp, ExLlamaV2, Transformers y más.',
+    noes: 'No es motor de inferencia propio. No está optimizado para APIs de alto volumen en producción. No es de instalación sencilla.',
+    hace: 'Chat UI avanzada, soporte de múltiples backends y formatos, sistema de extensiones, fine-tuning básico, notebook mode, roles de personaje.',
+    nohace: 'API limitada para producción. Instalación compleja. Sin gestión centralizada de modelos. Sin soporte multi-GPU serio.',
+    si: 'Investigación y experimentación, usuarios técnicos que quieren control total, extensiones personalizadas, muchos formatos de modelo.',
+    no: 'Producción con alta concurrencia, automatización limpia, usuarios que buscan setup rápido y sencillo.',
+    precio: 'Gratis (100%)',
+    oss: 'Sí — AGPL-3.0',
+  },
+  {
+    id: 'jan', name: 'Jan.ai', badge: 'App de escritorio', color: '#FF7C5C',
+    ossVal: true, prodVal: false, guiVal: true, freeVal: true,
+    es: 'App de escritorio open source para LLMs locales. Alternativa open source y enfocada en privacidad frente a LM Studio. Desarrollada por Jan HQ.',
+    noes: 'No es servidor de producción. No orientado a desarrolladores avanzados o pipelines complejos. Ecosistema más pequeño.',
+    hace: 'GUI para descargar y chatear con modelos, servidor API local OpenAI-compatible, marketplace de modelos, extensiones, multiplataforma.',
+    nohace: 'Sin multi-GPU avanzado. Menos extensible que oobabooga. API más básica. Sin fine-tuning. Comunidad más pequeña.',
+    si: 'Alternativa open source a LM Studio, privacidad total garantizada, uso personal con GUI amigable.',
+    no: 'Producción, máximo rendimiento, extensibilidad avanzada, pipelines automatizados complejos.',
+    precio: 'Gratis (100%)',
+    oss: 'Sí — AGPL-3.0',
+  },
+  {
+    id: 'llamafile', name: 'Llamafile', badge: 'Ejecutable único (Mozilla)', color: '#84CC16',
+    ossVal: true, prodVal: false, guiVal: false, freeVal: true,
+    es: 'Ejecutable único que empaqueta modelo + runtime en un solo archivo descargable. Sin instalación de ningún tipo. Proyecto de Mozilla / Justine Tunney basado en llama.cpp.',
+    noes: 'No es gestor de modelos. No es escalable. Sin soporte GPU avanzado. No está hecho para producción.',
+    hace: 'Un solo archivo contiene el modelo + servidor web. Corre en CPU en casi cualquier OS (x86/ARM/Mac/Windows/Linux) sin instalar nada.',
+    nohace: 'Sin gestión de múltiples modelos. Sin GPU serio. Archivos enormes (el modelo va incluido). Sin extensibilidad.',
+    si: 'Demos portables sin instalación, entornos air-gapped, sin internet disponible, distribuir a usuarios no técnicos, máxima simplicidad.',
+    no: 'Producción, múltiples modelos, GPU necesaria, modelos >7B, cuando el tamaño del archivo importa.',
+    precio: 'Gratis (100%)',
+    oss: 'Sí — Apache 2.0',
+  },
+];
+
+const CRITERIA = [
+  { key: 'es',      label: '¿Qué es?',            cls: 'crit-es' },
+  { key: 'noes',    label: '¿Qué NO es?',          cls: 'crit-noes' },
+  { key: 'hace',    label: '¿Qué hace?',           cls: 'crit-hace' },
+  { key: 'nohace',  label: '¿Qué NO hace?',        cls: 'crit-nohace' },
+  { key: 'si',      label: '✓ Cuándo SÍ usarlo',  cls: 'crit-si' },
+  { key: 'no',      label: '✗ Cuándo NO usarlo',  cls: 'crit-no' },
+  { key: 'precio',  label: 'Precio',               cls: 'crit-precio' },
+  { key: 'oss',     label: 'Código fuente',        cls: 'crit-oss' },
+];
+
+let activeFilter = 'all';
+
+function getVisible() {
+  if (activeFilter === 'all') return TOOLS;
+  if (activeFilter === 'opensource') return TOOLS.filter(t => t.ossVal);
+  if (activeFilter === 'production') return TOOLS.filter(t => t.prodVal);
+  if (activeFilter === 'personal') return TOOLS.filter(t => !t.prodVal);
+  if (activeFilter === 'gui') return TOOLS.filter(t => t.guiVal);
+  return TOOLS;
+}
+
+function render() {
+  const vis = getVisible();
+  const wrap = document.getElementById('table-wrap');
+
+  if (vis.length === 0) {
+    wrap.innerHTML = '<div class="no-results">// sin resultados para este filtro</div>';
+    return;
+  }
+
+  let html = '<table><thead><tr>';
+  html += '<th class="criterion-col"><span style="font-family:\'JetBrains Mono\',monospace;font-size:10px;color:var(--text-dim);letter-spacing:0.08em;text-transform:uppercase">CRITERIO</span></th>';
+
+  vis.forEach(t => {
+    const ossTag = t.ossVal
+      ? '<span class="tag tag-oss">Open Source</span>'
+      : '<span class="tag tag-prop">Propietario</span>';
+    const guiTag = t.guiVal ? '<span class="tag tag-gui">GUI</span>' : '';
+    const prodTag = t.prodVal ? '<span class="tag tag-prod">Producción</span>' : '';
+
+    html += `<th class="tool-col">
+      <div class="tool-header" style="--tool-color:${t.color}">
+        <div class="tool-name">${t.name}</div>
+        <div class="tool-badge">${t.badge}</div>
+        <div class="tool-tags">${ossTag}${guiTag}${prodTag}</div>
+      </div>
+    </th>`;
+  });
+  html += '</tr></thead><tbody>';
+
+  CRITERIA.forEach(cr => {
+    html += '<tr>';
+    html += `<td class="criterion-col"><span class="criterion-label ${cr.cls}">${cr.label}</span></td>`;
+    vis.forEach(t => {
+      let extraCls = '';
+      if (cr.key === 'si') extraCls = 'col-si';
+      else if (cr.key === 'no') extraCls = 'col-no';
+      else if (cr.key === 'precio') extraCls = 'col-precio';
+      else if (cr.key === 'oss') extraCls = t.ossVal ? 'col-oss-y' : 'col-oss-n';
+      html += `<td class="data-col ${extraCls}">${t[cr.key]}</td>`;
+    });
+    html += '</tr>';
+  });
+
+  html += '</tbody></table>';
+  wrap.innerHTML = html;
+}
+
+function setFilter(f) {
+  activeFilter = f;
+  document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+  event.target.classList.add('active');
+  render();
+}
+
+render();
+</script>
+</body>
+</html>

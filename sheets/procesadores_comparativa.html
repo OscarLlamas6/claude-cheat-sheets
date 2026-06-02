@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>APU vs CPU vs GPU vs NPU vs TPU — Guía Visual</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0b0c10;
+    --surface: #13151c;
+    --border: #232535;
+    --cpu: #4fc3f7;
+    --gpu: #a78bfa;
+    --npu: #34d399;
+    --apu: #fb923c;
+    --tpu: #f472b6;
+    --text: #e2e8f0;
+    --muted: #94a3b8;
+    --card-bg: #181a24;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Syne', sans-serif;
+    min-height: 100vh;
+    padding: 2rem 1rem 4rem;
+    overflow-x: hidden;
+  }
+
+  /* Noise overlay */
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none; z-index: 0; opacity: 0.5;
+  }
+
+  .wrapper { max-width: 1100px; margin: 0 auto; position: relative; z-index: 1; }
+
+  /* Header */
+  header { text-align: center; margin-bottom: 3rem; animation: fadeDown 0.7s ease both; }
+
+  header .eyebrow {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.25em;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 0.75rem;
+  }
+
+  h1 {
+    font-size: clamp(2rem, 5vw, 3.4rem);
+    font-weight: 800;
+    line-height: 1.1;
+    margin-bottom: 1rem;
+  }
+
+  h1 span.cpu { color: var(--cpu); }
+  h1 span.gpu { color: var(--gpu); }
+  h1 span.npu { color: var(--npu); }
+  h1 span.apu { color: var(--apu); }
+  h1 span.tpu { color: var(--tpu); }
+
+  header p {
+    color: var(--muted);
+    font-size: 1rem;
+    max-width: 500px;
+    margin: 0 auto;
+    line-height: 1.6;
+  }
+
+  /* Hero cards */
+  .hero-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2.5rem;
+  }
+
+  .hero-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 1.4rem 1.2rem;
+    position: relative;
+    overflow: hidden;
+    animation: fadeUp 0.6s ease both;
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+  }
+  .hero-card:hover { transform: translateY(-4px); }
+  .hero-card:nth-child(1) { animation-delay: 0.1s; }
+  .hero-card:nth-child(2) { animation-delay: 0.2s; }
+  .hero-card:nth-child(3) { animation-delay: 0.3s; }
+  .hero-card:nth-child(4) { animation-delay: 0.4s; }
+
+  .hero-card::before {
+    content: '';
+    position: absolute; top: 0; left: 0; right: 0; height: 3px;
+    border-radius: 14px 14px 0 0;
+  }
+  .hero-card.cpu::before { background: var(--cpu); box-shadow: 0 0 20px var(--cpu); }
+  .hero-card.gpu::before { background: var(--gpu); box-shadow: 0 0 20px var(--gpu); }
+  .hero-card.npu::before { background: var(--npu); box-shadow: 0 0 20px var(--npu); }
+  .hero-card.apu::before { background: var(--apu); box-shadow: 0 0 20px var(--apu); }
+  .hero-card.tpu::before { background: var(--tpu); box-shadow: 0 0 20px var(--tpu); }
+
+  .hero-card .chip-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 0.5rem;
+    opacity: 0.6;
+  }
+  .hero-card.cpu .chip-label { color: var(--cpu); }
+  .hero-card.gpu .chip-label { color: var(--gpu); }
+  .hero-card.npu .chip-label { color: var(--npu); }
+  .hero-card.apu .chip-label { color: var(--apu); }
+  .hero-card.tpu .chip-label { color: var(--tpu); }
+
+  .hero-card .chip-name {
+    font-size: 1.6rem;
+    font-weight: 800;
+    margin-bottom: 0.3rem;
+  }
+  .hero-card.cpu .chip-name { color: var(--cpu); }
+  .hero-card.gpu .chip-name { color: var(--gpu); }
+  .hero-card.npu .chip-name { color: var(--npu); }
+  .hero-card.apu .chip-name { color: var(--apu); }
+  .hero-card.tpu .chip-name { color: var(--tpu); }
+
+  .hero-card .chip-full {
+    font-size: 0.78rem;
+    color: var(--muted);
+    margin-bottom: 0.8rem;
+    font-weight: 600;
+  }
+
+  .hero-card .chip-icon {
+    font-size: 2.2rem;
+    position: absolute;
+    right: 1.2rem; top: 1.2rem;
+    opacity: 0.15;
+  }
+
+  .hero-card .chip-desc {
+    font-size: 0.82rem;
+    color: var(--muted);
+    line-height: 1.55;
+  }
+
+  /* Section title */
+  .section-title {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 1rem;
+    margin-top: 2.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+  }
+  .section-title::after {
+    content: ''; flex: 1; height: 1px; background: var(--border);
+  }
+
+  /* Comparison Table */
+  .table-wrap {
+    overflow-x: auto;
+    border-radius: 14px;
+    border: 1px solid var(--border);
+    animation: fadeUp 0.7s 0.3s ease both;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.88rem;
+  }
+
+  thead tr {
+    background: #1c1e2b;
+  }
+
+  th {
+    padding: 1rem 1.2rem;
+    text-align: left;
+    font-weight: 800;
+    font-size: 0.82rem;
+    white-space: nowrap;
+    border-bottom: 1px solid var(--border);
+  }
+
+  th.col-cpu { color: var(--cpu); border-top: 3px solid var(--cpu); }
+  th.col-gpu { color: var(--gpu); border-top: 3px solid var(--gpu); }
+  th.col-npu { color: var(--npu); border-top: 3px solid var(--npu); }
+  th.col-apu { color: var(--apu); border-top: 3px solid var(--apu); }
+  th.col-tpu { color: var(--tpu); border-top: 3px solid var(--tpu); }
+  th.col-aspect { color: var(--muted); font-family: 'Space Mono', monospace; font-size: 0.7rem; }
+
+  tbody tr {
+    border-bottom: 1px solid var(--border);
+    transition: background 0.2s;
+  }
+  tbody tr:hover { background: #1a1c28; }
+  tbody tr:last-child { border-bottom: none; }
+
+  td {
+    padding: 0.9rem 1.2rem;
+    vertical-align: top;
+    line-height: 1.5;
+    color: var(--text);
+  }
+
+  td.aspect {
+    font-weight: 700;
+    color: var(--muted);
+    font-size: 0.78rem;
+    white-space: nowrap;
+    font-family: 'Space Mono', monospace;
+    letter-spacing: 0.03em;
+  }
+
+  .tag {
+    display: inline-block;
+    padding: 0.15rem 0.55rem;
+    border-radius: 99px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    font-family: 'Space Mono', monospace;
+    margin-top: 0.3rem;
+    letter-spacing: 0.04em;
+  }
+  .tag-alto  { background: rgba(52,211,153,0.12); color: var(--npu); }
+  .tag-medio { background: rgba(251,146,60,0.12); color: var(--apu); }
+  .tag-bajo  { background: rgba(148,163,184,0.1); color: var(--muted); }
+  .tag-muy-alto { background: rgba(167,139,250,0.12); color: var(--gpu); }
+
+  /* Use-case grid */
+  .use-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1rem;
+    animation: fadeUp 0.7s 0.4s ease both;
+  }
+
+  .use-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.2rem;
+  }
+
+  .use-card h3 {
+    font-size: 0.82rem;
+    font-weight: 800;
+    margin-bottom: 0.8rem;
+    display: flex; align-items: center; gap: 0.5rem;
+  }
+  .use-card.cpu h3 { color: var(--cpu); }
+  .use-card.gpu h3 { color: var(--gpu); }
+  .use-card.npu h3 { color: var(--npu); }
+  .use-card.apu h3 { color: var(--apu); }
+  .use-card.tpu h3 { color: var(--tpu); }
+
+  .use-card ul {
+    list-style: none;
+    display: flex; flex-direction: column; gap: 0.45rem;
+  }
+
+  .use-card ul li {
+    font-size: 0.8rem;
+    color: var(--muted);
+    display: flex; gap: 0.5rem; align-items: flex-start;
+    line-height: 1.45;
+  }
+  .use-card ul li::before { content: '→'; opacity: 0.5; flex-shrink: 0; }
+
+  /* Analogy section */
+  .analogy-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1rem;
+    animation: fadeUp 0.7s 0.5s ease both;
+  }
+
+  .analogy-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.2rem 1.2rem 1rem;
+    text-align: center;
+  }
+
+  .analogy-emoji { font-size: 2.5rem; margin-bottom: 0.5rem; display: block; }
+  .analogy-chip {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 0.3rem;
+  }
+  .analogy-card.cpu .analogy-chip { color: var(--cpu); }
+  .analogy-card.gpu .analogy-chip { color: var(--gpu); }
+  .analogy-card.npu .analogy-chip { color: var(--npu); }
+  .analogy-card.apu .analogy-chip { color: var(--apu); }
+  .analogy-card.tpu .analogy-chip { color: var(--tpu); }
+
+  .analogy-text {
+    font-size: 0.8rem;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+
+  /* Footer */
+  footer {
+    text-align: center;
+    margin-top: 3rem;
+    font-size: 0.72rem;
+    color: var(--border);
+    font-family: 'Space Mono', monospace;
+  }
+
+  /* Animations */
+  @keyframes fadeDown {
+    from { opacity: 0; transform: translateY(-18px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(18px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+</style>
+</head>
+<body>
+<div class="wrapper">
+
+  <!-- Header -->
+  <header>
+    <div class="eyebrow">Guía de procesadores modernos</div>
+    <h1>
+      <span class="cpu">CPU</span> &nbsp;<span class="gpu">GPU</span><br>
+      <span class="npu">NPU</span> &nbsp;<span class="apu">APU</span> &nbsp;<span class="tpu">TPU</span>
+    </h1>
+    <p>Entiende qué hace cada chip, cómo se diferencian y cuándo se usa cada uno.</p>
+  </header>
+
+  <!-- Hero cards -->
+  <div class="hero-cards">
+    <div class="hero-card cpu">
+      <div class="chip-icon">🧠</div>
+      <div class="chip-label">Unidad de proceso central</div>
+      <div class="chip-name">CPU</div>
+      <div class="chip-full">Central Processing Unit</div>
+      <div class="chip-desc">El cerebro general del ordenador. Ejecuta instrucciones de forma secuencial y es excelente resolviendo tareas complejas y variadas una a la vez.</div>
+    </div>
+    <div class="hero-card gpu">
+      <div class="chip-icon">🎮</div>
+      <div class="chip-label">Unidad de proceso gráfico</div>
+      <div class="chip-name">GPU</div>
+      <div class="chip-full">Graphics Processing Unit</div>
+      <div class="chip-desc">Diseñada para procesar miles de tareas simples en paralelo. Nació para gráficos, pero hoy también potencia la IA y el cómputo científico.</div>
+    </div>
+    <div class="hero-card npu">
+      <div class="chip-icon">🤖</div>
+      <div class="chip-label">Unidad de proceso neuronal</div>
+      <div class="chip-name">NPU</div>
+      <div class="chip-full">Neural Processing Unit</div>
+      <div class="chip-desc">Especializada exclusivamente en operaciones de inteligencia artificial y aprendizaje automático. Consume muy poca energía para tareas de IA.</div>
+    </div>
+    <div class="hero-card apu">
+      <div class="chip-icon">⚡</div>
+      <div class="chip-label">Unidad de proceso acelerada</div>
+      <div class="chip-name">APU</div>
+      <div class="chip-full">Accelerated Processing Unit</div>
+      <div class="chip-desc">Combina CPU y GPU en un mismo chip. Ideal para dispositivos compactos donde se busca un balance entre potencia y eficiencia energética.</div>
+    </div>
+    <div class="hero-card tpu">
+      <div class="chip-icon">🔬</div>
+      <div class="chip-label">Unidad de proceso tensorial</div>
+      <div class="chip-name">TPU</div>
+      <div class="chip-full">Tensor Processing Unit</div>
+      <div class="chip-desc">ASIC creado por Google exclusivamente para operaciones de tensores en Machine Learning. Potencia modelos masivos como Gemini en la nube de Google.</div>
+    </div>
+  </div>
+
+  <!-- Comparison Table -->
+  <div class="section-title">Tabla comparativa detallada</div>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th class="col-aspect">Aspecto</th>
+          <th class="col-cpu">CPU</th>
+          <th class="col-gpu">GPU</th>
+          <th class="col-npu">NPU</th>
+          <th class="col-apu">APU</th>
+          <th class="col-tpu">TPU</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="aspect">Significado</td>
+          <td>Central Processing Unit</td>
+          <td>Graphics Processing Unit</td>
+          <td>Neural Processing Unit</td>
+          <td>Accelerated Processing Unit</td>
+          <td>Tensor Processing Unit</td>
+        </tr>
+        <tr>
+          <td class="aspect">Función principal</td>
+          <td>Ejecutar instrucciones generales del sistema operativo y aplicaciones</td>
+          <td>Renderizar gráficos y procesar datos masivos en paralelo</td>
+          <td>Acelerar operaciones de inteligencia artificial y redes neuronales</td>
+          <td>Combinar CPU + GPU integrada en un solo chip</td>
+          <td>Acelerar operaciones de tensores para entrenar e inferir modelos de ML a gran escala</td>
+        </tr>
+        <tr>
+          <td class="aspect">Número de núcleos</td>
+          <td>Pocos núcleos potentes (4–64 típicos)</td>
+          <td>Miles de núcleos pequeños (1,000–20,000+)</td>
+          <td>Núcleos altamente especializados para álgebra matricial</td>
+          <td>Núcleos de CPU + núcleos gráficos integrados</td>
+          <td>Miles de unidades de multiplicación matricial (MXUs) altamente especializadas</td>
+        </tr>
+        <tr>
+          <td class="aspect">Tipo de tareas</td>
+          <td>Secuenciales y complejas: decisiones lógicas, control del sistema</td>
+          <td>Paralelas y repetitivas: píxeles, matrices, simulaciones</td>
+          <td>Inferencia de IA, reconocimiento de voz, visión por computadora</td>
+          <td>Tareas cotidianas con gráficos integrados sin tarjeta dedicada</td>
+          <td>Exclusivamente entrenamiento e inferencia de redes neuronales profundas y modelos de lenguaje</td>
+        </tr>
+        <tr>
+          <td class="aspect">Rendimiento en IA</td>
+          <td>Bajo<br><span class="tag tag-bajo">Limitado</span></td>
+          <td>Muy alto<br><span class="tag tag-muy-alto">Excelente</span></td>
+          <td>Muy alto y eficiente<br><span class="tag tag-alto">Especializado</span></td>
+          <td>Moderado<br><span class="tag tag-medio">Depende del modelo</span></td>
+          <td>Extremadamente alto para ML<br><span class="tag tag-muy-alto">Máximo en ML</span></td>
+        </tr>
+        <tr>
+          <td class="aspect">Consumo energético</td>
+          <td>Moderado</td>
+          <td>Alto (especialmente en cargas pesadas)</td>
+          <td>Muy bajo — altamente eficiente</td>
+          <td>Bajo-moderado (ahorra al integrar GPU)</td>
+          <td>Alto en centros de datos, pero con ratio rendimiento/watt muy superior a GPU</td>
+        </tr>
+        <tr>
+          <td class="aspect">Versatilidad</td>
+          <td>Muy alta — hace de todo</td>
+          <td>Alta, pero optimizada para cómputo paralelo</td>
+          <td>Baja — solo tareas de IA</td>
+          <td>Alta en uso cotidiano, menor en tareas intensivas</td>
+          <td>Muy baja — solo ML/IA, no sirve para gráficos ni cómputo general</td>
+        </tr>
+        <tr>
+          <td class="aspect">Memoria</td>
+          <td>Usa RAM del sistema (DDR4/DDR5)</td>
+          <td>VRAM dedicada de alta velocidad (GDDR6/HBM)</td>
+          <td>Buffers internos especializados</td>
+          <td>Comparte la RAM del sistema con la GPU integrada</td>
+          <td>HBM (High Bandwidth Memory) integrada de altísima velocidad, hasta cientos de GB</td>
+        </tr>
+        <tr>
+          <td class="aspect">Costo típico</td>
+          <td>Medio-alto según gama</td>
+          <td>Alto (especialmente GPUs dedicadas)</td>
+          <td>Suele venir integrado en SoC — bajo costo marginal</td>
+          <td>Económico por la integración en un solo chip</td>
+          <td>Muy alto — solo accesible vía Google Cloud TPU (pago por uso)</td>
+        </tr>
+        <tr>
+          <td class="aspect">¿Se puede usar solo?</td>
+          <td>Sí — es el procesador principal</td>
+          <td>No necesariamente — normalmente acompaña a la CPU</td>
+          <td>No — es un coprocesador dentro de un SoC</td>
+          <td>Sí — reemplaza la necesidad de GPU dedicada para uso general</td>
+          <td>No — siempre acompaña a una CPU host; solo se accede en la nube</td>
+        </tr>
+        <tr>
+          <td class="aspect">Dónde se encuentra</td>
+          <td>Todo: PCs, laptops, servidores, móviles</td>
+          <td>PCs gaming, workstations, centros de datos, consolas</td>
+          <td>Smartphones modernos, laptops AI, chips Apple M-series</td>
+          <td>Laptops delgadas, PCs de entrada, consolas portátiles (Steam Deck)</td>
+          <td>Centros de datos de Google — accesible solo via Google Cloud</td>
+        </tr>
+        <tr>
+          <td class="aspect">Ejemplos reales</td>
+          <td>Intel Core i9, AMD Ryzen 9, Apple M4 (núcleos CPU)</td>
+          <td>NVIDIA RTX 4090, AMD RX 7900 XTX, Apple M4 (núcleos GPU)</td>
+          <td>Apple Neural Engine, Qualcomm Hexagon, Intel NPU</td>
+          <td>AMD Ryzen 7 8700G, Apple M1/M2/M3, Steam Deck APU</td>
+          <td>Google TPU v4, TPU v5e, TPU v5p (usados para entrenar Gemini, PaLM, BERT)</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Analogías -->
+  <div class="section-title">Analogías para recordarlo fácil</div>
+
+  <div class="analogy-grid">
+    <div class="analogy-card cpu">
+      <span class="analogy-emoji">👨‍💼</span>
+      <div class="analogy-chip">CPU</div>
+      <div class="analogy-text">Un gerente inteligente que toma decisiones difíciles, una a la vez, con mucha precisión.</div>
+    </div>
+    <div class="analogy-card gpu">
+      <span class="analogy-emoji">🏭</span>
+      <div class="analogy-chip">GPU</div>
+      <div class="analogy-text">Una fábrica con miles de obreros haciendo tareas simples al mismo tiempo, muy rápido.</div>
+    </div>
+    <div class="analogy-card npu">
+      <span class="analogy-emoji">🤖</span>
+      <div class="analogy-chip">NPU</div>
+      <div class="analogy-text">Un robot especialista que solo hace una cosa (IA), pero la hace mejor que nadie y sin gastar energía.</div>
+    </div>
+    <div class="analogy-card apu">
+      <span class="analogy-emoji">🧰</span>
+      <div class="analogy-chip">APU</div>
+      <div class="analogy-text">Una navaja suiza: no es la mejor en nada, pero hace todo sin ocupar espacio extra.</div>
+    </div>
+    <div class="analogy-card tpu">
+      <span class="analogy-emoji">🏎️</span>
+      <div class="analogy-chip">TPU</div>
+      <div class="analogy-text">Un auto de Fórmula 1: diseñado para una sola cosa (ganar carreras / entrenar IA), y lo hace mejor que todos.</div>
+    </div>
+  </div>
+
+  <!-- Casos de uso -->
+  <div class="section-title">¿Cuándo usar cada uno?</div>
+
+  <div class="use-grid">
+    <div class="use-card cpu">
+      <h3>🧠 CPU</h3>
+      <ul>
+        <li>Navegar por internet y usar aplicaciones</li>
+        <li>Programar y compilar código</li>
+        <li>Gestionar bases de datos</li>
+        <li>Cualquier tarea del día a día</li>
+        <li>Servidores web y aplicaciones empresariales</li>
+      </ul>
+    </div>
+    <div class="use-card gpu">
+      <h3>🎮 GPU</h3>
+      <ul>
+        <li>Videojuegos de alta resolución</li>
+        <li>Entrenar modelos de IA / Deep Learning</li>
+        <li>Renderizado 3D y efectos visuales</li>
+        <li>Minería de criptomonedas</li>
+        <li>Simulaciones científicas masivas</li>
+      </ul>
+    </div>
+    <div class="use-card npu">
+      <h3>🤖 NPU</h3>
+      <ul>
+        <li>Reconocimiento facial en tiempo real</li>
+        <li>Asistentes de voz (Siri, Cortana)</li>
+        <li>Traducción automática offline</li>
+        <li>Cámara inteligente en smartphones</li>
+        <li>IA local en laptops Copilot+ PC</li>
+      </ul>
+    </div>
+    <div class="use-card apu">
+      <h3>⚡ APU</h3>
+      <ul>
+        <li>Laptops delgadas y livianas</li>
+        <li>Consolas portátiles (Steam Deck)</li>
+        <li>Juegos en resolución media sin GPU extra</li>
+        <li>Diseño gráfico casual</li>
+        <li>Computadoras compactas (mini PCs)</li>
+      </ul>
+    </div>
+    <div class="use-card tpu">
+      <h3>🔬 TPU</h3>
+      <ul>
+        <li>Entrenar modelos de lenguaje masivos (LLMs)</li>
+        <li>Inferencia de IA a gran escala en la nube</li>
+        <li>Investigación en Deep Learning</li>
+        <li>Google Search, YouTube, Gmail (IA interna)</li>
+        <li>Entrenamiento de Gemini, BERT, PaLM</li>
+      </ul>
+    </div>
+  </div>
+
+  <footer>Tabla generada con Claude · Contenido educativo · 2025</footer>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Herramientas de Computer Vision · Cuadro comparativo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --paper:#efe9da;
+    --paper-deep:#e5dec9;
+    --card:#fbf8ef;
+    --ink:#1c1a12;
+    --ink-2:#54503f;
+    --ink-3:#85806a;
+    --line:#cabf9f;
+    --line-soft:#ddd4ba;
+    --accent:#ef3e11;
+    --accent-deep:#b62c06;
+    --green-bg:#dbe6cf;--green-ink:#2c4a1d;
+    --blue-bg:#d2dfe9;--blue-ink:#1d3e54;
+    --amber-bg:#f1e2b8;--amber-ink:#6a4c10;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html{scroll-behavior:smooth;}
+  body{
+    font-family:'Newsreader',Georgia,serif;
+    background-color:var(--paper);
+    background-image:radial-gradient(var(--line-soft) 0.9px,transparent 0.9px);
+    background-size:24px 24px;
+    color:var(--ink);
+    line-height:1.55;
+    -webkit-font-smoothing:antialiased;
+    padding:clamp(14px,3vw,40px);
+  }
+  .wrap{max-width:1200px;margin:0 auto;}
+
+  /* ---------- HERO ---------- */
+  .hero{
+    position:relative;
+    border:1.5px solid var(--ink);
+    background:var(--card);
+    padding:clamp(26px,5vw,60px) clamp(22px,5vw,58px);
+    margin-bottom:34px;
+  }
+  .bracket{position:absolute;width:22px;height:22px;border:3px solid var(--accent);}
+  .bracket.tl{top:-8px;left:-8px;border-right:0;border-bottom:0;}
+  .bracket.tr{top:-8px;right:-8px;border-left:0;border-bottom:0;}
+  .bracket.bl{bottom:-8px;left:-8px;border-right:0;border-top:0;}
+  .bracket.br{bottom:-8px;right:-8px;border-left:0;border-top:0;}
+  .kicker{
+    font-family:'JetBrains Mono',monospace;
+    font-size:12px;letter-spacing:.22em;text-transform:uppercase;
+    color:var(--accent-deep);font-weight:700;margin-bottom:18px;
+    display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+  }
+  .kicker::before{content:"";width:32px;height:2px;background:var(--accent);display:inline-block;}
+  h1{
+    font-family:'Bricolage Grotesque',sans-serif;
+    font-weight:800;
+    font-size:clamp(2.1rem,5.6vw,4rem);
+    line-height:1.02;letter-spacing:-.02em;
+    margin-bottom:18px;
+  }
+  h1 em{font-style:normal;color:var(--accent);}
+  .lede{
+    font-size:clamp(1.05rem,2vw,1.32rem);
+    color:var(--ink-2);max-width:62ch;
+  }
+  .meta-row{
+    margin-top:24px;padding-top:20px;border-top:1px solid var(--line-soft);
+    display:flex;gap:26px;flex-wrap:wrap;
+    font-family:'JetBrains Mono',monospace;font-size:11.5px;
+    letter-spacing:.04em;color:var(--ink-3);text-transform:uppercase;
+  }
+  .meta-row b{color:var(--ink);font-weight:700;}
+
+  /* ---------- SECTION TITLES ---------- */
+  .sec-head{
+    display:flex;align-items:baseline;gap:14px;
+    margin:46px 0 20px;flex-wrap:wrap;
+  }
+  .sec-num{
+    font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700;
+    color:var(--card);background:var(--ink);padding:4px 9px;letter-spacing:.05em;
+  }
+  .sec-title{
+    font-family:'Bricolage Grotesque',sans-serif;font-weight:700;
+    font-size:clamp(1.4rem,3vw,2rem);letter-spacing:-.015em;
+  }
+  .sec-sub{font-size:1rem;color:var(--ink-2);margin:-10px 0 22px;max-width:70ch;}
+
+  /* ---------- LEGEND ---------- */
+  .legend{
+    display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));
+    gap:14px;margin-bottom:8px;
+  }
+  .legend-item{
+    border:1px solid var(--line);background:var(--card);
+    padding:15px 17px;
+  }
+  .legend-item h4{
+    font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:700;
+    text-transform:uppercase;letter-spacing:.06em;margin-bottom:7px;
+    display:flex;align-items:center;gap:8px;
+  }
+  .legend-item p{font-size:.96rem;color:var(--ink-2);}
+  .swatch{width:13px;height:13px;border:1px solid rgba(0,0,0,.25);display:inline-block;flex:none;}
+
+  .badge{
+    font-family:'JetBrains Mono',monospace;font-size:10.5px;font-weight:700;
+    text-transform:uppercase;letter-spacing:.05em;
+    padding:3px 8px;border:1px solid rgba(0,0,0,.22);white-space:nowrap;
+  }
+  .b-oss{background:var(--green-bg);color:var(--green-ink);}
+  .b-freemium{background:var(--blue-bg);color:var(--blue-ink);}
+  .b-paid{background:var(--amber-bg);color:var(--amber-ink);}
+  .b-auto{background:var(--ink);color:var(--paper);border-color:var(--ink);}
+
+  /* ---------- TABLE ---------- */
+  .table-scroll{
+    overflow-x:auto;border:1.5px solid var(--ink);background:var(--card);
+    -webkit-overflow-scrolling:touch;
+  }
+  table{border-collapse:collapse;width:100%;min-width:760px;}
+  thead th{
+    background:var(--ink);color:var(--paper);
+    font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;
+    text-transform:uppercase;letter-spacing:.07em;
+    text-align:left;padding:13px 16px;
+  }
+  tbody td{
+    padding:14px 16px;border-bottom:1px solid var(--line-soft);
+    font-size:.97rem;vertical-align:top;
+  }
+  tbody tr:last-child td{border-bottom:0;}
+  tbody tr:nth-child(even){background:rgba(0,0,0,.018);}
+  tbody tr:hover{background:rgba(239,62,17,.06);}
+  .t-name{
+    font-family:'Bricolage Grotesque',sans-serif;font-weight:700;
+    font-size:1.04rem;white-space:nowrap;
+  }
+  .t-type{color:var(--ink-2);font-size:.92rem;}
+  .t-yes{color:var(--green-ink);}
+  .t-no{color:var(--accent-deep);}
+
+  /* ---------- FILTERS ---------- */
+  .filters{display:flex;gap:9px;flex-wrap:wrap;margin-bottom:24px;}
+  .chip{
+    font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:700;
+    text-transform:uppercase;letter-spacing:.05em;
+    padding:8px 15px;border:1.5px solid var(--ink);background:transparent;
+    color:var(--ink);cursor:pointer;transition:.16s;
+  }
+  .chip:hover{background:var(--paper-deep);}
+  .chip.active{background:var(--ink);color:var(--paper);}
+  .chip .ct{opacity:.6;margin-left:4px;}
+  .chip.active .ct{opacity:.85;}
+
+  /* ---------- CARDS ---------- */
+  .grid{
+    display:grid;grid-template-columns:repeat(auto-fill,minmax(348px,1fr));
+    gap:20px;
+  }
+  .card{
+    position:relative;border:1.5px solid var(--ink);background:var(--card);
+    padding:24px 22px 22px;display:flex;flex-direction:column;
+    animation:rise .5s cubic-bezier(.2,.7,.3,1) both;
+  }
+  @keyframes rise{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:none;}}
+  .card::before,.card::after{
+    content:"";position:absolute;width:15px;height:15px;
+    border:2.5px solid var(--accent);pointer-events:none;
+  }
+  .card::before{top:6px;left:6px;border-right:0;border-bottom:0;}
+  .card::after{bottom:6px;right:6px;border-left:0;border-top:0;}
+  .card-tag{
+    position:absolute;top:-1.5px;right:18px;transform:translateY(-100%);
+    font-family:'JetBrains Mono',monospace;font-size:9.5px;font-weight:700;
+    background:var(--accent);color:#fff;padding:3px 7px;letter-spacing:.05em;
+  }
+  .card h3{
+    font-family:'Bricolage Grotesque',sans-serif;font-weight:800;
+    font-size:1.55rem;letter-spacing:-.02em;line-height:1.1;
+  }
+  .card-type{
+    font-family:'JetBrains Mono',monospace;font-size:11px;
+    color:var(--ink-3);text-transform:uppercase;letter-spacing:.04em;
+    margin:6px 0 12px;
+  }
+  .card-badges{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:16px;}
+  .field{padding:12px 0;border-top:1px solid var(--line-soft);}
+  .field:first-of-type{border-top:0;padding-top:2px;}
+  .field-label{
+    font-family:'JetBrains Mono',monospace;font-size:10.5px;font-weight:700;
+    text-transform:uppercase;letter-spacing:.07em;
+    display:flex;align-items:center;gap:7px;margin-bottom:6px;
+  }
+  .field-label::before{content:"";width:7px;height:7px;background:var(--ink);flex:none;}
+  .field.yes .field-label{color:var(--green-ink);}
+  .field.yes .field-label::before{background:var(--green-ink);transform:rotate(45deg);}
+  .field.no .field-label{color:var(--accent-deep);}
+  .field.no .field-label::before{background:var(--accent-deep);clip-path:polygon(20% 0,0 20%,30% 50%,0 80%,20% 100%,50% 70%,80% 100%,100% 80%,70% 50%,100% 20%,80% 0,50% 30%);}
+  .field p{font-size:.99rem;color:var(--ink-2);}
+  .field ul{list-style:none;display:flex;flex-direction:column;gap:5px;}
+  .field li{
+    font-size:.97rem;color:var(--ink-2);padding-left:18px;position:relative;
+  }
+  .field.yes li::before{content:"+";position:absolute;left:0;color:var(--green-ink);font-weight:700;font-family:'JetBrains Mono',monospace;}
+  .field.no li::before{content:"\2212";position:absolute;left:0;color:var(--accent-deep);font-weight:700;font-family:'JetBrains Mono',monospace;}
+  .field.cost p{
+    font-family:'JetBrains Mono',monospace;font-size:.84rem;line-height:1.65;
+    color:var(--ink);
+  }
+
+  /* ---------- DECISION GUIDE ---------- */
+  .guide{
+    border:1.5px solid var(--ink);background:var(--ink);color:var(--paper);
+    padding:clamp(22px,4vw,40px);
+  }
+  .guide .sec-title{color:var(--paper);}
+  .guide-grid{
+    display:grid;grid-template-columns:repeat(auto-fit,minmax(270px,1fr));
+    gap:2px;background:rgba(255,255,255,.16);margin-top:20px;
+  }
+  .guide-item{background:var(--ink);padding:18px 20px;}
+  .guide-q{
+    font-family:'Newsreader',serif;font-style:italic;font-size:1.12rem;
+    color:#fff;margin-bottom:9px;
+  }
+  .guide-a{
+    font-family:'JetBrains Mono',monospace;font-size:.82rem;line-height:1.6;
+    color:#f4b9a6;
+  }
+  .guide-a b{color:#fff;font-weight:700;}
+
+  footer{
+    margin-top:34px;padding-top:20px;border-top:1px solid var(--line);
+    font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--ink-3);
+    line-height:1.7;
+  }
+  .empty{
+    grid-column:1/-1;text-align:center;padding:40px;color:var(--ink-3);
+    font-family:'JetBrains Mono',monospace;font-size:13px;
+  }
+  @media (max-width:480px){
+    .grid{grid-template-columns:1fr;}
+    .card h3{font-size:1.35rem;}
+  }
+  @media (prefers-reduced-motion:reduce){
+    .card{animation:none;}
+    html{scroll-behavior:auto;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- HERO -->
+  <header class="hero">
+    <span class="bracket tl"></span><span class="bracket tr"></span>
+    <span class="bracket bl"></span><span class="bracket br"></span>
+    <div class="kicker">Visión por Computadora · Guía de herramientas</div>
+    <h1>10 herramientas para <em>anotar datos</em> y entrenar modelos de Computer Vision</h1>
+    <p class="lede">Casi todo proyecto de visión por computadora empieza por lo mismo: conseguir datos etiquetados. Estas son las herramientas más usadas para anotar imágenes, automatizar el etiquetado y, en algunos casos, entrenar y desplegar el modelo &mdash; qué son, qué <em>no</em> hacen, si son gratis y cuándo conviene (o no) usarlas.</p>
+    <div class="meta-row">
+      <span>Nivel · <b>Principiante</b></span>
+      <span>Herramientas · <b>10</b></span>
+      <span>Actualizado · <b>Mayo 2026</b></span>
+    </div>
+  </header>
+
+  <!-- LEGEND -->
+  <div class="sec-head">
+    <span class="sec-num">00</span>
+    <span class="sec-title">Cómo leer este cuadro</span>
+  </div>
+  <p class="sec-sub">Cada herramienta lleva una etiqueta de costo. Los precios cambian seguido: úsalos como orientación y confirma siempre en la web oficial antes de decidir.</p>
+  <div class="legend">
+    <div class="legend-item">
+      <h4><span class="swatch" style="background:var(--green-bg)"></span>Open source</h4>
+      <p>Código abierto y gratis. Puedes usarlo sin pagar; algunas ofrecen además una versión de nube de pago.</p>
+    </div>
+    <div class="legend-item">
+      <h4><span class="swatch" style="background:var(--blue-bg)"></span>Freemium</h4>
+      <p>Tiene un plan gratuito real (a veces con límites o datos públicos) y planes de pago para escalar.</p>
+    </div>
+    <div class="legend-item">
+      <h4><span class="swatch" style="background:var(--amber-bg)"></span>De pago</h4>
+      <p>Plataforma comercial. Suele haber prueba o plan mínimo, pero el uso serio se cotiza con ventas.</p>
+    </div>
+    <div class="legend-item">
+      <h4><span class="swatch" style="background:var(--ink)"></span>Auto-etiquetado</h4>
+      <p>Su foco es etiquetar automáticamente con IA en vez de hacerlo a mano caja por caja.</p>
+    </div>
+  </div>
+
+  <!-- COMPARISON TABLE -->
+  <div class="sec-head">
+    <span class="sec-num">01</span>
+    <span class="sec-title">Vista rápida</span>
+  </div>
+  <p class="sec-sub">El cuadro comparativo de un vistazo. Desliza horizontalmente en móvil. Abajo encontrarás la ficha completa de cada herramienta.</p>
+  <div class="table-scroll">
+    <table>
+      <thead>
+        <tr>
+          <th>Herramienta</th>
+          <th>Qué es</th>
+          <th>Costo</th>
+          <th>Mejor para</th>
+          <th>Evítala si</th>
+        </tr>
+      </thead>
+      <tbody id="tableBody"></tbody>
+    </table>
+  </div>
+
+  <!-- DETAILED CARDS -->
+  <div class="sec-head">
+    <span class="sec-num">02</span>
+    <span class="sec-title">Ficha de cada herramienta</span>
+  </div>
+  <p class="sec-sub">Filtra por tipo de costo para comparar opciones equivalentes.</p>
+  <div class="filters" id="filters"></div>
+  <div class="grid" id="grid"></div>
+
+  <!-- DECISION GUIDE -->
+  <div class="sec-head">
+    <span class="sec-num">03</span>
+    <span class="sec-title" style="font-family:'Bricolage Grotesque',sans-serif">¿Por dónde empiezo?</span>
+  </div>
+  <div class="guide">
+    <p style="color:#f4b9a6;font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.06em;text-transform:uppercase">Atajos según tu situación</p>
+    <div class="guide-grid">
+      <div class="guide-item">
+        <div class="guide-q">&ldquo;Solo quiero aprender y probar.&rdquo;</div>
+        <div class="guide-a"><b>makesense.ai</b> para anotar en el navegador sin instalar nada, o el <b>plan gratis de Roboflow</b>.</div>
+      </div>
+      <div class="guide-item">
+        <div class="guide-q">&ldquo;Quiero un proyecto completo: anotar &rarr; entrenar &rarr; desplegar.&rdquo;</div>
+        <div class="guide-a"><b>Roboflow</b> cubre todo el pipeline en un solo lugar.</div>
+      </div>
+      <div class="guide-item">
+        <div class="guide-q">&ldquo;Quiero una herramienta de anotación potente y gratis, sin límites.&rdquo;</div>
+        <div class="guide-a"><b>CVAT</b> auto-hospedada, o <b>AnyLabeling</b> si prefieres una app de escritorio.</div>
+      </div>
+      <div class="guide-item">
+        <div class="guide-q">&ldquo;Tengo muchas imágenes de objetos comunes y no quiero etiquetar a mano.&rdquo;</div>
+        <div class="guide-a"><b>Autodistill</b> etiqueta automáticamente con modelos fundacionales.</div>
+      </div>
+      <div class="guide-item">
+        <div class="guide-q">&ldquo;Mi proyecto mezcla texto + imagen + audio.&rdquo;</div>
+        <div class="guide-a"><b>Label Studio</b> es el más flexible para datos multimodales.</div>
+      </div>
+      <div class="guide-item">
+        <div class="guide-q">&ldquo;Soy una empresa: necesito calidad y QA a escala.&rdquo;</div>
+        <div class="guide-a"><b>SuperAnnotate</b>, <b>Labelbox</b>, <b>V7</b> o <b>Encord</b> (este último, fuerte en imagen médica).</div>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    Cuadro comparativo educativo · Visión por Computadora · Mayo 2026<br />
+    Los precios y funciones son orientativos y cambian con frecuencia &mdash; verifica siempre en el sitio oficial de cada herramienta.
+  </footer>
+
+</div>
+
+<script>
+const TOOLS = [
+  {
+    id:"roboflow", name:"Roboflow", conf:"0.99",
+    type:"Plataforma end-to-end de CV",
+    cost:"freemium", costLabel:"Freemium",
+    costDetail:"Plan Public gratis (datos publicos en Roboflow Universe, ~$60/mes en creditos). Core desde ~$79/mes anual o $99/mes. Enterprise a cotizacion.",
+    whatIs:"Una plataforma completa: subes imagenes, las anotas (con auto-etiquetado asistido por IA y SAM), aplicas aumentos de datos, versionas el dataset, entrenas el modelo en sus GPUs y lo despliegas por API o en el edge. Incluye Roboflow Universe, un repositorio enorme de datasets y modelos publicos.",
+    whatNot:"No es solo un etiquetador: es todo el pipeline. En el plan gratis tus datos y modelos son PUBLICOS. No esta pensado para datos no visuales (texto, audio) y su sistema de creditos puede encarecerse con datasets grandes.",
+    yes:["Estas aprendiendo o haces prototipos rapidos","Quieres ir de imagenes crudas a un modelo desplegado el mismo dia","Deteccion de objetos, clasificacion o segmentacion","Quieres anotar + entrenar + desplegar en un solo lugar"],
+    no:["Tienes datos privados y poco presupuesto (el plan gratis los hace publicos)","Trabajas con texto, audio u otros datos no visuales","Necesitas 100% on-premise sin nube","Datasets enormes donde los creditos se vuelven caros"],
+    tBest:"Aprender y llevar un proyecto de CV de principio a fin sin friccion",
+    tAvoid:"Datos privados con presupuesto limitado"
+  },
+  {
+    id:"cvat", name:"CVAT", conf:"0.97",
+    type:"Etiquetador open source (imagen / video / 3D)",
+    cost:"oss", costLabel:"Open source",
+    costDetail:"Gratis y open source si lo auto-hospedas (uso ilimitado). La nube CVAT.ai tiene plan gratuito limitado (~10 tareas, 500 MB), Solo/Team ~$33/usuario al mes y Enterprise desde ~$10k.",
+    whatIs:"Una de las herramientas de anotacion open source mas completas (creada originalmente por Intel). Soporta cajas, poligonos, polilineas, puntos, esqueletos, cuboides y nubes de puntos 3D, con interpolacion para video y asistencia por IA (incluido SAM). Se auto-hospeda con Docker o se usa en la nube CVAT.ai.",
+    whatNot:"Es un etiquetador, NO entrena ni despliega modelos. Auto-hospedarlo requiere conocimientos de DevOps, el plan gratuito en la nube es limitado y la interfaz tiene curva de aprendizaje. No incluye una fuerza de anotadores gestionada.",
+    yes:["Necesitas anotacion seria de imagen y, sobre todo, video o 3D","Quieres una herramienta potente y gratuita con control total","Equipos de investigacion con recursos tecnicos","Quieres auto-hospedar por privacidad de los datos"],
+    no:["Quieres una solucion end-to-end (anotar + entrenar + desplegar)","No tienes capacidad de DevOps y el limite gratuito en nube te queda corto","Buscas un servicio de etiquetado gestionado","Equipo no tecnico que quiere cero configuracion"],
+    tBest:"Anotacion potente y gratuita de imagen, video y 3D",
+    tAvoid:"Quieres entrenar/desplegar o cero configuracion"
+  },
+  {
+    id:"superannotate", name:"SuperAnnotate", conf:"0.96",
+    type:"Plataforma comercial de datos para IA",
+    cost:"paid", costLabel:"De pago",
+    costDetail:"Plataforma comercial. Existe un plan gratuito limitado; los planes Pro y Enterprise son por cotizacion (hay que contactar a ventas).",
+    whatIs:"Plataforma empresarial que combina anotacion, gestion de datos, flujos de control de calidad (QA) y automatizacion para CV y NLP/multimodal. Incluye un marketplace de anotadores profesionales para contratar fuerza de etiquetado, SDK robusto e integracion con MLOps.",
+    whatNot:"No es gratuita para produccion: es una plataforma de pago con enfoque empresarial. Resulta excesiva para proyectos individuales o de hobby, su precio es por cotizacion (poco transparente) y no ofrece una version open source auto-hospedable.",
+    yes:["Empresas o equipos que necesitan datasets de alta calidad a escala","Flujos con QA exigente y revision por etapas","Quieres contratar una fuerza de anotadores gestionada","Industrias reguladas y MLOps empresarial"],
+    no:["Eres estudiante o haces proyectos de hobby","Tienes presupuesto ajustado","Proyectos rapidos y puntuales","Necesitas precios transparentes de autoservicio o algo open source"],
+    tBest:"Equipos y empresas con QA exigente y etiquetado gestionado",
+    tAvoid:"Hobby, presupuesto bajo o proyectos puntuales"
+  },
+  {
+    id:"autodistill", name:"Autodistill", conf:"0.95",
+    type:"Framework open source de auto-etiquetado",
+    cost:"oss", costLabel:"Open source", auto:true,
+    costDetail:"Gratis y open source (licencia Apache-2.0). Es una libreria de Python, no una aplicacion con interfaz grafica.",
+    whatIs:"Un framework (de Roboflow) que usa grandes modelos fundacionales -como Grounded SAM o GroundingDINO- para etiquetar tus imagenes automaticamente a partir de una descripcion en texto (una 'ontologia'), y luego entrena con esas etiquetas un modelo pequeno y rapido (p. ej. YOLOv8). La idea: 'destilar' un modelo grande y lento en uno pequeno.",
+    whatNot:"Es una libreria de Python, NO una interfaz grafica de anotacion. El auto-etiquetado no es perfecto y necesita revision humana. Falla con clases poco comunes o muy especificas que el modelo fundacional no conoce, y no gestiona datasets ni despliegue.",
+    yes:["Trabajas con objetos comunes y reconocibles","Quieres saltarte el etiquetado manual","Necesitas arrancar un dataset rapido (primer borrador de etiquetas)","Eres desarrollador comodo con Python"],
+    no:["Clases raras o de dominio especifico (medico, defectos industriales)","Necesitas etiquetas perfectas sin revision","No programas o quieres una interfaz visual","Necesitas una herramienta de anotacion pulida"],
+    tBest:"Etiquetar automaticamente objetos comunes sin trabajo manual",
+    tAvoid:"Clases raras o necesitas precision sin revisar"
+  },
+  {
+    id:"anylabeling", name:"AnyLabeling", conf:"0.94",
+    type:"App de escritorio open source con IA",
+    cost:"oss", costLabel:"Open source",
+    costDetail:"Gratis y open source. X-AnyLabeling es la version avanzada (mas modelos, multimodal, OCR, cuboides 3D).",
+    whatIs:"Herramienta ligera y gratuita de escritorio (combina ideas de LabelImg + Labelme + IA). Integra Segment Anything (SAM), YOLO y otros modelos para etiquetado automatico o semi-automatico rapido. Su variante X-AnyLabeling anade mas modelos y soporte multimodal.",
+    whatNot:"No es colaborativa ni en la nube: es una app de un solo usuario en tu computadora. No tiene flujos de equipo ni gestion de QA, y no entrena ni despliega modelos. X-AnyLabeling esta mas orientada a ingenieros avanzados.",
+    yes:["Eres un desarrollador trabajando en solitario","Quieres etiquetar offline / localmente","Quieres asistencia de SAM sin nube ni cuenta","Proyectos locales rapidos y con privacidad total"],
+    no:["Necesitas colaboracion en equipo","Proyectos grandes y gestionados","Quieres nube, versionado o MLOps","Necesitas una plataforma multiusuario hospedada"],
+    tBest:"Etiquetado local con SAM, sin cuenta ni nube",
+    tAvoid:"Trabajo en equipo o proyectos a gran escala"
+  },
+  {
+    id:"labelbox", name:"Labelbox", conf:"0.93",
+    type:"Plataforma comercial de datos de entrenamiento",
+    cost:"freemium", costLabel:"Freemium",
+    costDetail:"Plan gratuito limitado; Starter con precio por uso ('LBU', ~$0.10 por LBU) y Enterprise por cotizacion. Gratis para uso academico / de investigacion no comercial.",
+    whatIs:"Plataforma empresarial de etiquetado, gestion de datos y evaluacion de modelos para datos multimodales (imagen, video, texto, geoespacial). Ofrece etiquetado asistido por modelos, Model Foundry (auto-etiquetado con modelos fundacionales) y una fuerza de anotadores gestionada.",
+    whatNot:"Ya no se centra solo en vision: su enfoque actual es multimodal y de IA generativa. El precio por uso (LBU) puede ser opaco y caro, los flujos complejos tienen curva de aprendizaje y no hay opcion open source ni auto-hospedada.",
+    yes:["Empresas con un pipeline de MLOps completo","Datos de entrenamiento multimodales o para IA generativa","Necesitas fuerza de anotadores gestionada y cumplimiento (SOC2 / HIPAA)","Equipos grandes"],
+    no:["Proyectos de aprendizaje o de hobby","Presupuesto ajustado","Proyectos pequenos solo de CV (Roboflow o CVAT son mas simples)","Quieres un precio fijo y predecible"],
+    tBest:"Empresas con MLOps y datos multimodales a escala",
+    tAvoid:"Proyectos pequenos o presupuesto limitado"
+  },
+  {
+    id:"labelstudio", name:"Label Studio", conf:"0.92",
+    type:"Etiquetador open source multi-tipo de datos",
+    cost:"oss", costLabel:"Open source",
+    costDetail:"Edicion Community gratuita y open source (auto-hospedada). HumanSignal Cloud (Starter) desde ~$50/mes y Enterprise por cotizacion.",
+    whatIs:"Etiquetador open source muy flexible para MUCHOS tipos de datos: imagen, video, audio, texto, series de tiempo y HTML. Permite configurar interfaces de etiquetado a medida y pre-etiquetar con un 'ML backend'. Tiene edicion Community gratis y versiones de pago en la nube.",
+    whatNot:"Es un 'todoterreno': para CV avanzado esta menos especializado que CVAT (seguimiento de video y 3D mas debiles). No entrena ni despliega modelos, auto-hospedarlo requiere configuracion y las funciones avanzadas de QA estan en el plan Enterprise de pago.",
+    yes:["Proyectos multimodales (texto + imagen + audio)","Mezclas NLP y CV en una sola herramienta","Necesitas interfaces de etiquetado personalizadas","Equipos de investigacion con datos variados"],
+    no:["Video o 3D avanzado de CV (CVAT es mejor)","Quieres una solucion end-to-end con entrenamiento","Necesitas QA empresarial sin pagar","Quieres cero configuracion"],
+    tBest:"Proyectos multimodales (imagen + texto + audio)",
+    tAvoid:"Video/3D avanzado o quieres entrenar modelos"
+  },
+  {
+    id:"v7", name:"V7 (Darwin)", conf:"0.91",
+    type:"Plataforma comercial de CV y datos medicos",
+    cost:"paid", costLabel:"De pago",
+    costDetail:"Plataforma comercial con un plan gratuito limitado; los planes de pago son por cotizacion.",
+    whatIs:"Plataforma empresarial de anotacion, fuerte en video e imagen medica (DICOM, NIfTI, WSI). Ofrece auto-anotacion con modelos fundacionales, seguimiento automatico de objetos entre fotogramas de video y flujos de revision en varias etapas. Cumple con HIPAA.",
+    whatNot:"Es de pago / comercial (el plan gratuito es limitado). Resulta excesiva para clasificacion de imagenes 2D simple, no es open source, su interfaz esta solo en ingles y puede ralentizarse en proyectos muy grandes.",
+    yes:["IA medica y ciencias de la vida","Anotacion de video a escala","Etiquetado de alta precision en escenarios criticos","Industrias reguladas que necesitan HIPAA"],
+    no:["Proyectos de aprendizaje o de hobby","Clasificacion de imagenes simple (es demasiada plataforma)","Presupuesto ajustado","Necesitas algo open source o auto-hospedado"],
+    tBest:"IA medica y anotacion de video a escala",
+    tAvoid:"Hobby o tareas simples de clasificacion"
+  },
+  {
+    id:"encord", name:"Encord", conf:"0.90",
+    type:"Plataforma comercial especializada en CV",
+    cost:"paid", costLabel:"De pago",
+    costDetail:"Plataforma comercial, precio por cotizacion (con prueba gratuita disponible). Suele posicionarse como alternativa mas economica a Labelbox.",
+    whatIs:"Plataforma especializada en vision por computadora: anotacion, curacion de datos y aprendizaje activo (active learning). Es fuerte en imagen medica (DICOM, mamografia) y proyectos grandes (escala a ~500k imagenes por proyecto), con etiquetado asistido por modelos y metricas de calidad. Cumple SOC2 / HIPAA / GDPR.",
+    whatNot:"Es de pago / comercial: no tiene version open source auto-hospedable. Su precio es por cotizacion, tiene cierta curva de aprendizaje y es menos generalista para datos que no sean visuales.",
+    yes:["Equipos de CV en produccion que quieren active learning y control de calidad","Imagen medica","Proyectos grandes de imagenes","Equipos para quienes Labelbox resulto demasiado caro"],
+    no:["Proyectos de hobby","Presupuesto ajustado","Flujos muy simples","Necesitas open source o datos mayormente no visuales"],
+    tBest:"CV en produccion con active learning y control de calidad",
+    tAvoid:"Hobby, presupuesto bajo o datos no visuales"
+  },
+  {
+    id:"makesense", name:"makesense.ai", conf:"0.89",
+    type:"Etiquetador gratuito en el navegador",
+    cost:"oss", costLabel:"Open source",
+    costDetail:"Gratis y open source. Funciona en el navegador, sin instalacion ni cuenta.",
+    whatIs:"Herramienta web gratuita y de codigo abierto: la abres en el navegador y empiezas a dibujar cajas, poligonos, puntos o lineas, sin instalar nada ni crear cuenta. Tus datos quedan en el navegador y puedes exportar a YOLO, VOC, COCO o CSV. Tiene algo de asistencia con IA (SSD, PoseNet).",
+    whatNot:"Es muy ligera: sin colaboracion, sin persistencia en la nube (los datos viven en la sesion del navegador), sin video ni 3D, sin funciones de equipo/QA y con automatizacion minima. No sirve para datasets grandes.",
+    yes:["Eres principiante absoluto","Proyectos diminutos y rapidos","Quieres entender que es 'anotar datos'","Trabajos puntuales de cajas, sin configuracion ni cuenta"],
+    no:["Proyectos reales de cierto tamano","Colaboracion en equipo","Video o 3D","Necesitas persistencia, versionado o automatizacion"],
+    tBest:"Primeros pasos: anotar en el navegador sin instalar nada",
+    tAvoid:"Cualquier proyecto real, de equipo o grande"
+  }
+];
+
+/* ----- render table ----- */
+const tbody = document.getElementById("tableBody");
+tbody.innerHTML = TOOLS.map(t => `
+  <tr>
+    <td>
+      <div class="t-name">${t.name}</div>
+      <div class="t-type">${t.type}</div>
+    </td>
+    <td>${t.type}</td>
+    <td><span class="badge b-${t.cost}">${t.costLabel}</span></td>
+    <td class="t-yes">${t.tBest}</td>
+    <td class="t-no">${t.tAvoid}</td>
+  </tr>`).join("");
+
+/* ----- render cards ----- */
+const grid = document.getElementById("grid");
+function cardHTML(t, i){
+  const autoPill = t.auto ? `<span class="badge b-auto">Auto-etiquetado</span>` : "";
+  return `
+  <article class="card" data-cost="${t.cost}" style="animation-delay:${i*55}ms">
+    <span class="card-tag">class: ${t.id} &middot; ${t.conf}</span>
+    <h3>${t.name}</h3>
+    <div class="card-type">${t.type}</div>
+    <div class="card-badges">
+      <span class="badge b-${t.cost}">${t.costLabel}</span>${autoPill}
+    </div>
+    <div class="field">
+      <span class="field-label">Que es</span>
+      <p>${t.whatIs}</p>
+    </div>
+    <div class="field">
+      <span class="field-label">Que NO hace</span>
+      <p>${t.whatNot}</p>
+    </div>
+    <div class="field yes">
+      <span class="field-label">Usala cuando</span>
+      <ul>${t.yes.map(x=>`<li>${x}</li>`).join("")}</ul>
+    </div>
+    <div class="field no">
+      <span class="field-label">Evitala cuando</span>
+      <ul>${t.no.map(x=>`<li>${x}</li>`).join("")}</ul>
+    </div>
+    <div class="field cost">
+      <span class="field-label">Costo</span>
+      <p>${t.costDetail}</p>
+    </div>
+  </article>`;
+}
+function renderGrid(filter){
+  const list = filter==="all" ? TOOLS : TOOLS.filter(t=>t.cost===filter);
+  grid.innerHTML = list.length
+    ? list.map((t,i)=>cardHTML(t,i)).join("")
+    : `<div class="empty">Sin herramientas en esta categoria.</div>`;
+}
+
+/* ----- filters ----- */
+const FILTERS = [
+  {k:"all",      label:"Todas"},
+  {k:"oss",      label:"Open source"},
+  {k:"freemium", label:"Freemium"},
+  {k:"paid",     label:"De pago"}
+];
+const filterBar = document.getElementById("filters");
+filterBar.innerHTML = FILTERS.map(f=>{
+  const n = f.k==="all" ? TOOLS.length : TOOLS.filter(t=>t.cost===f.k).length;
+  return `<button class="chip${f.k==="all"?" active":""}" data-k="${f.k}">${f.label}<span class="ct">${n}</span></button>`;
+}).join("");
+filterBar.addEventListener("click", e=>{
+  const btn = e.target.closest(".chip");
+  if(!btn) return;
+  filterBar.querySelectorAll(".chip").forEach(c=>c.classList.remove("active"));
+  btn.classList.add("active");
+  renderGrid(btn.dataset.k);
+});
+
+renderGrid("all");
+</script>
+</body>
+</html>

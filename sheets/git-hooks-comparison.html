@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Comparación: Husky vs Talisman vs Lefthook vs Pre-commit</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        
+        header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+        
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+        
+        .content {
+            padding: 40px;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            font-size: 0.95em;
+        }
+        
+        thead {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        th {
+            padding: 18px 15px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 1.05em;
+        }
+        
+        th:first-child {
+            width: 20%;
+        }
+        
+        td {
+            padding: 15px;
+            border-bottom: 1px solid #e0e0e0;
+            vertical-align: top;
+        }
+        
+        tbody tr:hover {
+            background-color: #f8f9ff;
+        }
+        
+        .category {
+            font-weight: 700;
+            background-color: #f0f0f0;
+            color: #667eea;
+            font-size: 1.1em;
+        }
+        
+        .category td {
+            padding: 12px 15px;
+        }
+        
+        .highlight-yes {
+            color: #10b981;
+            font-weight: 600;
+        }
+        
+        .highlight-no {
+            color: #ef4444;
+            font-weight: 600;
+        }
+        
+        .highlight-partial {
+            color: #f59e0b;
+            font-weight: 600;
+        }
+        
+        ul {
+            margin: 8px 0;
+            padding-left: 20px;
+        }
+        
+        li {
+            margin: 5px 0;
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 0.85em;
+            font-weight: 600;
+            margin: 2px;
+        }
+        
+        .badge-js {
+            background-color: #f7df1e;
+            color: #000;
+        }
+        
+        .badge-go {
+            background-color: #00add8;
+            color: white;
+        }
+        
+        .badge-python {
+            background-color: #3776ab;
+            color: white;
+        }
+        
+        .icon {
+            font-size: 1.2em;
+            margin-right: 5px;
+        }
+        
+        .legend {
+            background-color: #f8f9ff;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 30px 0;
+        }
+        
+        .legend h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+        
+        .legend-item {
+            display: inline-block;
+            margin: 5px 15px 5px 0;
+        }
+        
+        @media (max-width: 1200px) {
+            .content {
+                padding: 20px;
+                overflow-x: auto;
+            }
+            
+            table {
+                font-size: 0.85em;
+            }
+            
+            th, td {
+                padding: 10px 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🔧 Comparación de Herramientas Git Hooks</h1>
+            <p class="subtitle">Husky • Talisman • Lefthook • Pre-commit</p>
+        </header>
+        
+        <div class="content">
+            <div class="legend">
+                <h3>📋 Leyenda</h3>
+                <div class="legend-item"><span class="highlight-yes">✓ Sí</span> - Funcionalidad completa</div>
+                <div class="legend-item"><span class="highlight-partial">◐ Parcial</span> - Funcionalidad limitada o mediante plugins</div>
+                <div class="legend-item"><span class="highlight-no">✗ No</span> - No soportado nativamente</div>
+            </div>
+            
+            <table>
+                <thead>
+                    <tr>
+                        <th>Aspecto</th>
+                        <th><span class="icon">🐕</span> Husky</th>
+                        <th><span class="icon">🔒</span> Talisman</th>
+                        <th><span class="icon">⚡</span> Lefthook</th>
+                        <th><span class="icon">🐍</span> Pre-commit</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="category">
+                        <td colspan="5">INFORMACIÓN GENERAL</td>
+                    </tr>
+                    <tr>
+                        <td><strong>¿Qué es?</strong></td>
+                        <td>Gestor de Git hooks para proyectos Node.js/npm. Simplifica la configuración de hooks.</td>
+                        <td>Herramienta de seguridad enfocada en prevenir filtración de secretos y datos sensibles en commits.</td>
+                        <td>Gestor de Git hooks rápido y multiplataforma escrito en Go. Enfocado en velocidad y simplicidad.</td>
+                        <td>Framework de gestión de hooks con ecosistema robusto de hooks pre-construidos.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Lenguaje</strong></td>
+                        <td><span class="badge badge-js">JavaScript/Node.js</span></td>
+                        <td><span class="badge badge-go">Go</span></td>
+                        <td><span class="badge badge-go">Go</span></td>
+                        <td><span class="badge badge-python">Python</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Año de creación</strong></td>
+                        <td>2016</td>
+                        <td>2017</td>
+                        <td>2020</td>
+                        <td>2014</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Propósito principal</strong></td>
+                        <td>Automatizar linting, testing y formateo en el ecosistema JavaScript</td>
+                        <td>Seguridad: prevenir commits de secretos, claves API, contraseñas</td>
+                        <td>Gestión rápida y eficiente de hooks con ejecución paralela</td>
+                        <td>Gestión integral de hooks con énfasis en reutilización y compartición</td>
+                    </tr>
+                    
+                    <tr class="category">
+                        <td colspan="5">CARACTERÍSTICAS PRINCIPALES</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Configuración</strong></td>
+                        <td>package.json o .huskyrc<br>Muy simple y minimalista</td>
+                        <td>.talismanrc (YAML)<br>Enfocado en reglas de seguridad</td>
+                        <td>lefthook.yml (YAML)<br>Configuración declarativa clara</td>
+                        <td>.pre-commit-config.yaml<br>Configuración detallada basada en repositorios</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Instalación</strong></td>
+                        <td>npm install husky --save-dev<br>Requiere Node.js/npm</td>
+                        <td>Script de instalación o binario<br>Instalación global en el sistema</td>
+                        <td>npm, brew, script, binario<br>Múltiples opciones</td>
+                        <td>pip install pre-commit<br>Requiere Python</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Ejecución paralela</strong></td>
+                        <td><span class="highlight-no">✗ No</span><br>Secuencial por defecto</td>
+                        <td><span class="highlight-no">✗ No</span><br>Ejecuta escaneos secuencialmente</td>
+                        <td><span class="highlight-yes">✓ Sí</span><br>Característica principal, muy rápido</td>
+                        <td><span class="highlight-partial">◐ Parcial</span><br>Algunos hooks en paralelo</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Detección de secretos</strong></td>
+                        <td><span class="highlight-no">✗ No</span><br>Requiere integrar otras herramientas</td>
+                        <td><span class="highlight-yes">✓ Sí</span><br>Funcionalidad core con múltiples detectores</td>
+                        <td><span class="highlight-no">✗ No</span><br>Pero puede ejecutar Talisman u otras herramientas</td>
+                        <td><span class="highlight-partial">◐ Parcial</span><br>Mediante hooks como detect-secrets</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Hooks soportados</strong></td>
+                        <td>Todos los hooks de Git<br>(pre-commit, pre-push, etc.)</td>
+                        <td>Principalmente pre-commit y pre-push<br>Enfoque en seguridad</td>
+                        <td>Todos los hooks de Git<br>Soporte completo</td>
+                        <td>Todos los hooks de Git<br>Ecosistema extenso</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Velocidad</strong></td>
+                        <td><span class="highlight-partial">◐ Media</span><br>Depende de Node.js</td>
+                        <td><span class="highlight-partial">◐ Media</span><br>Go binario rápido pero escaneos pueden ser lentos</td>
+                        <td><span class="highlight-yes">✓ Muy rápida</span><br>Go + paralelización</td>
+                        <td><span class="highlight-partial">◐ Media</span><br>Python con caché</td>
+                    </tr>
+                    
+                    <tr class="category">
+                        <td colspan="5">LO QUE HACE CADA UNO</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Husky</strong></td>
+                        <td colspan="4">
+                            <ul>
+                                <li>Simplifica configuración de Git hooks en proyectos Node.js</li>
+                                <li>Ejecuta scripts npm en diferentes hooks</li>
+                                <li>Integración nativa con lint-staged para archivos staged</li>
+                                <li>Configuración compartida vía package.json</li>
+                                <li>Instalación automática de hooks con npm install</li>
+                            </ul>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>Talisman</strong></td>
+                        <td colspan="4">
+                            <ul>
+                                <li>Escanea commits en busca de secretos (API keys, contraseñas, tokens)</li>
+                                <li>Detecta patrones sospechosos con regex y entropía</li>
+                                <li>Verifica tamaños de archivos para prevenir commits grandes</li>
+                                <li>Checksum de archivos para detectar cambios en binarios</li>
+                                <li>Modo interactivo para revisar hallazgos</li>
+                                <li>Whitelist/allowlist para falsos positivos</li>
+                            </ul>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>Lefthook</strong></td>
+                        <td colspan="4">
+                            <ul>
+                                <li>Ejecuta múltiples comandos en paralelo para máxima velocidad</li>
+                                <li>Configuración declarativa simple en YAML</li>
+                                <li>Soporte para comandos, scripts y runners personalizados</li>
+                                <li>Filtrado de archivos por glob patterns</li>
+                                <li>Variables de entorno y templating</li>
+                                <li>Sin dependencias externas (binario único)</li>
+                            </ul>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>Pre-commit</strong></td>
+                        <td colspan="4">
+                            <ul>
+                                <li>Framework completo con ecosistema de hooks pre-construidos</li>
+                                <li>Gestión automática de dependencias y entornos virtuales</li>
+                                <li>Caché de resultados para evitar re-ejecuciones</li>
+                                <li>Hooks reutilizables vía repositorios remotos</li>
+                                <li>Soporte multi-lenguaje (Python, Node, Ruby, Go, etc.)</li>
+                                <li>Actualización automática de hooks</li>
+                            </ul>
+                        </td>
+                    </tr>
+                    
+                    <tr class="category">
+                        <td colspan="5">LO QUE NO HACE CADA UNO</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Husky</strong></td>
+                        <td colspan="4">
+                            <ul>
+                                <li><span class="highlight-no">✗</span> No detecta secretos o vulnerabilidades de seguridad</li>
+                                <li><span class="highlight-no">✗</span> No ejecuta comandos en paralelo</li>
+                                <li><span class="highlight-no">✗</span> No gestiona dependencias de herramientas externas</li>
+                                <li><span class="highlight-no">✗</span> No tiene ecosistema de hooks pre-construidos</li>
+                                <li><span class="highlight-no">✗</span> Limitado a proyectos con npm/Node.js</li>
+                            </ul>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>Talisman</strong></td>
+                        <td colspan="4">
+                            <ul>
+                                <li><span class="highlight-no">✗</span> No ejecuta linters o formateadores</li>
+                                <li><span class="highlight-no">✗</span> No corre tests</li>
+                                <li><span class="highlight-no">✗</span> No es un gestor general de hooks (solo seguridad)</li>
+                                <li><span class="highlight-no">✗</span> No tiene ejecución paralela de múltiples herramientas</li>
+                                <li><span class="highlight-no">✗</span> Configuración menos flexible para workflows complejos</li>
+                            </ul>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>Lefthook</strong></td>
+                        <td colspan="4">
+                            <ul>
+                                <li><span class="highlight-no">✗</span> No tiene detección nativa de secretos</li>
+                                <li><span class="highlight-no">✗</span> No gestiona instalación de dependencias de herramientas</li>
+                                <li><span class="highlight-no">✗</span> No tiene ecosistema central de hooks compartidos</li>
+                                <li><span class="highlight-no">✗</span> Requiere tener herramientas instaladas manualmente</li>
+                            </ul>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>Pre-commit</strong></td>
+                        <td colspan="4">
+                            <ul>
+                                <li><span class="highlight-no">✗</span> No es tan rápido como Lefthook (sin paralelización total)</li>
+                                <li><span class="highlight-no">✗</span> Detección de secretos requiere hooks adicionales</li>
+                                <li><span class="highlight-no">✗</span> Más complejo de configurar inicialmente</li>
+                                <li><span class="highlight-no">✗</span> Requiere Python en el sistema</li>
+                            </ul>
+                        </td>
+                    </tr>
+                    
+                    <tr class="category">
+                        <td colspan="5">VENTAJAS ÚNICAS</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Solo Husky</strong></td>
+                        <td colspan="4">
+                            <ul>
+                                <li>Integración perfecta con proyectos JavaScript/TypeScript</li>
+                                <li>Configuración más simple para equipos Node.js</li>
+                                <li>Instalación automática con npm install</li>
+                                <li>Menor curva de aprendizaje para desarrolladores JS</li>
+                            </ul>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>Solo Talisman</strong></td>
+                        <td colspan="4">
+                            <ul>
+                                <li>Especializado en seguridad desde el diseño</li>
+                                <li>Múltiples detectores de secretos integrados</li>
+                                <li>Verificación de checksums de archivos</li>
+                                <li>Control de tamaños de archivo</li>
+                                <li>Modo interactivo para revisión de seguridad</li>
+                                <li>Base de datos de patrones de secretos actualizada</li>
+                            </ul>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>Solo Lefthook</strong></td>
+                        <td colspan="4">
+                            <ul>
+                                <li>Ejecución paralela verdadera de comandos</li>
+                                <li>Velocidad superior en proyectos grandes</li>
+                                <li>Sin dependencias de runtime (Go binario único)</li>
+                                <li>Multiplataforma sin necesidad de interpretes</li>
+                                <li>Configuración YAML más clara y legible</li>
+                            </ul>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>Solo Pre-commit</strong></td>
+                        <td colspan="4">
+                            <ul>
+                                <li>Ecosistema masivo de hooks pre-construidos y mantenidos</li>
+                                <li>Gestión automática de entornos virtuales</li>
+                                <li>Sistema de caché sofisticado</li>
+                                <li>Hooks reutilizables vía repositorios remotos</li>
+                                <li>Soporte multi-lenguaje superior</li>
+                                <li>Comunidad más grande y activa</li>
+                            </ul>
+                        </td>
+                    </tr>
+                    
+                    <tr class="category">
+                        <td colspan="5">CASOS DE USO RECOMENDADOS</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Husky</strong></td>
+                        <td colspan="4">
+                            <ul>
+                                <li>✅ Proyectos JavaScript/TypeScript/Node.js</li>
+                                <li>✅ Equipos que ya usan npm/yarn</li>
+                                <li>✅ Necesidad de simplicidad y configuración mínima</li>
+                                <li>✅ Integración con ESLint, Prettier, Jest</li>
+                                <li>✅ Startups y proyectos pequeños/medianos</li>
+                                <li>✅ Cuando lint-staged es suficiente</li>
+                            </ul>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>Talisman</strong></td>
+                        <td colspan="4">
+                            <ul>
+                                <li>✅ Proyectos con requisitos estrictos de seguridad</li>
+                                <li>✅ Prevención de filtración de secretos es crítica</li>
+                                <li>✅ Industrias reguladas (finanzas, salud, gobierno)</li>
+                                <li>✅ Equipos con historial de commits accidentales de secretos</li>
+                                <li>✅ Complemento de seguridad para cualquier proyecto</li>
+                                <li>✅ Auditorías de seguridad y compliance</li>
+                            </ul>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>Lefthook</strong></td>
+                        <td colspan="4">
+                            <ul>
+                                <li>✅ Proyectos grandes con muchos archivos</li>
+                                <li>✅ Monorepos donde velocidad es crítica</li>
+                                <li>✅ Equipos poliglota (múltiples lenguajes)</li>
+                                <li>✅ Cuando se requiere máximo rendimiento</li>
+                                <li>✅ CI/CD donde velocidad impacta costo</li>
+                                <li>✅ Proyectos sin Node.js o Python como requisito</li>
+                            </ul>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>Pre-commit</strong></td>
+                        <td colspan="4">
+                            <ul>
+                                <li>✅ Proyectos multi-lenguaje complejos</li>
+                                <li>✅ Necesidad de reutilizar hooks entre proyectos</li>
+                                <li>✅ Equipos grandes con diversos stacks tecnológicos</li>
+                                <li>✅ Cuando se quiere aprovechar hooks de la comunidad</li>
+                                <li>✅ Proyectos de código abierto</li>
+                                <li>✅ Organizaciones con estándares estrictos</li>
+                            </ul>
+                        </td>
+                    </tr>
+                    
+                    <tr class="category">
+                        <td colspan="5">COMPATIBILIDAD Y ECOSISTEMA</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Compatibilidad OS</strong></td>
+                        <td>Windows, macOS, Linux<br>(requiere Node.js)</td>
+                        <td>Windows, macOS, Linux<br>(binario Go)</td>
+                        <td>Windows, macOS, Linux<br>(binario Go)</td>
+                        <td>Windows, macOS, Linux<br>(requiere Python)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Ecosistema</strong></td>
+                        <td>Integración con npm ecosystem<br>Compatible con lint-staged</td>
+                        <td>Independiente, enfoque en seguridad<br>Puede integrarse con otros</td>
+                        <td>Puede ejecutar cualquier comando<br>Agnóstico de herramientas</td>
+                        <td>Ecosistema masivo de hooks<br>Repositorios de hooks compartidos</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Comunidad</strong></td>
+                        <td>⭐⭐⭐⭐ Grande (44k+ stars en GitHub)</td>
+                        <td>⭐⭐⭐ Media (1.9k+ stars)</td>
+                        <td>⭐⭐⭐⭐ Creciendo rápido (5k+ stars)</td>
+                        <td>⭐⭐⭐⭐⭐ Muy grande (13k+ stars)</td>
+                    </tr>
+                    
+                    <tr class="category">
+                        <td colspan="5">RECOMENDACIONES FINALES</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Mejor para principiantes</strong></td>
+                        <td><span class="highlight-yes">✓ Husky</span><br>Si usas Node.js</td>
+                        <td><span class="highlight-partial">◐</span><br>Solo para seguridad</td>
+                        <td><span class="highlight-yes">✓ Lefthook</span><br>Configuración simple</td>
+                        <td><span class="highlight-partial">◐</span><br>Curva de aprendizaje mayor</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Mejor para equipos grandes</strong></td>
+                        <td><span class="highlight-partial">◐</span><br>Solo si es puro JS</td>
+                        <td><span class="highlight-no">✗</span><br>Complementario, no principal</td>
+                        <td><span class="highlight-yes">✓ Lefthook</span><br>Rendimiento escalable</td>
+                        <td><span class="highlight-yes">✓ Pre-commit</span><br>Estandarización</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Mejor para seguridad</strong></td>
+                        <td><span class="highlight-no">✗</span><br>Requiere plugins</td>
+                        <td><span class="highlight-yes">✓✓✓ Talisman</span><br>Especializado en esto</td>
+                        <td><span class="highlight-partial">◐</span><br>Puede integrar Talisman</td>
+                        <td><span class="highlight-partial">◐</span><br>Con hooks adicionales</td>
+                    </tr>
+                    <tr>
+                        <td><strong>¿Se pueden combinar?</strong></td>
+                        <td colspan="4">
+                            <strong>✓ Sí, son complementarios:</strong>
+                            <ul>
+                                <li><strong>Lefthook + Talisman:</strong> Velocidad + Seguridad (muy popular)</li>
+                                <li><strong>Husky + Talisman:</strong> Node.js + Seguridad</li>
+                                <li><strong>Pre-commit + Talisman:</strong> Ecosistema robusto + Seguridad dedicada</li>
+                                <li>Generalmente se usa UN gestor de hooks (Husky/Lefthook/Pre-commit) + Talisman para seguridad</li>
+                            </ul>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <div class="legend" style="margin-top: 40px;">
+                <h3>💡 Conclusión y Recomendación General</h3>
+                <p style="margin-top: 10px; line-height: 1.8;">
+                    <strong>Para proyectos JavaScript/Node.js:</strong> Empieza con <strong>Husky</strong> por su simplicidad.<br>
+                    <strong>Para máximo rendimiento y monorepos:</strong> Usa <strong>Lefthook</strong>.<br>
+                    <strong>Para proyectos multi-lenguaje complejos:</strong> <strong>Pre-commit</strong> es la mejor opción.<br>
+                    <strong>Para seguridad:</strong> Añade <strong>Talisman</strong> a cualquiera de los anteriores.<br><br>
+                    <strong>Combinación ideal para muchos equipos:</strong> <em>Lefthook (velocidad y gestión) + Talisman (seguridad)</em>
+                </p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

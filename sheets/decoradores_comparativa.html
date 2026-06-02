@@ -1,0 +1,779 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Decoradores: Python + SQLAlchemy — Tabla comparativa</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..900;1,9..144,300..900&family=IBM+Plex+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+
+<style>
+:root {
+  --bg: #0d0d0f;
+  --bg-elev: #16161a;
+  --bg-elev-2: #1d1d22;
+  --border: #2a2a30;
+  --text: #e8e4d9;
+  --text-muted: #9b9789;
+  --text-dim: #5a574f;
+  --accent-py: #ffd95a;
+  --accent-sa: #ff7a6b;
+  --accent-mint: #7ee2c0;
+  --accent-blue: #7eb8e2;
+  --accent-pink: #ff79c6;
+}
+
+* { box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 1.65;
+  margin: 0;
+  padding: 0;
+  -webkit-font-smoothing: antialiased;
+  background-image:
+    radial-gradient(ellipse 80% 60% at 50% -10%, rgba(255, 217, 90, 0.06), transparent 60%),
+    radial-gradient(ellipse 50% 50% at 100% 100%, rgba(255, 122, 107, 0.04), transparent 60%);
+}
+
+.container {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 80px 32px 100px;
+}
+
+/* ─── Hero ─────────────────────────────────────── */
+.hero {
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 56px;
+  margin-bottom: 64px;
+}
+
+.eyebrow {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--accent-mint);
+  margin-bottom: 28px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.eyebrow::before {
+  content: "";
+  display: inline-block;
+  width: 24px;
+  height: 1px;
+  background: var(--accent-mint);
+}
+
+h1 {
+  font-family: 'Fraunces', serif;
+  font-variation-settings: "opsz" 144, "wght" 400;
+  font-size: clamp(44px, 7vw, 84px);
+  line-height: 0.98;
+  letter-spacing: -0.025em;
+  margin: 0;
+}
+
+h1 em {
+  font-style: italic;
+  font-variation-settings: "opsz" 144, "wght" 300;
+  color: var(--accent-py);
+}
+
+.subtitle {
+  font-family: 'Fraunces', serif;
+  font-variation-settings: "opsz" 14, "wght" 350;
+  font-size: 21px;
+  line-height: 1.45;
+  color: var(--text-muted);
+  max-width: 760px;
+  margin-top: 32px;
+}
+
+.subtitle code {
+  background: rgba(126, 226, 192, 0.08);
+  color: var(--accent-mint);
+}
+
+/* ─── Section title ───────────────────────────── */
+.section-title {
+  font-family: 'Fraunces', serif;
+  font-variation-settings: "opsz" 60, "wght" 400;
+  font-size: 36px;
+  letter-spacing: -0.015em;
+  margin: 0 0 8px;
+}
+
+.section-sub {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  margin-bottom: 32px;
+}
+
+.section-divider {
+  margin: 100px 0 0;
+}
+
+/* ─── Summary table ───────────────────────────── */
+.summary-wrap {
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  overflow: hidden;
+  background: var(--bg-elev);
+}
+
+.summary-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+}
+
+.summary-table thead th {
+  text-align: left;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  font-size: 10px;
+  color: var(--text-dim);
+  padding: 18px 20px;
+  background: var(--bg-elev-2);
+  border-bottom: 1px solid var(--border);
+}
+
+.summary-table tbody td {
+  border-bottom: 1px solid var(--border);
+  padding: 18px 20px;
+  vertical-align: middle;
+}
+
+.summary-table tbody tr:last-child td { border-bottom: 0; }
+
+.summary-table tbody tr {
+  transition: background 0.15s ease;
+}
+
+.summary-table tbody tr:hover {
+  background: var(--bg-elev-2);
+}
+
+.deco-name {
+  color: var(--accent-mint);
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.badge {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 2px;
+  font-size: 10px;
+  font-family: 'JetBrains Mono', monospace;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-weight: 500;
+}
+
+.badge-py {
+  background: rgba(255, 217, 90, 0.10);
+  color: var(--accent-py);
+  border: 1px solid rgba(255, 217, 90, 0.35);
+}
+
+.badge-sa {
+  background: rgba(255, 122, 107, 0.10);
+  color: var(--accent-sa);
+  border: 1px solid rgba(255, 122, 107, 0.35);
+}
+
+.yes { color: var(--accent-mint); }
+.no  { color: var(--text-dim); }
+
+/* ─── Detail cards ────────────────────────────── */
+.cards {
+  display: flex;
+  flex-direction: column;
+  gap: 36px;
+}
+
+.card {
+  background: var(--bg-elev);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  overflow: hidden;
+  position: relative;
+}
+
+.card::before {
+  content: "";
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 3px;
+}
+.card.py::before { background: var(--accent-py); }
+.card.sa::before { background: var(--accent-sa); }
+
+.card-header {
+  padding: 28px 36px 24px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 24px;
+  flex-wrap: wrap;
+  background: linear-gradient(180deg, var(--bg-elev-2) 0%, var(--bg-elev) 100%);
+}
+
+.card-name {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 24px;
+  font-weight: 500;
+  color: var(--accent-mint);
+  letter-spacing: -0.01em;
+}
+
+.card.py .card-name { color: var(--accent-py); }
+.card.sa .card-name { color: var(--accent-sa); }
+
+.card-tagline {
+  font-family: 'Fraunces', serif;
+  font-style: italic;
+  font-variation-settings: "opsz" 14, "wght" 400;
+  color: var(--text-muted);
+  font-size: 17px;
+  flex: 1;
+  text-align: right;
+  min-width: 200px;
+}
+
+.field {
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  border-bottom: 1px solid var(--border);
+}
+.field:last-child { border-bottom: 0; }
+
+.field-label {
+  padding: 22px 32px 22px 36px;
+  background: var(--bg-elev-2);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  border-right: 1px solid var(--border);
+}
+
+.field-value {
+  padding: 22px 36px;
+  color: var(--text);
+}
+
+.field-value > p { margin: 0 0 12px; }
+.field-value > p:last-child { margin-bottom: 0; }
+
+.field-value strong {
+  color: var(--text);
+  font-weight: 600;
+}
+
+code, .inline-code {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.88em;
+  background: rgba(126, 226, 192, 0.08);
+  padding: 2px 7px;
+  border-radius: 2px;
+  color: var(--accent-mint);
+  white-space: nowrap;
+}
+
+pre {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  padding: 18px 22px;
+  overflow-x: auto;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12.5px;
+  line-height: 1.7;
+  color: var(--text);
+  margin: 14px 0 0;
+}
+
+pre code {
+  background: transparent;
+  padding: 0;
+  color: inherit;
+  font-size: inherit;
+  white-space: pre;
+}
+
+.kw   { color: var(--accent-pink); }
+.deco { color: var(--accent-py); }
+.str  { color: var(--accent-mint); }
+.com  { color: var(--text-dim); font-style: italic; }
+.fn   { color: var(--accent-blue); }
+.cls  { color: var(--accent-sa); }
+
+/* ─── TL;DR box ───────────────────────────────── */
+.tldr {
+  margin-top: 80px;
+  padding: 44px 48px;
+  background: var(--bg-elev);
+  border-left: 3px solid var(--accent-py);
+  border-radius: 0 4px 4px 0;
+  position: relative;
+}
+
+.tldr-title {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--accent-py);
+  margin-bottom: 20px;
+}
+
+.tldr-text {
+  font-family: 'Fraunces', serif;
+  font-variation-settings: "opsz" 24, "wght" 400;
+  font-size: 19px;
+  line-height: 1.55;
+  margin: 0;
+  color: var(--text);
+}
+
+.tldr-text + .tldr-text { margin-top: 14px; }
+
+.tldr-text em {
+  font-style: italic;
+  color: var(--accent-py);
+  font-variation-settings: "opsz" 24, "wght" 350;
+}
+
+/* ─── Footer ─────────────────────────────────── */
+footer {
+  margin-top: 80px;
+  padding-top: 32px;
+  border-top: 1px solid var(--border);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+/* ─── Mobile ─────────────────────────────────── */
+@media (max-width: 768px) {
+  .container { padding: 48px 18px 60px; }
+  .field { grid-template-columns: 1fr; }
+  .field-label { border-right: 0; border-bottom: 1px solid var(--border); padding: 14px 24px; }
+  .field-value { padding: 18px 24px; }
+  .card-header { padding: 20px 24px; }
+  .card-tagline { text-align: left; min-width: 0; }
+  .summary-table { font-size: 11px; }
+  .summary-table tbody td, .summary-table thead th { padding: 12px 10px; }
+  .tldr { padding: 28px 24px; }
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+
+  <!-- ═══ HERO ═══ -->
+  <header class="hero">
+    <div class="eyebrow">Tabla comparativa · Decoradores</div>
+    <h1>Python<br>+ <em>SQLAlchemy</em></h1>
+    <p class="subtitle">Qué son, cómo se diferencian por detrás y qué hace el ORM (cuando aplica) con cada uno de los decoradores que aparecen — o podrían aparecer — en tu modelo <code>StoragePools</code>.</p>
+  </header>
+
+  <!-- ═══ VISTA GENERAL ═══ -->
+  <section>
+    <h2 class="section-title">Vista general</h2>
+    <p class="section-sub">— Resumen rápido en una sola pantalla</p>
+
+    <div class="summary-wrap">
+    <table class="summary-table">
+      <thead>
+        <tr>
+          <th>Decorador</th>
+          <th>Origen</th>
+          <th>Contexto donde aplica</th>
+          <th>¿El ORM lo "ve"?</th>
+          <th>Recibe</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="deco-name">@staticmethod</td>
+          <td><span class="badge badge-py">Python</span></td>
+          <td>Clase / instancia (Python)</td>
+          <td class="no">No</td>
+          <td>—</td>
+        </tr>
+        <tr>
+          <td class="deco-name">@classmethod</td>
+          <td><span class="badge badge-py">Python</span></td>
+          <td>Clase / instancia (Python)</td>
+          <td class="no">No</td>
+          <td>cls</td>
+        </tr>
+        <tr>
+          <td class="deco-name">@property</td>
+          <td><span class="badge badge-py">Python</span></td>
+          <td>Solo instancia (Python)</td>
+          <td class="no">No</td>
+          <td>self</td>
+        </tr>
+        <tr>
+          <td class="deco-name">@hybrid_property</td>
+          <td><span class="badge badge-sa">SQLAlchemy</span></td>
+          <td>Instancia (Python) + clase (SQL)</td>
+          <td class="yes">Sí</td>
+          <td>self / cls</td>
+        </tr>
+        <tr>
+          <td class="deco-name">@x.expression</td>
+          <td><span class="badge badge-sa">SQLAlchemy</span></td>
+          <td>Solo clase (SQL)</td>
+          <td class="yes">Sí</td>
+          <td>cls</td>
+        </tr>
+        <tr>
+          <td class="deco-name">@declared_attr</td>
+          <td><span class="badge badge-sa">SQLAlchemy</span></td>
+          <td>Construcción de la clase (mapping)</td>
+          <td class="yes">Sí (lo invoca él mismo)</td>
+          <td>cls</td>
+        </tr>
+      </tbody>
+    </table>
+    </div>
+  </section>
+
+  <!-- ═══ DETALLE ═══ -->
+  <section class="section-divider">
+    <h2 class="section-title">En detalle</h2>
+    <p class="section-sub">— Qué hace cada uno por detrás</p>
+
+    <div class="cards">
+
+      <!-- ─── @staticmethod ─── -->
+      <article class="card py">
+        <div class="card-header">
+          <div class="card-name">@staticmethod</div>
+          <div class="card-tagline">Una función "normal" que vive dentro del namespace de la clase</div>
+        </div>
+
+        <div class="field">
+          <div class="field-label">¿Qué es?</div>
+          <div class="field-value">
+            <p>Decorador integrado en Python. Marca un método que <strong>no recibe</strong> ni <code>self</code> ni <code>cls</code>. Se invoca directamente desde la clase: <code>Clase.metodo(args)</code>, sin necesidad de tener una instancia.</p>
+          </div>
+        </div>
+
+        <div class="field">
+          <div class="field-label">Por detrás</div>
+          <div class="field-value">
+            <p><code>staticmethod</code> es un <strong>descriptor</strong> que envuelve a la función. Cuando Python accede al atributo, el descriptor devuelve la función original sin hacer ningún <em>binding</em> (sin inyectar <code>self</code> ni <code>cls</code>). Es prácticamente azúcar sintáctico para decir "esta función está agrupada con la clase pero es independiente de cualquier instancia".</p>
+          </div>
+        </div>
+
+        <div class="field">
+          <div class="field-label">Qué hace el ORM</div>
+          <div class="field-value">
+            <p><strong>Nada.</strong> SQLAlchemy ignora completamente los <code>@staticmethod</code> al construir el mapeo. No los inspecciona, no los toca — son invisibles para el ORM.</p>
+          </div>
+        </div>
+
+        <div class="field">
+          <div class="field-label">En tu código</div>
+          <div class="field-value">
+            <p><code>expire_last_info(location)</code>. Lo invocas como <code>StoragePools.expire_last_info(loc_id)</code>. Como no necesita <code>self</code>, podría perfectamente vivir como función fuera de la clase, pero está aquí para mantener la operación lógicamente agrupada con el modelo.</p>
+<pre><code><span class="deco">@staticmethod</span>
+<span class="kw">def</span> <span class="fn">expire_last_info</span>(location):
+    sql_update = <span class="str">"UPDATE storage_pools SET last_info = False WHERE location_id = :location"</span>
+    db.session.execute(text(sql_update), {<span class="str">'location'</span>: location})
+    db.session.commit()</code></pre>
+          </div>
+        </div>
+      </article>
+
+      <!-- ─── @classmethod ─── -->
+      <article class="card py">
+        <div class="card-header">
+          <div class="card-name">@classmethod</div>
+          <div class="card-tagline">Un método cuyo primer argumento es la clase, no la instancia</div>
+        </div>
+
+        <div class="field">
+          <div class="field-label">¿Qué es?</div>
+          <div class="field-value">
+            <p>Decorador integrado en Python. El primer argumento del método es <code>cls</code> (la clase), no <code>self</code>. Útil para constructores alternativos (<code>cls.from_dict(...)</code>) o para queries que respeten herencia.</p>
+          </div>
+        </div>
+
+        <div class="field">
+          <div class="field-label">Por detrás</div>
+          <div class="field-value">
+            <p>También es un <strong>descriptor</strong>. Al acceder al atributo (sea desde la clase o desde una instancia) devuelve un <code>MethodType</code> ya enlazado a la clase. Por eso siempre recibes <code>cls</code> sin importar cómo se llame al método.</p>
+          </div>
+        </div>
+
+        <div class="field">
+          <div class="field-label">Qué hace el ORM</div>
+          <div class="field-value">
+            <p><strong>Nada directo.</strong> SQLAlchemy no lo trata especial. Pero en patrones tipo Active Record es común usarlo así:</p>
+<pre><code><span class="deco">@classmethod</span>
+<span class="kw">def</span> <span class="fn">active_in_location</span>(<span class="cls">cls</span>, location_id):
+    <span class="kw">return</span> db.session.query(<span class="cls">cls</span>).filter_by(
+        location_id=location_id, last_info=<span class="kw">True</span>
+    ).all()</code></pre>
+            <p>La gracia es que <code>cls</code> se resuelve a la subclase real, así que si heredas el modelo el método sigue funcionando.</p>
+          </div>
+        </div>
+
+        <div class="field">
+          <div class="field-label">En tu código</div>
+          <div class="field-value">
+            <p><strong>No lo usas.</strong> Pero <code>expire_last_info</code> sería un candidato natural para reescribirlo como <code>classmethod</code>, así eliminas el SQL crudo y aprovechas el ORM:</p>
+<pre><code><span class="deco">@classmethod</span>
+<span class="kw">def</span> <span class="fn">expire_last_info</span>(<span class="cls">cls</span>, location):
+    db.session.query(<span class="cls">cls</span>).filter_by(location_id=location)\
+        .update({<span class="str">"last_info"</span>: <span class="kw">False</span>})
+    db.session.commit()</code></pre>
+          </div>
+        </div>
+      </article>
+
+      <!-- ─── @property ─── -->
+      <article class="card py">
+        <div class="card-header">
+          <div class="card-name">@property</div>
+          <div class="card-tagline">Atributo computado a nivel de instancia — invisible al ORM</div>
+        </div>
+
+        <div class="field">
+          <div class="field-label">¿Qué es?</div>
+          <div class="field-value">
+            <p>Decorador estándar de Python. Convierte un método en un atributo de instancia computado. Lo accedes como <code>obj.x</code> (sin paréntesis), pero por debajo se ejecuta el getter.</p>
+          </div>
+        </div>
+
+        <div class="field">
+          <div class="field-label">Por detrás</div>
+          <div class="field-value">
+            <p><code>property</code> es un <strong>descriptor de datos</strong>. Intercepta el acceso al atributo, llama al getter pasándole <code>self</code>, y devuelve el valor calculado. Cada acceso re-ejecuta el getter (sin caché).</p>
+          </div>
+        </div>
+
+        <div class="field">
+          <div class="field-label">Qué hace el ORM</div>
+          <div class="field-value">
+            <p><strong>NADA — y esto es crítico.</strong> SQLAlchemy no sabe que existe <code>available_tb</code>. Si intentas usarlo en un query:</p>
+<pre><code><span class="com"># ❌ NO funciona</span>
+session.query(StoragePools).filter(StoragePools.available_tb &gt; <span class="str">5</span>)
+session.query(StoragePools).order_by(StoragePools.used_tb)</code></pre>
+            <p>Falla, porque <code>StoragePools.available_tb</code> a nivel de clase es un objeto <code>property</code>, no una <code>Column</code> ni una expresión SQL. El cálculo solo ocurre <strong>en Python, después de que SQLAlchemy haya cargado las filas</strong> y construido las instancias en memoria.</p>
+          </div>
+        </div>
+
+        <div class="field">
+          <div class="field-label">En tu código</div>
+          <div class="field-value">
+            <p><code>available_tb</code>, <code>capacity_tb</code>, <code>provisioned_tb</code>, <code>used_tb</code>, <code>p_pct</code>. Todos toman columnas en MB y las convierten a TB o porcentajes en Python puro. Perfectos para mostrar en plantillas Jinja, pero <strong>no se pueden usar en <code>WHERE</code> ni <code>ORDER BY</code> SQL.</strong></p>
+<pre><code><span class="deco">@property</span>
+<span class="kw">def</span> <span class="fn">available_tb</span>(<span class="cls">self</span>):
+    <span class="kw">return</span> <span class="fn">round</span>(<span class="cls">self</span>.available_mb / <span class="str">1024</span> / <span class="str">1024</span>, <span class="str">2</span>)</code></pre>
+          </div>
+        </div>
+      </article>
+
+      <!-- ─── @hybrid_property ─── -->
+      <article class="card sa">
+        <div class="card-header">
+          <div class="card-name">@hybrid_property</div>
+          <div class="card-tagline">Funciona en dos contextos: como property en Python y como expresión en SQL</div>
+        </div>
+
+        <div class="field">
+          <div class="field-label">¿Qué es?</div>
+          <div class="field-value">
+            <p>Decorador de la extensión <code>sqlalchemy.ext.hybrid</code>. Crea un atributo que se comporta de <strong>dos formas distintas</strong> según desde dónde se acceda:</p>
+            <p>· Desde una <strong>instancia</strong> (<code>obj.x</code>) → ejecuta el cuerpo Python con <code>self</code>, igual que <code>@property</code>.<br>
+               · Desde la <strong>clase</strong> (<code>Modelo.x</code>) → se interpreta como expresión SQL.</p>
+          </div>
+        </div>
+
+        <div class="field">
+          <div class="field-label">Por detrás</div>
+          <div class="field-value">
+            <p>Es un descriptor "híbrido" más sofisticado que <code>property</code>. Detecta el tipo de acceso (instancia vs clase) y escoge entre dos caminos:</p>
+            <p>· Acceso por instancia → ejecuta el getter Python tal cual.<br>
+               · Acceso por clase → toma el mismo cuerpo y lo trata como una expresión SQLAlchemy, asumiendo que los <code>self.col</code> referencian <code>Column</code>s. SQLAlchemy lo compila a SQL.</p>
+            <p>Ese auto-mapeo solo funciona si el cuerpo usa operadores que SQLAlchemy <em>sabe</em> traducir (sumas, comparaciones, <code>and_</code>, <code>or_</code>, etc.). Si haces algo demasiado "Python-y" — como acceder a un <code>relationship</code> (<code>self.location.name</code>) — la traducción automática falla y debes definir <code>.expression</code> aparte.</p>
+          </div>
+        </div>
+
+        <div class="field">
+          <div class="field-label">Qué hace el ORM</div>
+          <div class="field-value">
+            <p>SQLAlchemy lo registra como <strong>atributo cualificado del mapeo</strong>. Cuando lo usas en <code>filter</code>, <code>order_by</code>, <code>select</code>, etc., genera el SQL correspondiente y lo embebe en la query — todo sin cargar instancias en memoria.</p>
+          </div>
+        </div>
+
+        <div class="field">
+          <div class="field-label">En tu código</div>
+          <div class="field-value">
+            <p><code>sort_key</code>. El getter Python usa <code>self.location.name</code> (cruza un <code>relationship</code>), por eso la versión SQL no se puede inferir automáticamente y necesitaste declarar <code>@sort_key.expression</code> aparte.</p>
+<pre><code><span class="deco">@hybrid_property</span>
+<span class="kw">def</span> <span class="fn">sort_key</span>(<span class="cls">self</span>):
+    <span class="com"># Contexto Python: usa el relationship cargado</span>
+    location_name = <span class="cls">self</span>.location.name <span class="kw">if</span> <span class="cls">self</span>.location <span class="kw">else</span> <span class="str">""</span>
+    <span class="kw">return</span> (location_name, <span class="cls">self</span>.storage_name, <span class="cls">self</span>.pool_name)</code></pre>
+          </div>
+        </div>
+      </article>
+
+      <!-- ─── @sort_key.expression ─── -->
+      <article class="card sa">
+        <div class="card-header">
+          <div class="card-name">@sort_key.expression</div>
+          <div class="card-tagline">La forma SQL del hybrid_property — se invoca cuando el acceso es a nivel de clase</div>
+        </div>
+
+        <div class="field">
+          <div class="field-label">¿Qué es?</div>
+          <div class="field-value">
+            <p>El "complemento SQL" de un <code>@hybrid_property</code>. Define qué expresión SQL se genera cuando el atributo se usa a nivel de clase. Recibe <code>cls</code> y debe retornar una expresión SQLAlchemy compilable a SQL (<code>Column</code>, <code>scalar_subquery</code>, <code>func.*</code>, <code>tuple_</code>, etc.).</p>
+          </div>
+        </div>
+
+        <div class="field">
+          <div class="field-label">Por detrás</div>
+          <div class="field-value">
+            <p>Sobrescribe el comportamiento por defecto del <code>hybrid_property</code> en contexto de clase. Cuando SQLAlchemy detecta acceso desde la clase (<code>Modelo.sort_key</code>, no <code>instancia.sort_key</code>), llama a este método con <code>cls=Modelo</code> y usa el <code>ClauseElement</code> que retornes como parte del SQL final.</p>
+            <p>Sin él, SQLAlchemy intentaría reusar el getter del <code>@hybrid_property</code> y, en tu caso, fallaría porque <code>self.location.name</code> no es traducible.</p>
+          </div>
+        </div>
+
+        <div class="field">
+          <div class="field-label">Qué hace el ORM</div>
+          <div class="field-value">
+            <p>Embebe esa expresión SQL en el statement compilado. Cuando haces:</p>
+<pre><code>query.order_by(StoragePools.sort_key)</code></pre>
+            <p>SQLAlchemy genera SQL aproximadamente así:</p>
+<pre><code><span class="kw">ORDER BY</span>
+  (<span class="kw">SELECT</span> location.name <span class="kw">FROM</span> location
+   <span class="kw">WHERE</span> location.id = storage_pools.location_id),
+  storage_pools.storage_name,
+  storage_pools.pool_name</code></pre>
+            <p>Es decir: una <strong>subquery correlacionada</strong> para traer <code>location.name</code> + un ORDER BY multicolumna. Todo en una sola query SQL, sin cargar instancias en memoria, y haciendo el sort en la base de datos.</p>
+          </div>
+        </div>
+
+        <div class="field">
+          <div class="field-label">En tu código</div>
+          <div class="field-value">
+            <p>La definición construye la subquery con <code>select(...).correlate(cls).scalar_subquery()</code> y luego usa <code>tuple_(...)</code> para el sort multicolumna:</p>
+<pre><code><span class="deco">@sort_key.expression</span>
+<span class="kw">def</span> <span class="fn">sort_key</span>(<span class="cls">cls</span>):
+    location_name_sub = (
+        <span class="fn">select</span>(Location.name)
+        .<span class="fn">where</span>(Location.id == <span class="cls">cls</span>.location_id)
+        .<span class="fn">correlate</span>(<span class="cls">cls</span>)
+        .<span class="fn">scalar_subquery</span>()
+    )
+    <span class="kw">return</span> <span class="fn">tuple_</span>(location_name_sub, <span class="cls">cls</span>.storage_name, <span class="cls">cls</span>.pool_name)</code></pre>
+          </div>
+        </div>
+      </article>
+
+      <!-- ─── @declared_attr ─── -->
+      <article class="card sa">
+        <div class="card-header">
+          <div class="card-name">@declared_attr</div>
+          <div class="card-tagline">Declaración diferida de columnas/relaciones — clave para mixins reutilizables</div>
+        </div>
+
+        <div class="field">
+          <div class="field-label">¿Qué es?</div>
+          <div class="field-value">
+            <p>Decorador de SQLAlchemy (<code>sqlalchemy.orm.declared_attr</code>). Permite declarar <strong>columnas, relaciones u otros atributos del mapeo de forma diferida</strong>: la función no se ejecuta al definir la clase, sino una vez por cada clase mapeada que la herede.</p>
+          </div>
+        </div>
+
+        <div class="field">
+          <div class="field-label">Por detrás</div>
+          <div class="field-value">
+            <p>La función decorada queda como un placeholder en la clase. Cuando SQLAlchemy construye el mapeo de cada modelo concreto, invoca esa función pasándole <code>cls</code> (la subclase real) y usa <strong>lo que retorne como el atributo definitivo</strong> (un <code>Column</code>, un <code>relationship</code>, etc.).</p>
+            <p>Esto es importante porque cada subclase obtiene su <strong>propia instancia</strong> de la columna, no una compartida — algo que sería un problema si usaras simplemente <code>created_at = Column(...)</code> en un mixin.</p>
+          </div>
+        </div>
+
+        <div class="field">
+          <div class="field-label">Qué hace el ORM</div>
+          <div class="field-value">
+            <p>Es la herramienta canónica para <strong>mixins de mapeo reutilizables</strong>. Permite construir columnas dinámicamente usando <code>cls.__name__</code>, <code>cls.__tablename__</code>, etc. — útil para columnas como <code>created_by</code>, <code>tenant_id</code>, o claves foráneas que dependen del nombre de la tabla.</p>
+          </div>
+        </div>
+
+        <div class="field">
+          <div class="field-label">En tu código</div>
+          <div class="field-value">
+            <p><strong>No lo usas.</strong> Pero sería útil si quisieras un mixin de auditoría reutilizable para todos tus modelos:</p>
+<pre><code><span class="kw">class</span> <span class="cls">TimestampMixin</span>:
+    <span class="deco">@declared_attr</span>
+    <span class="kw">def</span> <span class="fn">created_at</span>(<span class="cls">cls</span>):
+        <span class="kw">return</span> <span class="fn">Column</span>(DateTime, default=datetime.utcnow)
+
+    <span class="deco">@declared_attr</span>
+    <span class="kw">def</span> <span class="fn">updated_by</span>(<span class="cls">cls</span>):
+        <span class="kw">return</span> <span class="fn">Column</span>(<span class="fn">String</span>(<span class="str">50</span>))
+
+
+<span class="kw">class</span> <span class="cls">StoragePools</span>(TimestampMixin, Model):
+    <span class="com"># StoragePools recibe sus propias columnas created_at y updated_by</span>
+    ...</code></pre>
+            <p>Cada modelo que herede de <code>TimestampMixin</code> recibe sus propias columnas como si las hubieras escrito a mano.</p>
+          </div>
+        </div>
+      </article>
+
+    </div>
+  </section>
+
+  <!-- ═══ TL;DR ═══ -->
+  <div class="tldr">
+    <div class="tldr-title">⚡ Para llevarte</div>
+    <p class="tldr-text">Las decoradores de Python (<em>@staticmethod</em>, <em>@classmethod</em>, <em>@property</em>) son <strong>invisibles para el ORM</strong>. Solo existen en Python, después de cargar las filas.</p>
+    <p class="tldr-text">Las decoradores de SQLAlchemy (<em>@hybrid_property</em>, <em>.expression</em>, <em>@declared_attr</em>) son las que <strong>el ORM sí entiende</strong>: las traduce a SQL para que puedas filtrar, ordenar y declarar columnas dinámicas <em>en la base de datos</em>.</p>
+    <p class="tldr-text">En tu modelo, los <em>@property</em> sirven para mostrar TB en plantillas, pero no podrías hacer <code>filter(StoragePools.used_tb &gt; 100)</code>. Para eso, tendrías que migrar esos cálculos a <em>@hybrid_property</em>.</p>
+  </div>
+
+  <footer>
+    <span>Modelo · StoragePools</span>
+    <span>Flask-AppBuilder + SQLAlchemy</span>
+  </footer>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KV Cache — Llama 3.3 70B Visualización Interactiva</title>
+<style>
+  :root {
+    --bg:       #f7f6f2;
+    --surface:  #ffffff;
+    --surface2: #f0efe9;
+    --border:   rgba(0,0,0,0.10);
+    --border2:  rgba(0,0,0,0.18);
+    --text:     #1a1a18;
+    --text2:    #5a5a56;
+    --text3:    #9a9994;
+    --radius:   12px;
+    --radius-sm:8px;
+
+    --kv-tc:#D85A30;--kv-bg:#FAECE7;
+    --bt-tc:#185FA5;--bt-bg:#E6F1FB;
+    --ly-tc:#534AB7;--ly-bg:#EEEDFE;
+    --hd-tc:#0F6E56;--hd-bg:#E1F5EE;
+    --dm-tc:#854F0B;--dm-bg:#FAEEDA;
+    --sl-tc:#3B6D11;--sl-bg:#EAF3DE;
+    --by-tc:#5F5E5A;--by-bg:#F1EFE8;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg:       #16161400;
+      --surface:  #1e1e1c;
+      --surface2: #252522;
+      --border:   rgba(255,255,255,0.10);
+      --border2:  rgba(255,255,255,0.18);
+      --text:     #e8e6de;
+      --text2:    #9a9890;
+      --text3:    #5a5a56;
+
+      --kv-tc:#F5C4B3;--kv-bg:#4A1B0C;
+      --bt-tc:#B5D4F4;--bt-bg:#042C53;
+      --ly-tc:#CECBF6;--ly-bg:#26215C;
+      --hd-tc:#9FE1CB;--hd-bg:#04342C;
+      --dm-tc:#FAC775;--dm-bg:#412402;
+      --sl-tc:#C0DD97;--sl-bg:#173404;
+      --by-tc:#D3D1C7;--by-bg:#2C2C2A;
+    }
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 2rem 1rem;
+    line-height: 1.6;
+  }
+
+  .page {
+    max-width: 780px;
+    margin: 0 auto;
+  }
+
+  /* Header */
+  .header { margin-bottom: 2rem; }
+  .header-tag {
+    font-size: 10px; font-weight: 600; letter-spacing: .1em;
+    text-transform: uppercase; color: var(--text3);
+    margin-bottom: 8px;
+  }
+  .header h1 {
+    font-size: 26px; font-weight: 600; letter-spacing: -.02em;
+    color: var(--text); margin-bottom: 8px;
+  }
+  .header p {
+    font-size: 14px; color: var(--text2); line-height: 1.65; max-width: 580px;
+  }
+
+  /* Section title */
+  .section-title {
+    font-size: 10px; font-weight: 600; letter-spacing: .07em;
+    text-transform: uppercase; color: var(--text3);
+    margin-bottom: 10px;
+  }
+
+  /* Formula */
+  .formula-wrap {
+    background: var(--surface);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.25rem 1.5rem;
+    margin-bottom: 1.25rem;
+  }
+  .formula-row {
+    display: flex; flex-wrap: wrap; align-items: center;
+    gap: 6px; font-size: 13px; color: var(--text2);
+  }
+  .pill {
+    display: inline-flex; align-items: center; gap: 3px;
+    padding: 4px 11px; border-radius: 20px;
+    font-size: 12px; font-weight: 500;
+    white-space: nowrap;
+  }
+  .pill b { font-weight: 600; }
+  .pill.kv { background: var(--kv-bg); color: var(--kv-tc); }
+  .pill.bt { background: var(--bt-bg); color: var(--bt-tc); }
+  .pill.ly { background: var(--ly-bg); color: var(--ly-tc); }
+  .pill.hd { background: var(--hd-bg); color: var(--hd-tc); }
+  .pill.dm { background: var(--dm-bg); color: var(--dm-tc); }
+  .pill.sl { background: var(--sl-bg); color: var(--sl-tc); }
+  .pill.by { background: var(--by-bg); color: var(--by-tc); }
+
+  /* Matrix viz */
+  .matrix-wrap {
+    background: var(--surface2);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.25rem;
+    margin-bottom: 1.25rem;
+  }
+  .matrix-headers {
+    display: grid;
+    grid-template-columns: 66px 1fr 12px 1fr;
+    margin-bottom: 6px;
+    font-size: 10px; font-weight: 600; letter-spacing: .05em; text-transform: uppercase;
+  }
+  .kh { color: #1D9E75; text-align: center; }
+  .vh { color: #D85A30; text-align: center; }
+  #kv-grid {}
+  .matrix-row {
+    display: grid;
+    grid-template-columns: 66px 1fr 12px 1fr;
+    align-items: center;
+    margin-bottom: 3px;
+  }
+  .row-label {
+    font-size: 10px; color: var(--text3);
+    text-align: right; padding-right: 10px;
+  }
+  .cells {
+    display: flex; gap: 2px;
+  }
+  .cell {
+    flex: 1; height: 14px; border-radius: 2px;
+  }
+  .cell-k { background: #1D9E75; }
+  .cell-v { background: #D85A30; }
+  @media (prefers-color-scheme: dark) {
+    .cell-k { background: #5DCAA5; }
+    .cell-v { background: #F0997B; }
+  }
+  .matrix-footer {
+    display: grid;
+    grid-template-columns: 66px 1fr 12px 1fr;
+    margin-top: 6px;
+    font-size: 10px; color: var(--text3); text-align: center;
+  }
+  .matrix-note {
+    text-align: center; margin-top: 7px;
+    font-size: 11px; color: var(--text3);
+  }
+  .matrix-note span { color: var(--dm-tc); font-weight: 500; }
+  #batch-badge {
+    display: none; text-align: center; margin-top: 6px;
+    font-size: 11px; color: var(--bt-tc); font-weight: 500;
+  }
+
+  /* Term cards */
+  .cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(176px, 1fr));
+    gap: 10px;
+    margin-bottom: 1.25rem;
+  }
+  .tcard {
+    background: var(--surface);
+    border: 0.5px solid var(--border);
+    border-left: 2.5px solid var(--tc, #888);
+    border-radius: var(--radius);
+    padding: 14px;
+  }
+  .tcard.kv { --tc: var(--kv-tc); }
+  .tcard.bt { --tc: var(--bt-tc); }
+  .tcard.ly { --tc: var(--ly-tc); }
+  .tcard.hd { --tc: var(--hd-tc); }
+  .tcard.dm { --tc: var(--dm-tc); }
+  .tcard.sl { --tc: var(--sl-tc); }
+  .tcard.by { --tc: var(--by-tc); }
+  .tn {
+    font-size: 10px; font-weight: 600; letter-spacing: .05em;
+    text-transform: uppercase; color: var(--tc); margin-bottom: 4px;
+  }
+  .tv {
+    font-size: 21px; font-weight: 600; color: var(--text);
+    margin-bottom: 6px; font-variant-numeric: tabular-nums;
+  }
+  .td { font-size: 12px; color: var(--text2); line-height: 1.6; }
+  .td strong { color: var(--text); font-weight: 500; }
+  .mini-vis { display: block; margin-bottom: 8px; }
+
+  /* Calculator */
+  .calc-wrap {
+    background: var(--surface);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.25rem 1.5rem;
+  }
+  .slider-row {
+    display: flex; align-items: center; gap: 14px; margin-bottom: 12px;
+  }
+  .slider-row label {
+    font-size: 13px; color: var(--text2); min-width: 100px;
+  }
+  .slider-row input[type=range] {
+    flex: 1;
+    -webkit-appearance: none;
+    height: 4px;
+    border-radius: 2px;
+    background: var(--border2);
+    outline: none;
+    cursor: pointer;
+  }
+  .slider-row input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 16px; height: 16px;
+    border-radius: 50%;
+    background: var(--text);
+    cursor: pointer;
+    border: 2px solid var(--surface);
+    box-shadow: 0 0 0 1px var(--border2);
+  }
+  .slider-val {
+    font-size: 13px; font-weight: 500; min-width: 80px;
+    text-align: right; font-variant-numeric: tabular-nums;
+    color: var(--text);
+  }
+  .calc-divider {
+    border: none; border-top: 0.5px solid var(--border);
+    margin: 1rem 0;
+  }
+  .mem-grid {
+    display: flex; align-items: flex-start;
+    gap: 20px; flex-wrap: wrap;
+  }
+  .mem-main { flex: 1; min-width: 140px; }
+  .mem-label {
+    font-size: 10px; font-weight: 600; letter-spacing: .06em;
+    text-transform: uppercase; color: var(--text3); margin-bottom: 4px;
+  }
+  .mem-num {
+    font-size: 32px; font-weight: 600; letter-spacing: -.02em;
+    font-variant-numeric: tabular-nums; color: var(--text);
+  }
+  .mem-unit { font-size: 16px; font-weight: 400; color: var(--text2); }
+  .mem-side { }
+  .mem-side-val {
+    font-size: 16px; font-weight: 500;
+    color: var(--text2); font-variant-numeric: tabular-nums;
+  }
+
+  /* Footer */
+  .footer {
+    margin-top: 2.5rem; padding-top: 1.5rem;
+    border-top: 0.5px solid var(--border);
+    font-size: 11px; color: var(--text3);
+    display: flex; justify-content: space-between; flex-wrap: wrap; gap: 6px;
+  }
+
+  /* Responsive */
+  @media (max-width: 500px) {
+    .mem-grid { flex-direction: column; gap: 12px; }
+    .header h1 { font-size: 21px; }
+    .mem-num { font-size: 26px; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- Header -->
+  <div class="header">
+    <div class="header-tag">AI Solutions Architect · Módulo: Inferencia y Memoria</div>
+    <h1>KV Cache — Cuantificando el costo de memoria</h1>
+    <p>
+      Durante inferencia, el transformer guarda las matrices <strong>Key</strong> y <strong>Value</strong>
+      de cada token generado para no recalcularlas. Este cache crece linealmente con el contexto y puede
+      dominar el uso de VRAM. La siguiente fórmula y visualización usan los parámetros reales de
+      <strong>Llama 3.3 70B</strong> (Unsloth).
+    </p>
+  </div>
+
+  <!-- Formula -->
+  <div class="formula-wrap">
+    <div class="section-title">Fórmula — KV Cache Bytes</div>
+    <div class="formula-row">
+      <span class="pill kv">2</span> ×
+      <span class="pill bt">batch</span> ×
+      <span class="pill ly">n_layers <b>80</b></span> ×
+      <span class="pill hd">n_kv_heads <b>8</b></span> ×
+      <span class="pill dm">head_dim <b>128</b></span> ×
+      <span class="pill sl">seq_len</span> ×
+      <span class="pill by">2 bytes (bf16)</span>
+    </div>
+  </div>
+
+  <!-- Matrix visualization -->
+  <div class="matrix-wrap">
+    <div class="section-title">Estructura del cache — K y V por capa y token</div>
+    <div class="matrix-headers">
+      <div></div>
+      <div class="kh">K CACHE</div>
+      <div></div>
+      <div class="vh">V CACHE</div>
+    </div>
+    <div id="kv-grid"></div>
+    <div class="matrix-footer">
+      <div></div>
+      <div>← seq_len tokens →</div>
+      <div></div>
+      <div>← seq_len tokens →</div>
+    </div>
+    <div id="batch-badge"></div>
+    <div class="matrix-note">
+      Cada celda = 1 token × 1 capa →
+      <span>n_kv_heads × head_dim = 8 × 128 = 1,024 valores (K o V)</span>
+    </div>
+  </div>
+
+  <!-- Term cards -->
+  <div class="section-title">Glosario visual — cada término de la fórmula</div>
+  <div class="cards-grid">
+
+    <!-- 2: K & V -->
+    <div class="tcard kv">
+      <div class="tn">Factor K &amp; V</div>
+      <svg class="mini-vis" width="48" height="30" viewBox="0 0 48 30">
+        <rect x="0"  y="10" width="26" height="18" rx="3" fill="#D85A30" opacity=".75"/>
+        <rect x="20" y="2"  width="26" height="18" rx="3" fill="#1D9E75" opacity=".9"/>
+        <text x="12" y="23" font-size="8" font-weight="600" fill="#fff" text-anchor="middle">V</text>
+        <text x="33" y="15" font-size="8" font-weight="600" fill="#fff" text-anchor="middle">K</text>
+      </svg>
+      <div class="tv">× 2</div>
+      <div class="td">
+        El mecanismo de atención necesita dos matrices por capa:
+        <strong>Keys</strong> (calcula cuánto atender a cada token) y
+        <strong>Values</strong> (qué información extraer). Mismo tamaño, siempre van juntas.
+      </div>
+    </div>
+
+    <!-- Batch -->
+    <div class="tcard bt">
+      <div class="tn">Batch size</div>
+      <svg class="mini-vis" width="48" height="30" viewBox="0 0 48 30">
+        <rect x="14" y="14" width="32" height="14" rx="2" fill="#B5D4F4" stroke="#378ADD" stroke-width=".4" opacity=".45"/>
+        <rect x="7"  y="8"  width="32" height="14" rx="2" fill="#85B7EB" stroke="#378ADD" stroke-width=".4" opacity=".7"/>
+        <rect x="0"  y="2"  width="32" height="14" rx="2" fill="#378ADD" stroke="#185FA5" stroke-width=".4"/>
+      </svg>
+      <div class="tv" id="bcard">× 1</div>
+      <div class="td">
+        Secuencias procesadas en paralelo. Cada elemento del batch tiene
+        su propio KV cache completo e independiente. La memoria escala
+        <strong>linealmente</strong> con el batch.
+      </div>
+    </div>
+
+    <!-- n_layers -->
+    <div class="tcard ly">
+      <div class="tn">n_hidden_layers</div>
+      <svg class="mini-vis" width="48" height="30" viewBox="0 0 48 30">
+        <rect x="2" y="2"  width="44" height="5" rx="1" fill="#CECBF6" stroke="#7F77DD" stroke-width=".3"/>
+        <rect x="2" y="9"  width="44" height="5" rx="1" fill="#CECBF6" stroke="#7F77DD" stroke-width=".3"/>
+        <rect x="2" y="16" width="44" height="5" rx="1" fill="#AFA9EC" stroke="#534AB7" stroke-width=".3"/>
+        <rect x="2" y="23" width="44" height="5" rx="1" fill="#7F77DD" stroke="#534AB7" stroke-width=".3"/>
+      </svg>
+      <div class="tv">80 capas</div>
+      <div class="td">
+        El modelo apila 80 capas transformer. <strong>Cada capa</strong>
+        mantiene su propio par de matrices K y V. A más profundidad,
+        mayor capacidad de razonamiento y mayor costo de memoria.
+      </div>
+    </div>
+
+    <!-- n_kv_heads -->
+    <div class="tcard hd">
+      <div class="tn">n_kv_heads — GQA</div>
+      <svg class="mini-vis" width="48" height="30" viewBox="0 0 48 30">
+        <circle cx="5"  cy="13" r="4" fill="#1D9E75" stroke="#0F6E56" stroke-width=".4"/>
+        <circle cx="13" cy="13" r="4" fill="#1D9E75" stroke="#0F6E56" stroke-width=".4"/>
+        <circle cx="21" cy="13" r="4" fill="#1D9E75" stroke="#0F6E56" stroke-width=".4"/>
+        <circle cx="29" cy="13" r="4" fill="#1D9E75" stroke="#0F6E56" stroke-width=".4"/>
+        <circle cx="37" cy="13" r="4" fill="#5DCAA5" stroke="#0F6E56" stroke-width=".4"/>
+        <circle cx="45" cy="13" r="4" fill="#5DCAA5" stroke="#0F6E56" stroke-width=".4"/>
+        <rect x="0" y="21" width="48" height="2" rx="1" fill="#9FE1CB" opacity=".4"/>
+        <rect x="0" y="25" width="48" height="2" rx="1" fill="#9FE1CB" opacity=".22"/>
+      </svg>
+      <div class="tv">8 de 64</div>
+      <div class="td">
+        <strong>Grouped Query Attention</strong>: 64 Q heads pero solo 8 KV heads.
+        Cada grupo de 8 queries comparte 1 par K/V. Ahorro real:
+        <strong>~8× menos memoria</strong> vs Multi-Head Attention estándar.
+      </div>
+    </div>
+
+    <!-- head_dim -->
+    <div class="tcard dm">
+      <div class="tn">head_dim</div>
+      <svg class="mini-vis" width="48" height="30" viewBox="0 0 48 30">
+        <rect x="0"  y="12" width="3.5" height="9" rx="1" fill="#EF9F27"/>
+        <rect x="5"  y="12" width="3.5" height="9" rx="1" fill="#EF9F27"/>
+        <rect x="10" y="12" width="3.5" height="9" rx="1" fill="#EF9F27"/>
+        <rect x="15" y="12" width="3.5" height="9" rx="1" fill="#EF9F27"/>
+        <rect x="20" y="12" width="3.5" height="9" rx="1" fill="#BA7517"/>
+        <rect x="25" y="12" width="3.5" height="9" rx="1" fill="#BA7517"/>
+        <rect x="30" y="12" width="3.5" height="9" rx="1" fill="#BA7517"/>
+        <rect x="35" y="12" width="3.5" height="9" rx="1" fill="#BA7517"/>
+        <rect x="40" y="12" width="3.5" height="9" rx="1" fill="#854F0B"/>
+        <rect x="45" y="12" width="3.5" height="9" rx="1" fill="#854F0B"/>
+      </svg>
+      <div class="tv">128 dims</div>
+      <div class="td">
+        Tamaño del vector K o V por cada head. Se calcula como
+        <strong>hidden_size / num_heads = 8192 / 64 = 128</strong>.
+        Cada K y V es un vector de 128 floats por head.
+      </div>
+    </div>
+
+    <!-- seq_len -->
+    <div class="tcard sl">
+      <div class="tn">seq_len (contexto)</div>
+      <svg class="mini-vis" width="48" height="30" viewBox="0 0 48 30">
+        <rect x="0"  y="10" width="11" height="12" rx="2" fill="#97C459" stroke="#3B6D11" stroke-width=".4"/>
+        <rect x="14" y="10" width="11" height="12" rx="2" fill="#97C459" stroke="#3B6D11" stroke-width=".4"/>
+        <rect x="28" y="10" width="11" height="12" rx="2" fill="#639922" stroke="#3B6D11" stroke-width=".4"/>
+        <text x="44" y="19" font-size="12" fill="#639922" font-weight="500">…</text>
+      </svg>
+      <div class="tv" id="scard">8,192</div>
+      <div class="td">
+        Tokens en el contexto activo. El cache crece con cada token generado.
+        Llama 3.3 soporta hasta <strong>131,072 tokens</strong> con RoPE
+        escalado (factor ×8 sobre los 8,192 originales del pretraining).
+      </div>
+    </div>
+
+    <!-- bytes_per_param -->
+    <div class="tcard by">
+      <div class="tn">bytes_per_param</div>
+      <svg class="mini-vis" width="48" height="30" viewBox="0 0 48 30">
+        <rect x="0"  y="8"  width="3" height="15" rx="0" fill="#2C2C2A"/>
+        <rect x="5"  y="11" width="3" height="12" rx="0" fill="#5F5E5A"/>
+        <rect x="10" y="11" width="3" height="12" rx="0" fill="#888780"/>
+        <rect x="15" y="11" width="3" height="12" rx="0" fill="#5F5E5A"/>
+        <rect x="20" y="11" width="3" height="12" rx="0" fill="#888780"/>
+        <rect x="25" y="11" width="3" height="12" rx="0" fill="#5F5E5A"/>
+        <rect x="30" y="11" width="3" height="12" rx="0" fill="#888780"/>
+        <rect x="35" y="13" width="3" height="10" rx="0" fill="#B4B2A9"/>
+        <rect x="40" y="13" width="3" height="10" rx="0" fill="#888780"/>
+        <rect x="45" y="13" width="3" height="10" rx="0" fill="#B4B2A9"/>
+      </svg>
+      <div class="tv">2 bytes</div>
+      <div class="td">
+        <strong>bfloat16</strong>: 16 bits (1 signo, 8 exponente, 7 mantisa).
+        Mayor rango dinámico que float16 con la misma memoria.
+        Es el <code style="font-size:11px;background:var(--surface2);padding:1px 4px;border-radius:3px;">torch_dtype</code>
+        del config de Llama 3.3.
+      </div>
+    </div>
+
+  </div><!-- /cards-grid -->
+
+  <!-- Calculator -->
+  <div class="calc-wrap">
+    <div class="section-title">Calculadora interactiva</div>
+
+    <div class="slider-row">
+      <label>Batch size</label>
+      <input type="range" id="bsl" min="1" max="16" value="1" step="1">
+      <span class="slider-val" id="blbl">1</span>
+    </div>
+    <div class="slider-row">
+      <label>seq_len</label>
+      <input type="range" id="ssl" min="256" max="131072" value="8192" step="256">
+      <span class="slider-val" id="slbl">8,192</span>
+    </div>
+
+    <hr class="calc-divider">
+
+    <div class="mem-grid">
+      <div class="mem-main">
+        <div class="mem-label">KV Cache total</div>
+        <div class="mem-num" id="mtot">2.50 <span class="mem-unit">GB</span></div>
+      </div>
+      <div class="mem-side">
+        <div class="mem-label">Por token (este batch)</div>
+        <div class="mem-side-val" id="mptok">320.0 KB</div>
+      </div>
+      <div class="mem-side">
+        <div class="mem-label">Al máximo contexto (131k)</div>
+        <div class="mem-side-val" id="mmax">40.00 GB</div>
+      </div>
+    </div>
+
+    <div id="batch-badge-calc" style="display:none;margin-top:10px;font-size:12px;color:var(--bt-tc);font-weight:500;"></div>
+
+    <!-- Breakdown -->
+    <hr class="calc-divider">
+    <div class="section-title" style="margin-bottom:8px;">Desglose del cálculo</div>
+    <div id="breakdown" style="font-size:13px;color:var(--text2);font-variant-numeric:tabular-nums;line-height:2;font-family:monospace;"></div>
+  </div>
+
+  <!-- Footer -->
+  <div class="footer">
+    <span>Llama 3.3 70B — config.json (Unsloth / Hugging Face)</span>
+    <span>AI Solutions Architect · KV Cache Memory</span>
+  </div>
+
+</div><!-- /page -->
+
+<script>
+const N_LAYERS = 80, N_KV = 8, HEAD_DIM = 128, BYTES = 2, KV = 2;
+const FL = KV * N_LAYERS * N_KV * HEAD_DIM * BYTES; // 327,680 bytes / token / batch item
+
+function fmt(b) {
+  if (b < 1024) return b.toFixed(0) + ' B';
+  if (b < 1048576) return (b / 1024).toFixed(1) + ' KB';
+  if (b < 1073741824) return (b / 1048576).toFixed(1) + ' MB';
+  return (b / 1073741824).toFixed(2) + ' GB';
+}
+
+function fmtBig(b) {
+  if (b < 1048576) return [(b / 1024).toFixed(1), 'KB'];
+  if (b < 1073741824) return [(b / 1048576).toFixed(1), 'MB'];
+  return [(b / 1073741824).toFixed(2), 'GB'];
+}
+
+function buildGrid() {
+  const R = 8, C = 10;
+  let h = '';
+  for (let r = 0; r < R; r++) {
+    const lbl = r === 0 ? 'layer 1' : r === R - 1 ? '⋮ ×80' : `L${r * 10 + 1}`;
+    h += `<div class="matrix-row">`;
+    h += `<div class="row-label">${lbl}</div>`;
+    h += `<div class="cells">`;
+    for (let c = 0; c < C; c++) h += `<div class="cell cell-k"></div>`;
+    h += `</div><div></div><div class="cells">`;
+    for (let c = 0; c < C; c++) h += `<div class="cell cell-v"></div>`;
+    h += `</div></div>`;
+  }
+  return h;
+}
+
+function update() {
+  const batch = +document.getElementById('bsl').value;
+  const seq   = +document.getElementById('ssl').value;
+
+  document.getElementById('blbl').textContent = batch.toLocaleString();
+  document.getElementById('slbl').textContent = seq.toLocaleString();
+  document.getElementById('bcard').textContent = '× ' + batch;
+  document.getElementById('scard').textContent = seq.toLocaleString();
+
+  const total = FL * batch * seq;
+  const perTok = FL * batch;
+  const maxCtx = FL * batch * 131072;
+  const [tv, tu] = fmtBig(total);
+
+  document.getElementById('mtot').innerHTML = tv + ' <span class="mem-unit">' + tu + '</span>';
+  document.getElementById('mptok').textContent = fmt(perTok);
+  document.getElementById('mmax').textContent = fmt(maxCtx);
+
+  // Batch badges
+  const bb = document.getElementById('batch-badge');
+  const bbc = document.getElementById('batch-badge-calc');
+  if (batch > 1) {
+    const msg = `↳ batch ${batch}: el cache se replica ${batch} veces — memoria × ${batch}`;
+    bb.style.display = 'block'; bb.textContent = msg;
+    bbc.style.display = 'block'; bbc.textContent = msg;
+  } else {
+    bb.style.display = 'none';
+    bbc.style.display = 'none';
+  }
+
+  // Breakdown
+  const breakdown = [
+    `2               (K + V)                     =           2`,
+    `× ${String(batch).padStart(13)}  (batch)                       =  ${String(KV * batch).padStart(10)}`,
+    `× ${String(N_LAYERS).padStart(13)}  (n_layers)                    =  ${String(KV * batch * N_LAYERS).padStart(10)}`,
+    `× ${String(N_KV).padStart(13)}  (n_kv_heads)                  =  ${String(KV * batch * N_LAYERS * N_KV).padStart(10)}`,
+    `× ${String(HEAD_DIM).padStart(13)}  (head_dim)                    =  ${String(KV * batch * N_LAYERS * N_KV * HEAD_DIM).toLocaleString().padStart(10)}`,
+    `× ${seq.toLocaleString().padStart(13)}  (seq_len)          → valores =  ${(KV * batch * N_LAYERS * N_KV * HEAD_DIM * seq).toLocaleString().padStart(10)}`,
+    `× ${String(BYTES).padStart(13)}  (bytes bf16)       → bytes  =  ${total.toLocaleString().padStart(10)}`,
+    `─────────────────────────────────────────────────────────`,
+    `                                             Total = ${fmt(total)}`,
+  ];
+  document.getElementById('breakdown').innerHTML =
+    breakdown.map(l => `<div>${l}</div>`).join('');
+}
+
+document.getElementById('kv-grid').innerHTML = buildGrid();
+document.getElementById('bsl').addEventListener('input', update);
+document.getElementById('ssl').addEventListener('input', update);
+update();
+</script>
+</body>
+</html>

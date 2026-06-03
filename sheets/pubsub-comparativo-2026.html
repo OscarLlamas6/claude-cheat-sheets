@@ -1,0 +1,1594 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Comparativo PubSub 2026 — Estado del Arte</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=IBM+Plex+Mono:wght@400;500&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0c10;
+    --surface: #111318;
+    --surface2: #181c23;
+    --border: #1e2330;
+    --accent: #00e5ff;
+    --accent2: #7c3aed;
+    --accent3: #f59e0b;
+    --green: #10b981;
+    --red: #ef4444;
+    --orange: #f97316;
+    --text: #e2e8f0;
+    --muted: #64748b;
+    --tag-oss: #0d9488;
+    --tag-free: #1d4ed8;
+    --tag-paid: #7c3aed;
+    --tag-freemium: #d97706;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    line-height: 1.6;
+    min-width: 1400px;
+  }
+
+  /* ── HEADER ── */
+  header {
+    background: linear-gradient(135deg, #0a0c10 0%, #0f1520 50%, #080d1a 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 48px 40px 36px;
+    position: relative;
+    overflow: hidden;
+  }
+  header::before {
+    content: '';
+    position: absolute;
+    top: -80px; left: -80px;
+    width: 400px; height: 400px;
+    background: radial-gradient(circle, rgba(0,229,255,0.06) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  header::after {
+    content: '';
+    position: absolute;
+    bottom: -60px; right: 100px;
+    width: 300px; height: 300px;
+    background: radial-gradient(circle, rgba(124,58,237,0.07) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .header-badge {
+    display: inline-block;
+    background: rgba(0,229,255,0.1);
+    border: 1px solid rgba(0,229,255,0.25);
+    color: var(--accent);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 2px;
+    padding: 4px 12px;
+    border-radius: 2px;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+  h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: 42px;
+    font-weight: 800;
+    letter-spacing: -1px;
+    line-height: 1.1;
+    background: linear-gradient(90deg, #e2e8f0 0%, var(--accent) 60%, #7c3aed 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 12px;
+  }
+  .header-sub {
+    color: var(--muted);
+    font-size: 14px;
+    font-weight: 300;
+    max-width: 700px;
+  }
+  .header-meta {
+    margin-top: 24px;
+    display: flex;
+    gap: 32px;
+    align-items: center;
+  }
+  .meta-stat {
+    text-align: center;
+  }
+  .meta-stat .num {
+    font-family: 'Syne', sans-serif;
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--accent);
+    display: block;
+  }
+  .meta-stat .lbl {
+    font-size: 11px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+  .meta-divider { width: 1px; height: 40px; background: var(--border); }
+
+  /* ── LEGEND ── */
+  .legend {
+    padding: 16px 40px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    gap: 24px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  .legend-title {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-right: 8px;
+  }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    color: var(--muted);
+  }
+
+  /* ── FILTERS ── */
+  .filters {
+    padding: 16px 40px;
+    background: var(--bg);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .filter-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-right: 4px;
+  }
+  .filter-btn {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--muted);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    padding: 5px 12px;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .filter-btn:hover, .filter-btn.active {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: rgba(0,229,255,0.06);
+  }
+
+  /* ── TABLE WRAPPER ── */
+  .table-wrapper {
+    overflow-x: auto;
+    padding: 0 0 40px;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 2800px;
+  }
+
+  /* STICKY HEADER */
+  thead th {
+    background: var(--surface);
+    padding: 14px 16px;
+    text-align: left;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--muted);
+    border-bottom: 2px solid var(--border);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    white-space: nowrap;
+  }
+  thead th:first-child {
+    position: sticky;
+    left: 0;
+    z-index: 20;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    min-width: 220px;
+  }
+  thead th.col-accent {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+  }
+
+  /* ROWS */
+  tbody tr {
+    border-bottom: 1px solid var(--border);
+    transition: background 0.1s;
+  }
+  tbody tr:hover { background: rgba(255,255,255,0.02); }
+  tbody tr:hover td:first-child { background: var(--surface2); }
+
+  td {
+    padding: 16px;
+    vertical-align: top;
+    border-right: 1px solid rgba(30,35,48,0.5);
+  }
+  td:first-child {
+    position: sticky;
+    left: 0;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    z-index: 5;
+  }
+
+  /* TOOL NAME CELL */
+  .tool-name {
+    font-family: 'Syne', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    color: #f1f5f9;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 4px;
+  }
+  .tool-icon {
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    flex-shrink: 0;
+  }
+  .tool-version {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    color: var(--muted);
+    display: block;
+    margin-top: 2px;
+  }
+  .tool-creator {
+    font-size: 11px;
+    color: var(--muted);
+    font-style: italic;
+  }
+
+  /* TAG PILLS */
+  .tags { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 6px; }
+  .tag {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.5px;
+    padding: 2px 7px;
+    border-radius: 2px;
+    font-weight: 500;
+    text-transform: uppercase;
+  }
+  .tag-oss { background: rgba(13,148,136,0.15); color: #2dd4bf; border: 1px solid rgba(13,148,136,0.3); }
+  .tag-free { background: rgba(29,78,216,0.15); color: #60a5fa; border: 1px solid rgba(29,78,216,0.3); }
+  .tag-paid { background: rgba(124,58,237,0.15); color: #a78bfa; border: 1px solid rgba(124,58,237,0.3); }
+  .tag-freemium { background: rgba(217,119,6,0.15); color: #fbbf24; border: 1px solid rgba(217,119,6,0.3); }
+  .tag-managed { background: rgba(239,68,68,0.12); color: #f87171; border: 1px solid rgba(239,68,68,0.25); }
+  .tag-cloud { background: rgba(99,102,241,0.12); color: #a5b4fc; border: 1px solid rgba(99,102,241,0.25); }
+  .tag-selfhost { background: rgba(16,185,129,0.12); color: #6ee7b7; border: 1px solid rgba(16,185,129,0.25); }
+
+  /* CONTENT CELLS */
+  .cell-content { max-width: 300px; }
+  .cell-content p { color: #94a3b8; font-size: 12px; line-height: 1.65; }
+
+  /* PRO/CON LISTS */
+  .pro-list, .con-list { list-style: none; }
+  .pro-list li, .con-list li {
+    font-size: 12px;
+    color: #94a3b8;
+    padding: 2px 0;
+    display: flex;
+    gap: 6px;
+    line-height: 1.5;
+  }
+  .pro-list li::before { content: '▲'; color: var(--green); font-size: 8px; margin-top: 3px; flex-shrink: 0; }
+  .con-list li::before { content: '▼'; color: var(--red); font-size: 8px; margin-top: 3px; flex-shrink: 0; }
+
+  /* USE CASE PILLS */
+  .use-list { display: flex; flex-direction: column; gap: 4px; }
+  .use-item {
+    font-size: 11px;
+    color: #94a3b8;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    padding: 4px 8px;
+    line-height: 1.4;
+  }
+  .use-item.yes { border-color: rgba(16,185,129,0.25); }
+  .use-item.no { border-color: rgba(239,68,68,0.2); }
+  .use-item.yes::before { content: '✓ '; color: var(--green); }
+  .use-item.no::before { content: '✗ '; color: var(--red); }
+
+  /* LICENSE CELL */
+  .license-cell { min-width: 140px; }
+  .license-main {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: var(--text);
+    font-weight: 500;
+  }
+  .license-note { font-size: 11px; color: var(--muted); margin-top: 4px; line-height: 1.5; }
+
+  /* THROUGHPUT BAR */
+  .perf-bar { margin-top: 6px; }
+  .bar-bg {
+    background: var(--border);
+    height: 4px;
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .bar-fill { height: 100%; border-radius: 2px; }
+  .bar-label { font-size: 11px; color: var(--muted); margin-top: 3px; font-family: 'IBM Plex Mono', monospace; }
+
+  /* SECTION ROWS */
+  .section-row td {
+    background: rgba(0,229,255,0.04);
+    border-top: 2px solid rgba(0,229,255,0.15);
+    padding: 8px 16px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: rgba(0,229,255,0.5);
+  }
+
+  /* FOOTER */
+  footer {
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    padding: 24px 40px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+  .footer-note {
+    font-size: 11px;
+    color: var(--muted);
+    font-family: 'IBM Plex Mono', monospace;
+  }
+  .footer-brand {
+    font-family: 'Syne', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--accent);
+    letter-spacing: 1px;
+  }
+
+  /* PRINT */
+  @media print {
+    body { min-width: auto; background: white; color: black; }
+    header { background: white; border-bottom: 2px solid #333; }
+    h1 { -webkit-text-fill-color: #0a0c10; color: #0a0c10; }
+    .table-wrapper { overflow: visible; }
+    table { min-width: auto; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-badge">Estado del Arte · Junio 2026</div>
+  <h1>Comparativo de Herramientas PubSub</h1>
+  <p class="header-sub">Análisis exhaustivo de 20 plataformas de mensajería y streaming de eventos: características, limitaciones, licencias y casos de uso reales.</p>
+  <div class="header-meta">
+    <div class="meta-stat"><span class="num">20</span><span class="lbl">Herramientas</span></div>
+    <div class="meta-divider"></div>
+    <div class="meta-stat"><span class="num">12</span><span class="lbl">Dimensiones</span></div>
+    <div class="meta-divider"></div>
+    <div class="meta-stat"><span class="num">2026</span><span class="lbl">Actualizado</span></div>
+    <div class="meta-divider"></div>
+    <div class="meta-stat"><span class="num">8</span><span class="lbl">Open Source</span></div>
+  </div>
+</header>
+
+<div class="legend">
+  <span class="legend-title">Leyenda:</span>
+  <div class="legend-item"><span class="tag tag-oss">OSS</span> Open Source</div>
+  <div class="legend-item"><span class="tag tag-free">FREE</span> Gratis / Self-hosted</div>
+  <div class="legend-item"><span class="tag tag-paid">PAID</span> Solo pago</div>
+  <div class="legend-item"><span class="tag tag-freemium">FREEMIUM</span> Tier gratuito + premium</div>
+  <div class="legend-item"><span class="tag tag-managed">MANAGED</span> Servicio administrado</div>
+  <div class="legend-item"><span class="tag tag-cloud">CLOUD</span> Solo nube</div>
+  <div class="legend-item"><span class="tag tag-selfhost">SELF-HOST</span> Auto-hospedable</div>
+</div>
+
+<div style="padding:14px 40px;background:#0a0c10;border-bottom:1px solid #1e2330;display:flex;gap:10px;flex-wrap:wrap;align-items:center"><span style="font-family:IBM Plex Mono,monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:#64748b;margin-right:4px">Filtrar:</span><button class="filter-btn active" data-filter="all">Todos (20)</button><button class="filter-btn" data-filter="oss">OSS</button><button class="filter-btn" data-filter="free">Gratuito</button><button class="filter-btn" data-filter="freemium">Freemium</button><button class="filter-btn" data-filter="paid">Solo Pago</button><button class="filter-btn" data-filter="managed">Managed</button><button class="filter-btn" data-filter="cloud">Cloud Only</button><button class="filter-btn" data-filter="selfhost">Self-hosteable</button></div>
+<div class="table-wrapper">
+<table id="mainTable">
+<thead>
+  <tr>
+    <th>Herramienta</th>
+    <th class="col-accent">¿Qué es?</th>
+    <th>¿Qué hace?</th>
+    <th>¿Qué NO hace?</th>
+    <th>Ventajas</th>
+    <th>Desventajas</th>
+    <th>Licencia / Modelo</th>
+    <th>Throughput / Escala</th>
+    <th>✓ Casos de uso: USAR</th>
+    <th>✗ Casos de uso: NO USAR</th>
+    <th>Protocolos</th>
+    <th>Estado 2026</th>
+  </tr>
+</thead>
+<tbody>
+
+<!-- ═══════════════════════════════════════════════ SECCION 1 ══ -->
+<tr class="section-row"><td colspan="12">── Plataformas originales evaluadas ──────────────────────────────────────────────────────────</td></tr>
+
+<!-- 1. RABBITMQ -->
+<tr>
+  <td>
+    <div class="tool-name"><div class="tool-icon" style="background:rgba(255,102,0,0.15)">🐰</div>RabbitMQ</div>
+    <span class="tool-version">v4.x · 2026</span>
+    <span class="tool-creator">Broadcom / VMware</span>
+    <div class="tags">
+      <span class="tag tag-oss">OSS</span>
+      <span class="tag tag-free">FREE</span>
+      <span class="tag tag-managed">MANAGED</span>
+      <span class="tag tag-selfhost">SELF-HOST</span>
+    </div>
+  </td>
+  <td><div class="cell-content"><p>Broker de mensajería tradicional basado en AMQP. Es el estándar de facto para colas de tareas y mensajería empresarial desde 2007. Implementa el modelo <em>push</em> hacia consumidores.</p></div></td>
+  <td><div class="cell-content"><p>Ruteo flexible de mensajes con exchanges (direct, topic, fanout, headers). Acknowledgments, dead-letter queues, priority queues, TTL, RPC patterns, pub/sub clásico, quorum queues para HA.</p></div></td>
+  <td><div class="cell-content"><p>No es un log distribuido; no hace replay histórico nativo. No diseñado para millones de msg/s sostenidos. No stream processing nativo (aunque Streams feature es limitada).</p></div></td>
+  <td>
+    <ul class="pro-list">
+      <li>Ecosistema maduro y muy documentado</li>
+      <li>Flexibilidad de ruteo insuperable</li>
+      <li>UI de administración incluida</li>
+      <li>Soporte multi-protocolo (AMQP, MQTT, STOMP)</li>
+      <li>Quorum queues para durabilidad robusta</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="con-list">
+      <li>Throughput limitado vs Kafka (~50k-100k msg/s)</li>
+      <li>Broadcom adquirió y cambió licenciamiento enterprise</li>
+      <li>Escalado horizontal complejo</li>
+      <li>Sin replay de mensajes consumidos</li>
+    </ul>
+  </td>
+  <td class="license-cell">
+    <div class="license-main">MPL 2.0</div>
+    <div class="license-note">Gratis self-hosted. CloudAMQP freemium. Comercial: RabbitMQ vs Tanzu.</div>
+  </td>
+  <td>
+    <div class="bar-label">~50–150k msg/s</div>
+    <div class="perf-bar"><div class="bar-bg"><div class="bar-fill" style="width:35%;background:linear-gradient(90deg,#f97316,#fb923c)"></div></div></div>
+  </td>
+  <td>
+    <div class="use-list">
+      <div class="use-item yes">Task queues / workers asíncronos</div>
+      <div class="use-item yes">Microservicios con ruteo complejo</div>
+      <div class="use-item yes">RPC asíncrono</div>
+      <div class="use-item yes">Notificaciones y alertas</div>
+    </div>
+  </td>
+  <td>
+    <div class="use-list">
+      <div class="use-item no">Big data / event sourcing a escala</div>
+      <div class="use-item no">Replay de eventos históricos</div>
+      <div class="use-item no">Stream processing complejo</div>
+    </div>
+  </td>
+  <td><p style="font-size:11px;color:#64748b">AMQP 0-9-1, AMQP 1.0, MQTT, STOMP, HTTP</p></td>
+  <td><p style="font-size:11px;color:#10b981">✦ Activo — v4.x con Khepri store (etcd-like). Streams mejorados.</p></td>
+</tr>
+
+<!-- 2. KAFKA -->
+<tr>
+  <td>
+    <div class="tool-name"><div class="tool-icon" style="background:rgba(0,100,200,0.15)">⚡</div>Apache Kafka</div>
+    <span class="tool-version">v3.9 · 2026</span>
+    <span class="tool-creator">Apache / Confluent</span>
+    <div class="tags">
+      <span class="tag tag-oss">OSS</span>
+      <span class="tag tag-free">FREE</span>
+      <span class="tag tag-freemium">FREEMIUM</span>
+      <span class="tag tag-selfhost">SELF-HOST</span>
+    </div>
+  </td>
+  <td><div class="cell-content"><p>Log distribuido de eventos. No es un broker tradicional sino un <em>commit log</em> particionado y replicado. El estándar del mercado para event streaming a gran escala.</p></div></td>
+  <td><div class="cell-content"><p>Streaming de eventos con retención durable (días/semanas). Replay ilimitado. Particionado para escala horizontal. Kafka Streams y ksqlDB para stream processing. Kafka Connect para integración.</p></div></td>
+  <td><div class="cell-content"><p>No es bueno para mensajes pequeños y muchas colas dinámicas. Latencia p99 alta. Sin ruteo sofisticado por mensaje. Gestión operacional compleja. ZooKeeper deprecado (KRaft en v3.x).</p></div></td>
+  <td>
+    <ul class="pro-list">
+      <li>Millones de msg/s con durabilidad total</li>
+      <li>Replay de eventos históricos</li>
+      <li>Ecosistema enorme (Kafka Streams, Connect)</li>
+      <li>KRaft mode elimina ZooKeeper (2026)</li>
+      <li>Estándar de facto en enterprise</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="con-list">
+      <li>Operación compleja (tuning, JVM)</li>
+      <li>No ideal para mensajes pequeños (<1KB)</li>
+      <li>Latencia mínima ~5–10ms</li>
+      <li>Curva de aprendizaje pronunciada</li>
+    </ul>
+  </td>
+  <td class="license-cell">
+    <div class="license-main">Apache 2.0</div>
+    <div class="license-note">Gratis self-hosted. Confluent Cloud freemium. MSK (AWS) managed.</div>
+  </td>
+  <td>
+    <div class="bar-label">1M–10M msg/s</div>
+    <div class="perf-bar"><div class="bar-bg"><div class="bar-fill" style="width:95%;background:linear-gradient(90deg,#00e5ff,#0ea5e9)"></div></div></div>
+  </td>
+  <td>
+    <div class="use-list">
+      <div class="use-item yes">Event sourcing y CQRS</div>
+      <div class="use-item yes">Pipeline de datos / ETL en tiempo real</div>
+      <div class="use-item yes">Logs de auditoría inmutable</div>
+      <div class="use-item yes">Analítica en tiempo real (clickstream, IoT)</div>
+    </div>
+  </td>
+  <td>
+    <div class="use-list">
+      <div class="use-item no">Muchas colas pequeñas y efímeras</div>
+      <div class="use-item no">Latencia ultra-baja (&lt;1ms)</div>
+      <div class="use-item no">Proyectos pequeños / startups tempranas</div>
+    </div>
+  </td>
+  <td><p style="font-size:11px;color:#64748b">Kafka Protocol (TCP), REST Proxy, Schema Registry</p></td>
+  <td><p style="font-size:11px;color:#10b981">✦ Muy activo — KRaft stable, Tiered Storage GA, Kafka 4.0 en camino.</p></td>
+</tr>
+
+<!-- 3. STRIMZI -->
+<tr>
+  <td>
+    <div class="tool-name"><div class="tool-icon" style="background:rgba(0,180,100,0.15)">☸️</div>Strimzi</div>
+    <span class="tool-version">v0.45 · 2026</span>
+    <span class="tool-creator">CNCF / Red Hat</span>
+    <div class="tags">
+      <span class="tag tag-oss">OSS</span>
+      <span class="tag tag-free">FREE</span>
+      <span class="tag tag-selfhost">SELF-HOST</span>
+    </div>
+  </td>
+  <td><div class="cell-content"><p>Operador Kubernetes para Apache Kafka. No es un broker nuevo: es la capa de gestión/orquestación que convierte Kafka en un ciudadano nativo de K8s vía CRDs (Custom Resource Definitions).</p></div></td>
+  <td><div class="cell-content"><p>Deploy, escalado, rolling updates, TLS, autenticación y monitoreo de clusters Kafka en K8s. Gestiona Kafka Connect, MirrorMaker2, Kafka Bridge (HTTP). Strimzi Drain Cleaner para mantenimiento.</p></div></td>
+  <td><div class="cell-content"><p>No es independiente de Kafka: SIN Kafka no funciona. No añade capacidades de mensajería nuevas. No compite con RabbitMQ. No ofrece managed service propio.</p></div></td>
+  <td>
+    <ul class="pro-list">
+      <li>Kafka-nativo en Kubernetes</li>
+      <li>Operaciones automatizadas (Day-2 ops)</li>
+      <li>CNCF sandbox (buen soporte comunitario)</li>
+      <li>Integración con Keycloak/OAuth2</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="con-list">
+      <li>Solo para Kubernetes</li>
+      <li>Dependencia total de Kafka</li>
+      <li>Complejidad operacional de K8s + Kafka</li>
+      <li>No reemplaza Kafka managed (MSK, Confluent)</li>
+    </ul>
+  </td>
+  <td class="license-cell">
+    <div class="license-main">Apache 2.0</div>
+    <div class="license-note">100% gratis y open source. Red Hat AMQ Streams es el flavor enterprise.</div>
+  </td>
+  <td>
+    <div class="bar-label">Hereda de Kafka</div>
+    <div class="perf-bar"><div class="bar-bg"><div class="bar-fill" style="width:90%;background:linear-gradient(90deg,#10b981,#34d399)"></div></div></div>
+  </td>
+  <td>
+    <div class="use-list">
+      <div class="use-item yes">Kafka en K8s on-premise</div>
+      <div class="use-item yes">GitOps con Kafka (ArgoCD + Strimzi)</div>
+      <div class="use-item yes">Multi-tenant Kafka en cluster compartido</div>
+    </div>
+  </td>
+  <td>
+    <div class="use-list">
+      <div class="use-item no">Entornos sin Kubernetes</div>
+      <div class="use-item no">Si prefieres Kafka managed en nube</div>
+      <div class="use-item no">Equipos sin experiencia en K8s operators</div>
+    </div>
+  </td>
+  <td><p style="font-size:11px;color:#64748b">Kafka Protocol, HTTP (Bridge), Prometheus</p></td>
+  <td><p style="font-size:11px;color:#10b981">✦ Activo en CNCF. Soporte KRaft completo desde 2025.</p></td>
+</tr>
+
+<!-- 4. REDPANDA -->
+<tr>
+  <td>
+    <div class="tool-name"><div class="tool-icon" style="background:rgba(255,50,80,0.15)">🐼</div>Redpanda</div>
+    <span class="tool-version">v24.x · 2026</span>
+    <span class="tool-creator">Redpanda Data</span>
+    <div class="tags">
+      <span class="tag tag-oss">OSS</span>
+      <span class="tag tag-freemium">FREEMIUM</span>
+      <span class="tag tag-managed">MANAGED</span>
+      <span class="tag tag-selfhost">SELF-HOST</span>
+    </div>
+  </td>
+  <td><div class="cell-content"><p>Plataforma de streaming Kafka-compatible escrita en C++ (no JVM). Diseñada para alto rendimiento con baja latencia. 100% compatible con la API de Kafka sin necesidad de ZooKeeper ni KRaft.</p></div></td>
+  <td><div class="cell-content"><p>Event streaming compatible con Kafka, Redpanda Connect (ex-Benthos) para data pipelines, schema registry integrado, Tiered Storage, WASM transforms, Redpanda Cloud (BYOC/SaaS).</p></div></td>
+  <td><div class="cell-content"><p>No tiene el ecosistema maduro de Kafka. Algunos features enterprise de Confluent no disponibles. Redpanda Connect no cubre 100% casos de Kafka Connect (aunque avanza rápido).</p></div></td>
+  <td>
+    <ul class="pro-list">
+      <li>10x menor latencia que Kafka (sub-ms p99)</li>
+      <li>Sin JVM: menor footprint de memoria</li>
+      <li>Instalación trivial (binario único)</li>
+      <li>Kafka API 100% compatible</li>
+      <li>Redpanda Connect: 200+ conectores built-in</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="con-list">
+      <li>Ecosistema menos maduro que Kafka</li>
+      <li>Licencia BSL en v22+ (no puro OSS)</li>
+      <li>Comunidad más pequeña</li>
+      <li>Soporte enterprise costoso</li>
+    </ul>
+  </td>
+  <td class="license-cell">
+    <div class="license-main">BSL 1.1 / Apache 2.0</div>
+    <div class="license-note">Core gratis. Enterprise features pagos. Redpanda Cloud freemium ($0 hasta cierto uso).</div>
+  </td>
+  <td>
+    <div class="bar-label">2M–15M msg/s</div>
+    <div class="perf-bar"><div class="bar-bg"><div class="bar-fill" style="width:98%;background:linear-gradient(90deg,#ef4444,#f87171)"></div></div></div>
+  </td>
+  <td>
+    <div class="use-list">
+      <div class="use-item yes">Latencia baja crítica con API Kafka</div>
+      <div class="use-item yes">Equipos que quieren Kafka sin JVM complexity</div>
+      <div class="use-item yes">Edge computing / IoT con recursos limitados</div>
+      <div class="use-item yes">Startups que escalan rápido</div>
+    </div>
+  </td>
+  <td>
+    <div class="use-list">
+      <div class="use-item no">Si necesitas Kafka Streams nativo</div>
+      <div class="use-item no">Ecosistema Confluent Platform completo</div>
+      <div class="use-item no">Regulatorio OSS estricto (BSL no es Apache)</div>
+    </div>
+  </td>
+  <td><p style="font-size:11px;color:#64748b">Kafka Protocol, HTTP, Schema Registry API, gRPC</p></td>
+  <td><p style="font-size:11px;color:#10b981">✦ Muy activo. Redpanda Serverless lanzado 2025. Competidor serio de Confluent.</p></td>
+</tr>
+
+<!-- 5. IRONMQ -->
+<tr>
+  <td>
+    <div class="tool-name"><div class="tool-icon" style="background:rgba(128,128,128,0.15)">🔩</div>IronMQ</div>
+    <span class="tool-version">v3 · 2026</span>
+    <span class="tool-creator">Iron.io</span>
+    <div class="tags">
+      <span class="tag tag-paid">PAID</span>
+      <span class="tag tag-cloud">CLOUD</span>
+      <span class="tag tag-managed">MANAGED</span>
+    </div>
+  </td>
+  <td><div class="cell-content"><p>Servicio de cola de mensajes gestionado en la nube. MQ-as-a-service simple, HTTP-first. Diseñado para simplicidad de integración sin operación de infraestructura.</p></div></td>
+  <td><div class="cell-content"><p>Colas de mensajes HTTP, push queues, delayed messages, timeouts, dead letter queues. API REST simple. Multi-cloud. Webhooks. Buena integración con IronWorker.</p></div></td>
+  <td><div class="cell-content"><p>No es streaming de eventos. Sin pub/sub masivo. Sin ordering guarantees globales. Sin replay. Sin stream processing. No compete con Kafka ni en throughput ni en features.</p></div></td>
+  <td>
+    <ul class="pro-list">
+      <li>Extremadamente fácil de usar (HTTP REST)</li>
+      <li>Sin infraestructura que gestionar</li>
+      <li>Buena para equipos pequeños y MVP</li>
+      <li>SDKs multi-lenguaje</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="con-list">
+      <li>Producto en declive — poca innovación desde 2020</li>
+      <li>Solo cloud (sin self-host)</li>
+      <li>Pricing escalado puede ser caro</li>
+      <li>Lock-in de proveedor</li>
+      <li>Comunidad pequeña, soporte limitado</li>
+    </ul>
+  </td>
+  <td class="license-cell">
+    <div class="license-main">SaaS — Solo Pago</div>
+    <div class="license-note">Pricing por mensajes procesados. No hay tier gratuito permanente.</div>
+  </td>
+  <td>
+    <div class="bar-label">~10–50k msg/s</div>
+    <div class="perf-bar"><div class="bar-bg"><div class="bar-fill" style="width:15%;background:linear-gradient(90deg,#6b7280,#9ca3af)"></div></div></div>
+  </td>
+  <td>
+    <div class="use-list">
+      <div class="use-item yes">MVPs que necesitan queue HTTP simple</div>
+      <div class="use-item yes">Equipos sin expertise en mensajería</div>
+    </div>
+  </td>
+  <td>
+    <div class="use-list">
+      <div class="use-item no">Producción enterprise de alto volumen</div>
+      <div class="use-item no">Event streaming o event sourcing</div>
+      <div class="use-item no">Nuevos proyectos (considerar SQS o NATS)</div>
+    </div>
+  </td>
+  <td><p style="font-size:11px;color:#64748b">HTTP REST, JSON</p></td>
+  <td><p style="font-size:11px;color:#f59e0b">⚠ Mantenimiento mínimo. No recomendado para proyectos nuevos en 2026.</p></td>
+</tr>
+
+<!-- 6. GCP PubSub -->
+<tr>
+  <td>
+    <div class="tool-name"><div class="tool-icon" style="background:rgba(66,133,244,0.15)">☁️</div>GCP Pub/Sub</div>
+    <span class="tool-version">2026 GA</span>
+    <span class="tool-creator">Google Cloud</span>
+    <div class="tags">
+      <span class="tag tag-freemium">FREEMIUM</span>
+      <span class="tag tag-cloud">CLOUD</span>
+      <span class="tag tag-managed">MANAGED</span>
+    </div>
+  </td>
+  <td><div class="cell-content"><p>Servicio de mensajería pub/sub completamente gestionado de Google Cloud. Escala global automática. Backbone de muchos servicios internos de Google. Integración nativa con todo el ecosistema GCP.</p></div></td>
+  <td><div class="cell-content"><p>Pub/sub global, exactly-once delivery, ordering garantizado (por región/key), BigQuery/Cloud Storage subscriptions, Dataflow integration, message filtering, dead letter topics, retención 7 días.</p></div></td>
+  <td><div class="cell-content"><p>No es un event log con replay histórico (limitado a 7 días). Sin stream processing nativo (requiere Dataflow). No self-hosteable. Latencia varía por región. Sin Kafka API.</p></div></td>
+  <td>
+    <ul class="pro-list">
+      <li>Escala global automática sin operación</li>
+      <li>SLA 99.95% garantizado</li>
+      <li>Integración perfecta con GCP (BigQuery, GCS, Dataflow)</li>
+      <li>At-least-once y exactly-once</li>
+      <li>10GB gratis/mes</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="con-list">
+      <li>Solo en GCP (cloud lock-in)</li>
+      <li>Costo puede escalar rápido a alto volumen</li>
+      <li>Replay limitado a 7 días</li>
+      <li>Sin Kafka API compatibility</li>
+    </ul>
+  </td>
+  <td class="license-cell">
+    <div class="license-main">Freemium SaaS</div>
+    <div class="license-note">10 GB gratis/mes. Luego $0.04–$0.05 por GB.</div>
+  </td>
+  <td>
+    <div class="bar-label">&gt;1M msg/s global</div>
+    <div class="perf-bar"><div class="bar-bg"><div class="bar-fill" style="width:88%;background:linear-gradient(90deg,#4285f4,#60a5fa)"></div></div></div>
+  </td>
+  <td>
+    <div class="use-list">
+      <div class="use-item yes">Arquitecturas 100% en GCP</div>
+      <div class="use-item yes">Eventos de Cloud Run / GKE a BigQuery</div>
+      <div class="use-item yes">IoT global con alta escala</div>
+      <div class="use-item yes">Equipos sin querer operar infraestructura</div>
+    </div>
+  </td>
+  <td>
+    <div class="use-list">
+      <div class="use-item no">Multi-cloud o migración futura</div>
+      <div class="use-item no">Retención de eventos &gt;7 días sin costo extra</div>
+      <div class="use-item no">Necesitas Kafka API (usar Kafka en GCP en su lugar)</div>
+    </div>
+  </td>
+  <td><p style="font-size:11px;color:#64748b">HTTP REST, gRPC, Avro/Protobuf/JSON, Cloud Storage triggers</p></td>
+  <td><p style="font-size:11px;color:#10b981">✦ Muy activo. Pub/Sub Lite deprecado 2025. Bigquery subs mejoradas.</p></td>
+</tr>
+
+<!-- 7. REDIS PubSub -->
+<tr>
+  <td>
+    <div class="tool-name"><div class="tool-icon" style="background:rgba(220,50,50,0.15)">🔴</div>Redis Pub/Sub</div>
+    <span class="tool-version">Redis 8.x · 2026</span>
+    <span class="tool-creator">Redis Ltd / Valkey fork</span>
+    <div class="tags">
+      <span class="tag tag-oss">OSS</span>
+      <span class="tag tag-free">FREE</span>
+      <span class="tag tag-freemium">FREEMIUM</span>
+      <span class="tag tag-selfhost">SELF-HOST</span>
+    </div>
+  </td>
+  <td><div class="cell-content"><p>Sistema pub/sub fire-and-forget integrado en Redis. Incluye también Redis Streams (estructura de datos para event log). No es un MQ dedicado: es una feature de una base de datos en memoria.</p></div></td>
+  <td><div class="cell-content"><p>Pub/Sub básico (PUBLISH/SUBSCRIBE/PSUBSCRIBE). Redis Streams: log append-only con consumer groups, ACK, replay limitado. Latencia ultra-baja (&lt;1ms). Integrado con caching.</p></div></td>
+  <td><div class="cell-content"><p>Pub/Sub nativo: sin persistencia ni ACK (fire-and-forget). Streams: sin escala horizontal nativa de particiones. Sin schema registry. Sin exactly-once semántica robusta. No reemplaza Kafka para durabilidad.</p></div></td>
+  <td>
+    <ul class="pro-list">
+      <li>Latencia ultra-baja (&lt;1ms)</li>
+      <li>Ya lo tienes si usas Redis para caché</li>
+      <li>Redis Streams es un mini-Kafka simple</li>
+      <li>Streams con consumer groups y ACK</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="con-list">
+      <li>Pub/Sub: sin garantía de entrega (fire-forget)</li>
+      <li>Datos en memoria: costoso a gran escala</li>
+      <li>Redis cambió licencia a RSALv2/SSPLv1 en 2024</li>
+      <li>Valkey (fork OSS) fragmentó comunidad</li>
+    </ul>
+  </td>
+  <td class="license-cell">
+    <div class="license-main">RSALv2 / SSPLv1</div>
+    <div class="license-note">Redis Ltd cambió de BSD en 2024. Valkey (fork OSS Apache 2.0) es alternativa. Redis Cloud freemium.</div>
+  </td>
+  <td>
+    <div class="bar-label">1M+ msg/s (en memoria)</div>
+    <div class="perf-bar"><div class="bar-bg"><div class="bar-fill" style="width:85%;background:linear-gradient(90deg,#ef4444,#fca5a5)"></div></div></div>
+  </td>
+  <td>
+    <div class="use-list">
+      <div class="use-item yes">Chat en tiempo real, presencia, cursores live</div>
+      <div class="use-item yes">Notificaciones efímeras (no críticas)</div>
+      <div class="use-item yes">Gaming leaderboards + eventos</div>
+      <div class="use-item yes">Redis Streams para queue simple persistente</div>
+    </div>
+  </td>
+  <td>
+    <div class="use-list">
+      <div class="use-item no">Mensajes críticos que no se pueden perder</div>
+      <div class="use-item no">Volúmenes masivos de eventos durables</div>
+      <div class="use-item no">Regulatorio que exige persistencia verificada</div>
+    </div>
+  </td>
+  <td><p style="font-size:11px;color:#64748b">Redis Protocol (RESP3), HTTP (Redis Stack), Pub/Sub nativo</p></td>
+  <td><p style="font-size:11px;color:#f59e0b">⚠ Controversia por cambio de licencia. Valkey gana tracción como fork. Redis 8 lanzado 2025.</p></td>
+</tr>
+
+<!-- ═══════════════════════════════════════════════ SECCION 2 ══ -->
+<tr class="section-row"><td colspan="12">── 13 alternativas adicionales ─────────────────────────────────────────────────────────────────</td></tr>
+
+<!-- 8. NATS -->
+<tr>
+  <td>
+    <div class="tool-name"><div class="tool-icon" style="background:rgba(0,180,220,0.15)">🌊</div>NATS / JetStream</div>
+    <span class="tool-version">v2.10 · 2026</span>
+    <span class="tool-creator">Synadia / CNCF</span>
+    <div class="tags">
+      <span class="tag tag-oss">OSS</span>
+      <span class="tag tag-free">FREE</span>
+      <span class="tag tag-freemium">FREEMIUM</span>
+      <span class="tag tag-selfhost">SELF-HOST</span>
+    </div>
+  </td>
+  <td><div class="cell-content"><p>Messaging system de alto rendimiento para cloud-native. Muy ligero (binario único &lt;10MB). NATS Core es pub/sub básico; JetStream añade persistencia, replay y consumer groups.</p></div></td>
+  <td><div class="cell-content"><p>Pub/Sub, request-reply, queue groups, JetStream (streams persistentes, consumers pull/push, KV store, Object Store). Leaf nodes para edge. Multi-tenancy con accounts. Ideal para microservicios.</p></div></td>
+  <td><div class="cell-content"><p>No tan maduro como Kafka para petabytes de data. Sin Kafka API. Stream processing nativo limitado. NATS Core: sin persistencia garantizada.</p></div></td>
+  <td>
+    <ul class="pro-list">
+      <li>Extremadamente ligero y rápido</li>
+      <li>Excelente para edge / IoT / embedded</li>
+      <li>JetStream combina PubSub + Queue + KV</li>
+      <li>Proyecto CNCF graduado</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="con-list">
+      <li>Ecosistema más pequeño que Kafka</li>
+      <li>JetStream no reemplaza Kafka a megaescala</li>
+      <li>Synadia cloud tiene pricing alto</li>
+    </ul>
+  </td>
+  <td class="license-cell"><div class="license-main">Apache 2.0</div><div class="license-note">Gratis. Synadia Cloud freemium.</div></td>
+  <td>
+    <div class="bar-label">10M+ msg/s</div>
+    <div class="perf-bar"><div class="bar-bg"><div class="bar-fill" style="width:92%;background:linear-gradient(90deg,#06b6d4,#67e8f9)"></div></div></div>
+  </td>
+  <td>
+    <div class="use-list">
+      <div class="use-item yes">Microservicios cloud-native ligeros</div>
+      <div class="use-item yes">Edge computing e IoT</div>
+      <div class="use-item yes">Service mesh messaging</div>
+    </div>
+  </td>
+  <td>
+    <div class="use-list">
+      <div class="use-item no">Reemplazar Kafka en big data pipelines</div>
+      <div class="use-item no">Equipo solo conoce Kafka API</div>
+    </div>
+  </td>
+  <td><p style="font-size:11px;color:#64748b">NATS Protocol (TCP), WebSocket, TLS</p></td>
+  <td><p style="font-size:11px;color:#10b981">✦ Muy activo. JetStream madurando. NATS 2.11 en desarrollo.</p></td>
+</tr>
+
+<!-- 9. AWS SQS/SNS -->
+<tr>
+  <td>
+    <div class="tool-name"><div class="tool-icon" style="background:rgba(255,153,0,0.15)">🟠</div>AWS SQS / SNS</div>
+    <span class="tool-version">2026 GA</span>
+    <span class="tool-creator">Amazon Web Services</span>
+    <div class="tags">
+      <span class="tag tag-freemium">FREEMIUM</span>
+      <span class="tag tag-cloud">CLOUD</span>
+      <span class="tag tag-managed">MANAGED</span>
+    </div>
+  </td>
+  <td><div class="cell-content"><p>SQS: cola de mensajes managed de AWS. SNS: servicio de notificaciones pub/sub y fan-out. Son servicios independientes que se complementan. Los más usados en arquitecturas AWS.</p></div></td>
+  <td><div class="cell-content"><p>SQS: colas standard y FIFO, dead-letter, visibility timeout. SNS: fan-out a múltiples suscriptores (SQS, Lambda, HTTP, email, SMS). EventBridge extiende con routing basado en reglas.</p></div></td>
+  <td><div class="cell-content"><p>No es event streaming. Sin replay (SQS retiene max 14 días). SNS no tiene persistencia del lado consumidor. Sin Kafka API. Lock-in total en AWS.</p></div></td>
+  <td>
+    <ul class="pro-list">
+      <li>Integración nativa con todo AWS</li>
+      <li>Escala automática infinita</li>
+      <li>1M mensajes gratis/mes (SQS)</li>
+      <li>Sin operación — serverless</li>
+      <li>FIFO queues para ordering estricto</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="con-list">
+      <li>AWS lock-in total</li>
+      <li>SQS: sin replay / streaming</li>
+      <li>Costos altos a alto volumen</li>
+      <li>Latencia más alta que Redis/NATS</li>
+    </ul>
+  </td>
+  <td class="license-cell"><div class="license-main">Freemium SaaS</div><div class="license-note">SQS: 1M req gratis, luego $0.40/M. SNS: 1M pub gratis.</div></td>
+  <td>
+    <div class="bar-label">Millones msg/s</div>
+    <div class="perf-bar"><div class="bar-bg"><div class="bar-fill" style="width:80%;background:linear-gradient(90deg,#f97316,#fbbf24)"></div></div></div>
+  </td>
+  <td>
+    <div class="use-list">
+      <div class="use-item yes">Todo lo que vive en AWS</div>
+      <div class="use-item yes">Lambda triggers + decoupling</div>
+      <div class="use-item yes">Fan-out de eventos a múltiples servicios</div>
+    </div>
+  </td>
+  <td>
+    <div class="use-list">
+      <div class="use-item no">Multi-cloud o salida de AWS planeada</div>
+      <div class="use-item no">Event replay o sourcing histórico</div>
+    </div>
+  </td>
+  <td><p style="font-size:11px;color:#64748b">HTTP/HTTPS REST, SDK AWS (todos los lenguajes)</p></td>
+  <td><p style="font-size:11px;color:#10b981">✦ Activo. EventBridge Pipes gana popularidad como orquestador.</p></td>
+</tr>
+
+<!-- 10. AZURE SERVICE BUS -->
+<tr>
+  <td>
+    <div class="tool-name"><div class="tool-icon" style="background:rgba(0,120,212,0.15)">🔷</div>Azure Service Bus</div>
+    <span class="tool-version">2026 GA</span>
+    <span class="tool-creator">Microsoft Azure</span>
+    <div class="tags">
+      <span class="tag tag-freemium">FREEMIUM</span>
+      <span class="tag tag-cloud">CLOUD</span>
+      <span class="tag tag-managed">MANAGED</span>
+    </div>
+  </td>
+  <td><div class="cell-content"><p>Broker de mensajería enterprise gestionado de Azure. AMQP-based. Equivalente a RabbitMQ pero managed en Azure. Soporte para sesiones, transacciones, dead-letter, topics y suscripciones (pub/sub).</p></div></td>
+  <td><div class="cell-content"><p>Queues y Topics con suscripciones. Filtros SQL en mensajes. Transacciones AMQP. Sesiones para ordering. Dead letter automático. Deferred messages. Auto-forwarding. Integración con Azure Functions, Logic Apps.</p></div></td>
+  <td><div class="cell-content"><p>No es streaming (para eso Azure Event Hubs). Sin replay extenso. Sin Kafka API nativa (aunque Event Hubs sí tiene). Lock-in Azure.</p></div></td>
+  <td>
+    <ul class="pro-list">
+      <li>AMQP 1.0 estándar enterprise</li>
+      <li>Transacciones distribuidas</li>
+      <li>Excelente para workflows enterprise</li>
+      <li>Integración perfecta con Azure ecosystem</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="con-list">
+      <li>Azure lock-in</li>
+      <li>Sin streaming / replay extenso</li>
+      <li>Pricing puede ser alto en Basic tier</li>
+    </ul>
+  </td>
+  <td class="license-cell"><div class="license-main">Freemium SaaS</div><div class="license-note">Basic: $0.05/M ops. Standard/Premium con features avanzados.</div></td>
+  <td>
+    <div class="bar-label">~100k–1M msg/s</div>
+    <div class="perf-bar"><div class="bar-bg"><div class="bar-fill" style="width:55%;background:linear-gradient(90deg,#0078d4,#60a5fa)"></div></div></div>
+  </td>
+  <td>
+    <div class="use-list">
+      <div class="use-item yes">Workflows enterprise en Azure</div>
+      <div class="use-item yes">Integración con SAP, Dynamics, Logic Apps</div>
+      <div class="use-item yes">Transacciones distribuidas críticas</div>
+    </div>
+  </td>
+  <td>
+    <div class="use-list">
+      <div class="use-item no">Streaming de eventos (usar Event Hubs)</div>
+      <div class="use-item no">Multi-cloud o proyectos agnósticos</div>
+    </div>
+  </td>
+  <td><p style="font-size:11px;color:#64748b">AMQP 1.0, HTTP REST, Azure SDK</p></td>
+  <td><p style="font-size:11px;color:#10b981">✦ Activo. Premium tier con JMS 2.0 support. Integración con AI services de Azure.</p></td>
+</tr>
+
+<!-- 11. APACHE PULSAR -->
+<tr>
+  <td>
+    <div class="tool-name"><div class="tool-icon" style="background:rgba(100,50,200,0.15)">✨</div>Apache Pulsar</div>
+    <span class="tool-version">v4.x · 2026</span>
+    <span class="tool-creator">Apache / StreamNative</span>
+    <div class="tags">
+      <span class="tag tag-oss">OSS</span>
+      <span class="tag tag-free">FREE</span>
+      <span class="tag tag-freemium">FREEMIUM</span>
+      <span class="tag tag-selfhost">SELF-HOST</span>
+    </div>
+  </td>
+  <td><div class="cell-content"><p>Sistema de mensajería y streaming unificado que combina mensaje (RabbitMQ) y stream (Kafka). Arquitectura separada de cómputo y almacenamiento (BookKeeper). Diseñado por Yahoo!</p></div></td>
+  <td><div class="cell-content"><p>Multi-tenancy nativo, geo-replication, topic compaction, Pulsar Functions (serverless stream processing), Pulsar IO (conectores), retención ilimitada, subscriptions multiple (exclusive, shared, failover, key-shared).</p></div></td>
+  <td><div class="cell-content"><p>Complejo de operar (Pulsar + BookKeeper + ZooKeeper). Menor ecosistema que Kafka. Sin Kafka API 100% compatible (Kafka-on-Pulsar existe pero con limitaciones).</p></div></td>
+  <td>
+    <ul class="pro-list">
+      <li>Multi-tenancy y geo-replication nativos</li>
+      <li>Compute-storage separation = escala independiente</li>
+      <li>Retención ilimitada nativa</li>
+      <li>Combina messaging + streaming</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="con-list">
+      <li>Muy complejo de operar (3 sistemas)</li>
+      <li>Ecosistema menor que Kafka</li>
+      <li>StreamNative es el principal driver</li>
+      <li>Adopción más lenta de lo esperado</li>
+    </ul>
+  </td>
+  <td class="license-cell"><div class="license-main">Apache 2.0</div><div class="license-note">Gratis self-hosted. StreamNative Cloud freemium.</div></td>
+  <td>
+    <div class="bar-label">1M+ msg/s</div>
+    <div class="perf-bar"><div class="bar-bg"><div class="bar-fill" style="width:75%;background:linear-gradient(90deg,#7c3aed,#a78bfa)"></div></div></div>
+  </td>
+  <td>
+    <div class="use-list">
+      <div class="use-item yes">Multi-tenant SaaS platforms</div>
+      <div class="use-item yes">Geo-distributed messaging</div>
+      <div class="use-item yes">Combinación messaging + streaming</div>
+    </div>
+  </td>
+  <td>
+    <div class="use-list">
+      <div class="use-item no">Equipos pequeños (complejidad operacional)</div>
+      <div class="use-item no">Si solo necesitas Kafka features</div>
+    </div>
+  </td>
+  <td><p style="font-size:11px;color:#64748b">Pulsar Protocol, Kafka Protocol (KoP), WebSocket, HTTP</p></td>
+  <td><p style="font-size:11px;color:#f59e0b">⚠ Activo pero crecimiento lento vs Redpanda. Pulsar 4.0 en 2025 mejoró KoP.</p></td>
+</tr>
+
+<!-- 12. ACTIVEMQ ARTEMIS -->
+<tr>
+  <td>
+    <div class="tool-name"><div class="tool-icon" style="background:rgba(200,100,0,0.15)">⚗️</div>ActiveMQ Artemis</div>
+    <span class="tool-version">v2.38 · 2026</span>
+    <span class="tool-creator">Apache Foundation</span>
+    <div class="tags">
+      <span class="tag tag-oss">OSS</span>
+      <span class="tag tag-free">FREE</span>
+      <span class="tag tag-selfhost">SELF-HOST</span>
+    </div>
+  </td>
+  <td><div class="cell-content"><p>Broker de mensajería enterprise JMS/AMQP. El sucesor del ActiveMQ clásico (HornetQ merge). Usado ampliamente en entornos Java enterprise y JEE. El estándar en muchas organizaciones financieras.</p></div></td>
+  <td><div class="cell-content"><p>JMS 2.0, AMQP 1.0, MQTT, STOMP, OpenWire. Clustering HA con shared store o replication. Large message support. Paging para mensajes que excedan memoria. XA Transactions.</p></div></td>
+  <td><div class="cell-content"><p>No es streaming. Sin replay masivo. Arquitectura orientada a mensajes, no eventos. Performance inferior a Kafka/Redpanda para streaming. UI limitada comparado con RabbitMQ.</p></div></td>
+  <td>
+    <ul class="pro-list">
+      <li>JMS 2.0 estándar Java enterprise</li>
+      <li>XA Transactions para sistemas financieros</li>
+      <li>Multi-protocolo (AMQP, MQTT, JMS, STOMP)</li>
+      <li>Confiable y maduro</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="con-list">
+      <li>Sensación de tecnología legacy</li>
+      <li>Complejidad de configuración Java/XML</li>
+      <li>Sin cloud managed oficial</li>
+      <li>Menos popular que RabbitMQ hoy</li>
+    </ul>
+  </td>
+  <td class="license-cell"><div class="license-main">Apache 2.0</div><div class="license-note">100% gratuito. Red Hat AMQ Broker es flavor enterprise.</div></td>
+  <td>
+    <div class="bar-label">~100–500k msg/s</div>
+    <div class="perf-bar"><div class="bar-bg"><div class="bar-fill" style="width:40%;background:linear-gradient(90deg,#d97706,#fbbf24)"></div></div></div>
+  </td>
+  <td>
+    <div class="use-list">
+      <div class="use-item yes">Sistemas financieros con JMS/XA</div>
+      <div class="use-item yes">Migración desde ActiveMQ Classic</div>
+      <div class="use-item yes">Entornos JEE / Jakarta EE</div>
+    </div>
+  </td>
+  <td>
+    <div class="use-list">
+      <div class="use-item no">Nuevos proyectos cloud-native</div>
+      <div class="use-item no">Event streaming o big data</div>
+    </div>
+  </td>
+  <td><p style="font-size:11px;color:#64748b">JMS, AMQP 1.0, MQTT, STOMP, OpenWire</p></td>
+  <td><p style="font-size:11px;color:#10b981">✦ Mantenido activamente. Artemis v2.38 en 2026. Legacy sólido.</p></td>
+</tr>
+
+<!-- 13. CONFLUENT KAFKA -->
+<tr>
+  <td>
+    <div class="tool-name"><div class="tool-icon" style="background:rgba(0,180,255,0.15)">🌐</div>Confluent Platform</div>
+    <span class="tool-version">7.x · 2026</span>
+    <span class="tool-creator">Confluent Inc.</span>
+    <div class="tags">
+      <span class="tag tag-freemium">FREEMIUM</span>
+      <span class="tag tag-managed">MANAGED</span>
+      <span class="tag tag-selfhost">SELF-HOST</span>
+    </div>
+  </td>
+  <td><div class="cell-content"><p>Kafka enterprise con superpoderes. Schema Registry, ksqlDB, Kafka Connect con 200+ conectores, Control Center. La versión "batteries included" de Kafka. Creada por los fundadores originales de Kafka.</p></div></td>
+  <td><div class="cell-content"><p>Todo Kafka + Schema Registry (Avro/Protobuf/JSON), ksqlDB (SQL sobre streams), Confluent Connect, RBAC, audit logs, cluster linking, Tableflow (tablas en tiempo real), Flink integrado en cloud.</p></div></td>
+  <td><div class="cell-content"><p>Muy costoso. Community Edition limitada (solo algunas features). No compite en latencia con Redpanda. La mayoría de features premium están solo en Confluent Cloud.</p></div></td>
+  <td>
+    <ul class="pro-list">
+      <li>El Kafka más completo del mercado</li>
+      <li>ksqlDB + Flink para stream SQL</li>
+      <li>200+ conectores certificados</li>
+      <li>Schema Registry estándar de la industria</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="con-list">
+      <li>Costosísimo en producción</li>
+      <li>Community Edition muy limitada</li>
+      <li>Vendor lock-in significativo</li>
+    </ul>
+  </td>
+  <td class="license-cell"><div class="license-main">Freemium / Comercial</div><div class="license-note">Confluent Cloud: $0.11/GB procesado. Enterprise: pricing por negociación.</div></td>
+  <td>
+    <div class="bar-label">1M–10M msg/s</div>
+    <div class="perf-bar"><div class="bar-bg"><div class="bar-fill" style="width:95%;background:linear-gradient(90deg,#0ea5e9,#38bdf8)"></div></div></div>
+  </td>
+  <td>
+    <div class="use-list">
+      <div class="use-item yes">Enterprise con presupuesto para Kafka managed</div>
+      <div class="use-item yes">Data mesh y stream SQL complejo</div>
+      <div class="use-item yes">Compliance y auditoría Kafka avanzada</div>
+    </div>
+  </td>
+  <td>
+    <div class="use-list">
+      <div class="use-item no">Startups o proyectos con presupuesto limitado</div>
+      <div class="use-item no">Si Apache Kafka OSS es suficiente</div>
+    </div>
+  </td>
+  <td><p style="font-size:11px;color:#64748b">Kafka Protocol + todos los de Kafka</p></td>
+  <td><p style="font-size:11px;color:#10b981">✦ Activo. Tableflow + Flink GA en 2025. Competencia dura de Redpanda.</p></td>
+</tr>
+
+<!-- 14. SOLACE -->
+<tr>
+  <td>
+    <div class="tool-name"><div class="tool-icon" style="background:rgba(0,200,100,0.15)">💡</div>Solace PubSub+</div>
+    <span class="tool-version">v10.x · 2026</span>
+    <span class="tool-creator">Solace Systems</span>
+    <div class="tags">
+      <span class="tag tag-freemium">FREEMIUM</span>
+      <span class="tag tag-managed">MANAGED</span>
+      <span class="tag tag-selfhost">SELF-HOST</span>
+    </div>
+  </td>
+  <td><div class="cell-content"><p>Plataforma de mensajería enterprise de alto rendimiento con hardware especializado. Históricamente usada en trading financiero de alta frecuencia. Ahora también software con Solace Cloud.</p></div></td>
+  <td><div class="cell-content"><p>Pub/sub con latencia determinista, JMS, AMQP, MQTT, REST, Kafka API bridge, event mesh, event portal (catálogo de eventos), WAN optimization, cloud messaging managed.</p></div></td>
+  <td><div class="cell-content"><p>Muy costoso para mayoría de casos. Overkill para proyectos normales. Sin OSS completo. Complejidad de arquitectura de event mesh para equipos pequeños.</p></div></td>
+  <td>
+    <ul class="pro-list">
+      <li>Latencia determinista (&lt;50µs en hardware)</li>
+      <li>Event Mesh cross-cloud nativo</li>
+      <li>Multi-protocolo incluyendo Kafka bridge</li>
+      <li>Event Portal para gobierno de eventos</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="con-list">
+      <li>Muy costoso (enterprise pricing)</li>
+      <li>Principalmente útil en finanzas y telecom</li>
+      <li>Vendor lock-in significativo</li>
+    </ul>
+  </td>
+  <td class="license-cell"><div class="license-main">Freemium / Enterprise</div><div class="license-note">Developer (gratis). Enterprise: negociado. Hardware appliance: costosísimo.</div></td>
+  <td>
+    <div class="bar-label">&lt;50µs latencia</div>
+    <div class="perf-bar"><div class="bar-bg"><div class="bar-fill" style="width:99%;background:linear-gradient(90deg,#10b981,#6ee7b7)"></div></div></div>
+  </td>
+  <td>
+    <div class="use-list">
+      <div class="use-item yes">Trading de alta frecuencia (HFT)</div>
+      <div class="use-item yes">Telecomunicaciones y utilities</div>
+      <div class="use-item yes">Event mesh cross-cloud enterprise</div>
+    </div>
+  </td>
+  <td>
+    <div class="use-list">
+      <div class="use-item no">Startups o proyectos sin budget enterprise</div>
+      <div class="use-item no">Casos que Kafka/RabbitMQ cubren bien</div>
+    </div>
+  </td>
+  <td><p style="font-size:11px;color:#64748b">AMQP, JMS, MQTT, REST, Kafka Protocol, WebSocket</p></td>
+  <td><p style="font-size:11px;color:#10b981">✦ Activo. Solace Event Portal v2 ganando tracción en enterprise.</p></td>
+</tr>
+
+<!-- 15. EVENTBRIDGE -->
+<tr>
+  <td>
+    <div class="tool-name"><div class="tool-icon" style="background:rgba(255,153,0,0.12)">🌉</div>AWS EventBridge</div>
+    <span class="tool-version">2026 GA</span>
+    <span class="tool-creator">Amazon Web Services</span>
+    <div class="tags">
+      <span class="tag tag-freemium">FREEMIUM</span>
+      <span class="tag tag-cloud">CLOUD</span>
+      <span class="tag tag-managed">MANAGED</span>
+    </div>
+  </td>
+  <td><div class="cell-content"><p>Event bus serverless de AWS. No es un message broker tradicional: es un router de eventos con reglas de filtrado/transformación. El "sistema nervioso" para arquitecturas event-driven en AWS.</p></div></td>
+  <td><div class="cell-content"><p>Event routing con reglas y filtros, schema registry integrado, event replay (hasta 24h), pipes (point-to-point), scheduler (jobs programados), SaaS integrations (Datadog, Zendesk, etc.), cross-account events.</p></div></td>
+  <td><div class="cell-content"><p>No es alta frecuencia (máx ~10k eventos/s por bus por defecto). Sin ordering garantizado. Sin streaming de datos masivos. No reemplaza Kafka. Latencia no determinista.</p></div></td>
+  <td>
+    <ul class="pro-list">
+      <li>Integración nativa con 200+ servicios AWS</li>
+      <li>SaaS integrations out-of-the-box</li>
+      <li>Schema discovery automático</li>
+      <li>EventBridge Pipes simplifica integrations</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="con-list">
+      <li>Solo AWS (cloud lock-in)</li>
+      <li>Límites de throughput bajos por defecto</li>
+      <li>Debug y observabilidad complejo</li>
+      <li>Costo por evento puede sumar</li>
+    </ul>
+  </td>
+  <td class="license-cell"><div class="license-main">Freemium SaaS</div><div class="license-note">Default bus gratis. Custom bus: $1/M eventos enviados.</div></td>
+  <td>
+    <div class="bar-label">~10k eventos/s</div>
+    <div class="perf-bar"><div class="bar-bg"><div class="bar-fill" style="width:25%;background:linear-gradient(90deg,#f59e0b,#fbbf24)"></div></div></div>
+  </td>
+  <td>
+    <div class="use-list">
+      <div class="use-item yes">Orquestación de microservicios en AWS</div>
+      <div class="use-item yes">Integraciones SaaS (Salesforce, GitHub, Datadog)</div>
+      <div class="use-item yes">Event-driven architectures serverless</div>
+    </div>
+  </td>
+  <td>
+    <div class="use-list">
+      <div class="use-item no">Alto throughput de eventos</div>
+      <div class="use-item no">Streaming de datos continuos</div>
+      <div class="use-item no">Multi-cloud</div>
+    </div>
+  </td>
+  <td><p style="font-size:11px;color:#64748b">HTTP/HTTPS, JSON, AWS SDK</p></td>
+  <td><p style="font-size:11px;color:#10b981">✦ Activo. EventBridge Scheduler GA 2024. Pipes muy usado en 2026.</p></td>
+</tr>
+
+<!-- 16. MOSQUITTO / EMQX -->
+<tr>
+  <td>
+    <div class="tool-name"><div class="tool-icon" style="background:rgba(0,150,100,0.15)">📡</div>EMQX (+ Mosquitto)</div>
+    <span class="tool-version">v5.8 · 2026</span>
+    <span class="tool-creator">EMQ Technologies</span>
+    <div class="tags">
+      <span class="tag tag-oss">OSS</span>
+      <span class="tag tag-freemium">FREEMIUM</span>
+      <span class="tag tag-selfhost">SELF-HOST</span>
+      <span class="tag tag-managed">MANAGED</span>
+    </div>
+  </td>
+  <td><div class="cell-content"><p>MQTT broker de alto rendimiento. Mosquitto es la referencia ligera de Eclipse. EMQX es el broker MQTT más escalable del mercado. MQTT es el protocolo estándar de IoT (ISO/IEC 20922).</p></div></td>
+  <td><div class="cell-content"><p>MQTT 3.1/5.0, pub/sub para dispositivos IoT, 100M+ conexiones concurrentes (EMQX), QoS 0/1/2, retained messages, will messages, EMQX Flows para data processing, bridge a Kafka/RabbitMQ.</p></div></td>
+  <td><div class="cell-content"><p>MQTT no es para microservicios enterprise. Sin streaming masivo de datos. Sin Kafka-level event sourcing. Mosquitto no escala a millones de conexiones.</p></div></td>
+  <td>
+    <ul class="pro-list">
+      <li>El estándar para IoT y dispositivos embebidos</li>
+      <li>EMQX: 100M conexiones concurrentes</li>
+      <li>MQTT 5.0 con features avanzados</li>
+      <li>EMQX Cloud freemium generoso</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="con-list">
+      <li>Diseñado para IoT, no general purpose</li>
+      <li>MQTT no es ideal para microservicios complejos</li>
+      <li>EMQX enterprise muy costoso</li>
+    </ul>
+  </td>
+  <td class="license-cell"><div class="license-main">Apache 2.0 (EMQX OSS)</div><div class="license-note">Mosquitto: EPL. EMQX Cloud freemium. Enterprise: comercial.</div></td>
+  <td>
+    <div class="bar-label">100M conexiones</div>
+    <div class="perf-bar"><div class="bar-bg"><div class="bar-fill" style="width:90%;background:linear-gradient(90deg,#059669,#34d399)"></div></div></div>
+  </td>
+  <td>
+    <div class="use-list">
+      <div class="use-item yes">IoT: sensores, smart home, vehículos</div>
+      <div class="use-item yes">Apps móviles con notificaciones push</div>
+      <div class="use-item yes">Industria 4.0 y SCADA modernos</div>
+    </div>
+  </td>
+  <td>
+    <div class="use-list">
+      <div class="use-item no">Microservicios sin componente IoT</div>
+      <div class="use-item no">Event streaming de datos masivos</div>
+    </div>
+  </td>
+  <td><p style="font-size:11px;color:#64748b">MQTT 3.1/5.0, WebSocket-MQTT, CoAP (EMQX)</p></td>
+  <td><p style="font-size:11px;color:#10b981">✦ Muy activo. EMQX 5.x con arquitectura cluster mejorada. Mosquitto 2.x activo.</p></td>
+</tr>
+
+<!-- 17. VALKEY -->
+<tr>
+  <td>
+    <div class="tool-name"><div class="tool-icon" style="background:rgba(100,180,0,0.15)">🔑</div>Valkey</div>
+    <span class="tool-version">v8.x · 2026</span>
+    <span class="tool-creator">Linux Foundation / AWS, Google</span>
+    <div class="tags">
+      <span class="tag tag-oss">OSS</span>
+      <span class="tag tag-free">FREE</span>
+      <span class="tag tag-selfhost">SELF-HOST</span>
+    </div>
+  </td>
+  <td><div class="cell-content"><p>Fork de Redis mantenido por la Linux Foundation, creado en respuesta al cambio de licencia de Redis a RSALv2. 100% compatible con Redis. Soportado por AWS, Google, Oracle, Ericsson.</p></div></td>
+  <td><div class="cell-content"><p>Todo lo que hace Redis: pub/sub, Streams, caching, data structures. Valkey 8.x añade mejoras de performance y multi-threading avanzado. Compatible con todos los clientes Redis existentes.</p></div></td>
+  <td><div class="cell-content"><p>Igual que Redis: pub/sub sin garantía de entrega. Streams no reemplazan Kafka. Relativamente nuevo: algunos edge cases de compatibilidad. Sin managed service propio maduro (aunque ElastiCache lo soporta).</p></div></td>
+  <td>
+    <ul class="pro-list">
+      <li>Verdadero OSS (BSD-style) sin restricciones</li>
+      <li>Compatible 100% con Redis API</li>
+      <li>Respaldo de grandes cloud providers</li>
+      <li>Performance mejorado vs Redis en benchmarks</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="con-list">
+      <li>Ecosistema en construcción (vs Redis maduro)</li>
+      <li>Módulos Redis no siempre compatibles</li>
+      <li>Managed services menos maduros</li>
+    </ul>
+  </td>
+  <td class="license-cell"><div class="license-main">BSD 3-Clause</div><div class="license-note">100% open source y gratuito. Managed via AWS ElastiCache, etc.</div></td>
+  <td>
+    <div class="bar-label">1M+ msg/s (en memoria)</div>
+    <div class="perf-bar"><div class="bar-bg"><div class="bar-fill" style="width:83%;background:linear-gradient(90deg,#84cc16,#a3e635)"></div></div></div>
+  </td>
+  <td>
+    <div class="use-list">
+      <div class="use-item yes">Reemplazo drop-in de Redis OSS</div>
+      <div class="use-item yes">Proyectos que requieren licencia OSS pura</div>
+      <div class="use-item yes">Cache + pub/sub combinado</div>
+    </div>
+  </td>
+  <td>
+    <div class="use-list">
+      <div class="use-item no">Dependes de módulos Redis Stack</div>
+      <div class="use-item no">Necesitas managed service maduro ahora mismo</div>
+    </div>
+  </td>
+  <td><p style="font-size:11px;color:#64748b">Redis Protocol (RESP3), Pub/Sub nativo</p></td>
+  <td><p style="font-size:11px;color:#10b981">✦ Muy activo. Valkey 8.x con mejoras significativas de performance. Creciendo rápido.</p></td>
+</tr>
+
+<!-- 18. WARPSTREAM -->
+<tr>
+  <td>
+    <div class="tool-name"><div class="tool-icon" style="background:rgba(100,50,250,0.15)">🌀</div>WarpStream</div>
+    <span class="tool-version">2026 GA</span>
+    <span class="tool-creator">WarpStream Labs (Confluent acquired 2024)</span>
+    <div class="tags">
+      <span class="tag tag-freemium">FREEMIUM</span>
+      <span class="tag tag-managed">MANAGED</span>
+      <span class="tag tag-selfhost">SELF-HOST</span>
+    </div>
+  </td>
+  <td><div class="cell-content"><p>Kafka-compatible data streaming directamente sobre object storage (S3/GCS). Elimina el costo de networking entre AZs. Arquitetura "BYOC" (Bring Your Own Cloud). Adquirido por Confluent en 2024.</p></div></td>
+  <td><div class="cell-content"><p>Kafka API 100% compatible, zero inter-AZ networking costs, escala a S3/GCS directamente, BYOC con agents en tu nube, precio por throughput muy bajo, latencia p50 baja.</p></div></td>
+  <td><div class="cell-content"><p>Latencia p99 más alta que Kafka tradicional (S3 tiene latencia variable). No ideal para latencia ultra-baja. Relativamente nuevo: no probado en todos los workloads.</p></div></td>
+  <td>
+    <ul class="pro-list">
+      <li>Drástica reducción de costos vs Kafka managed</li>
+      <li>Zero egress costs entre AZs</li>
+      <li>Kafka API compatible</li>
+      <li>Infinitely scalable en object storage</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="con-list">
+      <li>Latencia p99 mayor que Kafka tradicional</li>
+      <li>Ahora dentro de Confluent (futuro incierto)</li>
+      <li>Ecosistema joven</li>
+    </ul>
+  </td>
+  <td class="license-cell"><div class="license-main">Freemium / Comercial</div><div class="license-note">Tier gratuito generoso. Pago por throughput (muy económico).</div></td>
+  <td>
+    <div class="bar-label">Escala con S3</div>
+    <div class="perf-bar"><div class="bar-bg"><div class="bar-fill" style="width:70%;background:linear-gradient(90deg,#8b5cf6,#c4b5fd)"></div></div></div>
+  </td>
+  <td>
+    <div class="use-list">
+      <div class="use-item yes">Kafka a bajo costo en AWS/GCP</div>
+      <div class="use-item yes">Workloads donde p99 latency no es crítica</div>
+      <div class="use-item yes">Data lakes con Kafka API</div>
+    </div>
+  </td>
+  <td>
+    <div class="use-list">
+      <div class="use-item no">Latencia sub-milisegundo requerida</div>
+      <div class="use-item no">Producción crítica hasta que madure más</div>
+    </div>
+  </td>
+  <td><p style="font-size:11px;color:#64748b">Kafka Protocol, S3/GCS API</p></td>
+  <td><p style="font-size:11px;color:#f59e0b">⚠ Adquirido por Confluent. Integración en proceso. Futuro de producto BYOC bajo revisión.</p></td>
+</tr>
+
+<!-- 19. UPSTASH KAFKA -->
+<tr>
+  <td>
+    <div class="tool-name"><div class="tool-icon" style="background:rgba(0,220,180,0.15)">⚡</div>Upstash (Kafka/QStash)</div>
+    <span class="tool-version">2026</span>
+    <span class="tool-creator">Upstash Inc.</span>
+    <div class="tags">
+      <span class="tag tag-freemium">FREEMIUM</span>
+      <span class="tag tag-cloud">CLOUD</span>
+      <span class="tag tag-managed">MANAGED</span>
+    </div>
+  </td>
+  <td><div class="cell-content"><p>Serverless Kafka y QStash (message queue HTTP-first para serverless). Diseñado para aplicaciones serverless y edge (Vercel, Cloudflare Workers, Next.js). Pay-per-request real.</p></div></td>
+  <td><div class="cell-content"><p>Upstash Kafka: Kafka API compatible serverless. QStash: HTTP message queue con scheduling, retries, callbacks, FIFO. Redis serverless también disponible. SDKs para Next.js, Remix, SvelteKit.</p></div></td>
+  <td><div class="cell-content"><p>No diseñado para throughput ultra-alto sostenido. QStash es simple (sin routing complejo). Sin self-hosting. Latencia variable (serverless cold start).</p></div></td>
+  <td>
+    <ul class="pro-list">
+      <li>Verdaderamente serverless (pay-per-use)</li>
+      <li>Ideal para Next.js / Vercel / Edge</li>
+      <li>QStash: HTTP queue sin infraestructura</li>
+      <li>Tier gratuito muy generoso</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="con-list">
+      <li>No para workloads de alto throughput continuo</li>
+      <li>Solo cloud (Upstash managed)</li>
+      <li>Upstash Kafka menos features que Confluent</li>
+    </ul>
+  </td>
+  <td class="license-cell"><div class="license-main">Freemium SaaS</div><div class="license-note">Kafka: free tier hasta 10k msg/día. QStash: 500 req gratis/día.</div></td>
+  <td>
+    <div class="bar-label">Variable (serverless)</div>
+    <div class="perf-bar"><div class="bar-bg"><div class="bar-fill" style="width:30%;background:linear-gradient(90deg,#14b8a6,#5eead4)"></div></div></div>
+  </td>
+  <td>
+    <div class="use-list">
+      <div class="use-item yes">Aplicaciones Vercel/Next.js/Edge</div>
+      <div class="use-item yes">Startups con presupuesto cero</div>
+      <div class="use-item yes">Background jobs HTTP en serverless</div>
+    </div>
+  </td>
+  <td>
+    <div class="use-list">
+      <div class="use-item no">Alto throughput sostenido (&gt;1M msg/s)</div>
+      <div class="use-item no">Self-hosted o on-premise</div>
+      <div class="use-item no">Enterprise con SLA estricto</div>
+    </div>
+  </td>
+  <td><p style="font-size:11px;color:#64748b">Kafka Protocol, HTTP REST (QStash), Redis Protocol</p></td>
+  <td><p style="font-size:11px;color:#10b981">✦ Activo. Upstash muy popular en ecosistema Vercel/serverless 2026.</p></td>
+</tr>
+
+<!-- 20. INNGEST -->
+<tr>
+  <td>
+    <div class="tool-name"><div class="tool-icon" style="background:rgba(200,100,255,0.15)">🎯</div>Inngest</div>
+    <span class="tool-version">v3.x · 2026</span>
+    <span class="tool-creator">Inngest Inc.</span>
+    <div class="tags">
+      <span class="tag tag-freemium">FREEMIUM</span>
+      <span class="tag tag-cloud">CLOUD</span>
+      <span class="tag tag-managed">MANAGED</span>
+      <span class="tag tag-selfhost">SELF-HOST</span>
+    </div>
+  </td>
+  <td><div class="cell-content"><p>Plataforma de eventos + workflows durable. No es un MQ tradicional: combina event-driven messaging con orquestación de workflows (como Temporal + event bus). Diseñado para developers modernos.</p></div></td>
+  <td><div class="cell-content"><p>Durable functions (pasos que sobreviven fallos), event-driven triggers, scheduled jobs (cron), fan-out, throttling, step functions, replay de eventos, local development server, observabilidad nativa.</p></div></td>
+  <td><div class="cell-content"><p>No es un message broker de alto throughput. Sin Kafka API. No reemplaza Kafka/RabbitMQ para streaming masivo. Más caro que soluciones de infraestructura pura a escala.</p></div></td>
+  <td>
+    <ul class="pro-list">
+      <li>Developer experience excepcional</li>
+      <li>Durable workflows sin Temporal complexity</li>
+      <li>Observabilidad y debugging nativo</li>
+      <li>Self-hosteable (Inngest OSS)</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="con-list">
+      <li>No para alto throughput de eventos puros</li>
+      <li>Pricing cloud puede escalar</li>
+      <li>Relativamente nuevo en enterprise</li>
+    </ul>
+  </td>
+  <td class="license-cell"><div class="license-main">Freemium / OSS</div><div class="license-note">Free: 50k runs/mes. Cloud desde $25/mes. OSS self-hosted disponible.</div></td>
+  <td>
+    <div class="bar-label">Workflows, no throughput</div>
+    <div class="perf-bar"><div class="bar-bg"><div class="bar-fill" style="width:20%;background:linear-gradient(90deg,#a855f7,#d8b4fe)"></div></div></div>
+  </td>
+  <td>
+    <div class="use-list">
+      <div class="use-item yes">Background jobs con retry automático</div>
+      <div class="use-item yes">Workflows multi-paso durables</div>
+      <div class="use-item yes">Event-driven con orquestación (ej: onboarding flow)</div>
+      <div class="use-item yes">Next.js + serverless workflows</div>
+    </div>
+  </td>
+  <td>
+    <div class="use-list">
+      <div class="use-item no">Streaming masivo de datos (&gt;100k msg/s)</div>
+      <div class="use-item no">Event sourcing / CQRS patterns</div>
+      <div class="use-item no">Si necesitas Kafka API</div>
+    </div>
+  </td>
+  <td><p style="font-size:11px;color:#64748b">HTTP webhooks, SDK TypeScript/Python/Go</p></td>
+  <td><p style="font-size:11px;color:#10b981">✦ Muy activo. Crecimiento explosivo en 2025-2026. v3 con mejoras en branching y concurrencia.</p></td>
+</tr>
+
+</tbody>
+</table>
+</div>
+
+<footer>
+  <div>
+    <div class="footer-brand">PubSub Comparativo 2026</div>
+    <div class="footer-note" style="margin-top:6px">Generado con datos del estado del arte a Junio 2026 · 20 herramientas · 12 dimensiones evaluadas</div>
+    <div class="footer-note" style="margin-top:4px">Nota: Precios y features cambian frecuentemente. Verificar con documentación oficial antes de decisiones de arquitectura.</div>
+  </div>
+  <div style="text-align:right">
+    <div class="footer-note">Dimensiones evaluadas: Descripción · Funcionalidades · Limitaciones</div>
+    <div class="footer-note">Ventajas · Desventajas · Licencias · Throughput</div>
+    <div class="footer-note">Casos de uso (SI / NO) · Protocolos · Estado 2026</div>
+  </div>
+</footer>
+
+<script>
+  // Simple filter by tags
+  document.querySelectorAll('.filter-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+      const filter = this.dataset.filter;
+      if (this.classList.contains('active')) {
+        this.classList.remove('active');
+        document.querySelectorAll('tbody tr:not(.section-row)').forEach(r => r.style.display = '');
+        return;
+      }
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      this.classList.add('active');
+      if (filter === 'all') {
+        document.querySelectorAll('tbody tr:not(.section-row)').forEach(r => r.style.display = '');
+      } else {
+        document.querySelectorAll('tbody tr:not(.section-row)').forEach(row => {
+          const tags = row.querySelector('.tags');
+          if (!tags) return;
+          const has = tags.querySelector('.tag-' + filter);
+          row.style.display = has ? '' : 'none';
+        });
+      }
+    });
+  });
+</script>
+
+</body>
+</html>

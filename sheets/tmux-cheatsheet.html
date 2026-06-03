@@ -1,0 +1,764 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TMUX — Cheat Sheet</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:       #0d0f14;
+    --bg2:      #13161e;
+    --bg3:      #1a1e2a;
+    --border:   #252a38;
+    --green:    #4ade80;
+    --cyan:     #22d3ee;
+    --yellow:   #fbbf24;
+    --orange:   #fb923c;
+    --purple:   #a78bfa;
+    --red:      #f87171;
+    --muted:    #4b5572;
+    --text:     #c9d1e8;
+    --text2:    #8892aa;
+    --prefix:   #fbbf24;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  /* Scanline overlay */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0,0,0,0.03) 2px,
+      rgba(0,0,0,0.03) 4px
+    );
+    pointer-events: none;
+    z-index: 999;
+  }
+
+  /* Header */
+  .header {
+    background: var(--bg2);
+    border-bottom: 1px solid var(--border);
+    padding: 28px 40px 24px;
+    display: flex;
+    align-items: flex-end;
+    gap: 32px;
+    flex-wrap: wrap;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .header::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--green), var(--cyan), var(--purple), transparent);
+  }
+
+  .header-left {}
+
+  .logo-line {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .logo-bracket {
+    font-size: 42px;
+    font-weight: 700;
+    color: var(--green);
+    font-family: 'Space Mono', monospace;
+    line-height: 1;
+    text-shadow: 0 0 20px rgba(74,222,128,0.4);
+  }
+
+  .logo-text {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .logo-title {
+    font-size: 36px;
+    font-weight: 700;
+    font-family: 'Space Mono', monospace;
+    color: #fff;
+    letter-spacing: -1px;
+    line-height: 1;
+  }
+
+  .logo-sub {
+    font-size: 11px;
+    color: var(--text2);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    margin-top: 4px;
+  }
+
+  .prefix-badge {
+    background: rgba(251,191,36,0.1);
+    border: 1px solid rgba(251,191,36,0.3);
+    border-radius: 6px;
+    padding: 10px 18px;
+    margin-left: auto;
+  }
+
+  .prefix-label {
+    font-size: 10px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+  }
+
+  .prefix-key {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--yellow);
+    font-family: 'Space Mono', monospace;
+    margin-top: 2px;
+  }
+
+  .prefix-note {
+    font-size: 10px;
+    color: var(--text2);
+    margin-top: 2px;
+  }
+
+  /* Main grid */
+  .main {
+    padding: 32px 40px 48px;
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+  }
+
+  /* Cards */
+  .card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+    break-inside: avoid;
+  }
+
+  .card.span2 { grid-column: span 2; }
+  .card.wide  { grid-column: 1 / -1; }
+
+  .card-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .card-icon {
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    flex-shrink: 0;
+  }
+
+  .card-title {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+
+  .card-body {
+    padding: 12px 0;
+  }
+
+  /* Color themes per section */
+  .theme-green .card-header { background: rgba(74,222,128,0.05); }
+  .theme-green .card-icon   { background: rgba(74,222,128,0.15); color: var(--green); }
+  .theme-green .card-title  { color: var(--green); }
+
+  .theme-cyan .card-header { background: rgba(34,211,238,0.05); }
+  .theme-cyan .card-icon   { background: rgba(34,211,238,0.15); color: var(--cyan); }
+  .theme-cyan .card-title  { color: var(--cyan); }
+
+  .theme-yellow .card-header { background: rgba(251,191,36,0.05); }
+  .theme-yellow .card-icon   { background: rgba(251,191,36,0.15); color: var(--yellow); }
+  .theme-yellow .card-title  { color: var(--yellow); }
+
+  .theme-purple .card-header { background: rgba(167,139,250,0.05); }
+  .theme-purple .card-icon   { background: rgba(167,139,250,0.15); color: var(--purple); }
+  .theme-purple .card-title  { color: var(--purple); }
+
+  .theme-orange .card-header { background: rgba(251,146,60,0.05); }
+  .theme-orange .card-icon   { background: rgba(251,146,60,0.15); color: var(--orange); }
+  .theme-orange .card-title  { color: var(--orange); }
+
+  .theme-red .card-header { background: rgba(248,113,113,0.05); }
+  .theme-red .card-icon   { background: rgba(248,113,113,0.15); color: var(--red); }
+  .theme-red .card-title  { color: var(--red); }
+
+  /* Command rows */
+  .cmd {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    padding: 5px 16px;
+    gap: 12px;
+    border-bottom: 1px solid rgba(255,255,255,0.03);
+    transition: background 0.12s;
+  }
+  .cmd:last-child { border-bottom: none; }
+  .cmd:hover { background: rgba(255,255,255,0.03); }
+
+  .cmd-desc {
+    color: var(--text2);
+    font-size: 12px;
+    flex: 1;
+    min-width: 0;
+  }
+
+  .cmd-key {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    flex-shrink: 0;
+  }
+
+  .key {
+    display: inline-flex;
+    align-items: center;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-bottom: 2px solid var(--muted);
+    border-radius: 4px;
+    padding: 1px 7px;
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--text);
+    font-family: 'Space Mono', monospace;
+    white-space: nowrap;
+  }
+
+  .key.prefix {
+    background: rgba(251,191,36,0.1);
+    border-color: rgba(251,191,36,0.3);
+    border-bottom-color: rgba(251,191,36,0.5);
+    color: var(--yellow);
+  }
+
+  .key.cmd-line {
+    background: var(--bg);
+    border-color: rgba(255,255,255,0.1);
+    color: var(--cyan);
+    font-size: 10.5px;
+    padding: 2px 8px;
+    max-width: 220px;
+  }
+
+  .plus {
+    color: var(--muted);
+    font-size: 10px;
+  }
+
+  /* Section divider inside card */
+  .section-label {
+    font-size: 9px;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    color: var(--muted);
+    padding: 8px 16px 4px;
+    border-bottom: 1px solid var(--border);
+    margin-top: 4px;
+  }
+  .section-label:first-child { margin-top: 0; }
+
+  /* Tmux status bar illustration */
+  .status-bar-demo {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    margin: 12px 16px;
+    overflow: hidden;
+  }
+
+  .sb-terminal {
+    padding: 8px 12px;
+    font-size: 11px;
+    color: var(--text2);
+    min-height: 36px;
+    display: flex;
+    align-items: center;
+  }
+
+  .sb-terminal .prompt { color: var(--green); }
+  .sb-terminal .cursor {
+    display: inline-block;
+    width: 7px; height: 14px;
+    background: var(--text);
+    margin-left: 2px;
+    animation: blink 1s step-end infinite;
+    vertical-align: text-bottom;
+  }
+
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
+  }
+
+  .sb-bar {
+    background: #222840;
+    display: flex;
+    align-items: stretch;
+    height: 22px;
+    font-size: 11px;
+  }
+
+  .sb-win {
+    display: flex;
+    align-items: center;
+    padding: 0 10px;
+    gap: 5px;
+    border-right: 1px solid rgba(255,255,255,0.06);
+    color: var(--text2);
+  }
+  .sb-win.active {
+    background: var(--green);
+    color: #000;
+    font-weight: 700;
+  }
+  .sb-win .wnum { opacity: 0.6; font-size: 10px; }
+  .sb-win.active .wnum { opacity: 0.7; }
+
+  .sb-right {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 0 12px;
+    color: var(--text2);
+    font-size: 10px;
+    border-left: 1px solid rgba(255,255,255,0.06);
+  }
+
+  .sb-session {
+    color: var(--cyan);
+    font-weight: 700;
+  }
+
+  /* Copy mode highlight */
+  .copy-demo {
+    background: var(--bg);
+    border-radius: 6px;
+    margin: 8px 16px;
+    padding: 6px 10px;
+    font-size: 11px;
+    color: var(--text2);
+    line-height: 1.8;
+  }
+
+  .copy-demo .selected {
+    background: rgba(167,139,250,0.25);
+    color: #fff;
+    border-radius: 2px;
+    padding: 0 2px;
+  }
+
+  /* Footer */
+  .footer {
+    text-align: center;
+    padding: 20px 40px 32px;
+    color: var(--muted);
+    font-size: 10px;
+    letter-spacing: 1px;
+    border-top: 1px solid var(--border);
+  }
+
+  .footer span { color: var(--green); }
+
+  /* Print */
+  @media print {
+    body::before { display: none; }
+    .card:hover { background: var(--bg2); }
+  }
+
+  /* Responsive */
+  @media (max-width: 1100px) {
+    .grid { grid-template-columns: repeat(2, 1fr); }
+    .card.span2 { grid-column: span 1; }
+  }
+  @media (max-width: 700px) {
+    .grid { grid-template-columns: 1fr; }
+    .card.wide, .card.span2 { grid-column: span 1; }
+    .main { padding: 20px 16px; }
+    .header { padding: 20px 16px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="header-left">
+    <div class="logo-line">
+      <div class="logo-bracket">[</div>
+      <div class="logo-text">
+        <div class="logo-title">tmux</div>
+        <div class="logo-sub">terminal multiplexer · cheat sheet</div>
+      </div>
+      <div class="logo-bracket">]</div>
+    </div>
+  </div>
+  <div class="prefix-badge">
+    <div class="prefix-label">Prefix por defecto</div>
+    <div class="prefix-key">Ctrl + b</div>
+    <div class="prefix-note">Luego presiona el comando</div>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+  <div class="grid">
+
+    <!-- SESIONES -->
+    <div class="card theme-green">
+      <div class="card-header">
+        <div class="card-icon">❐</div>
+        <div class="card-title">Sesiones</div>
+      </div>
+      <div class="card-body">
+        <div class="section-label">desde la terminal</div>
+        <div class="cmd">
+          <span class="cmd-desc">Nueva sesión</span>
+          <div class="cmd-key"><span class="key cmd-line">tmux new -s nombre</span></div>
+        </div>
+        <div class="cmd">
+          <span class="cmd-desc">Listar sesiones</span>
+          <div class="cmd-key"><span class="key cmd-line">tmux ls</span></div>
+        </div>
+        <div class="cmd">
+          <span class="cmd-desc">Retomar sesión</span>
+          <div class="cmd-key"><span class="key cmd-line">tmux attach -t nombre</span></div>
+        </div>
+        <div class="cmd">
+          <span class="cmd-desc">Retomar última sesión</span>
+          <div class="cmd-key"><span class="key cmd-line">tmux a</span></div>
+        </div>
+        <div class="cmd">
+          <span class="cmd-desc">Matar sesión</span>
+          <div class="cmd-key"><span class="key cmd-line">tmux kill-session -t x</span></div>
+        </div>
+        <div class="section-label">dentro de tmux</div>
+        <div class="cmd">
+          <span class="cmd-desc">Desconectarse (detach)</span>
+          <div class="cmd-key"><span class="key prefix">Prefix</span><span class="plus">+</span><span class="key">d</span></div>
+        </div>
+        <div class="cmd">
+          <span class="cmd-desc">Nueva sesión</span>
+          <div class="cmd-key"><span class="key prefix">Prefix</span><span class="plus">+</span><span class="key">:new-session</span></div>
+        </div>
+        <div class="cmd">
+          <span class="cmd-desc">Listar &amp; cambiar sesión</span>
+          <div class="cmd-key"><span class="key prefix">Prefix</span><span class="plus">+</span><span class="key">s</span></div>
+        </div>
+        <div class="cmd">
+          <span class="cmd-desc">Renombrar sesión</span>
+          <div class="cmd-key"><span class="key prefix">Prefix</span><span class="plus">+</span><span class="key">$</span></div>
+        </div>
+        <div class="cmd">
+          <span class="cmd-desc">Sesión anterior / siguiente</span>
+          <div class="cmd-key"><span class="key prefix">Prefix</span><span class="plus">+</span><span class="key">(</span><span class="plus">/</span><span class="key">)</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- VENTANAS -->
+    <div class="card theme-cyan">
+      <div class="card-header">
+        <div class="card-icon">▣</div>
+        <div class="card-title">Ventanas (Windows)</div>
+      </div>
+      <div class="card-body">
+        <div class="cmd">
+          <span class="cmd-desc">Nueva ventana</span>
+          <div class="cmd-key"><span class="key prefix">Prefix</span><span class="plus">+</span><span class="key">c</span></div>
+        </div>
+        <div class="cmd">
+          <span class="cmd-desc">Cerrar ventana</span>
+          <div class="cmd-key"><span class="key prefix">Prefix</span><span class="plus">+</span><span class="key">&amp;</span></div>
+        </div>
+        <div class="cmd">
+          <span class="cmd-desc">Renombrar ventana</span>
+          <div class="cmd-key"><span class="key prefix">Prefix</span><span class="plus">+</span><span class="key">,</span></div>
+        </div>
+        <div class="cmd">
+          <span class="cmd-desc">Listar ventanas</span>
+          <div class="cmd-key"><span class="key prefix">Prefix</span><span class="plus">+</span><span class="key">w</span></div>
+        </div>
+        <div class="cmd">
+          <span class="cmd-desc">Ventana anterior</span>
+          <div class="cmd-key"><span class="key prefix">Prefix</span><span class="plus">+</span><span class="key">p</span></div>
+        </div>
+        <div class="cmd">
+          <span class="cmd-desc">Ventana siguiente</span>
+          <div class="cmd-key"><span class="key prefix">Prefix</span><span class="plus">+</span><span class="key">n</span></div>
+        </div>
+        <div class="cmd">
+          <span class="cmd-desc">Ir a ventana por número</span>
+          <div class="cmd-key"><span class="key prefix">Prefix</span><span class="plus">+</span><span class="key">0–9</span></div>
+        </div>
+        <div class="cmd">
+          <span class="cmd-desc">Buscar ventana</span>
+          <div class="cmd-key"><span class="key prefix">Prefix</span><span class="plus">+</span><span class="key">f</span></div>
+        </div>
+        <div class="cmd">
+          <span class="cmd-desc">Última ventana activa</span>
+          <div class="cmd-key"><span class="key prefix">Prefix</span><span class="plus">+</span><span class="key">l</span></div>
+        </div>
+
+        <!-- mini status bar demo -->
+        <div class="status-bar-demo">
+          <div class="sb-terminal">
+            <span class="prompt">user@host:~$</span>&nbsp;<span class="cursor"></span>
+          </div>
+          <div class="sb-bar">
+            <div class="sb-win active"><span class="wnum">0</span> bash</div>
+            <div class="sb-win"><span class="wnum">1</span> vim</div>
+            <div class="sb-win"><span class="wnum">2</span> htop</div>
+            <div class="sb-right"><span class="sb-session">▸ dev</span> &nbsp;13:42</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PANELES -->
+    <div class="card theme-yellow">
+      <div class="card-header">
+        <div class="card-icon">⊞</div>
+        <div class="card-title">Paneles (Panes)</div>
+      </div>
+      <div class="card-body">
+        <div class="section-label">dividir</div>
+        <div class="cmd">
+          <span class="cmd-desc">Dividir horizontal (arriba/abajo)</span>
+          <div class="cmd-key"><span class="key prefix">Prefix</span><span class="plus">+</span><span class="key">"</span></div>
+        </div>
+        <div class="cmd">
+          <span class="cmd-desc">Dividir vertical (izq/der)</span>
+          <div class="cmd-key"><span class="key prefix">Prefix</span><span class="plus">+</span><span class="key">%</span></div>
+        </div>
+        <div class="section-label">navegar</div>
+        <div class="cmd">
+          <span class="cmd-desc">Mover entre paneles</span>
+          <div class="cmd-key"><span class="key prefix">Prefix</span><span class="plus">+</span><span class="key">↑↓←→</span></div>
+        </div>
+        <div class="cmd">
+          <span class="cmd-desc">Siguiente panel (ciclo)</span>
+          <div class="cmd-key"><span class="key prefix">Prefix</span><span class="plus">+</span><span class="key">o</span></div>
+        </div>
+        <div class="cmd">
+          <span class="cmd-desc">Ir a panel por número</span>
+          <div class="cmd-key"><span class="key prefix">Prefix</span><span class="plus">+</span><span class="key">q</span><span class="plus">→</span><span class="key">0–9</span></div>
+        </div>
+        <div class="section-label">redimensionar</div>
+        <div class="cmd">
+          <span class="cmd-desc">Redimensionar panel</span>
+          <div class="cmd-key"><span class="key prefix">Prefix</span><span class="plus">+</span><span class="key">Ctrl+↑↓←→</span></div>
+        </div>
+        <div class="cmd">
+          <span class="cmd-desc">Zoom toggle (maximizar)</span>
+          <div class="cmd-key"><span class="key prefix">Prefix</span><span class="plus">+</span><span class="key">z</span></div>
+        </div>
+        <div class="section-label">gestionar</div>
+        <div class="cmd">
+          <span class="cmd-desc">Cerrar panel actual</span>
+          <div class="cmd-key"><span class="key prefix">Prefix</span><span class="plus">+</span><span class="key">x</span></div>
+        </div>
+        <div class="cmd">
+          <span class="cmd-desc">Panel a nueva ventana</span>
+          <div class="cmd-key"><span class="key prefix">Prefix</span><span class="plus">+</span><span class="key">!</span></div>
+        </div>
+        <div class="cmd">
+          <span class="cmd-desc">Rotar paneles</span>
+          <div class="cmd-key"><span class="key prefix">Prefix</span><span class="plus">+</span><span class="key">}</span><span class="plus">/</span><span class="key">{</span></div>
+        </div>
+        <div class="cmd">
+          <span class="cmd-desc">Cambiar layout</span>
+          <div class="cmd-key"><span class="key prefix">Prefix</span><span class="plus">+</span><span class="key">Space</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- COPY MODE -->
+    <div class="card theme-purple">
+      <div class="card-header">
+        <div class="card-icon">⬚</div>
+        <div class="card-title">Copy Mode (vi)</div>
+      </div>
+      <div class="card-body">
+        <div class="cmd">
+          <span class="cmd-desc">Entrar a copy mode</span>
+          <div class="cmd-key"><span class="key prefix">Prefix</span><span class="plus">+</span><span class="key">[</span></div>
+        </div>
+        <div class="cmd">
+          <span class="cmd-desc">Salir de copy mode</span>
+          <div class="cmd-key"><span class="key">q</span> <span class="plus">o</span> <span class="key">Esc</span></div>
+        </div>
+        <div class="cmd">
+          <span class="cmd-desc">Iniciar selección</span>
+          <div class="cmd-key"><span class="key">Space</span></div>
+        </div>
+        <div class="cmd">
+          <span class="cmd-desc">Copiar selección</span>
+          <div class="cmd-key"><span class="key">Enter</span></div>
+        </div>
+        <div class="cmd">
+          <span class="cmd-desc">Pegar buffer</span>
+          <div class="cmd-key"><span class="key prefix">Prefix</span><span class="plus">+</span><span class="key">]</span></div>
+        </div>
+        <div class="cmd">
+          <span class="cmd-desc">Buscar hacia atrás</span>
+          <div class="cmd-key"><span class="key">?texto</span></div>
+        </div>
+        <div class="cmd">
+          <span class="cmd-desc">Buscar hacia adelante</span>
+          <div class="cmd-key"><span class="key">/texto</span></div>
+        </div>
+        <div class="cmd">
+          <span class="cmd-desc">Página arriba / abajo</span>
+          <div class="cmd-key"><span class="key">Ctrl+u</span><span class="plus">/</span><span class="key">Ctrl+d</span></div>
+        </div>
+        <div class="copy-demo">
+          <span style="color:var(--text2)">$ tail -f server.log</span><br>
+          <span class="selected">ERROR 2024-01-15 connection refused</span><br>
+          <span style="color:var(--text2)">INFO  2024-01-15 retrying...</span>
+        </div>
+        <div class="cmd" style="margin-top:4px">
+          <span class="cmd-desc">Activar vi-mode en config</span>
+          <div class="cmd-key"><span class="key cmd-line">setw -g mode-keys vi</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- COMANDOS -->
+    <div class="card theme-orange">
+      <div class="card-header">
+        <div class="card-icon">:</div>
+        <div class="card-title">Línea de Comandos</div>
+      </div>
+      <div class="card-body">
+        <div class="cmd">
+          <span class="cmd-desc">Abrir prompt de comando</span>
+          <div class="cmd-key"><span class="key prefix">Prefix</span><span class="plus">+</span><span class="key">:</span></div>
+        </div>
+        <div class="section-label">comandos útiles en el prompt</div>
+        <div class="cmd">
+          <span class="cmd-desc">Cambiar nombre sesión</span>
+          <div class="cmd-key"><span class="key cmd-line">rename-session nombre</span></div>
+        </div>
+        <div class="cmd">
+          <span class="cmd-desc">Recargar config</span>
+          <div class="cmd-key"><span class="key cmd-line">source ~/.tmux.conf</span></div>
+        </div>
+        <div class="cmd">
+          <span class="cmd-desc">Matar servidor tmux</span>
+          <div class="cmd-key"><span class="key cmd-line">kill-server</span></div>
+        </div>
+        <div class="cmd">
+          <span class="cmd-desc">Ver opciones</span>
+          <div class="cmd-key"><span class="key cmd-line">show-options -g</span></div>
+        </div>
+        <div class="cmd">
+          <span class="cmd-desc">Mostrar atajos activos</span>
+          <div class="cmd-key"><span class="key prefix">Prefix</span><span class="plus">+</span><span class="key">?</span></div>
+        </div>
+        <div class="cmd">
+          <span class="cmd-desc">Reloj</span>
+          <div class="cmd-key"><span class="key prefix">Prefix</span><span class="plus">+</span><span class="key">t</span></div>
+        </div>
+        <div class="cmd">
+          <span class="cmd-desc">Sincronizar paneles toggle</span>
+          <div class="cmd-key"><span class="key cmd-line">setw synchronize-panes</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CONFIG -->
+    <div class="card theme-red wide">
+      <div class="card-header">
+        <div class="card-icon">⚙</div>
+        <div class="card-title">~/.tmux.conf — Configuración recomendada</div>
+      </div>
+      <div class="card-body">
+        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 0;">
+          <div>
+            <div class="section-label">cambiar prefix a Ctrl+a (como screen)</div>
+            <div class="cmd">
+              <span class="cmd-desc" style="color:var(--text); font-size:11px;">unbind C-b &nbsp;|&nbsp; set -g prefix C-a &nbsp;|&nbsp; bind C-a send-prefix</span>
+            </div>
+            <div class="section-label">numeración desde 1</div>
+            <div class="cmd">
+              <span class="cmd-desc" style="color:var(--text); font-size:11px;">set -g base-index 1 &nbsp;|&nbsp; setw -g pane-base-index 1</span>
+            </div>
+            <div class="section-label">mouse support</div>
+            <div class="cmd">
+              <span class="cmd-desc" style="color:var(--text); font-size:11px;">set -g mouse on</span>
+            </div>
+            <div class="section-label">vi keys en copy mode</div>
+            <div class="cmd">
+              <span class="cmd-desc" style="color:var(--text); font-size:11px;">setw -g mode-keys vi</span>
+            </div>
+          </div>
+          <div>
+            <div class="section-label">dividir con | y -</div>
+            <div class="cmd">
+              <span class="cmd-desc" style="color:var(--text); font-size:11px;">bind | split-window -h &nbsp;|&nbsp; bind - split-window -v</span>
+            </div>
+            <div class="section-label">recargar config con r</div>
+            <div class="cmd">
+              <span class="cmd-desc" style="color:var(--text); font-size:11px;">bind r source-file ~/.tmux.conf \; display "Config recargada"</span>
+            </div>
+            <div class="section-label">historial largo</div>
+            <div class="cmd">
+              <span class="cmd-desc" style="color:var(--text); font-size:11px;">set -g history-limit 50000</span>
+            </div>
+            <div class="section-label">colores 256 / true color</div>
+            <div class="cmd">
+              <span class="cmd-desc" style="color:var(--text); font-size:11px;">set -g default-terminal "tmux-256color"</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /grid -->
+</div><!-- /main -->
+
+<div class="footer">
+  tmux · terminal multiplexer &nbsp;·&nbsp; <span>man tmux</span> para la referencia completa &nbsp;·&nbsp; github.com/tmux/tmux
+</div>
+
+</body>
+</html>

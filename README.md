@@ -22,6 +22,8 @@ Cuadros comparativos y guías de referencia generados con Claude, centralizados 
 | Gestión de Dispositivos Móviles — Cuadro Comparativo | IT, Mobile |
 | APU vs CPU vs GPU vs NPU vs TPU — Guía Visual | Hardware |
 | RAG & Chunking — Guía de Referencia | AI, LLM |
+| Comparativo PubSub 2026 — Estado del Arte | DevOps, Messaging |
+| TMUX — Cheat Sheet | Dev Tools, Terminal |
 
 ## Activar GitHub Pages
 

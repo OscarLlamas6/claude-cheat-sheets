@@ -1,0 +1,1446 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Métodos para Potenciar LLMs — Guía 2026</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Space+Mono:ital,wght@0,400;0,700;1,400&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --surface: #111118;
+    --surface2: #16161f;
+    --border: #1e1e2e;
+    --accent1: #7c3aed;
+    --accent2: #06b6d4;
+    --accent3: #f59e0b;
+    --accent4: #10b981;
+    --accent5: #ef4444;
+    --accent6: #ec4899;
+    --accent7: #3b82f6;
+    --accent8: #8b5cf6;
+    --text: #e2e8f0;
+    --muted: #64748b;
+    --subtle: #94a3b8;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* BG noise texture */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.035'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .container {
+    max-width: 1600px;
+    margin: 0 auto;
+    padding: 40px 24px 80px;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* HEADER */
+  header {
+    text-align: center;
+    padding: 60px 0 48px;
+    position: relative;
+  }
+
+  header::after {
+    content: '';
+    display: block;
+    width: 120px;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--accent1), var(--accent2), transparent);
+    margin: 32px auto 0;
+  }
+
+  .eyebrow {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--accent2);
+    margin-bottom: 16px;
+    opacity: 0.9;
+  }
+
+  h1 {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: clamp(2.4rem, 5vw, 4.2rem);
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+    background: linear-gradient(135deg, #e2e8f0 0%, #a78bfa 40%, #67e8f9 80%, #e2e8f0 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 20px;
+  }
+
+  .subtitle {
+    font-size: 1.05rem;
+    color: var(--subtle);
+    max-width: 640px;
+    margin: 0 auto;
+    line-height: 1.7;
+    font-weight: 300;
+  }
+
+  /* NAV PILLS */
+  .nav-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+    margin-bottom: 40px;
+  }
+
+  .nav-pill {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 1px;
+    padding: 6px 14px;
+    border-radius: 100px;
+    cursor: pointer;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--subtle);
+    transition: all 0.2s;
+    text-transform: uppercase;
+  }
+
+  .nav-pill:hover, .nav-pill.active {
+    border-color: var(--accent1);
+    color: var(--text);
+    background: rgba(124,58,237,0.12);
+  }
+
+  /* LEGEND */
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    justify-content: center;
+    margin-bottom: 40px;
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    font-family: 'Space Mono', monospace;
+    color: var(--subtle);
+  }
+
+  .legend-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+  }
+
+  /* METHOD CARDS */
+  .methods-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+  }
+
+  .method-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+    transition: border-color 0.3s;
+    animation: fadeUp 0.5s ease both;
+  }
+
+  .method-card:hover {
+    border-color: rgba(124,58,237,0.3);
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .method-card:nth-child(1) { animation-delay: 0.05s; }
+  .method-card:nth-child(2) { animation-delay: 0.10s; }
+  .method-card:nth-child(3) { animation-delay: 0.15s; }
+  .method-card:nth-child(4) { animation-delay: 0.20s; }
+  .method-card:nth-child(5) { animation-delay: 0.25s; }
+  .method-card:nth-child(6) { animation-delay: 0.30s; }
+  .method-card:nth-child(7) { animation-delay: 0.35s; }
+  .method-card:nth-child(8) { animation-delay: 0.40s; }
+
+  .card-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 20px 24px;
+    cursor: pointer;
+    border-bottom: 1px solid transparent;
+    transition: border-color 0.3s;
+    user-select: none;
+  }
+
+  .card-header.open {
+    border-bottom-color: var(--border);
+  }
+
+  .method-number {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    min-width: 28px;
+  }
+
+  .method-accent {
+    width: 4px;
+    height: 40px;
+    border-radius: 4px;
+    flex-shrink: 0;
+  }
+
+  .method-title-block { flex: 1; }
+
+  .method-name {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.3rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    margin-bottom: 4px;
+  }
+
+  .method-tagline {
+    font-size: 13px;
+    color: var(--subtle);
+    font-style: italic;
+  }
+
+  .badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    align-items: center;
+  }
+
+  .badge {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.5px;
+    padding: 3px 9px;
+    border-radius: 4px;
+    text-transform: uppercase;
+  }
+
+  .badge-cost-low  { background: rgba(16,185,129,0.15); color: #10b981; border: 1px solid rgba(16,185,129,0.25); }
+  .badge-cost-med  { background: rgba(245,158,11,0.15); color: #f59e0b; border: 1px solid rgba(245,158,11,0.25); }
+  .badge-cost-high { background: rgba(239,68,68,0.15);  color: #ef4444; border: 1px solid rgba(239,68,68,0.25); }
+  .badge-diff-low  { background: rgba(59,130,246,0.15); color: #60a5fa; border: 1px solid rgba(59,130,246,0.25); }
+  .badge-diff-med  { background: rgba(139,92,246,0.15); color: #a78bfa; border: 1px solid rgba(139,92,246,0.25); }
+  .badge-diff-high { background: rgba(236,72,153,0.15); color: #f472b6; border: 1px solid rgba(236,72,153,0.25); }
+
+  .chevron {
+    color: var(--muted);
+    transition: transform 0.3s;
+    font-size: 18px;
+    line-height: 1;
+  }
+
+  .chevron.open { transform: rotate(180deg); }
+
+  /* CARD BODY */
+  .card-body {
+    display: none;
+    padding: 24px;
+  }
+
+  .card-body.open { display: block; }
+
+  .grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 16px;
+  }
+
+  .grid-3 {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 16px;
+  }
+
+  @media (max-width: 900px) {
+    .grid-3 { grid-template-columns: 1fr 1fr; }
+    .grid-2 { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 600px) {
+    .grid-3 { grid-template-columns: 1fr; }
+  }
+
+  .info-block {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px;
+  }
+
+  .info-block-title {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .info-block-title .icon { font-size: 14px; }
+
+  .info-block p, .info-block li {
+    font-size: 13.5px;
+    line-height: 1.7;
+    color: var(--subtle);
+  }
+
+  .info-block ul {
+    list-style: none;
+    padding: 0;
+  }
+
+  .info-block ul li::before {
+    content: '→ ';
+    color: var(--accent2);
+    font-size: 11px;
+  }
+
+  .pros-block .info-block-title { color: #10b981; }
+  .pros-block li::before { color: #10b981 !important; content: '✓ ' !important; }
+
+  .cons-block .info-block-title { color: #ef4444; }
+  .cons-block li::before { color: #ef4444 !important; content: '✗ ' !important; }
+
+  .yes-block .info-block-title { color: #06b6d4; }
+  .yes-block li::before { color: #06b6d4 !important; content: '✓ ' !important; }
+
+  .no-block .info-block-title { color: #f59e0b; }
+  .no-block li::before { color: #f59e0b !important; content: '✕ ' !important; }
+
+  /* TOOLS SECTION */
+  .tools-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 10px;
+    margin-top: 4px;
+  }
+
+  .tool-chip {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .tool-name {
+    font-family: 'Syne', sans-serif;
+    font-weight: 600;
+    font-size: 13px;
+    color: var(--text);
+  }
+
+  .tool-meta {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+
+  .tag-free       { color: #10b981; }
+  .tag-opensource { color: #06b6d4; }
+  .tag-enterprise { color: #f59e0b; }
+  .tag-cloud      { color: #a78bfa; }
+
+  /* SOTA */
+  .sota-block {
+    background: linear-gradient(135deg, rgba(124,58,237,0.08), rgba(6,182,212,0.05));
+    border: 1px solid rgba(124,58,237,0.2);
+    border-radius: 10px;
+    padding: 16px;
+    margin-top: 16px;
+  }
+
+  .sota-block .info-block-title { color: #a78bfa; }
+
+  .sota-text {
+    font-size: 13.5px;
+    line-height: 1.75;
+    color: var(--subtle);
+  }
+
+  .sota-text strong {
+    color: var(--text);
+    font-weight: 500;
+  }
+
+  /* COMPARISON TABLE */
+  .comparison-section {
+    margin-top: 56px;
+  }
+
+  .section-heading {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.6rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .section-heading::before {
+    content: '';
+    display: block;
+    width: 4px;
+    height: 28px;
+    background: linear-gradient(180deg, var(--accent1), var(--accent2));
+    border-radius: 4px;
+  }
+
+  .table-wrap {
+    overflow-x: auto;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    min-width: 900px;
+  }
+
+  thead th {
+    background: var(--surface2);
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--muted);
+    padding: 14px 16px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+  }
+
+  thead th:first-child {
+    min-width: 160px;
+  }
+
+  tbody tr {
+    border-bottom: 1px solid var(--border);
+    transition: background 0.2s;
+  }
+
+  tbody tr:last-child { border-bottom: none; }
+
+  tbody tr:hover { background: rgba(255,255,255,0.02); }
+
+  tbody td {
+    padding: 12px 16px;
+    vertical-align: top;
+    color: var(--subtle);
+    line-height: 1.5;
+  }
+
+  .td-name {
+    font-family: 'Syne', sans-serif;
+    font-weight: 600;
+    font-size: 13px;
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .td-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .dot-good   { background: #10b981; }
+  .dot-mid    { background: #f59e0b; }
+  .dot-bad    { background: #ef4444; }
+  .dot-na     { background: #475569; }
+
+  /* FOOTER */
+  footer {
+    margin-top: 64px;
+    text-align: center;
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 1px;
+    padding-bottom: 40px;
+  }
+
+  footer span { color: var(--accent1); }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <header>
+    <div class="eyebrow">Referencia Técnica · LLMs · 2026</div>
+    <h1>Métodos para Potenciar<br>un Modelo LLM</h1>
+    <p class="subtitle">Guía comparativa de todas las técnicas disponibles para extender, personalizar y mejorar el rendimiento de modelos de lenguaje: desde el más simple al más avanzado.</p>
+  </header>
+
+  <div class="legend">
+    <div class="legend-item"><div class="legend-dot" style="background:#10b981"></div>Costo Bajo</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#f59e0b"></div>Costo Medio</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#ef4444"></div>Costo Alto</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#60a5fa"></div>Dificultad Baja</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#a78bfa"></div>Dificultad Media</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#f472b6"></div>Dificultad Alta</div>
+  </div>
+
+  <div class="methods-grid" id="methodsGrid">
+
+    <!-- ==================== 1. PROMPT ENGINEERING ==================== -->
+    <div class="method-card" data-method="pe">
+      <div class="card-header" onclick="toggleCard(this)">
+        <span class="method-number">01</span>
+        <div class="method-accent" style="background:#06b6d4"></div>
+        <div class="method-title-block">
+          <div class="method-name" style="color:#06b6d4">Prompt Engineering</div>
+          <div class="method-tagline">Hablarle bien al modelo para obtener lo mejor</div>
+        </div>
+        <div class="badges">
+          <span class="badge badge-cost-low">$ Bajo</span>
+          <span class="badge badge-diff-low">Fácil</span>
+        </div>
+        <span class="chevron">▾</span>
+      </div>
+      <div class="card-body">
+        <div class="grid-2">
+          <div class="info-block">
+            <div class="info-block-title"><span class="icon">📖</span> ¿Qué es?</div>
+            <p>Técnica de diseño y optimización de los inputs (prompts) que se le dan al modelo. No modifica el modelo en sí; modifica cómo se le formula la pregunta o instrucción. Incluye técnicas como Chain-of-Thought (CoT), Few-shot, Zero-shot, ReAct, Tree of Thoughts, etc.</p>
+          </div>
+          <div class="info-block">
+            <div class="info-block-title"><span class="icon">⚙️</span> ¿Qué hace?</div>
+            <p>Guía al modelo paso a paso, proporciona ejemplos, descompone problemas complejos, establece roles o personas, y delimita el formato de salida esperado. Con un buen prompt se pueden extraer capacidades latentes del modelo sin costosos entrenamientos.</p>
+          </div>
+        </div>
+        <div class="grid-3">
+          <div class="info-block pros-block">
+            <div class="info-block-title"><span class="icon">✅</span> Ventajas</div>
+            <ul>
+              <li>Sin costo de entrenamiento</li>
+              <li>Inmediato, iterable en segundos</li>
+              <li>Portable entre modelos</li>
+              <li>No requiere datos propios</li>
+              <li>Ideal para prototipos rápidos</li>
+            </ul>
+          </div>
+          <div class="info-block cons-block">
+            <div class="info-block-title"><span class="icon">❌</span> Desventajas</div>
+            <ul>
+              <li>Frágil: un token cambia el output</li>
+              <li>Ocupa ventana de contexto</li>
+              <li>No persiste entre sesiones</li>
+              <li>Límite de lo que el modelo "sabe"</li>
+              <li>Difícil de versionar y testear a escala</li>
+            </ul>
+          </div>
+          <div class="info-block">
+            <div class="info-block-title"><span class="icon">📊</span> Métricas clave</div>
+            <ul>
+              <li>Tokens usados por prompt</li>
+              <li>Consistencia de salida</li>
+              <li>Latencia de respuesta</li>
+              <li>Pass rate en test suite</li>
+            </ul>
+          </div>
+        </div>
+        <div class="grid-2">
+          <div class="info-block yes-block">
+            <div class="info-block-title"><span class="icon">🟢</span> Cuándo USARLO</div>
+            <ul>
+              <li>Prototipado y exploración rápida</li>
+              <li>Tareas bien definidas y acotadas</li>
+              <li>Sin datos propios de entrenamiento</li>
+              <li>Presupuesto casi cero</li>
+              <li>Querés usar modelos de API existentes</li>
+            </ul>
+          </div>
+          <div class="info-block no-block">
+            <div class="info-block-title"><span class="icon">🔴</span> Cuándo NO usarlo</div>
+            <ul>
+              <li>Requiere conocimiento muy especializado o propietario</li>
+              <li>Consistencia crítica en producción masiva</li>
+              <li>Necesitás outputs estructurados 100% confiables</li>
+              <li>El modelo no tiene el conocimiento base necesario</li>
+            </ul>
+          </div>
+        </div>
+        <div class="info-block" style="margin-top:16px">
+          <div class="info-block-title"><span class="icon">🛠️</span> Herramientas y Ecosistema</div>
+          <div class="tools-grid">
+            <div class="tool-chip"><div class="tool-name">LangChain Prompts</div><div class="tool-meta"><span class="tag-opensource">Open Source</span><span class="tag-free">Free</span></div></div>
+            <div class="tool-chip"><div class="tool-name">PromptFlow (Azure)</div><div class="tool-meta"><span class="tag-enterprise">Enterprise</span><span class="tag-cloud">Cloud</span></div></div>
+            <div class="tool-chip"><div class="tool-name">Guidance (MSFT)</div><div class="tool-meta"><span class="tag-opensource">Open Source</span><span class="tag-free">Free</span></div></div>
+            <div class="tool-chip"><div class="tool-name">DSPy</div><div class="tool-meta"><span class="tag-opensource">Open Source</span><span class="tag-free">Free</span></div></div>
+            <div class="tool-chip"><div class="tool-name">PromptLayer</div><div class="tool-meta"><span class="tag-enterprise">Enterprise</span><span class="tag-free">Freemium</span></div></div>
+            <div class="tool-chip"><div class="tool-name">Anthropic Console</div><div class="tool-meta"><span class="tag-cloud">Cloud</span><span class="tag-free">Freemium</span></div></div>
+          </div>
+        </div>
+        <div class="sota-block">
+          <div class="info-block-title"><span class="icon">🔬</span> Estado del Arte 2026</div>
+          <p class="sota-text">Con modelos como <strong>Claude 3.5/4, GPT-4o y Gemini 2.0</strong>, el prompt engineering ha madurado hacia <strong>meta-prompting automático</strong>: herramientas como DSPy optimizan prompts automáticamente mediante gradient-free optimization. El paradigma <strong>Chain-of-Thought</strong> sigue siendo estándar y se ha extendido a <strong>Graph-of-Thought</strong> para problemas multi-dimensional. Los System Prompts estructurados con XML/Markdown se han estandarizado en la industria.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== 2. RAG ==================== -->
+    <div class="method-card" data-method="rag">
+      <div class="card-header" onclick="toggleCard(this)">
+        <span class="method-number">02</span>
+        <div class="method-accent" style="background:#7c3aed"></div>
+        <div class="method-title-block">
+          <div class="method-name" style="color:#a78bfa">RAG — Retrieval-Augmented Generation</div>
+          <div class="method-tagline">Dale al modelo una biblioteca en tiempo real</div>
+        </div>
+        <div class="badges">
+          <span class="badge badge-cost-med">$$ Medio</span>
+          <span class="badge badge-diff-med">Intermedio</span>
+        </div>
+        <span class="chevron">▾</span>
+      </div>
+      <div class="card-body">
+        <div class="grid-2">
+          <div class="info-block">
+            <div class="info-block-title"><span class="icon">📖</span> ¿Qué es?</div>
+            <p>Arquitectura que combina un sistema de recuperación de información (búsqueda en bases de datos vectoriales, BM25, o híbrida) con un LLM generador. Antes de generar, el sistema recupera documentos relevantes y los inyecta en el contexto del modelo, permitiéndole "acceder" a información que no estaba en su entrenamiento.</p>
+          </div>
+          <div class="info-block">
+            <div class="info-block-title"><span class="icon">⚙️</span> ¿Qué hace?</div>
+            <p>Convierte documentos en embeddings vectoriales almacenados en una base de datos vectorial (Pinecone, Weaviate, Chroma, etc.). En tiempo de inferencia, la consulta del usuario se convierte también en embedding y se buscan los K documentos más similares, que se pasan como contexto al LLM.</p>
+          </div>
+        </div>
+        <div class="grid-3">
+          <div class="info-block pros-block">
+            <div class="info-block-title"><span class="icon">✅</span> Ventajas</div>
+            <ul>
+              <li>Conocimiento actualizable sin re-entrenar</li>
+              <li>Citable y verificable (fuentes)</li>
+              <li>Funciona con cualquier LLM</li>
+              <li>Escalable a millones de docs</li>
+              <li>Reduce alucinaciones en dominio</li>
+            </ul>
+          </div>
+          <div class="info-block cons-block">
+            <div class="info-block-title"><span class="icon">❌</span> Desventajas</div>
+            <ul>
+              <li>Latencia adicional por búsqueda</li>
+              <li>Calidad depende del chunking</li>
+              <li>Costoso con grandes volúmenes</li>
+              <li>Falla en razonamiento implícito complejo</li>
+              <li>Embeddings se desactualizan</li>
+            </ul>
+          </div>
+          <div class="info-block">
+            <div class="info-block-title"><span class="icon">🏗️</span> Variantes</div>
+            <ul>
+              <li>Naive RAG (básico)</li>
+              <li>Advanced RAG (re-ranking)</li>
+              <li>Modular RAG</li>
+              <li>GraphRAG (relaciones)</li>
+              <li>HyDE (hipotético)</li>
+              <li>Self-RAG (auto-evaluación)</li>
+            </ul>
+          </div>
+        </div>
+        <div class="grid-2">
+          <div class="info-block yes-block">
+            <div class="info-block-title"><span class="icon">🟢</span> Cuándo USARLO</div>
+            <ul>
+              <li>Documentación empresarial / legal / técnica</li>
+              <li>Knowledge base de atención al cliente</li>
+              <li>Información que cambia frecuentemente</li>
+              <li>Necesitás transparencia (fuentes citables)</li>
+              <li>Datos propietarios o confidenciales</li>
+            </ul>
+          </div>
+          <div class="info-block no-block">
+            <div class="info-block-title"><span class="icon">🔴</span> Cuándo NO usarlo</div>
+            <ul>
+              <li>Razonamiento puro sin consulta documental</li>
+              <li>Cambios de comportamiento/tono del modelo</li>
+              <li>Datos muy pequeños (pocas páginas)</li>
+              <li>Latencia ultra-baja es crítica</li>
+            </ul>
+          </div>
+        </div>
+        <div class="info-block" style="margin-top:16px">
+          <div class="info-block-title"><span class="icon">🛠️</span> Herramientas y Ecosistema</div>
+          <div class="tools-grid">
+            <div class="tool-chip"><div class="tool-name">LlamaIndex</div><div class="tool-meta"><span class="tag-opensource">Open Source</span><span class="tag-free">Free</span></div></div>
+            <div class="tool-chip"><div class="tool-name">LangChain RAG</div><div class="tool-meta"><span class="tag-opensource">Open Source</span><span class="tag-free">Free</span></div></div>
+            <div class="tool-chip"><div class="tool-name">Pinecone</div><div class="tool-meta"><span class="tag-enterprise">Enterprise</span><span class="tag-free">Freemium</span></div></div>
+            <div class="tool-chip"><div class="tool-name">Weaviate</div><div class="tool-meta"><span class="tag-opensource">Open Source</span><span class="tag-enterprise">Enterprise</span></div></div>
+            <div class="tool-chip"><div class="tool-name">Chroma</div><div class="tool-meta"><span class="tag-opensource">Open Source</span><span class="tag-free">Free</span></div></div>
+            <div class="tool-chip"><div class="tool-name">Qdrant</div><div class="tool-meta"><span class="tag-opensource">Open Source</span><span class="tag-free">Free</span></div></div>
+            <div class="tool-chip"><div class="tool-name">Azure AI Search</div><div class="tool-meta"><span class="tag-enterprise">Enterprise</span><span class="tag-cloud">Cloud</span></div></div>
+            <div class="tool-chip"><div class="tool-name">GraphRAG (MSFT)</div><div class="tool-meta"><span class="tag-opensource">Open Source</span><span class="tag-free">Free</span></div></div>
+          </div>
+        </div>
+        <div class="sota-block">
+          <div class="info-block-title"><span class="icon">🔬</span> Estado del Arte 2026</div>
+          <p class="sota-text">RAG sigue siendo la técnica más adoptada en enterprise. El estado del arte en 2026 son los sistemas <strong>Agentic RAG</strong> donde el agente decide cuándo y qué recuperar. <strong>GraphRAG de Microsoft</strong> domina casos donde el razonamiento sobre relaciones importa. Las ventanas de contexto gigantes (1M+ tokens) de Gemini/Claude están generando debate sobre si RAG sigue siendo necesario para muchos casos, aunque el costo de tokens sigue haciendo RAG más eficiente a escala.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== 3. FINE-TUNING ==================== -->
+    <div class="method-card" data-method="ft">
+      <div class="card-header" onclick="toggleCard(this)">
+        <span class="method-number">03</span>
+        <div class="method-accent" style="background:#f59e0b"></div>
+        <div class="method-title-block">
+          <div class="method-name" style="color:#f59e0b">Fine-Tuning</div>
+          <div class="method-tagline">Re-entrenar el modelo con tus propios datos</div>
+        </div>
+        <div class="badges">
+          <span class="badge badge-cost-high">$$$ Alto</span>
+          <span class="badge badge-diff-high">Avanzado</span>
+        </div>
+        <span class="chevron">▾</span>
+      </div>
+      <div class="card-body">
+        <div class="grid-2">
+          <div class="info-block">
+            <div class="info-block-title"><span class="icon">📖</span> ¿Qué es?</div>
+            <p>Proceso de continuar el entrenamiento de un modelo pre-entrenado usando un dataset específico y más pequeño, adaptando los pesos del modelo a una tarea o dominio particular. Incluye técnicas como SFT (Supervised Fine-Tuning), RLHF, DPO, y métodos parameter-efficient como LoRA y QLoRA.</p>
+          </div>
+          <div class="info-block">
+            <div class="info-block-title"><span class="icon">⚙️</span> ¿Qué hace?</div>
+            <p>Ajusta los pesos del modelo (o un subconjunto con LoRA) para que "interiorice" un estilo, comportamiento, formato o conocimiento especializado. El resultado es un modelo que responde de forma distinta a nivel estructural, no solo por instrucción. Modifica la "personalidad base" del modelo.</p>
+          </div>
+        </div>
+        <div class="grid-3">
+          <div class="info-block pros-block">
+            <div class="info-block-title"><span class="icon">✅</span> Ventajas</div>
+            <ul>
+              <li>Estilo/tono consistente permanente</li>
+              <li>Menor uso de contexto en producción</li>
+              <li>Mejor en tareas muy específicas</li>
+              <li>LoRA/QLoRA reduce costo drásticamente</li>
+              <li>Puede ejecutarse en hardware propio</li>
+            </ul>
+          </div>
+          <div class="info-block cons-block">
+            <div class="info-block-title"><span class="icon">❌</span> Desventajas</div>
+            <ul>
+              <li>Requiere datos curados de calidad</li>
+              <li>Riesgo de catastrofic forgetting</li>
+              <li>Caro y lento para modelos grandes</li>
+              <li>Difícil de debuggear</li>
+              <li>Actualización de conocimiento requiere re-training</li>
+            </ul>
+          </div>
+          <div class="info-block">
+            <div class="info-block-title"><span class="icon">🏗️</span> Variantes</div>
+            <ul>
+              <li>Full Fine-Tuning</li>
+              <li>LoRA / QLoRA</li>
+              <li>RLHF (con feedback humano)</li>
+              <li>DPO (Direct Preference Optimization)</li>
+              <li>PEFT (Parameter Efficient)</li>
+              <li>Instruction Tuning</li>
+            </ul>
+          </div>
+        </div>
+        <div class="grid-2">
+          <div class="info-block yes-block">
+            <div class="info-block-title"><span class="icon">🟢</span> Cuándo USARLO</div>
+            <ul>
+              <li>Estilo/voz de marca muy específico</li>
+              <li>Formato de output rígido y consistente</li>
+              <li>Dominio muy técnico (medicina, derecho, código)</li>
+              <li>Prompt engineering ya no da más resultados</li>
+              <li>Reducir costos de inferencia a largo plazo</li>
+            </ul>
+          </div>
+          <div class="info-block no-block">
+            <div class="info-block-title"><span class="icon">🔴</span> Cuándo NO usarlo</div>
+            <ul>
+              <li>Menos de 500-1000 ejemplos de calidad</li>
+              <li>El conocimiento cambia frecuentemente</li>
+              <li>Budget limitado (usar LoRA si no hay opción)</li>
+              <li>RAG o prompts resuelven el problema</li>
+            </ul>
+          </div>
+        </div>
+        <div class="info-block" style="margin-top:16px">
+          <div class="info-block-title"><span class="icon">🛠️</span> Herramientas y Ecosistema</div>
+          <div class="tools-grid">
+            <div class="tool-chip"><div class="tool-name">Hugging Face PEFT</div><div class="tool-meta"><span class="tag-opensource">Open Source</span><span class="tag-free">Free</span></div></div>
+            <div class="tool-chip"><div class="tool-name">Unsloth</div><div class="tool-meta"><span class="tag-opensource">Open Source</span><span class="tag-free">Free</span></div></div>
+            <div class="tool-chip"><div class="tool-name">OpenAI Fine-tuning</div><div class="tool-meta"><span class="tag-enterprise">Enterprise</span><span class="tag-cloud">Cloud</span></div></div>
+            <div class="tool-chip"><div class="tool-name">Axolotl</div><div class="tool-meta"><span class="tag-opensource">Open Source</span><span class="tag-free">Free</span></div></div>
+            <div class="tool-chip"><div class="tool-name">LLaMA Factory</div><div class="tool-meta"><span class="tag-opensource">Open Source</span><span class="tag-free">Free</span></div></div>
+            <div class="tool-chip"><div class="tool-name">Together AI</div><div class="tool-meta"><span class="tag-enterprise">Enterprise</span><span class="tag-cloud">Cloud</span></div></div>
+            <div class="tool-chip"><div class="tool-name">Vertex AI Tuning</div><div class="tool-meta"><span class="tag-enterprise">Enterprise</span><span class="tag-cloud">Cloud</span></div></div>
+            <div class="tool-chip"><div class="tool-name">Modal</div><div class="tool-meta"><span class="tag-enterprise">Enterprise</span><span class="tag-free">Freemium</span></div></div>
+          </div>
+        </div>
+        <div class="sota-block">
+          <div class="info-block-title"><span class="icon">🔬</span> Estado del Arte 2026</div>
+          <p class="sota-text"><strong>LoRA y QLoRA</strong> son el estándar de facto para fine-tuning eficiente, permitiendo adaptar modelos de 7B-70B en GPUs consumer. <strong>DPO (Direct Preference Optimization)</strong> reemplazó en gran medida a RLHF por su simplicidad. La tendencia 2026 es <strong>synthetic data generation</strong>: usar GPT-4/Claude para generar datasets de entrenamiento de alta calidad, democratizando el fine-tuning. Unsloth ha logrado reducir el uso de VRAM hasta 60%, haciendo fine-tuning viable en GPUs de 8GB.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== 4. CONTEXT WINDOW / IN-CONTEXT LEARNING ==================== -->
+    <div class="method-card" data-method="icl">
+      <div class="card-header" onclick="toggleCard(this)">
+        <span class="method-number">04</span>
+        <div class="method-accent" style="background:#10b981"></div>
+        <div class="method-title-block">
+          <div class="method-name" style="color:#10b981">In-Context Learning (ICL) & Long Context</div>
+          <div class="method-tagline">Enseñar sin entrenar, todo dentro del prompt</div>
+        </div>
+        <div class="badges">
+          <span class="badge badge-cost-med">$$ Medio</span>
+          <span class="badge badge-diff-low">Fácil</span>
+        </div>
+        <span class="chevron">▾</span>
+      </div>
+      <div class="card-body">
+        <div class="grid-2">
+          <div class="info-block">
+            <div class="info-block-title"><span class="icon">📖</span> ¿Qué es?</div>
+            <p>Capacidad emergente de los LLMs de aprender de ejemplos dados directamente en el contexto del prompt (few-shot). Con ventanas de contexto de 1M+ tokens (Gemini 2.0, Claude 3.5), es posible meter libros enteros, codebases completos o datasets completos como "contexto vivo" sin necesidad de fine-tuning.</p>
+          </div>
+          <div class="info-block">
+            <div class="info-block-title"><span class="icon">⚙️</span> ¿Qué hace?</div>
+            <p>El modelo infiere el patrón deseado a partir de los ejemplos dados (1-shot, few-shot, many-shot). Con long context, permite "cargar" documentación completa, historiales, código fuente, o bases de conocimiento directamente en memoria temporal del modelo durante la sesión.</p>
+          </div>
+        </div>
+        <div class="grid-3">
+          <div class="info-block pros-block">
+            <div class="info-block-title"><span class="icon">✅</span> Ventajas</div>
+            <ul>
+              <li>Sin modificar el modelo base</li>
+              <li>Flexible y actualizable instantáneamente</li>
+              <li>Ideal para muchos ejemplos heterogéneos</li>
+              <li>Ventanas largas eliminan necesidad de RAG en muchos casos</li>
+            </ul>
+          </div>
+          <div class="info-block cons-block">
+            <div class="info-block-title"><span class="icon">❌</span> Desventajas</div>
+            <ul>
+              <li>Costo de tokens muy alto con contextos largos</li>
+              <li>Latencia alta (prefill cost)</li>
+              <li>Lost-in-the-middle: el modelo olvida el centro</li>
+              <li>No persiste entre conversaciones</li>
+            </ul>
+          </div>
+          <div class="info-block">
+            <div class="info-block-title"><span class="icon">📏</span> Límites de contexto 2026</div>
+            <ul>
+              <li>Gemini 2.0: 2M tokens</li>
+              <li>Claude 3.7: 200K tokens</li>
+              <li>GPT-4o: 128K tokens</li>
+              <li>Llama 3.3 70B: 128K tokens</li>
+              <li>Mistral Large: 128K tokens</li>
+            </ul>
+          </div>
+        </div>
+        <div class="grid-2">
+          <div class="info-block yes-block">
+            <div class="info-block-title"><span class="icon">🟢</span> Cuándo USARLO</div>
+            <ul>
+              <li>Prototipos donde no hay tiempo para RAG/FT</li>
+              <li>Análisis de documentos largos (contratos, research)</li>
+              <li>Many-shot learning para nuevas tareas</li>
+              <li>Cuando los datos son muy dinámicos</li>
+            </ul>
+          </div>
+          <div class="info-block no-block">
+            <div class="info-block-title"><span class="icon">🔴</span> Cuándo NO usarlo</div>
+            <ul>
+              <li>Producción con millones de queries (muy caro)</li>
+              <li>Necesitás recuperación precisa de un hecho específico</li>
+              <li>Datos que no caben en ningún contexto</li>
+            </ul>
+          </div>
+        </div>
+        <div class="sota-block">
+          <div class="info-block-title"><span class="icon">🔬</span> Estado del Arte 2026</div>
+          <p class="sota-text">Las ventanas de contexto gigantes están redefiniendo el panorama. <strong>Gemini 2.0 con 2M tokens</strong> puede procesar toda una codebase o una novela completa. Sin embargo, estudios como "Lost in the Middle" confirman que los modelos pierden atención en el centro del contexto. La técnica <strong>Many-Shot ICL</strong> (cientos de ejemplos en el prompt) ha demostrado igualar fine-tuning en muchos benchmarks, democratizando el ajuste sin entrenamiento.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== 5. AGENTS & TOOL USE ==================== -->
+    <div class="method-card" data-method="agents">
+      <div class="card-header" onclick="toggleCard(this)">
+        <span class="method-number">05</span>
+        <div class="method-accent" style="background:#ef4444"></div>
+        <div class="method-title-block">
+          <div class="method-name" style="color:#ef4444">Agentes y Tool Use (Function Calling)</div>
+          <div class="method-tagline">Dale al modelo manos, ojos y capacidad de actuar</div>
+        </div>
+        <div class="badges">
+          <span class="badge badge-cost-med">$$ Medio</span>
+          <span class="badge badge-diff-med">Intermedio</span>
+        </div>
+        <span class="chevron">▾</span>
+      </div>
+      <div class="card-body">
+        <div class="grid-2">
+          <div class="info-block">
+            <div class="info-block-title"><span class="icon">📖</span> ¿Qué es?</div>
+            <p>Extensión del LLM mediante herramientas externas que el modelo puede "llamar": APIs, bases de datos, calculadoras, navegadores web, código Python, etc. El modelo decide cuándo y cómo usar cada herramienta (ReAct loop). Los agentes multi-step pueden planificar, actuar, observar y re-planificar autónomamente.</p>
+          </div>
+          <div class="info-block">
+            <div class="info-block-title"><span class="icon">⚙️</span> ¿Qué hace?</div>
+            <p>Transforma el LLM de un sistema de Q&A a un sistema que puede ejecutar acciones reales: enviar emails, consultar bases de datos en tiempo real, ejecutar código, navegar por la web, interactuar con sistemas externos (CRMs, ERPs, APIs). Arquitecturas multi-agente permiten dividir tareas complejas entre agentes especializados.</p>
+          </div>
+        </div>
+        <div class="grid-3">
+          <div class="info-block pros-block">
+            <div class="info-block-title"><span class="icon">✅</span> Ventajas</div>
+            <ul>
+              <li>Capacidades ilimitadas via herramientas</li>
+              <li>Acceso a datos en tiempo real</li>
+              <li>Puede automatizar workflows complejos</li>
+              <li>Modular y extensible</li>
+              <li>Combina con RAG, FT y otros métodos</li>
+            </ul>
+          </div>
+          <div class="info-block cons-block">
+            <div class="info-block-title"><span class="icon">❌</span> Desventajas</div>
+            <ul>
+              <li>Latencia alta (múltiples LLM calls)</li>
+              <li>Costo elevado por cadena de llamadas</li>
+              <li>Difícil de debuggear y monitorear</li>
+              <li>Riesgo de loops o acciones no deseadas</li>
+              <li>Requiere buena orquestación</li>
+            </ul>
+          </div>
+          <div class="info-block">
+            <div class="info-block-title"><span class="icon">🏗️</span> Patrones comunes</div>
+            <ul>
+              <li>ReAct (Reason + Act)</li>
+              <li>Plan & Execute</li>
+              <li>Multi-Agent Systems</li>
+              <li>Reflexion (auto-crítica)</li>
+              <li>Computer Use (GUI agents)</li>
+              <li>MCP (Model Context Protocol)</li>
+            </ul>
+          </div>
+        </div>
+        <div class="grid-2">
+          <div class="info-block yes-block">
+            <div class="info-block-title"><span class="icon">🟢</span> Cuándo USARLO</div>
+            <ul>
+              <li>Automatización de procesos multi-paso</li>
+              <li>Integración con sistemas externos</li>
+              <li>Tareas que requieren información en tiempo real</li>
+              <li>Workflows que mezclan datos y acciones</li>
+              <li>Asistentes con capacidad de "hacer"</li>
+            </ul>
+          </div>
+          <div class="info-block no-block">
+            <div class="info-block-title"><span class="icon">🔴</span> Cuándo NO usarlo</div>
+            <ul>
+              <li>Respuestas simples sin acciones externas</li>
+              <li>Latencia ultra-baja (<100ms)</li>
+              <li>Entornos sin confianza para ejecución de código</li>
+              <li>Sistemas sin APIs accesibles</li>
+            </ul>
+          </div>
+        </div>
+        <div class="info-block" style="margin-top:16px">
+          <div class="info-block-title"><span class="icon">🛠️</span> Herramientas y Ecosistema</div>
+          <div class="tools-grid">
+            <div class="tool-chip"><div class="tool-name">LangGraph</div><div class="tool-meta"><span class="tag-opensource">Open Source</span><span class="tag-free">Free</span></div></div>
+            <div class="tool-chip"><div class="tool-name">AutoGen (MSFT)</div><div class="tool-meta"><span class="tag-opensource">Open Source</span><span class="tag-free">Free</span></div></div>
+            <div class="tool-chip"><div class="tool-name">CrewAI</div><div class="tool-meta"><span class="tag-opensource">Open Source</span><span class="tag-free">Free</span></div></div>
+            <div class="tool-chip"><div class="tool-name">Claude MCP</div><div class="tool-meta"><span class="tag-opensource">Open Source</span><span class="tag-cloud">Cloud</span></div></div>
+            <div class="tool-chip"><div class="tool-name">Semantic Kernel</div><div class="tool-meta"><span class="tag-opensource">Open Source</span><span class="tag-free">Free</span></div></div>
+            <div class="tool-chip"><div class="tool-name">n8n + LLM</div><div class="tool-meta"><span class="tag-opensource">Open Source</span><span class="tag-free">Freemium</span></div></div>
+            <div class="tool-chip"><div class="tool-name">Flowise</div><div class="tool-meta"><span class="tag-opensource">Open Source</span><span class="tag-free">Free</span></div></div>
+            <div class="tool-chip"><div class="tool-name">Vertex AI Agents</div><div class="tool-meta"><span class="tag-enterprise">Enterprise</span><span class="tag-cloud">Cloud</span></div></div>
+          </div>
+        </div>
+        <div class="sota-block">
+          <div class="info-block-title"><span class="icon">🔬</span> Estado del Arte 2026</div>
+          <p class="sota-text">Los agentes son el área de mayor crecimiento en 2025-2026. <strong>MCP (Model Context Protocol) de Anthropic</strong> se ha convertido en el estándar abierto de integración de herramientas. Los <strong>Computer Use agents</strong> de Claude pueden interactuar con GUIs reales. Las arquitecturas <strong>multi-agente</strong> como AutoGen y CrewAI están siendo adoptadas en enterprise para pipelines de automatización complejos. El desafío central sigue siendo la <strong>fiabilidad y observabilidad</strong> de los agentes en producción.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== 6. KNOWLEDGE DISTILLATION ==================== -->
+    <div class="method-card" data-method="kd">
+      <div class="card-header" onclick="toggleCard(this)">
+        <span class="method-number">06</span>
+        <div class="method-accent" style="background:#ec4899"></div>
+        <div class="method-title-block">
+          <div class="method-name" style="color:#ec4899">Knowledge Distillation</div>
+          <div class="method-tagline">Comprimir el conocimiento de un modelo grande en uno pequeño</div>
+        </div>
+        <div class="badges">
+          <span class="badge badge-cost-high">$$$ Alto</span>
+          <span class="badge badge-diff-high">Avanzado</span>
+        </div>
+        <span class="chevron">▾</span>
+      </div>
+      <div class="card-body">
+        <div class="grid-2">
+          <div class="info-block">
+            <div class="info-block-title"><span class="icon">📖</span> ¿Qué es?</div>
+            <p>Técnica para transferir el "conocimiento" de un modelo grande (teacher) a un modelo más pequeño (student). El modelo student aprende a imitar las distribuciones de probabilidad del teacher, no solo las respuestas correctas, logrando un modelo más pequeño con rendimiento cercano al grande.</p>
+          </div>
+          <div class="info-block">
+            <div class="info-block-title"><span class="icon">⚙️</span> ¿Qué hace?</div>
+            <p>El modelo teacher genera "soft labels" (probabilidades suavizadas) que el modelo student usa para aprender. Hay dos variantes: offline distillation (generar dataset con el teacher primero) y online distillation (aprendizaje simultáneo). Se usa para crear modelos on-device, edge computing, o reducir costos de inferencia.</p>
+          </div>
+        </div>
+        <div class="grid-3">
+          <div class="info-block pros-block">
+            <div class="info-block-title"><span class="icon">✅</span> Ventajas</div>
+            <ul>
+              <li>Modelos mucho más pequeños y rápidos</li>
+              <li>Menor costo de inferencia</li>
+              <li>Deployable en edge / on-device</li>
+              <li>Mantiene capacidades clave del modelo grande</li>
+            </ul>
+          </div>
+          <div class="info-block cons-block">
+            <div class="info-block-title"><span class="icon">❌</span> Desventajas</div>
+            <ul>
+              <li>Proceso complejo y costoso de setup</li>
+              <li>Siempre habrá pérdida de capacidad</li>
+              <li>Requiere acceso a model weights del teacher</li>
+              <li>Difícil de hacer con modelos propietarios</li>
+            </ul>
+          </div>
+          <div class="info-block">
+            <div class="info-block-title"><span class="icon">🎯</span> Casos reales</div>
+            <ul>
+              <li>Phi-3 (MSFT): destilado de GPT-4</li>
+              <li>DistilBERT: destilado de BERT</li>
+              <li>TinyLlama</li>
+              <li>Apple On-Device LLMs</li>
+              <li>Gemma (Google)</li>
+            </ul>
+          </div>
+        </div>
+        <div class="grid-2">
+          <div class="info-block yes-block">
+            <div class="info-block-title"><span class="icon">🟢</span> Cuándo USARLO</div>
+            <ul>
+              <li>Deployment en mobile / edge</li>
+              <li>Reducir costos de inferencia en producción masiva</li>
+              <li>Latencia muy baja requerida</li>
+              <li>Privacidad: datos no pueden salir del dispositivo</li>
+            </ul>
+          </div>
+          <div class="info-block no-block">
+            <div class="info-block-title"><span class="icon">🔴</span> Cuándo NO usarlo</div>
+            <ul>
+              <li>Tareas que requieren el máximo razonamiento</li>
+              <li>Sin acceso a compute significativo para el proceso</li>
+              <li>Aplicación de bajo volumen donde el costo no importa</li>
+            </ul>
+          </div>
+        </div>
+        <div class="sota-block">
+          <div class="info-block-title"><span class="icon">🔬</span> Estado del Arte 2026</div>
+          <p class="sota-text">La família <strong>Phi de Microsoft</strong> es el ejemplo más exitoso: Phi-3-mini (3.8B) rival a modelos 10x más grandes. <strong>Apple MLX</strong> y los modelos on-device de iOS 18 utilizan destilación masiva. La tendencia 2026 es generar datos sintéticos de alta calidad con modelos frontier (GPT-4, Claude) para entrenar modelos pequeños muy capaces — técnica llamada <strong>"self-play distillation"</strong> o <strong>Synthetic Data Fine-Tuning</strong>.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== 7. GUARDRAILS & CONSTITUTIONAL AI ==================== -->
+    <div class="method-card" data-method="guardrails">
+      <div class="card-header" onclick="toggleCard(this)">
+        <span class="method-number">07</span>
+        <div class="method-accent" style="background:#3b82f6"></div>
+        <div class="method-title-block">
+          <div class="method-name" style="color:#60a5fa">Guardrails, System Prompts & Constitutional AI</div>
+          <div class="method-tagline">Controlar y alinear el comportamiento del modelo</div>
+        </div>
+        <div class="badges">
+          <span class="badge badge-cost-low">$ Bajo</span>
+          <span class="badge badge-diff-med">Intermedio</span>
+        </div>
+        <span class="chevron">▾</span>
+      </div>
+      <div class="card-body">
+        <div class="grid-2">
+          <div class="info-block">
+            <div class="info-block-title"><span class="icon">📖</span> ¿Qué es?</div>
+            <p>Conjunto de técnicas para controlar, limitar y alinear el comportamiento del modelo: system prompts de configuración, filtros de input/output, validadores de formato, modelos de clasificación para detectar contenido inapropiado, y técnicas de RLHF/RLAIF para alinear valores del modelo con los deseados.</p>
+          </div>
+          <div class="info-block">
+            <div class="info-block-title"><span class="icon">⚙️</span> ¿Qué hace?</div>
+            <p>Define la "personalidad" y límites del modelo mediante instrucciones persistentes (system prompt), agrega capas de validación que interceptan inputs/outputs antes y después del LLM, y en el caso de Constitutional AI, usa el propio modelo para auto-criticar y corregir sus respuestas según principios definidos.</p>
+          </div>
+        </div>
+        <div class="grid-3">
+          <div class="info-block pros-block">
+            <div class="info-block-title"><span class="icon">✅</span> Ventajas</div>
+            <ul>
+              <li>Control granular sin re-entrenar</li>
+              <li>Rápido de implementar</li>
+              <li>Crítico para compliance y seguridad</li>
+              <li>Combina con cualquier otro método</li>
+            </ul>
+          </div>
+          <div class="info-block cons-block">
+            <div class="info-block-title"><span class="icon">❌</span> Desventajas</div>
+            <ul>
+              <li>Vulnerable a prompt injection</li>
+              <li>Añade latencia si hay múltiples capas</li>
+              <li>Puede ser demasiado restrictivo</li>
+              <li>System prompts consumen contexto</li>
+            </ul>
+          </div>
+          <div class="info-block">
+            <div class="info-block-title"><span class="icon">🛡️</span> Tipos</div>
+            <ul>
+              <li>Input filters (pre-LLM)</li>
+              <li>Output validators (post-LLM)</li>
+              <li>System prompts</li>
+              <li>Constitutional AI (Anthropic)</li>
+              <li>RLHF / RLAIF</li>
+              <li>Structured outputs (JSON mode)</li>
+            </ul>
+          </div>
+        </div>
+        <div class="grid-2">
+          <div class="info-block yes-block">
+            <div class="info-block-title"><span class="icon">🟢</span> Cuándo USARLO</div>
+            <ul>
+              <li>Siempre en producción (mínimo system prompt)</li>
+              <li>Apps con usuarios finales (B2C)</li>
+              <li>Industrias reguladas (salud, finanzas, legal)</li>
+              <li>Cuando el formato de output es crítico</li>
+            </ul>
+          </div>
+          <div class="info-block no-block">
+            <div class="info-block-title"><span class="icon">🔴</span> Cuándo NO omitirlo</div>
+            <ul>
+              <li>Nunca omitir en producción con usuarios reales</li>
+              <li>Especialmente crítico en LLMs sin fine-tuning de alineamiento</li>
+            </ul>
+          </div>
+        </div>
+        <div class="info-block" style="margin-top:16px">
+          <div class="info-block-title"><span class="icon">🛠️</span> Herramientas y Ecosistema</div>
+          <div class="tools-grid">
+            <div class="tool-chip"><div class="tool-name">NeMo Guardrails</div><div class="tool-meta"><span class="tag-opensource">Open Source</span><span class="tag-free">Free</span></div></div>
+            <div class="tool-chip"><div class="tool-name">Guardrails AI</div><div class="tool-meta"><span class="tag-opensource">Open Source</span><span class="tag-free">Freemium</span></div></div>
+            <div class="tool-chip"><div class="tool-name">LlamaGuard (Meta)</div><div class="tool-meta"><span class="tag-opensource">Open Source</span><span class="tag-free">Free</span></div></div>
+            <div class="tool-chip"><div class="tool-name">Azure Content Safety</div><div class="tool-meta"><span class="tag-enterprise">Enterprise</span><span class="tag-cloud">Cloud</span></div></div>
+            <div class="tool-chip"><div class="tool-name">Rebuff</div><div class="tool-meta"><span class="tag-opensource">Open Source</span><span class="tag-free">Free</span></div></div>
+            <div class="tool-chip"><div class="tool-name">Lakera Guard</div><div class="tool-meta"><span class="tag-enterprise">Enterprise</span></div></div>
+          </div>
+        </div>
+        <div class="sota-block">
+          <div class="info-block-title"><span class="icon">🔬</span> Estado del Arte 2026</div>
+          <p class="sota-text"><strong>Constitutional AI de Anthropic</strong> y <strong>RLAIF</strong> son el estándar para modelos de producción robustos. <strong>LlamaGuard 3</strong> de Meta es el clasificador de seguridad open source más adoptado. En 2025-2026, el foco se ha movido hacia <strong>agentic safety</strong>: garantizar que los agentes autónomos no tomen acciones destructivas. Los <strong>Structured Outputs</strong> (JSON mode nativo) se han vuelto universales en todos los providers principales.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== 8. PRETRAINING / DOMAIN ADAPTIVE PRETRAINING ==================== -->
+    <div class="method-card" data-method="pretrain">
+      <div class="card-header" onclick="toggleCard(this)">
+        <span class="method-number">08</span>
+        <div class="method-accent" style="background:#8b5cf6"></div>
+        <div class="method-title-block">
+          <div class="method-name" style="color:#8b5cf6">Domain-Adaptive Pretraining (DAPT) & Continued Pretraining</div>
+          <div class="method-tagline">Construir un modelo que "habla" tu dominio desde los cimientos</div>
+        </div>
+        <div class="badges">
+          <span class="badge badge-cost-high">$$$$+ Muy Alto</span>
+          <span class="badge badge-diff-high">Experto</span>
+        </div>
+        <span class="chevron">▾</span>
+      </div>
+      <div class="card-body">
+        <div class="grid-2">
+          <div class="info-block">
+            <div class="info-block-title"><span class="icon">📖</span> ¿Qué es?</div>
+            <p>Continuar el pre-entrenamiento de un modelo base con grandes volúmenes de texto de un dominio específico (medicina, derecho, código, idioma regional, etc.) antes de cualquier instruction tuning. Es la base sobre la que se construyen modelos como BioMedLM, LegalBERT, o CodeLlama. Requiere cientos de GB a TB de datos y semanas/meses de compute.</p>
+          </div>
+          <div class="info-block">
+            <div class="info-block-title"><span class="icon">⚙️</span> ¿Qué hace?</div>
+            <p>Actualiza los pesos del transformer en la tarea de next-token prediction usando corpus especializados masivos. Permite al modelo internalizar vocabulario, sintaxis, conceptos y relaciones propias del dominio que no estaban suficientemente representadas en los datos de pretraining general. El resultado es un modelo con intuición profunda del dominio.</p>
+          </div>
+        </div>
+        <div class="grid-3">
+          <div class="info-block pros-block">
+            <div class="info-block-title"><span class="icon">✅</span> Ventajas</div>
+            <ul>
+              <li>Comprensión profunda del dominio</li>
+              <li>Base sólida para fine-tuning posterior</li>
+              <li>Vocabulario especializado nativo</li>
+              <li>Puede aprender idiomas infrarepresentados</li>
+            </ul>
+          </div>
+          <div class="info-block cons-block">
+            <div class="info-block-title"><span class="icon">❌</span> Desventajas</div>
+            <ul>
+              <li>Costo computacional enorme (GPU weeks/months)</li>
+              <li>Requiere datasets masivos y limpios</li>
+              <li>Solo para organizaciones grandes</li>
+              <li>Riesgo de perder capacidades generales</li>
+              <li>ROI difícil de justificar para la mayoría</li>
+            </ul>
+          </div>
+          <div class="info-block">
+            <div class="info-block-title"><span class="icon">🎯</span> Modelos reales</div>
+            <ul>
+              <li>CodeLlama (código)</li>
+              <li>BioMedLM (biomedicina)</li>
+              <li>LegalBERT (derecho)</li>
+              <li>BloombergGPT (finanzas)</li>
+              <li>StarCoder (código)</li>
+              <li>Modelos de idiomas indígenas</li>
+            </ul>
+          </div>
+        </div>
+        <div class="grid-2">
+          <div class="info-block yes-block">
+            <div class="info-block-title"><span class="icon">🟢</span> Cuándo USARLO</div>
+            <ul>
+              <li>Dominio altamente especializado con terminología única</li>
+              <li>Idioma no cubierto adecuadamente en modelos generales</li>
+              <li>Tienes acceso a corpus masivo propio (TB de datos)</li>
+              <li>Producto de nicho que justifica el costo</li>
+            </ul>
+          </div>
+          <div class="info-block no-block">
+            <div class="info-block-title"><span class="icon">🔴</span> Cuándo NO usarlo</div>
+            <ul>
+              <li>La mayoría de los casos empresariales</li>
+              <li>RAG + Fine-tuning resuelve el problema</li>
+              <li>Sin presupuesto de cómputo significativo</li>
+              <li>Sin expertise en training LLMs a escala</li>
+            </ul>
+          </div>
+        </div>
+        <div class="sota-block">
+          <div class="info-block-title"><span class="icon">🔬</span> Estado del Arte 2026</div>
+          <p class="sota-text">Con modelos de propósito general cada vez más capaces, el DAPT se justifica principalmente para <strong>dominios muy especializados o idiomas infrarepresentados</strong>. El caso de <strong>BloombergGPT para finanzas</strong> sigue siendo el benchmark de referencia. La tendencia 2026 es <strong>Continued Pretraining eficiente</strong> usando técnicas como LoRA aplicado al pretraining, reduciendo costos. Para la mayoría de casos, la combinación RAG + Fine-tuning supera al DAPT en ROI.</p>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- end methods-grid -->
+
+  <!-- COMPARISON TABLE -->
+  <div class="comparison-section">
+    <h2 class="section-heading">Tabla Comparativa Rápida</h2>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Método</th>
+            <th>Modifica Pesos</th>
+            <th>Datos Propios</th>
+            <th>Costo Setup</th>
+            <th>Costo Inferencia</th>
+            <th>Dificultad</th>
+            <th>Actualizable</th>
+            <th>Tiempo al Deploy</th>
+            <th>Mejor Para</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><div class="td-name"><div class="td-dot" style="background:#06b6d4"></div>Prompt Engineering</div></td>
+            <td><div class="td-dot dot-good" title="No"></div> No</td>
+            <td><div class="td-dot dot-good" title="No necesario"></div> Opcional</td>
+            <td><div class="td-dot dot-good"></div> Casi $0</td>
+            <td><div class="td-dot dot-mid"></div> Medio</td>
+            <td><div class="td-dot dot-good"></div> Baja</td>
+            <td><div class="td-dot dot-good"></div> Inmediato</td>
+            <td><div class="td-dot dot-good"></div> Horas</td>
+            <td>Prototipado, tareas generales</td>
+          </tr>
+          <tr>
+            <td><div class="td-name"><div class="td-dot" style="background:#a78bfa"></div>RAG</div></td>
+            <td><div class="td-dot dot-good"></div> No</td>
+            <td><div class="td-dot dot-bad"></div> Sí</td>
+            <td><div class="td-dot dot-mid"></div> Bajo-Medio</td>
+            <td><div class="td-dot dot-mid"></div> Medio</td>
+            <td><div class="td-dot dot-mid"></div> Media</td>
+            <td><div class="td-dot dot-good"></div> Tiempo real</td>
+            <td><div class="td-dot dot-mid"></div> Días-semanas</td>
+            <td>Knowledge base, documentos actualizables</td>
+          </tr>
+          <tr>
+            <td><div class="td-name"><div class="td-dot" style="background:#f59e0b"></div>Fine-Tuning</div></td>
+            <td><div class="td-dot dot-bad"></div> Sí</td>
+            <td><div class="td-dot dot-bad"></div> Sí (curado)</td>
+            <td><div class="td-dot dot-bad"></div> Alto</td>
+            <td><div class="td-dot dot-good"></div> Bajo</td>
+            <td><div class="td-dot dot-bad"></div> Alta</td>
+            <td><div class="td-dot dot-bad"></div> Re-training</td>
+            <td><div class="td-dot dot-bad"></div> Semanas</td>
+            <td>Estilo consistente, formato específico</td>
+          </tr>
+          <tr>
+            <td><div class="td-name"><div class="td-dot" style="background:#10b981"></div>In-Context / Long Context</div></td>
+            <td><div class="td-dot dot-good"></div> No</td>
+            <td><div class="td-dot dot-mid"></div> Opcional</td>
+            <td><div class="td-dot dot-good"></div> $0</td>
+            <td><div class="td-dot dot-bad"></div> Muy Alto</td>
+            <td><div class="td-dot dot-good"></div> Baja</td>
+            <td><div class="td-dot dot-good"></div> Inmediato</td>
+            <td><div class="td-dot dot-good"></div> Minutos</td>
+            <td>Análisis de docs largos, few-shot</td>
+          </tr>
+          <tr>
+            <td><div class="td-name"><div class="td-dot" style="background:#ef4444"></div>Agents & Tool Use</div></td>
+            <td><div class="td-dot dot-good"></div> No</td>
+            <td><div class="td-dot dot-mid"></div> Opcional</td>
+            <td><div class="td-dot dot-mid"></div> Medio</td>
+            <td><div class="td-dot dot-bad"></div> Alto (multi-call)</td>
+            <td><div class="td-dot dot-mid"></div> Media</td>
+            <td><div class="td-dot dot-good"></div> Fácil</td>
+            <td><div class="td-dot dot-mid"></div> Días</td>
+            <td>Automatización, sistemas integrados</td>
+          </tr>
+          <tr>
+            <td><div class="td-name"><div class="td-dot" style="background:#ec4899"></div>Knowledge Distillation</div></td>
+            <td><div class="td-dot dot-bad"></div> Sí (student)</td>
+            <td><div class="td-dot dot-bad"></div> Generados</td>
+            <td><div class="td-dot dot-bad"></div> Muy Alto</td>
+            <td><div class="td-dot dot-good"></div> Muy Bajo</td>
+            <td><div class="td-dot dot-bad"></div> Alta</td>
+            <td><div class="td-dot dot-bad"></div> Re-training</td>
+            <td><div class="td-dot dot-bad"></div> Meses</td>
+            <td>Edge, mobile, costo inferencia masivo</td>
+          </tr>
+          <tr>
+            <td><div class="td-name"><div class="td-dot" style="background:#60a5fa"></div>Guardrails & CAI</div></td>
+            <td><div class="td-dot dot-mid"></div> Opcional</td>
+            <td><div class="td-dot dot-mid"></div> Opcional</td>
+            <td><div class="td-dot dot-good"></div> Bajo</td>
+            <td><div class="td-dot dot-mid"></div> Bajo-Medio</td>
+            <td><div class="td-dot dot-mid"></div> Media</td>
+            <td><div class="td-dot dot-good"></div> Fácil</td>
+            <td><div class="td-dot dot-mid"></div> Días</td>
+            <td>Producción, compliance, seguridad</td>
+          </tr>
+          <tr>
+            <td><div class="td-name"><div class="td-dot" style="background:#8b5cf6"></div>DAPT / Continued Pretraining</div></td>
+            <td><div class="td-dot dot-bad"></div> Sí</td>
+            <td><div class="td-dot dot-bad"></div> Sí (masivo)</td>
+            <td><div class="td-dot dot-bad"></div> Extremo</td>
+            <td><div class="td-dot dot-mid"></div> Medio</td>
+            <td><div class="td-dot dot-bad"></div> Experto</td>
+            <td><div class="td-dot dot-bad"></div> Re-training</td>
+            <td><div class="td-dot dot-bad"></div> Meses</td>
+            <td>Dominio ultra-especializado, idiomas</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- DECISION TREE -->
+  <div class="comparison-section">
+    <h2 class="section-heading">¿Cuál usar? Árbol de Decisión</h2>
+    <div class="info-block" style="background: var(--surface); border-color: rgba(124,58,237,0.2);">
+      <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; padding: 8px 0;">
+        <div style="padding:16px; background: var(--bg); border-radius:10px; border-left: 3px solid #06b6d4;">
+          <div style="font-family:'Syne',sans-serif; font-weight:700; color:#06b6d4; margin-bottom:8px;">¿Empezando / prototipando?</div>
+          <p style="font-size:13px; color:var(--subtle); line-height:1.6;">→ <strong style="color:var(--text)">Prompt Engineering primero</strong>. Siempre. Agota este método antes de invertir en los otros.</p>
+        </div>
+        <div style="padding:16px; background: var(--bg); border-radius:10px; border-left: 3px solid #a78bfa;">
+          <div style="font-family:'Syne',sans-serif; font-weight:700; color:#a78bfa; margin-bottom:8px;">¿Necesitás conocimiento propio actualizable?</div>
+          <p style="font-size:13px; color:var(--subtle); line-height:1.6;">→ <strong style="color:var(--text)">RAG</strong>. Es la solución más versátil para conocimiento dinámico o propietario.</p>
+        </div>
+        <div style="padding:16px; background: var(--bg); border-radius:10px; border-left: 3px solid #f59e0b;">
+          <div style="font-family:'Syne',sans-serif; font-weight:700; color:#f59e0b; margin-bottom:8px;">¿Querés cambiar el estilo/comportamiento base?</div>
+          <p style="font-size:13px; color:var(--subtle); line-height:1.6;">→ <strong style="color:var(--text)">Fine-Tuning (LoRA)</strong>. Especialmente si el prompt engineering no da el resultado deseado.</p>
+        </div>
+        <div style="padding:16px; background: var(--bg); border-radius:10px; border-left: 3px solid #ef4444;">
+          <div style="font-family:'Syne',sans-serif; font-weight:700; color:#ef4444; margin-bottom:8px;">¿Necesitás que el modelo "actúe" en el mundo?</div>
+          <p style="font-size:13px; color:var(--subtle); line-height:1.6;">→ <strong style="color:var(--text)">Agentes + Tool Use</strong>. Con APIs, bases de datos, acciones externas.</p>
+        </div>
+        <div style="padding:16px; background: var(--bg); border-radius:10px; border-left: 3px solid #ec4899;">
+          <div style="font-family:'Syne',sans-serif; font-weight:700; color:#ec4899; margin-bottom:8px;">¿Deployment en edge/mobile con bajo costo?</div>
+          <p style="font-size:13px; color:var(--subtle); line-height:1.6;">→ <strong style="color:var(--text)">Knowledge Distillation</strong>. O usar modelos ya destilados (Phi-3, Gemma).</p>
+        </div>
+        <div style="padding:16px; background: var(--bg); border-radius:10px; border-left: 3px solid #8b5cf6;">
+          <div style="font-family:'Syne',sans-serif; font-weight:700; color:#8b5cf6; margin-bottom:8px;">¿Dominio ultra-especializado sin modelo existente?</div>
+          <p style="font-size:13px; color:var(--subtle); line-height:1.6;">→ <strong style="color:var(--text)">DAPT</strong>. Solo si tenés TBs de datos y presupuesto de cómputo serio.</p>
+        </div>
+      </div>
+      <div style="margin-top:16px; padding:14px; background: rgba(124,58,237,0.08); border-radius:10px; border: 1px solid rgba(124,58,237,0.2);">
+        <p style="font-size:13px; color:var(--subtle); line-height:1.7;"><strong style="color:#a78bfa">💡 Regla de oro 2026:</strong> La mayoría de casos enterprise se resuelven con la combinación <strong style="color:var(--text)">RAG + Fine-Tuning (LoRA) + Guardrails</strong>. Los agentes se agregan cuando se necesita automatización. El prompt engineering nunca desaparece: siempre es la primera capa. DAPT y Distilación son para casos muy específicos o a escala masiva.</p>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    Generado con <span>Claude</span> · Métodos para Potenciar LLMs · 2026 · Todos los datos son educativos y pueden variar según el caso de uso
+  </footer>
+
+</div>
+
+<script>
+  function toggleCard(header) {
+    const body = header.nextElementSibling;
+    const chevron = header.querySelector('.chevron');
+    const isOpen = body.classList.contains('open');
+    body.classList.toggle('open', !isOpen);
+    chevron.classList.toggle('open', !isOpen);
+    header.classList.toggle('open', !isOpen);
+  }
+
+  // Open first card by default
+  document.addEventListener('DOMContentLoaded', () => {
+    const firstHeader = document.querySelector('.card-header');
+    if (firstHeader) toggleCard(firstHeader);
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,1012 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cuadro Comparativo — Herramientas de Ciberseguridad</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #050a0f;
+    --surface: #0c1520;
+    --surface2: #111d2b;
+    --border: #1e3348;
+    --accent: #00d4ff;
+    --accent2: #ff6b35;
+    --accent3: #39ff14;
+    --accent4: #b44cff;
+    --text: #e8f4f8;
+    --muted: #7a9bb5;
+    --danger: #ff3b5c;
+    --warn: #ffc947;
+    --good: #39ff14;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Syne', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Grid background */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(0,212,255,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,212,255,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .container {
+    position: relative;
+    z-index: 1;
+    max-width: 1600px;
+    margin: 0 auto;
+    padding: 40px 24px 80px;
+  }
+
+  /* Header */
+  header {
+    text-align: center;
+    margin-bottom: 60px;
+    animation: fadeDown 0.8s ease both;
+  }
+
+  .header-badge {
+    display: inline-block;
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 3px;
+    color: var(--accent);
+    border: 1px solid var(--accent);
+    padding: 4px 16px;
+    border-radius: 2px;
+    text-transform: uppercase;
+    margin-bottom: 20px;
+    background: rgba(0,212,255,0.05);
+  }
+
+  h1 {
+    font-size: clamp(2rem, 5vw, 3.8rem);
+    font-weight: 800;
+    line-height: 1.05;
+    background: linear-gradient(135deg, var(--text) 30%, var(--accent) 80%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 16px;
+  }
+
+  header p {
+    font-size: 1rem;
+    color: var(--muted);
+    font-family: 'Space Mono', monospace;
+    letter-spacing: 1px;
+  }
+
+  /* Nav / Term Pills */
+  .nav-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: center;
+    margin-bottom: 50px;
+    animation: fadeDown 0.9s ease 0.1s both;
+  }
+
+  .pill {
+    font-family: 'Space Mono', monospace;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 8px 18px;
+    border-radius: 3px;
+    border: 1px solid;
+    cursor: pointer;
+    transition: all 0.2s;
+    letter-spacing: 1px;
+  }
+
+  .pill:hover { transform: translateY(-2px); }
+
+  .pill-siem  { color: #00d4ff; border-color: #00d4ff; background: rgba(0,212,255,0.08); }
+  .pill-xdr   { color: #b44cff; border-color: #b44cff; background: rgba(180,76,255,0.08); }
+  .pill-edr   { color: #ff6b35; border-color: #ff6b35; background: rgba(255,107,53,0.08); }
+  .pill-soar  { color: #39ff14; border-color: #39ff14; background: rgba(57,255,20,0.08); }
+  .pill-ndr   { color: #ffc947; border-color: #ffc947; background: rgba(255,201,71,0.08); }
+  .pill-ueba  { color: #ff3b5c; border-color: #ff3b5c; background: rgba(255,59,92,0.08); }
+  .pill-thi   { color: #00d4ff; border-color: #00d4ff; background: rgba(0,212,255,0.08); }
+  .pill-vm    { color: #b44cff; border-color: #b44cff; background: rgba(180,76,255,0.08); }
+
+  .pill.active { transform: translateY(-2px); filter: brightness(1.3); }
+
+  /* Cards */
+  .cards-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .term-section {
+    display: none;
+    animation: fadeIn 0.4s ease both;
+  }
+  .term-section.visible { display: block; }
+
+  .term-header {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: 20px;
+    padding: 24px 32px;
+    border-radius: 6px 6px 0 0;
+    border: 1px solid;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+
+  .term-header:hover { filter: brightness(1.1); }
+
+  .term-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 1.5rem;
+    font-weight: 700;
+    letter-spacing: 2px;
+  }
+
+  .term-name {
+    font-size: 1rem;
+    color: var(--muted);
+    font-weight: 600;
+  }
+
+  .toggle-icon {
+    font-size: 1.2rem;
+    transition: transform 0.3s;
+  }
+
+  .term-section.open .toggle-icon { transform: rotate(45deg); }
+
+  .term-body {
+    display: none;
+    border: 1px solid;
+    border-top: none;
+    border-radius: 0 0 6px 6px;
+    overflow: hidden;
+  }
+
+  .term-section.open .term-body { display: block; }
+
+  /* Color themes per term */
+  .t-siem .term-header { background: rgba(0,212,255,0.07); border-color: #00d4ff44; }
+  .t-siem .term-label, .t-siem .toggle-icon { color: #00d4ff; }
+  .t-siem .term-body { border-color: #00d4ff44; }
+
+  .t-xdr .term-header { background: rgba(180,76,255,0.07); border-color: #b44cff44; }
+  .t-xdr .term-label, .t-xdr .toggle-icon { color: #b44cff; }
+  .t-xdr .term-body { border-color: #b44cff44; }
+
+  .t-edr .term-header { background: rgba(255,107,53,0.07); border-color: #ff6b3544; }
+  .t-edr .term-label, .t-edr .toggle-icon { color: #ff6b35; }
+  .t-edr .term-body { border-color: #ff6b3544; }
+
+  .t-soar .term-header { background: rgba(57,255,20,0.07); border-color: #39ff1444; }
+  .t-soar .term-label, .t-soar .toggle-icon { color: #39ff14; }
+  .t-soar .term-body { border-color: #39ff1444; }
+
+  .t-ndr .term-header { background: rgba(255,201,71,0.07); border-color: #ffc94744; }
+  .t-ndr .term-label, .t-ndr .toggle-icon { color: #ffc947; }
+  .t-ndr .term-body { border-color: #ffc94744; }
+
+  .t-ueba .term-header { background: rgba(255,59,92,0.07); border-color: #ff3b5c44; }
+  .t-ueba .term-label, .t-ueba .toggle-icon { color: #ff3b5c; }
+  .t-ueba .term-body { border-color: #ff3b5c44; }
+
+  .t-thi .term-header { background: rgba(0,212,255,0.07); border-color: #00d4ff44; }
+  .t-thi .term-label, .t-thi .toggle-icon { color: #00d4ff; }
+  .t-thi .term-body { border-color: #00d4ff44; }
+
+  .t-vm .term-header { background: rgba(180,76,255,0.07); border-color: #b44cff44; }
+  .t-vm .term-label, .t-vm .toggle-icon { color: #b44cff; }
+  .t-vm .term-body { border-color: #b44cff44; }
+
+  /* Table */
+  .compare-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.88rem;
+  }
+
+  .compare-table thead tr {
+    background: var(--surface2);
+  }
+
+  .compare-table th {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--muted);
+    padding: 14px 20px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+  }
+
+  .compare-table th:first-child { min-width: 160px; }
+
+  .compare-table td {
+    padding: 16px 20px;
+    border-bottom: 1px solid #1a2a3a;
+    vertical-align: top;
+    line-height: 1.6;
+    color: #c5daea;
+  }
+
+  .compare-table tr:last-child td { border-bottom: none; }
+  .compare-table tr:hover td { background: rgba(255,255,255,0.02); }
+
+  .row-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.72rem;
+    letter-spacing: 1px;
+    font-weight: 700;
+    color: var(--muted);
+    text-transform: uppercase;
+    padding-right: 12px;
+    white-space: nowrap;
+  }
+
+  /* Row category icons */
+  .row-que    .row-label { color: #00d4ff; }
+  .row-hace   .row-label { color: #b44cff; }
+  .row-nohace .row-label { color: #ff3b5c; }
+  .row-vent   .row-label { color: #39ff14; }
+  .row-desv   .row-label { color: #ffc947; }
+  .row-si     .row-label { color: #39ff14; }
+  .row-no     .row-label { color: #ff3b5c; }
+  .row-tools  .row-label { color: #00d4ff; }
+
+  /* Tags */
+  .tag-grid { display: flex; flex-wrap: wrap; gap: 6px; }
+
+  .tag {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.68rem;
+    padding: 3px 10px;
+    border-radius: 2px;
+    border: 1px solid;
+    letter-spacing: 0.5px;
+  }
+
+  .tag-free  { color: #39ff14; border-color: #39ff1466; background: rgba(57,255,20,0.07); }
+  .tag-paid  { color: #ffc947; border-color: #ffc94766; background: rgba(255,201,71,0.07); }
+  .tag-both  { color: #00d4ff; border-color: #00d4ff66; background: rgba(0,212,255,0.07); }
+
+  /* Bullet list inside cells */
+  .cell-list { list-style: none; }
+  .cell-list li { padding: 2px 0 2px 14px; position: relative; }
+  .cell-list li::before {
+    content: '›';
+    position: absolute;
+    left: 0;
+    color: var(--muted);
+  }
+
+  /* All terms table */
+  .all-table-wrap {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Summary overview grid */
+  .overview-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 16px;
+    padding: 28px;
+    background: var(--surface);
+  }
+
+  .overview-card {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 18px;
+  }
+
+  .overview-card h4 {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.75rem;
+    letter-spacing: 2px;
+    margin-bottom: 8px;
+  }
+
+  .overview-card p {
+    font-size: 0.82rem;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+
+  /* Animations */
+  @keyframes fadeDown {
+    from { opacity:0; transform: translateY(-20px); }
+    to   { opacity:1; transform: translateY(0); }
+  }
+
+  @keyframes fadeIn {
+    from { opacity:0; transform: translateY(8px); }
+    to   { opacity:1; transform: translateY(0); }
+  }
+
+  /* View mode buttons */
+  .view-toggle {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 30px;
+  }
+
+  .vbtn {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 2px;
+    padding: 10px 22px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--muted);
+    cursor: pointer;
+    border-radius: 3px;
+    transition: all 0.2s;
+  }
+
+  .vbtn:hover, .vbtn.active {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: rgba(0,212,255,0.08);
+  }
+
+  /* Mega comparison table */
+  .mega-wrap { overflow-x: auto; }
+  .mega-table { border-collapse: collapse; min-width: 1200px; width: 100%; font-size: 0.82rem; }
+  .mega-table th {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    padding: 14px 16px;
+    border: 1px solid var(--border);
+    white-space: nowrap;
+    position: sticky;
+    top: 0;
+    background: var(--surface2);
+    z-index: 2;
+  }
+  .mega-table td {
+    padding: 13px 16px;
+    border: 1px solid #1a2a3a;
+    vertical-align: top;
+    line-height: 1.5;
+    color: #c5daea;
+  }
+  .mega-table td:first-child {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.72rem;
+    letter-spacing: 1px;
+    color: var(--muted);
+    font-weight: 700;
+    text-transform: uppercase;
+    background: var(--surface2);
+    position: sticky;
+    left: 0;
+    z-index: 1;
+    white-space: nowrap;
+    min-width: 130px;
+  }
+  .mega-table tr:hover td { background: rgba(255,255,255,0.025); }
+  .mega-table tr:hover td:first-child { background: var(--surface2); }
+
+  .th-siem { color: #00d4ff !important; }
+  .th-xdr  { color: #b44cff !important; }
+  .th-edr  { color: #ff6b35 !important; }
+  .th-soar { color: #39ff14 !important; }
+  .th-ndr  { color: #ffc947 !important; }
+  .th-ueba { color: #ff3b5c !important; }
+  .th-thi  { color: #00d4ff !important; }
+  .th-vm   { color: #b44cff !important; }
+
+  .check-yes { color: #39ff14; font-size: 1rem; }
+  .check-no  { color: #ff3b5c; font-size: 1rem; }
+  .check-par { color: #ffc947; font-size: 1rem; }
+
+  /* Footer */
+  footer {
+    text-align: center;
+    margin-top: 60px;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--muted);
+    letter-spacing: 1px;
+    border-top: 1px solid var(--border);
+    padding-top: 30px;
+  }
+
+  /* Print */
+  @media print {
+    body { background: white; color: black; }
+    body::before { display: none; }
+    .nav-pills, .view-toggle { display: none; }
+    .term-section { display: block !important; }
+    .term-body { display: block !important; }
+    .term-header { background: #eee !important; }
+  }
+
+  @media (max-width: 768px) {
+    .container { padding: 20px 12px; }
+    .compare-table th { padding: 10px 12px; }
+    .compare-table td { padding: 12px; }
+    .overview-grid { grid-template-columns: 1fr 1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <header>
+    <div class="header-badge">// CYBERSECURITY REFERENCE 2025</div>
+    <h1>Cuadro Comparativo<br>de Herramientas SOC</h1>
+    <p>SIEM · XDR · EDR · SOAR · NDR · UEBA · Threat Intel · VM</p>
+  </header>
+
+  <!-- Nav Pills -->
+  <div class="nav-pills">
+    <button class="pill pill-siem active" onclick="showTerm('siem', this)">SIEM</button>
+    <button class="pill pill-xdr"  onclick="showTerm('xdr', this)">XDR</button>
+    <button class="pill pill-edr"  onclick="showTerm('edr', this)">EDR</button>
+    <button class="pill pill-soar" onclick="showTerm('soar', this)">SOAR</button>
+    <button class="pill pill-ndr"  onclick="showTerm('ndr', this)">NDR</button>
+    <button class="pill pill-ueba" onclick="showTerm('ueba', this)">UEBA</button>
+    <button class="pill pill-thi"  onclick="showTerm('thi', this)">Threat Intel</button>
+    <button class="pill pill-vm"   onclick="showTerm('vm', this)">Vuln. Mgmt.</button>
+    <button class="pill" style="color:#fff;border-color:#444;background:rgba(255,255,255,0.05)" onclick="showTerm('all', this)">▦ TODOS</button>
+  </div>
+
+  <!-- View mode -->
+  <div class="view-toggle" id="viewToggle" style="display:none;">
+    <button class="vbtn active" onclick="setView('cards', this)">TARJETAS</button>
+    <button class="vbtn" onclick="setView('table', this)">TABLA GLOBAL</button>
+  </div>
+
+  <div class="cards-wrapper" id="cardsWrapper">
+
+    <!-- ============ SIEM ============ -->
+    <div class="term-section t-siem" id="sec-siem">
+      <div class="term-header" onclick="toggleSection('siem')">
+        <span class="term-label">SIEM</span>
+        <span class="term-name">Security Information and Event Management</span>
+        <span class="toggle-icon">+</span>
+      </div>
+      <div class="term-body">
+        <table class="compare-table">
+          <thead><tr><th>Categoría</th><th>Detalle</th></tr></thead>
+          <tbody>
+            <tr class="row-que"><td class="row-label">¿Qué es?</td><td>Plataforma centralizada que recopila, agrega, normaliza y correlaciona logs y eventos de seguridad provenientes de múltiples fuentes (firewalls, servidores, aplicaciones, endpoints, etc.) para proporcionar visibilidad unificada y detectar amenazas.</td></tr>
+            <tr class="row-hace"><td class="row-label">¿Qué hace?</td><td><ul class="cell-list"><li>Centraliza y correlaciona logs en tiempo real</li><li>Genera alertas basadas en reglas y correlación</li><li>Permite búsqueda e investigación forense histórica</li><li>Genera reportes de compliance (PCI-DSS, ISO 27001, HIPAA)</li><li>Detecta patrones anómalos mediante reglas SIEM</li></ul></td></tr>
+            <tr class="row-nohace"><td class="row-label">¿Qué NO hace?</td><td><ul class="cell-list"><li>No responde ni contiene amenazas automáticamente</li><li>No analiza tráfico de red en profundidad (eso es NDR)</li><li>No previene intrusiones activamente</li><li>No protege endpoints directamente</li><li>No integra inteligencia de amenazas por sí solo (necesita TIP)</li></ul></td></tr>
+            <tr class="row-vent"><td class="row-label">Ventajas</td><td><ul class="cell-list"><li>Visibilidad centralizada de toda la infraestructura</li><li>Fundamental para compliance normativo</li><li>Histórico forense para investigaciones post-incidente</li><li>Amplia cobertura de fuentes de datos</li></ul></td></tr>
+            <tr class="row-desv"><td class="row-label">Desventajas</td><td><ul class="cell-list"><li>Alto volumen de falsos positivos</li><li>Costoso en licencias y almacenamiento</li><li>Requiere personal especializado para tuning</li><li>Curva de aprendizaje elevada</li><li>Difícil detectar amenazas zero-day sin reglas previas</li></ul></td></tr>
+            <tr class="row-si"><td class="row-label">Úsalo cuando...</td><td><ul class="cell-list"><li>Tu organización debe cumplir con PCI-DSS, HIPAA, SOX, ISO 27001</li><li>Tienes un SOC o equipo de análisis dedicado</li><li>Necesitas correlación de eventos de múltiples plataformas</li><li>Requieres retención histórica de logs para auditorías</li></ul></td></tr>
+            <tr class="row-no"><td class="row-label">No lo uses cuando...</td><td><ul class="cell-list"><li>Eres una empresa pequeña sin equipo de seguridad</li><li>No tienes presupuesto para personal de tuning</li><li>Buscas respuesta activa automatizada (necesitas SOAR)</li><li>Tu infraestructura es muy pequeña y homogénea</li></ul></td></tr>
+            <tr class="row-tools"><td class="row-label">Herramientas</td><td>
+              <div class="tag-grid">
+                <span class="tag tag-free">Wazuh (Open Source)</span>
+                <span class="tag tag-free">OpenSearch/ELK Stack</span>
+                <span class="tag tag-free">Graylog Community</span>
+                <span class="tag tag-free">OSSIM (AlienVault Open)</span>
+                <span class="tag tag-paid">Splunk Enterprise</span>
+                <span class="tag tag-paid">Microsoft Sentinel</span>
+                <span class="tag tag-paid">IBM QRadar</span>
+                <span class="tag tag-paid">LogRhythm</span>
+                <span class="tag tag-paid">Exabeam</span>
+                <span class="tag tag-paid">Securonix</span>
+              </div>
+            </td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ============ XDR ============ -->
+    <div class="term-section t-xdr" id="sec-xdr">
+      <div class="term-header" onclick="toggleSection('xdr')">
+        <span class="term-label">XDR</span>
+        <span class="term-name">Extended Detection and Response</span>
+        <span class="toggle-icon">+</span>
+      </div>
+      <div class="term-body">
+        <table class="compare-table">
+          <thead><tr><th>Categoría</th><th>Detalle</th></tr></thead>
+          <tbody>
+            <tr class="row-que"><td class="row-label">¿Qué es?</td><td>Evolución del EDR que integra y correlaciona datos de múltiples capas de seguridad (endpoints, red, email, cloud, identidades) en una sola plataforma unificada para detección y respuesta coordinada a amenazas.</td></tr>
+            <tr class="row-hace"><td class="row-label">¿Qué hace?</td><td><ul class="cell-list"><li>Correlaciona telemetría de endpoint, red, email y cloud</li><li>Detecta amenazas avanzadas y movimiento lateral</li><li>Automatiza respuestas coordinadas multi-capa</li><li>Prioriza alertas con contexto enriquecido</li><li>Facilita investigaciones cross-domain (un solo pane of glass)</li></ul></td></tr>
+            <tr class="row-nohace"><td class="row-label">¿Qué NO hace?</td><td><ul class="cell-list"><li>No reemplaza completamente al SIEM en compliance</li><li>No gestiona vulnerabilidades ni parchea sistemas</li><li>No es un firewall ni IPS activo</li><li>Limitado a los productos del mismo vendor (Native XDR)</li></ul></td></tr>
+            <tr class="row-vent"><td class="row-label">Ventajas</td><td><ul class="cell-list"><li>Visibilidad unificada y holística de amenazas</li><li>Reduce tiempo de detección (MTTD) y respuesta (MTTR)</li><li>Menos silos de seguridad, correlación automática</li><li>Mejor experiencia de investigación que EDR aislado</li></ul></td></tr>
+            <tr class="row-desv"><td class="row-label">Desventajas</td><td><ul class="cell-list"><li>Vendor lock-in en implementaciones nativas</li><li>Costo elevado si se requiere Open XDR</li><li>Integración compleja con herramientas legacy</li><li>Aún emergente — madurez variable por vendor</li></ul></td></tr>
+            <tr class="row-si"><td class="row-label">Úsalo cuando...</td><td><ul class="cell-list"><li>Tienes un ecosistema de seguridad del mismo proveedor</li><li>Buscas reducir la fatiga de alertas del SOC</li><li>Necesitas detectar amenazas APT o movimiento lateral</li><li>Quieres consolidar herramientas y reducir silos</li></ul></td></tr>
+            <tr class="row-no"><td class="row-label">No lo uses cuando...</td><td><ul class="cell-list"><li>Tu stack es muy heterogéneo (mejor Open XDR o SIEM+EDR)</li><li>Solo necesitas proteger endpoints (EDR es suficiente)</li><li>El presupuesto es muy limitado</li></ul></td></tr>
+            <tr class="row-tools"><td class="row-label">Herramientas</td><td>
+              <div class="tag-grid">
+                <span class="tag tag-free">Wazuh + OpenSearch (Open XDR)</span>
+                <span class="tag tag-free">Velociraptor (forense)</span>
+                <span class="tag tag-paid">Microsoft Defender XDR</span>
+                <span class="tag tag-paid">CrowdStrike Falcon XDR</span>
+                <span class="tag tag-paid">Palo Alto Cortex XDR</span>
+                <span class="tag tag-paid">Trend Micro Vision One</span>
+                <span class="tag tag-paid">SentinelOne Singularity XDR</span>
+                <span class="tag tag-paid">Trellix XDR</span>
+              </div>
+            </td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ============ EDR ============ -->
+    <div class="term-section t-edr" id="sec-edr">
+      <div class="term-header" onclick="toggleSection('edr')">
+        <span class="term-label">EDR</span>
+        <span class="term-name">Endpoint Detection and Response</span>
+        <span class="toggle-icon">+</span>
+      </div>
+      <div class="term-body">
+        <table class="compare-table">
+          <thead><tr><th>Categoría</th><th>Detalle</th></tr></thead>
+          <tbody>
+            <tr class="row-que"><td class="row-label">¿Qué es?</td><td>Solución de seguridad que monitorea continuamente los endpoints (laptops, servidores, móviles) para detectar, investigar y responder a amenazas en tiempo real mediante agentes instalados localmente.</td></tr>
+            <tr class="row-hace"><td class="row-label">¿Qué hace?</td><td><ul class="cell-list"><li>Monitorea procesos, conexiones, archivos y registros en el endpoint</li><li>Detecta malware, ransomware y comportamientos maliciosos</li><li>Permite respuesta: aislar host, matar procesos, eliminar archivos</li><li>Registra telemetría forense del endpoint</li><li>Detecta técnicas MITRE ATT&CK en el endpoint</li></ul></td></tr>
+            <tr class="row-nohace"><td class="row-label">¿Qué NO hace?</td><td><ul class="cell-list"><li>No monitorea tráfico de red entre dispositivos</li><li>No cubre dispositivos sin agente (IoT, OT, impresoras)</li><li>No gestiona vulnerabilidades ni aplica parches</li><li>No automatiza respuestas a nivel organizacional (necesita SOAR)</li></ul></td></tr>
+            <tr class="row-vent"><td class="row-label">Ventajas</td><td><ul class="cell-list"><li>Visibilidad profunda del endpoint</li><li>Respuesta rápida: aislamiento inmediato del host</li><li>Detección de amenazas zero-day por comportamiento</li><li>Telemetría forense detallada para investigaciones</li></ul></td></tr>
+            <tr class="row-desv"><td class="row-label">Desventajas</td><td><ul class="cell-list"><li>Punto ciego en dispositivos sin agente</li><li>Puede impactar rendimiento del endpoint</li><li>Gestión de agentes en endpoints dispersos es compleja</li><li>Costo por endpoint puede escalar rápidamente</li></ul></td></tr>
+            <tr class="row-si"><td class="row-label">Úsalo cuando...</td><td><ul class="cell-list"><li>Tienes usuarios remotos o trabajo híbrido</li><li>Eres objetivo de ransomware o APTs</li><li>Necesitas respuesta rápida e investigación de endpoints</li><li>Requieres visibilidad de lo que ocurre dentro del OS</li></ul></td></tr>
+            <tr class="row-no"><td class="row-label">No lo uses cuando...</td><td><ul class="cell-list"><li>Tu entorno es mayoritariamente OT/IoT sin OS gestionable</li><li>Solo tienes servidores en cloud (evalúa CWPP en su lugar)</li><li>Buscas proteger la red (necesitas NDR)</li></ul></td></tr>
+            <tr class="row-tools"><td class="row-label">Herramientas</td><td>
+              <div class="tag-grid">
+                <span class="tag tag-free">Wazuh Agent</span>
+                <span class="tag tag-free">OSSEC</span>
+                <span class="tag tag-free">OpenEDR (Comodo)</span>
+                <span class="tag tag-free">Velociraptor</span>
+                <span class="tag tag-paid">CrowdStrike Falcon</span>
+                <span class="tag tag-paid">SentinelOne</span>
+                <span class="tag tag-paid">Microsoft Defender for Endpoint</span>
+                <span class="tag tag-paid">Carbon Black (VMware)</span>
+                <span class="tag tag-paid">Cybereason</span>
+              </div>
+            </td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ============ SOAR ============ -->
+    <div class="term-section t-soar" id="sec-soar">
+      <div class="term-header" onclick="toggleSection('soar')">
+        <span class="term-label">SOAR</span>
+        <span class="term-name">Security Orchestration, Automation and Response</span>
+        <span class="toggle-icon">+</span>
+      </div>
+      <div class="term-body">
+        <table class="compare-table">
+          <thead><tr><th>Categoría</th><th>Detalle</th></tr></thead>
+          <tbody>
+            <tr class="row-que"><td class="row-label">¿Qué es?</td><td>Plataforma que orquesta, automatiza y coordina procesos de respuesta a incidentes de seguridad mediante playbooks (flujos de trabajo automatizados) que integran múltiples herramientas de seguridad para reducir el trabajo manual del equipo SOC.</td></tr>
+            <tr class="row-hace"><td class="row-label">¿Qué hace?</td><td><ul class="cell-list"><li>Automatiza respuestas a incidentes mediante playbooks</li><li>Integra herramientas dispares (SIEM, firewall, EDR, ticketing)</li><li>Gestiona el ciclo de vida de incidentes (IR)</li><li>Enriquece alertas con contexto externo (threat intel, WHOIS)</li><li>Reduce MTTR significativamente</li></ul></td></tr>
+            <tr class="row-nohace"><td class="row-label">¿Qué NO hace?</td><td><ul class="cell-list"><li>No detecta amenazas por sí solo (necesita SIEM o EDR como fuente)</li><li>No es un sistema de monitoreo</li><li>No reemplaza al analista para decisiones complejas</li><li>No gestiona vulnerabilidades ni aplica parches</li></ul></td></tr>
+            <tr class="row-vent"><td class="row-label">Ventajas</td><td><ul class="cell-list"><li>Reduce drásticamente el MTTR (tiempo de respuesta)</li><li>Elimina tareas repetitivas y manuales del SOC</li><li>Consistencia en la respuesta a incidentes</li><li>Mejora la escalabilidad del equipo de seguridad</li></ul></td></tr>
+            <tr class="row-desv"><td class="row-label">Desventajas</td><td><ul class="cell-list"><li>Complejidad inicial de configuración y playbooks</li><li>Requiere madurez previa en el SOC</li><li>Riesgo de automatización incorrecta (falsos positivos mal manejados)</li><li>Dependencia de integraciones API de otras herramientas</li></ul></td></tr>
+            <tr class="row-si"><td class="row-label">Úsalo cuando...</td><td><ul class="cell-list"><li>Tu SOC está abrumado por el volumen de alertas</li><li>Tienes procesos repetitivos de respuesta bien definidos</li><li>Quieres estandarizar y documentar la respuesta a incidentes</li><li>Ya tienes SIEM y EDR funcionando correctamente</li></ul></td></tr>
+            <tr class="row-no"><td class="row-label">No lo uses cuando...</td><td><ul class="cell-list"><li>No tienes un SOC o procesos IR definidos</li><li>No tienes herramientas fuente de alertas (SIEM/EDR)</li><li>Eres una organización muy pequeña con pocos incidentes</li></ul></td></tr>
+            <tr class="row-tools"><td class="row-label">Herramientas</td><td>
+              <div class="tag-grid">
+                <span class="tag tag-free">Shuffle (Open Source)</span>
+                <span class="tag tag-free">TheHive + Cortex</span>
+                <span class="tag tag-free">n8n (general, adaptable)</span>
+                <span class="tag tag-free">MISP (Threat Sharing)</span>
+                <span class="tag tag-paid">Splunk SOAR (Phantom)</span>
+                <span class="tag tag-paid">Palo Alto XSOAR</span>
+                <span class="tag tag-paid">IBM Resilient</span>
+                <span class="tag tag-paid">ServiceNow SecOps</span>
+                <span class="tag tag-paid">Swimlane</span>
+              </div>
+            </td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ============ NDR ============ -->
+    <div class="term-section t-ndr" id="sec-ndr">
+      <div class="term-header" onclick="toggleSection('ndr')">
+        <span class="term-label">NDR</span>
+        <span class="term-name">Network Detection and Response</span>
+        <span class="toggle-icon">+</span>
+      </div>
+      <div class="term-body">
+        <table class="compare-table">
+          <thead><tr><th>Categoría</th><th>Detalle</th></tr></thead>
+          <tbody>
+            <tr class="row-que"><td class="row-label">¿Qué es?</td><td>Solución que analiza el tráfico de red en tiempo real usando ML, análisis comportamental y detección de anomalías para identificar amenazas que se mueven lateralmente o usan comunicaciones cifradas, sin depender de agentes en endpoints.</td></tr>
+            <tr class="row-hace"><td class="row-label">¿Qué hace?</td><td><ul class="cell-list"><li>Analiza flujos de red (NetFlow, PCAP, metadatos)</li><li>Detecta movimiento lateral, C2 y exfiltración de datos</li><li>Identifica dispositivos IoT/OT sin agente</li><li>Crea línea base de comportamiento normal de la red</li><li>Alerta sobre conexiones anómalas o sospechosas</li></ul></td></tr>
+            <tr class="row-nohace"><td class="row-label">¿Qué NO hace?</td><td><ul class="cell-list"><li>No ve lo que ocurre dentro del endpoint (eso es EDR)</li><li>No bloquea tráfico activamente (eso es IPS/firewall)</li><li>Limitado con tráfico cifrado E2E sin inspección TLS</li><li>No gestiona logs de aplicaciones o sistemas</li></ul></td></tr>
+            <tr class="row-vent"><td class="row-label">Ventajas</td><td><ul class="cell-list"><li>Cobertura de dispositivos sin agente (IoT, OT, impresoras)</li><li>Detección de amenazas que evaden el endpoint</li><li>No requiere instalación en endpoints</li><li>Excelente para detectar movimiento lateral post-compromiso</li></ul></td></tr>
+            <tr class="row-desv"><td class="row-label">Desventajas</td><td><ul class="cell-list"><li>Ciego al comportamiento interno del endpoint</li><li>Requiere infraestructura de captura de red (SPAN ports)</li><li>Tráfico cifrado puede limitar la visibilidad</li><li>Altos volúmenes de datos de red = almacenamiento costoso</li></ul></td></tr>
+            <tr class="row-si"><td class="row-label">Úsalo cuando...</td><td><ul class="cell-list"><li>Tienes entornos OT/IoT/SCADA sin EDR posible</li><li>Necesitas detectar amenazas internas y movimiento lateral</li><li>Tienes redes segmentadas y quieres monitorearlas</li><li>Necesitas visibilidad en comunicaciones Este-Oeste</li></ul></td></tr>
+            <tr class="row-no"><td class="row-label">No lo uses cuando...</td><td><ul class="cell-list"><li>Eres una startup pequeña con pocos hosts gestionados</li><li>Tu infraestructura es 100% cloud sin redes on-prem relevantes</li><li>No tienes switches gestionables para SPAN/mirror ports</li></ul></td></tr>
+            <tr class="row-tools"><td class="row-label">Herramientas</td><td>
+              <div class="tag-grid">
+                <span class="tag tag-free">Zeek (Bro)</span>
+                <span class="tag tag-free">Suricata</span>
+                <span class="tag tag-free">SecurityOnion</span>
+                <span class="tag tag-free">Arkime (Moloch)</span>
+                <span class="tag tag-paid">Darktrace</span>
+                <span class="tag tag-paid">ExtraHop Reveal(x)</span>
+                <span class="tag tag-paid">Vectra AI</span>
+                <span class="tag tag-paid">Corelight</span>
+                <span class="tag tag-paid">Cisco Stealthwatch</span>
+              </div>
+            </td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ============ UEBA ============ -->
+    <div class="term-section t-ueba" id="sec-ueba">
+      <div class="term-header" onclick="toggleSection('ueba')">
+        <span class="term-label">UEBA</span>
+        <span class="term-name">User and Entity Behavior Analytics</span>
+        <span class="toggle-icon">+</span>
+      </div>
+      <div class="term-body">
+        <table class="compare-table">
+          <thead><tr><th>Categoría</th><th>Detalle</th></tr></thead>
+          <tbody>
+            <tr class="row-que"><td class="row-label">¿Qué es?</td><td>Tecnología que aplica machine learning y análisis estadístico para crear líneas base del comportamiento normal de usuarios y entidades (dispositivos, cuentas de servicio), detectando desviaciones que indican amenazas internas, cuentas comprometidas o actividad anómala.</td></tr>
+            <tr class="row-hace"><td class="row-label">¿Qué hace?</td><td><ul class="cell-list"><li>Perfila comportamiento normal de usuarios y entidades</li><li>Detecta insiders maliciosos y cuentas comprometidas</li><li>Asigna puntajes de riesgo dinámicos por usuario</li><li>Identifica acceso a datos sensibles fuera de patrón</li><li>Reduce falsos positivos del SIEM con contexto de riesgo</li></ul></td></tr>
+            <tr class="row-nohace"><td class="row-label">¿Qué NO hace?</td><td><ul class="cell-list"><li>No responde activamente a amenazas (necesita integración con SOAR)</li><li>No sustituye al SIEM, es complementario</li><li>No detecta amenazas de red por sí solo</li><li>Requiere tiempo de aprendizaje (baseline) antes de ser efectivo</li></ul></td></tr>
+            <tr class="row-vent"><td class="row-label">Ventajas</td><td><ul class="cell-list"><li>Detección de amenazas internas (insider threat)</li><li>Priorización de alertas basada en riesgo real</li><li>Detección de cuentas comprometidas sin IoC previo</li><li>Complementa al SIEM con inteligencia contextual</li></ul></td></tr>
+            <tr class="row-desv"><td class="row-label">Desventajas</td><td><ul class="cell-list"><li>Necesita período de aprendizaje prolongado (semanas/meses)</li><li>Puede generar alertas en cambios legítimos de comportamiento</li><li>Requiere datos de alta calidad para ser efectivo</li><li>Costo elevado como solución standalone</li></ul></td></tr>
+            <tr class="row-si"><td class="row-label">Úsalo cuando...</td><td><ul class="cell-list"><li>Tienes empleados con acceso a datos sensibles</li><li>Necesitas detectar amenazas internas o ex-empleados</li><li>Tu SIEM genera demasiado ruido y quieres priorizar</li><li>Industrias como finanzas, salud o gobierno</li></ul></td></tr>
+            <tr class="row-no"><td class="row-label">No lo uses cuando...</td><td><ul class="cell-list"><li>Tu plantilla es muy pequeña (menos de 20 usuarios)</li><li>Acabas de implementar seguridad básica (primero SIEM/EDR)</li><li>No tienes logs suficientes para construir el baseline</li></ul></td></tr>
+            <tr class="row-tools"><td class="row-label">Herramientas</td><td>
+              <div class="tag-grid">
+                <span class="tag tag-free">Apache Spot (open source)</span>
+                <span class="tag tag-free">Wazuh (módulo básico)</span>
+                <span class="tag tag-free">ELK + ML jobs (básico)</span>
+                <span class="tag tag-paid">Splunk UBA</span>
+                <span class="tag tag-paid">Exabeam</span>
+                <span class="tag tag-paid">Securonix</span>
+                <span class="tag tag-paid">Microsoft Sentinel UEBA</span>
+                <span class="tag tag-paid">Varonis</span>
+                <span class="tag tag-paid">Forcepoint UEBA</span>
+              </div>
+            </td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ============ Threat Intel ============ -->
+    <div class="term-section t-thi" id="sec-thi">
+      <div class="term-header" onclick="toggleSection('thi')">
+        <span class="term-label">TIP</span>
+        <span class="term-name">Threat Intelligence Platform / Cyber Threat Intelligence</span>
+        <span class="toggle-icon">+</span>
+      </div>
+      <div class="term-body">
+        <table class="compare-table">
+          <thead><tr><th>Categoría</th><th>Detalle</th></tr></thead>
+          <tbody>
+            <tr class="row-que"><td class="row-label">¿Qué es?</td><td>Plataforma que recopila, agrega, analiza y distribuye inteligencia de amenazas (IoCs, TTPs, grupos de amenazas) de múltiples fuentes (feeds comerciales, OSINT, comunidades como ISAC) para enriquecer la detección y priorización de amenazas.</td></tr>
+            <tr class="row-hace"><td class="row-label">¿Qué hace?</td><td><ul class="cell-list"><li>Agrega y normaliza IoCs (IPs, hashes, dominios)</li><li>Mapea amenazas al framework MITRE ATT&CK</li><li>Comparte inteligencia con la comunidad (STIX/TAXII)</li><li>Enriquece alertas del SIEM con contexto de actor</li><li>Permite hunting proactivo de amenazas conocidas</li></ul></td></tr>
+            <tr class="row-nohace"><td class="row-label">¿Qué NO hace?</td><td><ul class="cell-list"><li>No detecta amenazas por sí solo (es un enricher)</li><li>No responde a incidentes directamente</li><li>No monitorea endpoints ni redes</li><li>Los IoCs tienen vida útil corta — sin actualización pierde valor</li></ul></td></tr>
+            <tr class="row-vent"><td class="row-label">Ventajas</td><td><ul class="cell-list"><li>Contexto proactivo sobre atacantes y campañas activas</li><li>Reduce tiempo de investigación con IoCs ya conocidos</li><li>Mejora la calidad de las alertas del SIEM</li><li>Permite defensa proactiva (hunting)</li></ul></td></tr>
+            <tr class="row-desv"><td class="row-label">Desventajas</td><td><ul class="cell-list"><li>Requiere curación constante — feeds ruidosos generan falsos positivos</li><li>Los IoCs envejecen rápido (IPs rotadas, dominios caducados)</li><li>Sin SIEM o EDR para consumir la intel, su valor es limitado</li></ul></td></tr>
+            <tr class="row-si"><td class="row-label">Úsalo cuando...</td><td><ul class="cell-list"><li>Tienes un SOC maduro que puede consumir y actuar sobre la intel</li><li>Perteneces a industria objetivo de actores APT</li><li>Quieres hunting proactivo de amenazas</li><li>Tu SIEM necesita enriquecimiento contextual</li></ul></td></tr>
+            <tr class="row-no"><td class="row-label">No lo uses cuando...</td><td><ul class="cell-list"><li>No tienes SIEM o herramientas que consuman los IoCs</li><li>Eres una empresa pequeña sin equipo de análisis</li><li>No puedes mantener actualizada la plataforma de intel</li></ul></td></tr>
+            <tr class="row-tools"><td class="row-label">Herramientas</td><td>
+              <div class="tag-grid">
+                <span class="tag tag-free">MISP</span>
+                <span class="tag tag-free">OpenCTI</span>
+                <span class="tag tag-free">VirusTotal (freemium)</span>
+                <span class="tag tag-free">OTX AlienVault</span>
+                <span class="tag tag-free">ThreatFox (Abuse.ch)</span>
+                <span class="tag tag-paid">Recorded Future</span>
+                <span class="tag tag-paid">Mandiant Threat Intel</span>
+                <span class="tag tag-paid">CrowdStrike Intelligence</span>
+                <span class="tag tag-paid">Anomali ThreatStream</span>
+              </div>
+            </td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ============ Vulnerability Management ============ -->
+    <div class="term-section t-vm" id="sec-vm">
+      <div class="term-header" onclick="toggleSection('vm')">
+        <span class="term-label">VM</span>
+        <span class="term-name">Vulnerability Management</span>
+        <span class="toggle-icon">+</span>
+      </div>
+      <div class="term-body">
+        <table class="compare-table">
+          <thead><tr><th>Categoría</th><th>Detalle</th></tr></thead>
+          <tbody>
+            <tr class="row-que"><td class="row-label">¿Qué es?</td><td>Proceso y conjunto de herramientas para identificar, clasificar, priorizar y remediar vulnerabilidades en sistemas, aplicaciones y redes mediante escaneos continuos, correlación con CVEs/CVSS y gestión del ciclo de vida de parches.</td></tr>
+            <tr class="row-hace"><td class="row-label">¿Qué hace?</td><td><ul class="cell-list"><li>Escanea activos en busca de vulnerabilidades conocidas (CVEs)</li><li>Prioriza por CVSS score, exposición y criticidad del activo</li><li>Gestiona el ciclo de vida del parche</li><li>Genera reportes de remediación para equipos IT</li><li>Mide la superficie de ataque de la organización</li></ul></td></tr>
+            <tr class="row-nohace"><td class="row-label">¿Qué NO hace?</td><td><ul class="cell-list"><li>No detecta ataques en tiempo real</li><li>No responde a incidentes</li><li>No aplica parches automáticamente (salvo integración específica)</li><li>No detecta vulnerabilidades zero-day (sin CVE)</li></ul></td></tr>
+            <tr class="row-vent"><td class="row-label">Ventajas</td><td><ul class="cell-list"><li>Reduce la superficie de ataque de forma proactiva</li><li>Visibilidad continua del inventario de activos</li><li>Fundamental para compliance y auditorías</li><li>Priorización basada en riesgo real</li></ul></td></tr>
+            <tr class="row-desv"><td class="row-label">Desventajas</td><td><ul class="cell-list"><li>Los escaneos pueden impactar el rendimiento de sistemas</li><li>Sin proceso de remediación, la data es inútil</li><li>Falsos positivos frecuentes en escaneos</li><li>No cubre vulnerabilidades lógicas de negocio</li></ul></td></tr>
+            <tr class="row-si"><td class="row-label">Úsalo cuando...</td><td><ul class="cell-list"><li>Tienes obligaciones de compliance (PCI-DSS, HIPAA)</li><li>Necesitas gestionar parches en un inventario grande</li><li>Quieres medir y reducir la superficie de ataque</li><li>Necesitas priorizar donde invertir en hardening</li></ul></td></tr>
+            <tr class="row-no"><td class="row-label">No lo uses cuando...</td><td><ul class="cell-list"><li>No tienes equipo IT que pueda remediar los hallazgos</li><li>Tu entorno es temporal o experimental</li><li>Buscas detección de amenazas activas (no es su función)</li></ul></td></tr>
+            <tr class="row-tools"><td class="row-label">Herramientas</td><td>
+              <div class="tag-grid">
+                <span class="tag tag-free">OpenVAS / Greenbone</span>
+                <span class="tag tag-free">Nessus Essentials (free)</span>
+                <span class="tag tag-free">Nuclei</span>
+                <span class="tag tag-free">Nikto</span>
+                <span class="tag tag-paid">Tenable.io / Nessus Pro</span>
+                <span class="tag tag-paid">Qualys VMDR</span>
+                <span class="tag tag-paid">Rapid7 InsightVM</span>
+                <span class="tag tag-paid">Crowdstrike Falcon Spotlight</span>
+              </div>
+            </td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ============ ALL — Mega Table ============ -->
+    <div class="term-section" id="sec-all">
+      <div style="padding:8px 0 20px;">
+        <div class="view-toggle" style="display:flex;" id="viewToggleInner">
+          <button class="vbtn active" id="btnCards" onclick="setView('cards', this)">TARJETAS EXPANDIBLES</button>
+          <button class="vbtn" id="btnTable" onclick="setView('table', this)">TABLA COMPARATIVA GLOBAL</button>
+        </div>
+      </div>
+
+      <div id="allCards" style="display:flex;flex-direction:column;gap:2px;">
+        <!-- All mini summaries -->
+        <div class="overview-grid" style="border:1px solid var(--border);border-radius:6px;">
+          <div class="overview-card">
+            <h4 style="color:#00d4ff">SIEM</h4>
+            <p>Centraliza y correlaciona logs. Es el cerebro del SOC. Base del compliance.</p>
+          </div>
+          <div class="overview-card">
+            <h4 style="color:#b44cff">XDR</h4>
+            <p>Visibilidad unificada multi-capa (endpoint + red + cloud). Evolución del EDR.</p>
+          </div>
+          <div class="overview-card">
+            <h4 style="color:#ff6b35">EDR</h4>
+            <p>Protección profunda del endpoint. Detección y respuesta en el dispositivo.</p>
+          </div>
+          <div class="overview-card">
+            <h4 style="color:#39ff14">SOAR</h4>
+            <p>Automatiza la respuesta. Orquesta herramientas. Reduce trabajo manual del SOC.</p>
+          </div>
+          <div class="overview-card">
+            <h4 style="color:#ffc947">NDR</h4>
+            <p>Analiza el tráfico de red. Cubre dispositivos sin agente (IoT/OT).</p>
+          </div>
+          <div class="overview-card">
+            <h4 style="color:#ff3b5c">UEBA</h4>
+            <p>Detecta comportamientos anómalos de usuarios. Ideal para insider threat.</p>
+          </div>
+          <div class="overview-card">
+            <h4 style="color:#00d4ff">TIP</h4>
+            <p>Recopila y distribuye inteligencia de amenazas (IoCs, TTPs, actores).</p>
+          </div>
+          <div class="overview-card">
+            <h4 style="color:#b44cff">VM</h4>
+            <p>Identifica y prioriza vulnerabilidades. Gestión del ciclo de vida del parche.</p>
+          </div>
+        </div>
+      </div>
+
+      <div id="allMegaTable" style="display:none;">
+        <div class="mega-wrap">
+          <table class="mega-table">
+            <thead>
+              <tr>
+                <th>Categoría</th>
+                <th class="th-siem">SIEM</th>
+                <th class="th-xdr">XDR</th>
+                <th class="th-edr">EDR</th>
+                <th class="th-soar">SOAR</th>
+                <th class="th-ndr">NDR</th>
+                <th class="th-ueba">UEBA</th>
+                <th class="th-thi">TIP</th>
+                <th class="th-vm">VM</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Función principal</td>
+                <td>Correlación de logs y compliance</td>
+                <td>Detección unificada multi-capa</td>
+                <td>Protección del endpoint</td>
+                <td>Automatización de respuesta</td>
+                <td>Análisis de tráfico de red</td>
+                <td>Análisis comportamental de usuarios</td>
+                <td>Inteligencia de amenazas</td>
+                <td>Gestión de vulnerabilidades</td>
+              </tr>
+              <tr>
+                <td>¿Detecta amenazas?</td>
+                <td><span class="check-yes">✔</span> Vía correlación</td>
+                <td><span class="check-yes">✔</span> Multi-capa</td>
+                <td><span class="check-yes">✔</span> En endpoint</td>
+                <td><span class="check-no">✘</span> Necesita fuente</td>
+                <td><span class="check-yes">✔</span> En red</td>
+                <td><span class="check-yes">✔</span> Comportamiento</td>
+                <td><span class="check-par">◐</span> Enriquece</td>
+                <td><span class="check-no">✘</span> Proactivo</td>
+              </tr>
+              <tr>
+                <td>¿Responde activamente?</td>
+                <td><span class="check-no">✘</span></td>
+                <td><span class="check-par">◐</span> Parcial</td>
+                <td><span class="check-yes">✔</span> Aislamiento</td>
+                <td><span class="check-yes">✔</span> Playbooks</td>
+                <td><span class="check-no">✘</span></td>
+                <td><span class="check-no">✘</span></td>
+                <td><span class="check-no">✘</span></td>
+                <td><span class="check-no">✘</span></td>
+              </tr>
+              <tr>
+                <td>Cobertura de compliance</td>
+                <td><span class="check-yes">✔✔</span> Alta</td>
+                <td><span class="check-par">◐</span> Media</td>
+                <td><span class="check-par">◐</span> Media</td>
+                <td><span class="check-par">◐</span> Media</td>
+                <td><span class="check-par">◐</span> Parcial</td>
+                <td><span class="check-par">◐</span> Parcial</td>
+                <td><span class="check-no">✘</span> Baja</td>
+                <td><span class="check-yes">✔</span> Alta</td>
+              </tr>
+              <tr>
+                <td>Cubre IoT/OT</td>
+                <td><span class="check-par">◐</span> Vía logs</td>
+                <td><span class="check-par">◐</span> Parcial</td>
+                <td><span class="check-no">✘</span> Necesita agente</td>
+                <td><span class="check-no">✘</span></td>
+                <td><span class="check-yes">✔</span> Sin agente</td>
+                <td><span class="check-par">◐</span> Parcial</td>
+                <td><span class="check-par">◐</span> Parcial</td>
+                <td><span class="check-par">◐</span> Parcial</td>
+              </tr>
+              <tr>
+                <td>Insider threat</td>
+                <td><span class="check-par">◐</span></td>
+                <td><span class="check-par">◐</span></td>
+                <td><span class="check-par">◐</span></td>
+                <td><span class="check-no">✘</span></td>
+                <td><span class="check-par">◐</span></td>
+                <td><span class="check-yes">✔✔</span> Especializado</td>
+                <td><span class="check-par">◐</span></td>
+                <td><span class="check-no">✘</span></td>
+              </tr>
+              <tr>
+                <td>Nivel de madurez requerido</td>
+                <td>Medio-Alto</td>
+                <td>Medio</td>
+                <td>Básico</td>
+                <td>Alto</td>
+                <td>Medio</td>
+                <td>Alto</td>
+                <td>Medio</td>
+                <td>Básico</td>
+              </tr>
+              <tr>
+                <td>Dificultad de implementación</td>
+                <td>Alta</td>
+                <td>Media</td>
+                <td>Baja-Media</td>
+                <td>Alta</td>
+                <td>Media</td>
+                <td>Alta</td>
+                <td>Media</td>
+                <td>Baja-Media</td>
+              </tr>
+              <tr>
+                <td>Herramienta free destacada</td>
+                <td>Wazuh / ELK</td>
+                <td>Wazuh + OpenSearch</td>
+                <td>Wazuh / OpenEDR</td>
+                <td>Shuffle / TheHive</td>
+                <td>Zeek / Suricata</td>
+                <td>ELK ML (básico)</td>
+                <td>MISP / OpenCTI</td>
+                <td>OpenVAS / Nuclei</td>
+              </tr>
+              <tr>
+                <td>Herramienta paga destacada</td>
+                <td>Splunk / Sentinel</td>
+                <td>CrowdStrike / Defender</td>
+                <td>SentinelOne / Falcon</td>
+                <td>Splunk SOAR / XSOAR</td>
+                <td>Darktrace / Vectra</td>
+                <td>Exabeam / Varonis</td>
+                <td>Recorded Future</td>
+                <td>Tenable / Qualys</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- end cards-wrapper -->
+
+  <footer>
+    <p>CUADRO COMPARATIVO · HERRAMIENTAS DE CIBERSEGURIDAD SOC · 2025</p>
+    <p style="margin-top:8px">SIEM · XDR · EDR · SOAR · NDR · UEBA · TIP · VM</p>
+    <p style="margin-top:12px;font-size:0.62rem;color:#3a5a7a">Generado con fines educativos y de referencia.</p>
+  </footer>
+
+</div>
+
+<script>
+const sections = ['siem','xdr','edr','soar','ndr','ueba','thi','vm','all'];
+
+function showTerm(id, btn) {
+  sections.forEach(s => {
+    const sec = document.getElementById('sec-' + s);
+    if (sec) sec.classList.remove('visible');
+  });
+  const target = document.getElementById('sec-' + id);
+  if (target) target.classList.add('visible');
+
+  document.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+
+  // Auto-open if only one
+  if (id !== 'all') {
+    const header = target.querySelector('.term-header');
+    const body = target.querySelector('.term-body');
+    target.classList.add('open');
+  }
+}
+
+function toggleSection(id) {
+  const sec = document.getElementById('sec-' + id);
+  sec.classList.toggle('open');
+}
+
+function setView(mode, btn) {
+  document.querySelectorAll('.vbtn').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+
+  if (mode === 'cards') {
+    document.getElementById('allCards').style.display = 'block';
+    document.getElementById('allMegaTable').style.display = 'none';
+  } else {
+    document.getElementById('allCards').style.display = 'none';
+    document.getElementById('allMegaTable').style.display = 'block';
+  }
+}
+
+// Init: show SIEM open
+window.addEventListener('DOMContentLoaded', () => {
+  showTerm('siem', document.querySelector('.pill-siem'));
+});
+</script>
+</body>
+</html>

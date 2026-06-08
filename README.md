@@ -24,6 +24,8 @@ Cuadros comparativos y guías de referencia generados con Claude, centralizados 
 | RAG & Chunking — Guía de Referencia | AI, LLM |
 | Comparativo PubSub 2026 — Estado del Arte | DevOps, Messaging |
 | TMUX — Cheat Sheet | Dev Tools, Terminal |
+| Cuadro Comparativo — Herramientas de Ciberseguridad | IT, Seguridad |
+| Métodos para Potenciar LLMs — Guía 2026 | AI, LLM |
 
 ## Activar GitHub Pages
 

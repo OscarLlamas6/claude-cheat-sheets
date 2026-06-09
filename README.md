@@ -26,6 +26,7 @@ Cuadros comparativos y guías de referencia generados con Claude, centralizados 
 | TMUX — Cheat Sheet | Dev Tools, Terminal |
 | Cuadro Comparativo — Herramientas de Ciberseguridad | IT, Seguridad |
 | Métodos para Potenciar LLMs — Guía 2026 | AI, LLM |
+| Comparativa de Términos — Gestión de Vulnerabilidades | IT, Seguridad |
 
 ## Activar GitHub Pages
 

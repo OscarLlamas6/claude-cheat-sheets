@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Comparativa de Términos — Gestión de Vulnerabilidades</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:ital,wght@0,300;0,400;0,600;1,300&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:        #0D1117;
+    --surface:   #161B22;
+    --border:    #21262D;
+    --accent:    #58A6FF;
+    --accent2:   #3FB950;
+    --accent3:   #F78166;
+    --muted:     #8B949E;
+    --text:      #E6EDF3;
+    --text-soft: #C9D1D9;
+    --mono:      'IBM Plex Mono', monospace;
+    --sans:      'IBM Plex Sans', sans-serif;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 14px;
+    line-height: 1.6;
+    padding: 48px 24px 80px;
+    min-height: 100vh;
+  }
+
+  /* ── Header ── */
+  header {
+    max-width: 1200px;
+    margin: 0 auto 48px;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 32px;
+  }
+
+  .eyebrow {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 12px;
+  }
+
+  h1 {
+    font-family: var(--mono);
+    font-size: clamp(22px, 4vw, 36px);
+    font-weight: 600;
+    letter-spacing: -.02em;
+    line-height: 1.2;
+    color: var(--text);
+  }
+
+  h1 span { color: var(--accent3); }
+
+  .subtitle {
+    margin-top: 12px;
+    color: var(--muted);
+    font-weight: 300;
+    font-size: 15px;
+    max-width: 640px;
+  }
+
+  /* ── Legend ── */
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin-top: 24px;
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--muted);
+  }
+
+  .dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  /* ── Table wrapper ── */
+  .table-wrap {
+    max-width: 1200px;
+    margin: 0 auto;
+    overflow-x: auto;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13.5px;
+  }
+
+  /* ── Column groups ── */
+  thead tr:first-child th {
+    background: #0D1117;
+    padding: 14px 18px;
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    border-bottom: 1px solid var(--border);
+    text-align: left;
+    position: sticky;
+    top: 0;
+    z-index: 2;
+  }
+
+  thead tr:first-child th:first-child { background: var(--bg); }
+
+  /* Sub-header row */
+  thead tr.subhead th {
+    background: #0A0E13;
+    padding: 10px 18px;
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--accent);
+    border-bottom: 2px solid var(--border);
+    position: sticky;
+    top: 41px;
+    z-index: 2;
+    text-align: left;
+  }
+
+  /* Body rows */
+  tbody tr {
+    border-bottom: 1px solid var(--border);
+    transition: background .12s;
+  }
+
+  tbody tr:last-child { border-bottom: none; }
+  tbody tr:hover { background: rgba(88,166,255,.04); }
+
+  td {
+    padding: 18px 18px;
+    vertical-align: top;
+    color: var(--text-soft);
+    line-height: 1.65;
+  }
+
+  /* First column — term badge */
+  td:first-child {
+    min-width: 160px;
+    font-family: var(--mono);
+    font-size: 12.5px;
+    padding-right: 12px;
+  }
+
+  .term-badge {
+    display: inline-flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .term-abbr {
+    font-weight: 600;
+    font-size: 13px;
+    letter-spacing: .03em;
+  }
+
+  .term-full {
+    font-size: 10px;
+    color: var(--muted);
+    font-weight: 400;
+    letter-spacing: 0;
+    font-family: var(--sans);
+  }
+
+  /* Category color stripe on left */
+  td.cat-id   { border-left: 3px solid #58A6FF; }
+  td.cat-score{ border-left: 3px solid #D2A8FF; }
+  td.cat-db   { border-left: 3px solid #3FB950; }
+  td.cat-class{ border-left: 3px solid #F78166; }
+  td.cat-prog { border-left: 3px solid #FFA657; }
+
+  .cat-id   .term-abbr { color: #58A6FF; }
+  .cat-score .term-abbr { color: #D2A8FF; }
+  .cat-db   .term-abbr { color: #3FB950; }
+  .cat-class .term-abbr { color: #F78166; }
+  .cat-prog .term-abbr { color: #FFA657; }
+
+  /* Chips */
+  .chip {
+    display: inline-block;
+    font-family: var(--mono);
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: 3px;
+    margin-bottom: 4px;
+    font-weight: 600;
+    letter-spacing: .04em;
+  }
+
+  .chip-id    { background: rgba(88,166,255,.15);  color: #58A6FF; }
+  .chip-score { background: rgba(210,168,255,.15); color: #D2A8FF; }
+  .chip-db    { background: rgba(63,185,80,.15);   color: #3FB950; }
+  .chip-class { background: rgba(247,129,102,.15); color: #F78166; }
+  .chip-prog  { background: rgba(255,166,87,.15);  color: #FFA657; }
+
+  /* Severity scale */
+  .sev-scale {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-top: 4px;
+  }
+
+  .sev-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--mono);
+    font-size: 11px;
+  }
+
+  .sev-bar {
+    height: 6px;
+    border-radius: 2px;
+  }
+
+  .sev-none    { background: #30363D; width: 24px; }
+  .sev-low     { background: #3FB950; width: 40px; }
+  .sev-medium  { background: #FFA657; width: 60px; }
+  .sev-high    { background: #F78166; width: 80px; }
+  .sev-critical{ background: #FF7B72; width: 100px; }
+
+  /* Tags list */
+  .tag-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 6px;
+  }
+
+  .tag {
+    background: var(--border);
+    color: var(--muted);
+    font-family: var(--mono);
+    font-size: 10px;
+    padding: 2px 7px;
+    border-radius: 3px;
+  }
+
+  /* Relationship diagram cell */
+  .rel-diagram {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--muted);
+    white-space: pre;
+    line-height: 1.7;
+  }
+
+  /* Footer */
+  footer {
+    max-width: 1200px;
+    margin: 40px auto 0;
+    padding-top: 24px;
+    border-top: 1px solid var(--border);
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--muted);
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  @media print {
+    body { background: #fff; color: #000; }
+    .table-wrap { border: 1px solid #ccc; }
+    thead tr:first-child th, thead tr.subhead th { position: static; background: #f5f5f5; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <p class="eyebrow">Ciberseguridad · Gestión de Vulnerabilidades</p>
+  <h1>Términos clave:<br><span>CVE · CVSS · NVD</span> y más</h1>
+  <p class="subtitle">Tabla comparativa de los estándares, sistemas y bases de datos que conforman el ecosistema de identificación y priorización de vulnerabilidades.</p>
+
+  <div class="legend">
+    <span class="legend-item"><span class="dot" style="background:#58A6FF"></span> Identificación</span>
+    <span class="legend-item"><span class="dot" style="background:#D2A8FF"></span> Puntuación / Severidad</span>
+    <span class="legend-item"><span class="dot" style="background:#3FB950"></span> Base de datos / Repositorio</span>
+    <span class="legend-item"><span class="dot" style="background:#F78166"></span> Clasificación / Taxonomía</span>
+    <span class="legend-item"><span class="dot" style="background:#FFA657"></span> Programa / Proceso</span>
+  </div>
+</header>
+
+<div class="table-wrap">
+  <table>
+    <thead>
+      <tr>
+        <th style="min-width:160px">Término</th>
+        <th style="min-width:130px">Tipo</th>
+        <th style="min-width:180px">¿Qué es?</th>
+        <th style="min-width:200px">¿Para qué sirve?</th>
+        <th style="min-width:160px">Administrado por</th>
+        <th style="min-width:200px">Relación con los demás</th>
+        <th style="min-width:180px">Ejemplo / Formato</th>
+      </tr>
+      <tr class="subhead">
+        <th colspan="7">▸ IDENTIFICACIÓN DE VULNERABILIDADES</th>
+      </tr>
+    </thead>
+    <tbody>
+
+      <!-- CVE -->
+      <tr>
+        <td class="cat-id">
+          <div class="term-badge">
+            <span class="term-abbr">CVE</span>
+            <span class="term-full">Common Vulnerabilities and Exposures</span>
+          </div>
+        </td>
+        <td><span class="chip chip-id">Identificador</span></td>
+        <td>Lista pública de vulnerabilidades y exposiciones de seguridad conocidas, cada una con un identificador único.</td>
+        <td>Nombrar y rastrear vulnerabilidades de forma estándar entre diferentes plataformas, herramientas y equipos.</td>
+        <td>
+          <strong>MITRE Corporation</strong><br>
+          <span style="color:var(--muted);font-size:12px">Patrocinado por el gobierno federal de EE. UU.</span>
+        </td>
+        <td>
+          <span class="rel-diagram">CVE-ID → NVD enriquece
+CVE-ID → CVSS puntúa
+CVE-ID → CWE clasifica el tipo</span>
+        </td>
+        <td>
+          <span style="color:var(--accent);font-family:var(--mono);font-size:12px">CVE-2024-1234</span><br>
+          <span style="color:var(--muted);font-size:12px">Año + número secuencial</span>
+        </td>
+      </tr>
+
+      <!-- CNA -->
+      <tr>
+        <td class="cat-id">
+          <div class="term-badge">
+            <span class="term-abbr">CNA</span>
+            <span class="term-full">CVE Numbering Authority</span>
+          </div>
+        </td>
+        <td><span class="chip chip-id">Programa</span></td>
+        <td>Organizaciones autorizadas por MITRE para asignar IDs de CVE a vulnerabilidades dentro de su ámbito (ej. Microsoft, Google, Red Hat).</td>
+        <td>Descentralizar y agilizar la asignación de CVE-IDs sin que todo pase por MITRE.</td>
+        <td>
+          <strong>MITRE</strong> (autoriza a CNAs)<br>
+          <span style="color:var(--muted);font-size:12px">&gt; 400 CNAs a nivel global</span>
+        </td>
+        <td>Los CNAs crean entradas CVE que luego son indexadas por el NVD y puntuadas con CVSS.</td>
+        <td>
+          <div class="tag-list">
+            <span class="tag">Microsoft</span>
+            <span class="tag">Google</span>
+            <span class="tag">Red Hat</span>
+            <span class="tag">Apple</span>
+          </div>
+        </td>
+      </tr>
+
+    </tbody>
+
+    <thead>
+      <tr class="subhead">
+        <th colspan="7">▸ PUNTUACIÓN Y SEVERIDAD</th>
+      </tr>
+    </thead>
+    <tbody>
+
+      <!-- CVSS -->
+      <tr>
+        <td class="cat-score">
+          <div class="term-badge">
+            <span class="term-abbr">CVSS</span>
+            <span class="term-full">Common Vulnerability Scoring System</span>
+          </div>
+        </td>
+        <td><span class="chip chip-score">Sistema de puntuación</span></td>
+        <td>Framework estándar para evaluar la severidad de una vulnerabilidad mediante una puntuación numérica de 0 a 10.</td>
+        <td>Priorizar qué vulnerabilidades requieren atención inmediata comparando su severidad de forma objetiva.</td>
+        <td>
+          <strong>FIRST</strong><br>
+          <span style="color:var(--muted);font-size:12px">Forum of Incident Response and Security Teams</span>
+        </td>
+        <td>CVSS puntúa cada CVE. El NVD publica la puntuación CVSS base de cada CVE. No asigna IDs.</td>
+        <td>
+          <div class="sev-scale">
+            <div class="sev-row"><div class="sev-bar sev-none"></div><span style="color:var(--muted)">None (0.0)</span></div>
+            <div class="sev-row"><div class="sev-bar sev-low"></div><span style="color:#3FB950">Low (0.1–3.9)</span></div>
+            <div class="sev-row"><div class="sev-bar sev-medium"></div><span style="color:#FFA657">Medium (4.0–6.9)</span></div>
+            <div class="sev-row"><div class="sev-bar sev-high"></div><span style="color:#F78166">High (7.0–8.9)</span></div>
+            <div class="sev-row"><div class="sev-bar sev-critical"></div><span style="color:#FF7B72">Critical (9.0–10.0)</span></div>
+          </div>
+        </td>
+      </tr>
+
+      <!-- CVSS Metrics detail -->
+      <tr style="background:rgba(210,168,255,.03)">
+        <td class="cat-score">
+          <div class="term-badge">
+            <span class="term-abbr">CVSS<br>Métricas</span>
+            <span class="term-full">Base · Temporal · Ambiental</span>
+          </div>
+        </td>
+        <td><span class="chip chip-score">Sub-componente</span></td>
+        <td>Las tres capas de cálculo del score CVSS: Base (cualidades intrínsecas), Temporal (disponibilidad de parches) y Ambiental (contexto del entorno).</td>
+        <td>Afinar la puntuación de severidad según el momento y el entorno específico de cada organización.</td>
+        <td>
+          <strong>FIRST</strong> (define el estándar)<br>
+          <span style="color:var(--muted);font-size:12px">NVD reporta solo Base</span>
+        </td>
+        <td>El NVD publica solo la métrica Base. Las métricas Temporal y Ambiental las calcula cada organización según su contexto.</td>
+        <td>
+          <div class="tag-list">
+            <span class="tag">Base: AV/AC/Au/C/I/A</span>
+            <span class="tag">Temporal: E/RL/RC</span>
+            <span class="tag">Ambiental: CR/IR/AR</span>
+          </div>
+        </td>
+      </tr>
+
+      <!-- EPSS -->
+      <tr>
+        <td class="cat-score">
+          <div class="term-badge">
+            <span class="term-abbr">EPSS</span>
+            <span class="term-full">Exploit Prediction Scoring System</span>
+          </div>
+        </td>
+        <td><span class="chip chip-score">Score predictivo</span></td>
+        <td>Modelo probabilístico que predice la probabilidad de que una vulnerabilidad sea explotada en los próximos 30 días (de 0 % a 100 %).</td>
+        <td>Complementar CVSS para priorizar remediación: una vulnerabilidad con CVSS alto pero EPSS bajo puede ser menos urgente que una con CVSS medio y EPSS muy alto.</td>
+        <td>
+          <strong>FIRST</strong><br>
+          <span style="color:var(--muted);font-size:12px">Actualizado diariamente</span>
+        </td>
+        <td>No reemplaza CVSS; lo complementa. Se aplica sobre CVEs existentes. Usado por el NVD y herramientas de VM modernas.</td>
+        <td>
+          <span style="color:var(--accent);font-family:var(--mono);font-size:12px">EPSS: 0.94 (94 %)</span><br>
+          <span style="color:var(--muted);font-size:12px">Probabilidad de explotación</span>
+        </td>
+      </tr>
+
+    </tbody>
+
+    <thead>
+      <tr class="subhead">
+        <th colspan="7">▸ BASES DE DATOS Y REPOSITORIOS</th>
+      </tr>
+    </thead>
+    <tbody>
+
+      <!-- NVD -->
+      <tr>
+        <td class="cat-db">
+          <div class="term-badge">
+            <span class="term-abbr">NVD</span>
+            <span class="term-full">National Vulnerability Database</span>
+          </div>
+        </td>
+        <td><span class="chip chip-db">Base de datos</span></td>
+        <td>Base de datos integral de vulnerabilidades sincronizada con la lista CVE, que añade metadatos enriquecidos: scores CVSS, disponibilidad de parches, referencias y más.</td>
+        <td>Consultar vulnerabilidades con filtros avanzados (producto, versión, severidad) y obtener el score CVSS oficial de cada CVE.</td>
+        <td>
+          <strong>NIST</strong><br>
+          <span style="color:var(--muted);font-size:12px">National Institute of Standards and Technology — EE. UU.</span>
+        </td>
+        <td>
+          <span class="rel-diagram">CVE-ID ──▶ NVD (enriquece)
+NVD ──▶ CVSS score (base)
+NVD ──▶ CWE (clasificación)
+NVD ──▶ CPE (producto afectado)</span>
+        </td>
+        <td>
+          <a href="https://nvd.nist.gov" style="color:var(--accent);font-family:var(--mono);font-size:11px;text-decoration:none">nvd.nist.gov</a><br>
+          <span style="color:var(--muted);font-size:12px">API pública disponible</span>
+        </td>
+      </tr>
+
+      <!-- KEV -->
+      <tr>
+        <td class="cat-db">
+          <div class="term-badge">
+            <span class="term-abbr">KEV</span>
+            <span class="term-full">Known Exploited Vulnerabilities Catalog</span>
+          </div>
+        </td>
+        <td><span class="chip chip-db">Catálogo</span></td>
+        <td>Catálogo de vulnerabilidades con explotación activa confirmada en el mundo real, mantenido por CISA.</td>
+        <td>Identificar vulnerabilidades que ya están siendo usadas por actores de amenaza. Las agencias federales de EE. UU. están obligadas a parchearlas en plazos definidos.</td>
+        <td>
+          <strong>CISA</strong><br>
+          <span style="color:var(--muted);font-size:12px">Cybersecurity and Infrastructure Security Agency</span>
+        </td>
+        <td>Subconjunto de CVEs. Complementa CVSS/EPSS: una vuln en KEV debe priorizarse independientemente de su score.</td>
+        <td>
+          <a href="https://www.cisa.gov/known-exploited-vulnerabilities-catalog" style="color:var(--accent);font-family:var(--mono);font-size:11px;text-decoration:none">cisa.gov/kev</a><br>
+          <span style="color:var(--muted);font-size:12px">Actualización continua</span>
+        </td>
+      </tr>
+
+    </tbody>
+
+    <thead>
+      <tr class="subhead">
+        <th colspan="7">▸ CLASIFICACIÓN Y TAXONOMÍA</th>
+      </tr>
+    </thead>
+    <tbody>
+
+      <!-- CWE -->
+      <tr>
+        <td class="cat-class">
+          <div class="term-badge">
+            <span class="term-abbr">CWE</span>
+            <span class="term-full">Common Weakness Enumeration</span>
+          </div>
+        </td>
+        <td><span class="chip chip-class">Taxonomía</span></td>
+        <td>Lista categorizada de debilidades de software y hardware (fallas de diseño o implementación) que pueden originar vulnerabilidades.</td>
+        <td>Clasificar el <em>tipo de falla</em> que causó una vulnerabilidad CVE para guiar la remediación y mejorar el diseño seguro.</td>
+        <td>
+          <strong>MITRE Corporation</strong>
+        </td>
+        <td>El NVD asocia un CWE a cada CVE. CWE describe la causa raíz; CVE describe la instancia concreta. No asigna severidad.</td>
+        <td>
+          <span style="color:var(--accent3);font-family:var(--mono);font-size:12px">CWE-79</span><br>
+          <span style="color:var(--muted);font-size:12px">Cross-site Scripting (XSS)</span>
+          <div class="tag-list" style="margin-top:6px">
+            <span class="tag">CWE-89: SQL Injection</span>
+            <span class="tag">CWE-20: Improper Input</span>
+          </div>
+        </td>
+      </tr>
+
+      <!-- CPE -->
+      <tr>
+        <td class="cat-class">
+          <div class="term-badge">
+            <span class="term-abbr">CPE</span>
+            <span class="term-full">Common Platform Enumeration</span>
+          </div>
+        </td>
+        <td><span class="chip chip-class">Esquema de nombres</span></td>
+        <td>Esquema estandarizado de nombres para describir clases de aplicaciones, sistemas operativos y hardware de forma inequívoca.</td>
+        <td>Identificar qué productos y versiones específicas están afectados por un CVE, facilitando la automatización del inventario y el análisis de impacto.</td>
+        <td>
+          <strong>NIST / NVD</strong>
+        </td>
+        <td>El NVD asocia CPEs a cada CVE. Herramientas de gestión de activos usan CPE para correlacionar inventario con vulnerabilidades.</td>
+        <td>
+          <span style="color:var(--accent3);font-family:var(--mono);font-size:10px">cpe:2.3:a:apache:log4j:2.14.1</span>
+        </td>
+      </tr>
+
+      <!-- MITRE ATT&CK -->
+      <tr>
+        <td class="cat-class">
+          <div class="term-badge">
+            <span class="term-abbr">ATT&CK</span>
+            <span class="term-full">Adversarial Tactics, Techniques & Common Knowledge</span>
+          </div>
+        </td>
+        <td><span class="chip chip-class">Framework</span></td>
+        <td>Base de conocimiento de tácticas, técnicas y procedimientos (TTPs) usados por actores de amenaza reales, organizada por fases del ataque.</td>
+        <td>Mapear cómo los atacantes explotan vulnerabilidades y qué controles de defensa aplicar en cada etapa de la cadena de ataque.</td>
+        <td>
+          <strong>MITRE Corporation</strong>
+        </td>
+        <td>Las CVEs pueden vincularse a técnicas ATT&CK específicas para contextualizar el impacto operacional de una vulnerabilidad.</td>
+        <td>
+          <div class="tag-list">
+            <span class="tag">T1190: Exploit Public App</span>
+            <span class="tag">T1059: Command Execution</span>
+          </div>
+        </td>
+      </tr>
+
+    </tbody>
+
+    <thead>
+      <tr class="subhead">
+        <th colspan="7">▸ PROGRAMAS Y PROCESOS</th>
+      </tr>
+    </thead>
+    <tbody>
+
+      <!-- VDP -->
+      <tr>
+        <td class="cat-prog">
+          <div class="term-badge">
+            <span class="term-abbr">VDP</span>
+            <span class="term-full">Vulnerability Disclosure Program</span>
+          </div>
+        </td>
+        <td><span class="chip chip-prog">Programa</span></td>
+        <td>Política formal que define cómo investigadores externos pueden reportar vulnerabilidades a una organización de forma segura y responsable.</td>
+        <td>Recibir reportes de vulnerabilidades de manera controlada antes de que sean publicadas como CVE o explotadas.</td>
+        <td>Cada organización define el suyo (puede seguir estándares ISO 29147).</td>
+        <td>Precede al proceso CVE: tras una divulgación responsable via VDP, el hallazgo puede recibir un CVE-ID de un CNA.</td>
+        <td>
+          <div class="tag-list">
+            <span class="tag">Bug Bounty</span>
+            <span class="tag">Responsible Disclosure</span>
+            <span class="tag">Coordinated Disclosure</span>
+          </div>
+        </td>
+      </tr>
+
+      <!-- VM -->
+      <tr>
+        <td class="cat-prog">
+          <div class="term-badge">
+            <span class="term-abbr">VM</span>
+            <span class="term-full">Vulnerability Management</span>
+          </div>
+        </td>
+        <td><span class="chip chip-prog">Proceso continuo</span></td>
+        <td>Proceso cíclico de identificar, clasificar, priorizar, remediar y reportar vulnerabilidades en los sistemas de una organización.</td>
+        <td>Reducir la superficie de ataque de forma sistemática y continua, usando CVE, CVSS, NVD y KEV como insumos de priorización.</td>
+        <td>Interna de cada organización (apoyada en herramientas como Tenable, Qualys, Rapid7).</td>
+        <td>Es el proceso que consume todos los demás términos: usa CVEs para identificar, CVSS/EPSS para priorizar, NVD/KEV para enriquecer, CWE para remediar la causa raíz.</td>
+        <td>
+          <div class="tag-list">
+            <span class="tag">Escaneo</span>
+            <span class="tag">Priorización</span>
+            <span class="tag">Remediación</span>
+            <span class="tag">Validación</span>
+          </div>
+        </td>
+      </tr>
+
+    </tbody>
+  </table>
+</div>
+
+<footer>
+  <span>Fuentes: MITRE · NIST NVD · FIRST · CISA</span>
+  <span>Generado con Claude — Junio 2026</span>
+</footer>
+
+</body>
+</html>

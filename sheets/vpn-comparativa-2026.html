@@ -1,0 +1,1835 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VPN Comparativa 2026 — Estado del Arte</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
+
+  :root {
+    --bg:         #0a0c10;
+    --surface:    #0f1219;
+    --panel:      #141822;
+    --border:     #1e2535;
+    --border-hi:  #2a3550;
+    --accent:     #00d4ff;
+    --accent2:    #7b5ea7;
+    --accent3:    #00ff9d;
+    --warn:       #ff6b35;
+    --text:       #c8d6e5;
+    --text-dim:   #5a6a82;
+    --text-bright:#eaf2ff;
+    --green:      #00ff9d;
+    --red:        #ff4d6a;
+    --yellow:     #ffd166;
+    --mono:       'JetBrains Mono', monospace;
+    --sans:       'Inter', sans-serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 13px;
+    line-height: 1.5;
+    min-height: 100vh;
+  }
+
+  /* ── HEADER ── */
+  header {
+    background: linear-gradient(135deg, #0a0c10 0%, #0e1420 50%, #0a0f1a 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 40px 40px 32px;
+    position: relative;
+    overflow: hidden;
+  }
+  header::before {
+    content: '';
+    position: absolute;
+    top: -80px; right: -80px;
+    width: 400px; height: 400px;
+    background: radial-gradient(circle, rgba(0,212,255,0.06) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  header::after {
+    content: '';
+    position: absolute;
+    bottom: -60px; left: 20%;
+    width: 300px; height: 300px;
+    background: radial-gradient(circle, rgba(123,94,167,0.05) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .header-eyebrow {
+    font-family: var(--mono);
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.2em;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+  .header-eyebrow span { color: var(--text-dim); }
+
+  h1 {
+    font-family: var(--mono);
+    font-size: clamp(22px, 4vw, 38px);
+    font-weight: 700;
+    color: var(--text-bright);
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+    margin-bottom: 12px;
+  }
+  h1 em {
+    font-style: normal;
+    color: var(--accent);
+  }
+
+  .header-sub {
+    font-size: 13px;
+    color: var(--text-dim);
+    max-width: 620px;
+    line-height: 1.6;
+  }
+
+  .header-meta {
+    display: flex;
+    gap: 24px;
+    margin-top: 20px;
+    flex-wrap: wrap;
+  }
+  .meta-chip {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--text-dim);
+    border: 1px solid var(--border);
+    padding: 4px 10px;
+    border-radius: 2px;
+  }
+  .meta-chip strong { color: var(--text); }
+
+  /* ── LEGEND ── */
+  .legend {
+    padding: 20px 40px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .legend-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-right: 4px;
+  }
+  .badge {
+    display: inline-block;
+    font-family: var(--mono);
+    font-size: 10px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 2px;
+    white-space: nowrap;
+  }
+  .badge-free    { background: rgba(0,255,157,0.12); color: var(--green); border: 1px solid rgba(0,255,157,0.25); }
+  .badge-ent     { background: rgba(0,212,255,0.10); color: var(--accent); border: 1px solid rgba(0,212,255,0.25); }
+  .badge-both    { background: rgba(123,94,167,0.15); color: #b58ee8; border: 1px solid rgba(123,94,167,0.3); }
+  .badge-oss     { background: rgba(255,209,102,0.10); color: var(--yellow); border: 1px solid rgba(255,209,102,0.25); }
+  .check         { color: var(--green); font-weight: 700; }
+  .cross         { color: var(--red); font-weight: 700; }
+
+  /* ── FILTER BAR ── */
+  .filter-bar {
+    padding: 14px 40px;
+    background: var(--panel);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .filter-bar-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+  .filter-btn {
+    font-family: var(--mono);
+    font-size: 10px;
+    font-weight: 600;
+    padding: 5px 14px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--text-dim);
+    cursor: pointer;
+    border-radius: 2px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    transition: all 0.15s;
+  }
+  .filter-btn:hover, .filter-btn.active {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: rgba(0,212,255,0.06);
+  }
+  .search-input {
+    margin-left: auto;
+    font-family: var(--mono);
+    font-size: 11px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 5px 12px;
+    border-radius: 2px;
+    width: 200px;
+    outline: none;
+  }
+  .search-input:focus { border-color: var(--accent); }
+  .search-input::placeholder { color: var(--text-dim); }
+
+  /* ── TABLE WRAPPER ── */
+  .table-wrapper {
+    overflow-x: auto;
+    padding: 0 40px 60px;
+  }
+
+  /* ── TABLE ── */
+  table {
+    border-collapse: collapse;
+    width: 100%;
+    min-width: 1400px;
+    margin-top: 24px;
+  }
+
+  thead th {
+    font-family: var(--mono);
+    font-size: 9px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--text-dim);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 10px 14px;
+    text-align: left;
+    position: sticky;
+    top: 0;
+    white-space: nowrap;
+  }
+  thead th:first-child {
+    color: var(--accent);
+    min-width: 150px;
+    z-index: 2;
+    left: 0;
+  }
+  thead th:nth-child(2) { min-width: 220px; }
+  thead th:nth-child(3) { min-width: 220px; }
+  thead th:nth-child(4) { min-width: 200px; }
+  thead th:nth-child(5) { min-width: 200px; }
+  thead th:nth-child(6) { min-width: 220px; }
+  thead th:nth-child(7) { min-width: 220px; }
+  thead th:nth-child(8) { min-width: 100px; }
+  thead th:nth-child(9) { min-width: 100px; }
+
+  tbody tr {
+    transition: background 0.12s;
+  }
+  tbody tr:hover td {
+    background: rgba(0,212,255,0.03);
+  }
+  tbody tr.hidden { display: none; }
+
+  td {
+    border: 1px solid var(--border);
+    padding: 12px 14px;
+    vertical-align: top;
+    font-size: 12px;
+    line-height: 1.5;
+    color: var(--text);
+  }
+
+  td:first-child {
+    position: sticky;
+    left: 0;
+    background: var(--bg);
+    z-index: 1;
+  }
+
+  .vpn-name {
+    font-family: var(--mono);
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text-bright);
+    display: block;
+    margin-bottom: 4px;
+  }
+  .vpn-version {
+    font-family: var(--mono);
+    font-size: 9px;
+    color: var(--text-dim);
+  }
+  .vpn-type {
+    display: inline-block;
+    margin-top: 5px;
+    font-family: var(--mono);
+    font-size: 9px;
+    color: var(--accent2);
+    background: rgba(123,94,167,0.1);
+    border: 1px solid rgba(123,94,167,0.2);
+    padding: 1px 6px;
+    border-radius: 2px;
+  }
+
+  ul.cell-list {
+    list-style: none;
+    padding: 0;
+  }
+  ul.cell-list li {
+    padding: 1px 0;
+    font-size: 12px;
+    line-height: 1.5;
+  }
+  ul.cell-list li::before {
+    content: '›';
+    color: var(--text-dim);
+    margin-right: 6px;
+    font-family: var(--mono);
+  }
+  ul.cell-list.pro li::before { content: '+'; color: var(--green); }
+  ul.cell-list.con li::before { content: '−'; color: var(--red); }
+  ul.cell-list.use li::before { content: '▸'; color: var(--accent); }
+  ul.cell-list.nouse li::before { content: '✗'; color: var(--warn); }
+
+  .pricing-cell {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  /* ── FOOTER ── */
+  footer {
+    text-align: center;
+    padding: 32px 40px;
+    border-top: 1px solid var(--border);
+    background: var(--surface);
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--text-dim);
+  }
+  footer strong { color: var(--accent); }
+
+  /* ── ROW ALT COLOR ── */
+  tbody tr:nth-child(even) td:not(:first-child) {
+    background: rgba(255,255,255,0.01);
+  }
+
+  .tag {
+    display: inline-block;
+    font-family: var(--mono);
+    font-size: 9px;
+    padding: 1px 6px;
+    border-radius: 2px;
+    margin: 1px 1px 1px 0;
+  }
+  .tag-proto  { background: rgba(0,212,255,0.08); color: var(--accent);   border: 1px solid rgba(0,212,255,0.2); }
+  .tag-os     { background: rgba(255,209,102,0.08); color: var(--yellow); border: 1px solid rgba(255,209,102,0.2); }
+  .tag-alert  { background: rgba(255,75,106,0.08); color: var(--red);     border: 1px solid rgba(255,75,106,0.2); }
+  .tag-new    { background: rgba(0,255,157,0.08); color: var(--green);    border: 1px solid rgba(0,255,157,0.2); }
+
+  /* scroll hint */
+  .scroll-hint {
+    text-align: right;
+    padding: 10px 40px 0;
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--text-dim);
+  }
+
+  /* counter */
+  #row-count {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--text-dim);
+    margin-left: auto;
+    margin-right: 16px;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-eyebrow">SECURITY LANDSCAPE <span>/ NETWORK PRIVACY</span></div>
+  <h1>VPN Solutions<br>Estado del Arte <em>2026</em></h1>
+  <p class="header-sub">Análisis comparativo de 25 soluciones VPN enterprise y open-source: protocolos, casos de uso, ventajas, limitaciones y posicionamiento de mercado actualizado a mediados de 2026.</p>
+  <div class="header-meta">
+    <span class="meta-chip"><strong>25</strong> soluciones</span>
+    <span class="meta-chip"><strong>8</strong> dimensiones de análisis</span>
+    <span class="meta-chip">Actualizado <strong>Q2 2026</strong></span>
+    <span class="meta-chip">Protocolos: <strong>IKEv2 · WireGuard · SSL/TLS · DTLS · QUIC</strong></span>
+  </div>
+</header>
+
+<div class="legend">
+  <span class="legend-label">Modelo:</span>
+  <span class="badge badge-free">FREE / OSS</span>
+  <span class="badge badge-ent">ENTERPRISE</span>
+  <span class="badge badge-both">FREE + ENTERPRISE</span>
+  &nbsp;&nbsp;
+  <span class="legend-label">Señales:</span>
+  <span class="check">✓</span> Disponible &nbsp;
+  <span class="cross">✗</span> No disponible
+</div>
+
+<div class="filter-bar">
+  <span class="filter-bar-label">Filtrar:</span>
+  <button class="filter-btn active" onclick="filterTable('all', this)">Todas (25)</button>
+  <button class="filter-btn" onclick="filterTable('oss', this)">Open Source</button>
+  <button class="filter-btn" onclick="filterTable('enterprise', this)">Enterprise</button>
+  <button class="filter-btn" onclick="filterTable('cloud', this)">Cloud Native</button>
+  <button class="filter-btn" onclick="filterTable('mesh', this)">Mesh / P2P</button>
+  <button class="filter-btn" onclick="filterTable('remote', this)">Remote Access</button>
+  <span id="row-count">25 entradas</span>
+  <input class="search-input" type="text" placeholder="Buscar solución..." oninput="searchTable(this.value)">
+</div>
+
+<div class="scroll-hint">← desplazarse horizontalmente →</div>
+
+<div class="table-wrapper">
+<table id="vpnTable">
+<thead>
+  <tr>
+    <th>#  Solución</th>
+    <th>¿Qué hace?</th>
+    <th>¿Qué NO hace?</th>
+    <th>Ventajas</th>
+    <th>Desventajas</th>
+    <th>Casos de uso RECOMENDADOS</th>
+    <th>Casos de uso NO recomendados</th>
+    <th>Gratuito / OSS</th>
+    <th>Enterprise</th>
+  </tr>
+</thead>
+<tbody>
+
+<!-- 1. OpenVPN -->
+<tr data-tags="oss remote">
+  <td>
+    <span class="vpn-name">01 OpenVPN</span>
+    <span class="vpn-version">v2.6.x / OpenVPN 3</span>
+    <span class="vpn-type">SSL/TLS</span><br>
+    <span class="tag tag-proto">TLS 1.3</span>
+    <span class="tag tag-os">Multi-OS</span>
+  </td>
+  <td>
+    <ul class="cell-list">
+      <li>Túnel cifrado sobre TCP/UDP usando OpenSSL</li>
+      <li>Soporta certificados PKI (x.509), MFA, LDAP</li>
+      <li>Split tunneling, ruteo personalizado</li>
+      <li>Funciona detrás de NAT/firewalls restrictivos (TCP 443)</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cell-list">
+      <li>No ofrece gestión centralizada en versión CE</li>
+      <li>No tiene GUI nativa robusta en servidor</li>
+      <li>Sin soporte QUIC ni post-quantum nativo (2026)</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cell-list pro">
+      <li>Maduro, auditado, enorme comunidad</li>
+      <li>Máxima compatibilidad de OS/dispositivos</li>
+      <li>Altamente personalizable</li>
+      <li>Atraviesa firewalls con TCP 443</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cell-list con">
+      <li>Velocidad inferior a WireGuard (~30-40%)</li>
+      <li>Configuración compleja sin herramientas de orquestación</li>
+      <li>Overhead de TLS handshake notable</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cell-list use">
+      <li>Acceso remoto corporativo legacy</li>
+      <li>Entornos con firewalls muy restrictivos</li>
+      <li>Cuando se requiere compatibilidad universal</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cell-list nouse">
+      <li>Entornos IoT con recursos limitados</li>
+      <li>Cuando la velocidad es crítica (streaming 4K, gaming)</li>
+      <li>Redes mesh dinámicas</li>
+    </ul>
+  </td>
+  <td><span class="badge badge-free">CE Gratuito</span></td>
+  <td><span class="badge badge-ent">Access Server</span></td>
+</tr>
+
+<!-- 2. WireGuard -->
+<tr data-tags="oss mesh remote">
+  <td>
+    <span class="vpn-name">02 WireGuard</span>
+    <span class="vpn-version">1.0 Stable / kernel 5.6+</span>
+    <span class="vpn-type">UDP / Kernel Module</span><br>
+    <span class="tag tag-proto">ChaCha20</span>
+    <span class="tag tag-new">State of Art</span>
+  </td>
+  <td>
+    <ul class="cell-list">
+      <li>VPN de alto rendimiento integrada al kernel Linux</li>
+      <li>Criptografía moderna: ChaCha20, Poly1305, Curve25519</li>
+      <li>Reconexión transparente sin renegociación</li>
+      <li>~4000 líneas de código (auditabilidad extrema)</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cell-list">
+      <li>No tiene gestión dinámica de IPs built-in</li>
+      <li>Sin soporte TCP nativo (solo UDP)</li>
+      <li>No incluye PKI ni autenticación de usuarios</li>
+      <li>Sin GUI oficial de gestión centralizada</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cell-list pro">
+      <li>Rendimiento excepcional (2-4x vs OpenVPN)</li>
+      <li>Latencia ultra baja, roaming transparente</li>
+      <li>Código minimalista = superficie de ataque mínima</li>
+      <li>Soporte nativo Linux/Windows/macOS/iOS/Android</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cell-list con">
+      <li>No traversa ciertos firewalls que bloquean UDP</li>
+      <li>Requiere soluciones externas para gestión (Headscale, etc.)</li>
+      <li>Post-quantum en progreso (no estable aún)</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cell-list use">
+      <li>VPN site-to-site de alto rendimiento</li>
+      <li>Remote access moderno</li>
+      <li>Base para otras soluciones (Tailscale, Netbird)</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cell-list nouse">
+      <li>Entornos con bloqueo de UDP estricto</li>
+      <li>Cuando se necesita PKI empresarial compleja</li>
+      <li>Redes que requieren gestión masiva de usuarios</li>
+    </ul>
+  </td>
+  <td><span class="badge badge-free">100% OSS</span></td>
+  <td><span class="badge badge-ent">Via wrappers</span></td>
+</tr>
+
+<!-- 3. strongSwan -->
+<tr data-tags="oss remote enterprise">
+  <td>
+    <span class="vpn-name">03 strongSwan</span>
+    <span class="vpn-version">6.0.x (2025)</span>
+    <span class="vpn-type">IPsec / IKEv2</span><br>
+    <span class="tag tag-proto">IKEv2</span>
+    <span class="tag tag-proto">PQ-Crypto</span>
+  </td>
+  <td>
+    <ul class="cell-list">
+      <li>IPsec completo con IKEv1/IKEv2 y soporte XAUTH</li>
+      <li>Integración con HSM, smartcards, RADIUS</li>
+      <li>Criptografía post-quantum (CRYSTALS-Kyber, v6)</li>
+      <li>VPN roadwarrior y site-to-site enterprise</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cell-list">
+      <li>Sin interfaz gráfica web nativa</li>
+      <li>Poca compatibilidad con dispositivos iOS/Android sin config manual</li>
+      <li>No incluye solución SD-WAN</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cell-list pro">
+      <li>Estándar de facto para IPsec en Linux</li>
+      <li>Cumplimiento FIPS 140-3, Common Criteria</li>
+      <li>Post-quantum ready (líder en 2026)</li>
+      <li>Integración profunda con PKI empresarial</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cell-list con">
+      <li>Configuración compleja (ipsec.conf o vici)</li>
+      <li>Curva de aprendizaje pronunciada</li>
+      <li>Documentación fragmentada</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cell-list use">
+      <li>Interoperabilidad con routers Cisco/Juniper/Palo Alto</li>
+      <li>Sectores regulados (finanzas, gobierno)</li>
+      <li>Cuando se requiere PQ-safe VPN ya en producción</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cell-list nouse">
+      <li>Startups sin equipo de redes especializado</li>
+      <li>Ambientes cloud-native puros (usar Tailscale/Netbird)</li>
+      <li>Usuarios finales no técnicos</li>
+    </ul>
+  </td>
+  <td><span class="badge badge-free">OSS (GPL)</span></td>
+  <td><span class="badge badge-ent">Soporte comercial</span></td>
+</tr>
+
+<!-- 4. Fortinet FortiVPN / FortiClient -->
+<tr data-tags="enterprise remote">
+  <td>
+    <span class="vpn-name">04 FortiClient VPN</span>
+    <span class="vpn-version">FortiOS 7.6 / 2025</span>
+    <span class="vpn-type">SSL-VPN + IPsec</span><br>
+    <span class="tag tag-proto">IKEv2</span>
+    <span class="tag tag-os">ZTNA</span>
+  </td>
+  <td>
+    <ul class="cell-list">
+      <li>VPN SSL e IPsec integrada al ecosistema Fortinet</li>
+      <li>ZTNA 2.0 con postura de seguridad del endpoint</li>
+      <li>Integración con FortiGate, FortiManager, EMS</li>
+      <li>Telemetría de endpoint y control de acceso granular</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cell-list">
+      <li>No opera bien fuera del ecosistema Fortinet</li>
+      <li>Licencias caras; sin versión OSS real</li>
+      <li>SSL-VPN legacy con CVEs históricos graves</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cell-list pro">
+      <li>Integración nativa con el Security Fabric de Fortinet</li>
+      <li>Visibilidad y control unificado</li>
+      <li>Soporte global 24/7</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cell-list con">
+      <li>Vendor lock-in severo</li>
+      <li>SSL-VPN históricamente comprometido (CVE-2022-42475, etc.)</li>
+      <li>Costo de licenciamiento elevado</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cell-list use">
+      <li>Organizaciones ya invertidas en Fortinet</li>
+      <li>Acceso remoto masivo con gestión centralizada</li>
+      <li>Cumplimiento PCI-DSS, HIPAA</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cell-list nouse">
+      <li>Multi-vendor environments</li>
+      <li>Presupuesto limitado</li>
+      <li>Cuando se priorizan stacks open-source</li>
+    </ul>
+  </td>
+  <td><span class="badge badge-free">Versión básica free</span></td>
+  <td><span class="badge badge-ent">Enterprise EMS</span></td>
+</tr>
+
+<!-- 5. Tailscale -->
+<tr data-tags="cloud mesh remote">
+  <td>
+    <span class="vpn-name">05 Tailscale</span>
+    <span class="vpn-version">v1.72 / 2025</span>
+    <span class="vpn-type">Mesh / WireGuard</span><br>
+    <span class="tag tag-proto">WireGuard</span>
+    <span class="tag tag-new">Zero-config</span>
+  </td>
+  <td>
+    <ul class="cell-list">
+      <li>Red mesh cifrada P2P sobre WireGuard</li>
+      <li>NAT traversal automático (DERP relay servers)</li>
+      <li>SSO/MFA via Google, Azure AD, Okta</li>
+      <li>ACLs granulares, MagicDNS, subnet routing</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cell-list">
+      <li>Control plane en la nube de Tailscale (privacidad)</li>
+      <li>No es IPsec-compatible con equipos legacy</li>
+      <li>Sin gestión de paquetes a nivel firewall stateful</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cell-list pro">
+      <li>Setup en minutos, sin configurar firewalls</li>
+      <li>Funciona en cualquier topología de red</li>
+      <li>UX excepcional; clientes en todos los OS</li>
+      <li>Headscale como alternativa self-hosted</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cell-list con">
+      <li>Dependencia del control plane externo</li>
+      <li>Free tier limitado (3 usuarios en 2026)</li>
+      <li>No cumple requisitos de soberanía de datos sin Headscale</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cell-list use">
+      <li>Equipos de desarrollo distribuidos</li>
+      <li>Acceso a servidores/homelab</li>
+      <li>Startups que necesitan red privada rápido</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cell-list nouse">
+      <li>Entornos que exigen air-gap o soberanía total</li>
+      <li>Interoperabilidad con VPN hardware legacy</li>
+      <li>Grandes enterprise con política de no cloud externo</li>
+    </ul>
+  </td>
+  <td><span class="badge badge-both">Free personal / Starter</span></td>
+  <td><span class="badge badge-ent">Business / Enterprise</span></td>
+</tr>
+
+<!-- 6. Cisco AnyConnect / Cisco Secure Client -->
+<tr data-tags="enterprise remote">
+  <td>
+    <span class="vpn-name">06 Cisco Secure Client</span>
+    <span class="vpn-version">5.1.x (ex-AnyConnect)</span>
+    <span class="vpn-type">SSL/DTLS + IPsec</span><br>
+    <span class="tag tag-proto">DTLS</span>
+    <span class="tag tag-os">ZTNA</span>
+  </td>
+  <td>
+    <ul class="cell-list">
+      <li>VPN de acceso remoto con DTLS para baja latencia</li>
+      <li>Postura de endpoint, escaneo pre-conexión</li>
+      <li>Integración con Cisco ISE, Umbrella, Duo</li>
+      <li>ZTNA con Cisco+ Secure Connect</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cell-list">
+      <li>No funciona sin infraestructura Cisco (ASA/FTD)</li>
+      <li>Licenciamiento muy costoso</li>
+      <li>No es open source en ningún componente</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cell-list pro">
+      <li>El estándar enterprise más adoptado globalmente</li>
+      <li>Soporte maduro y documentación extensa</li>
+      <li>DTLS reduce latencia vs TLS puro</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cell-list con">
+      <li>Lock-in total al ecosistema Cisco</li>
+      <li>Costos de licencias prohibitivos para PYMES</li>
+      <li>Actualizaciones lentas frente a soluciones modernas</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cell-list use">
+      <li>Grandes corporativos con infraestructura Cisco</li>
+      <li>Sector financiero, gobierno, defensa</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cell-list nouse">
+      <li>Organizaciones sin Cisco ASA/FTD</li>
+      <li>PYMES con presupuesto ajustado</li>
+      <li>Cloud-native sin appliances físicos</li>
+    </ul>
+  </td>
+  <td><span class="badge badge-free">Trial limitado</span></td>
+  <td><span class="badge badge-ent">Enterprise only</span></td>
+</tr>
+
+<!-- 7. Palo Alto GlobalProtect -->
+<tr data-tags="enterprise remote">
+  <td>
+    <span class="vpn-name">07 GlobalProtect</span>
+    <span class="vpn-version">PAN-OS 11.2 / 2025</span>
+    <span class="vpn-type">IPsec / SSL</span><br>
+    <span class="tag tag-proto">IKEv2</span>
+    <span class="tag tag-os">ZTNA 2.0</span>
+  </td>
+  <td>
+    <ul class="cell-list">
+      <li>VPN integrada con NGFW Palo Alto</li>
+      <li>Inspección profunda de tráfico VPN</li>
+      <li>HIP (Host Information Profile) para postura</li>
+      <li>ZTNA 2.0 con Prisma Access</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cell-list">
+      <li>Requiere firewalls Palo Alto (NGFW)</li>
+      <li>Sin versión OSS</li>
+      <li>No soporta dispositivos no-gestionados fácilmente</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cell-list pro">
+      <li>Integración nativa con NGFW y threat prevention</li>
+      <li>Visibilidad granular del tráfico cifrado</li>
+      <li>Líder en Gartner Magic Quadrant SSE 2025</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cell-list con">
+      <li>Costo total de propiedad muy alto</li>
+      <li>Complejidad operacional</li>
+      <li>Dependencia absoluta del vendor</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cell-list use">
+      <li>Empresas con NGFW Palo Alto ya desplegados</li>
+      <li>Entornos de alta seguridad con inspección de tráfico</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cell-list nouse">
+      <li>Entornos sin hardware Palo Alto</li>
+      <li>Presupuestos medios/bajos</li>
+    </ul>
+  </td>
+  <td><span class="cross">✗</span></td>
+  <td><span class="badge badge-ent">Enterprise</span></td>
+</tr>
+
+<!-- 8. Nebula (Defined Networking) -->
+<tr data-tags="oss mesh cloud">
+  <td>
+    <span class="vpn-name">08 Nebula</span>
+    <span class="vpn-version">v1.9 / 2025</span>
+    <span class="vpn-type">Overlay Mesh</span><br>
+    <span class="tag tag-proto">Noise Protocol</span>
+    <span class="tag tag-new">P2P</span>
+  </td>
+  <td>
+    <ul class="cell-list">
+      <li>Red overlay P2P certificada con lighthouse nodes</li>
+      <li>Protocolo Noise (base de WireGuard) con grupos y ACLs</li>
+      <li>Auto-descubrimiento entre nodos</li>
+      <li>Creado por Slack, open source desde 2019</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cell-list">
+      <li>Sin GUI oficial</li>
+      <li>No tiene gestión enterprise SaaS nativa</li>
+      <li>Comunidad más pequeña que Tailscale</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cell-list pro">
+      <li>Control total self-hosted</li>
+      <li>ACLs basadas en grupos muy flexibles</li>
+      <li>Alto rendimiento, bajo overhead</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cell-list con">
+      <li>Requiere operar tus propios lighthouse servers</li>
+      <li>Menos pulido que Tailscale en UX</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cell-list use">
+      <li>Infraestructura multi-cloud self-managed</li>
+      <li>Equipos técnicos que necesitan control total</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cell-list nouse">
+      <li>Usuarios sin experiencia DevOps</li>
+      <li>Cuando se necesita soporte comercial</li>
+    </ul>
+  </td>
+  <td><span class="badge badge-free">OSS (MIT)</span></td>
+  <td><span class="badge badge-ent">Via Defined.net</span></td>
+</tr>
+
+<!-- 9. Netbird -->
+<tr data-tags="oss cloud mesh enterprise">
+  <td>
+    <span class="vpn-name">09 NetBird</span>
+    <span class="vpn-version">v1.x / 2026 · ISO 27001</span>
+    <span class="vpn-type">WireGuard Mesh + ZTNA</span><br>
+    <span class="tag tag-proto">WireGuard</span>
+    <span class="tag tag-new">ZTNA + OSS</span>
+    <span class="tag tag-os">GDPR · DORA</span>
+  </td>
+  <td>
+    <ul class="cell-list">
+      <li>Plataforma ZTNA completa sobre WireGuard P2P mesh</li>
+      <li>SSO/MFA con Okta, Azure AD, Google, OIDC genérico</li>
+      <li>Dynamic Posture Checks: verifica firewall, antivirus, geo, MDM/EDR</li>
+      <li>Activity logging con streaming a SIEM en tiempo real</li>
+      <li>API REST completa + soporte Terraform / IaC</li>
+      <li>Control plane self-hosteable (BSD-3) o SaaS cloud</li>
+      <li>Funciona en Linux, Windows, macOS, iOS, Android, Docker, routers</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cell-list">
+      <li>No soporta dispositivos legacy sin WireGuard (routers IPsec antiguos)</li>
+      <li>No ofrece inspección de tráfico inline (no es NGFW)</li>
+      <li>Sin soporte SSTP ni protocolos VPN clásicos para interop legacy</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cell-list pro">
+      <li>Único que combina WireGuard mesh P2P + ZTNA + OSS + certificado ISO 27001</li>
+      <li>Setup en menos de 5 minutos, sin abrir puertos ni configurar firewalls</li>
+      <li>Self-hosted sin límite de nodos; cloud SaaS como alternativa gestionada</li>
+      <li>Terraform + API: gestión como código (GitOps-ready)</li>
+      <li>Posture checks con integración MDM/EDR (Defender, Crowdstrike, etc.)</li>
+      <li>Cumplimiento GDPR, ISO 27001, DORA — liga enterprise real en 2026</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cell-list con">
+      <li>Sin inspección de tráfico (requiere complementar con firewall)</li>
+      <li>No interopera con gateways IPsec/IKEv2 de terceros (Cisco, Palo Alto)</li>
+      <li>Funciones avanzadas de postura y logs en planes de pago</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cell-list use">
+      <li>Reemplazar VPN legacy en empresas medianas con múltiples sedes/cloud</li>
+      <li>Equipos DevOps/DevSecOps que gestionan infra multi-cloud como código</li>
+      <li>Acceso remoto seguro con postura de dispositivo (BYOD + gestionados)</li>
+      <li>Sectores que requieren GDPR/ISO 27001/DORA sin vendor lock-in</li>
+      <li>Organizaciones que quieren soberanía total con self-hosted</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cell-list nouse">
+      <li>Interoperabilidad con VPN hardware legacy (IPsec/IKEv2 puro)</li>
+      <li>Cuando se requiere inspección DPI inline del tráfico</li>
+      <li>Entornos OT/ICS con dispositivos sin soporte WireGuard</li>
+    </ul>
+  </td>
+  <td><span class="badge badge-both">OSS BSD-3 / Free tier</span></td>
+  <td><span class="badge badge-ent">Teams / Business / Enterprise</span></td>
+</tr>
+
+<!-- 10. ZeroTier -->
+<tr data-tags="cloud mesh oss">
+  <td>
+    <span class="vpn-name">10 ZeroTier</span>
+    <span class="vpn-version">1.14 / 2025</span>
+    <span class="vpn-type">SDN Overlay</span><br>
+    <span class="tag tag-proto">ZeroTier Protocol</span>
+    <span class="tag tag-new">L2/L3</span>
+  </td>
+  <td>
+    <ul class="cell-list">
+      <li>Red virtual SDN sobre Internet (L2/L3)</li>
+      <li>Planeta/luna (servidores de raíz) para discovery</li>
+      <li>Emula switch Ethernet virtual entre peers</li>
+      <li>Self-hosteable con ZeroTier Central</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cell-list">
+      <li>No usa WireGuard (protocolo propio, menos auditado)</li>
+      <li>Rendimiento menor en redes adversas</li>
+      <li>Modelo de negocio cambiante en 2024-2025</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cell-list pro">
+      <li>Único en emular L2 (broadcast, multicast)</li>
+      <li>Ideal para gaming, IoT, lab environments</li>
+      <li>Setup muy sencillo</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cell-list con">
+      <li>Protocolo propio = menos transparencia criptográfica</li>
+      <li>Incertidumbre sobre sostenibilidad del proyecto</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cell-list use">
+      <li>Homelab, gaming LAN virtual</li>
+      <li>IoT donde se necesita capa 2</li>
+      <li>Interconexión de sucursales pequeñas</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cell-list nouse">
+      <li>Entornos enterprise de alta seguridad</li>
+      <li>Cuando se necesita protocolo auditado (WireGuard/IPsec)</li>
+    </ul>
+  </td>
+  <td><span class="badge badge-both">Free 25 nodos</span></td>
+  <td><span class="badge badge-ent">Business plan</span></td>
+</tr>
+
+<!-- 11. Libreswan -->
+<tr data-tags="oss enterprise">
+  <td>
+    <span class="vpn-name">11 Libreswan</span>
+    <span class="vpn-version">4.15 / 2025</span>
+    <span class="vpn-type">IPsec/IKEv1/IKEv2</span><br>
+    <span class="tag tag-proto">FIPS 140</span>
+    <span class="tag tag-os">RHEL/FCOS</span>
+  </td>
+  <td>
+    <ul class="cell-list">
+      <li>IPsec para Linux con FIPS 140-2/3 validado</li>
+      <li>Sucesor de FreeS/WAN, integrado en RHEL/Fedora</li>
+      <li>Soporte IKEv1/IKEv2, XAUTH, EAP</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cell-list">
+      <li>Sin GUI</li>
+      <li>Menos activo que strongSwan en innovación</li>
+      <li>Curva de aprendizaje alta</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cell-list pro">
+      <li>FIPS validado de serie en RHEL</li>
+      <li>Ideal para gobierno US (FISMA, FedRAMP)</li>
+      <li>Excelente interoperabilidad IPsec</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cell-list con">
+      <li>Documentación desactualizada en partes</li>
+      <li>Limitado a ecosistema Linux/RHEL principalmente</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cell-list use">
+      <li>Agencias gubernamentales US con RHEL</li>
+      <li>Cuando se necesita FIPS en producción</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cell-list nouse">
+      <li>Entornos no-Linux</li>
+      <li>Cuando strongSwan sea viable (más moderno)</li>
+    </ul>
+  </td>
+  <td><span class="badge badge-free">OSS (GPL)</span></td>
+  <td><span class="badge badge-ent">Via Red Hat</span></td>
+</tr>
+
+<!-- 12. SoftEther VPN -->
+<tr data-tags="oss remote">
+  <td>
+    <span class="vpn-name">12 SoftEther VPN</span>
+    <span class="vpn-version">4.43 / 2024</span>
+    <span class="vpn-type">Multi-protocolo</span><br>
+    <span class="tag tag-proto">SSL-VPN</span>
+    <span class="tag tag-proto">L2TP</span>
+  </td>
+  <td>
+    <ul class="cell-list">
+      <li>Servidor VPN multi-protocolo (OpenVPN, L2TP, SSTP, IPsec)</li>
+      <li>Emulación de switch virtual Ethernet</li>
+      <li>Originado en Universidad de Tsukuba, Japón</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cell-list">
+      <li>Desarrollo activo lento post-2021</li>
+      <li>Sin soporte WireGuard</li>
+      <li>UI de gestión anticuada</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cell-list pro">
+      <li>Soporte de más protocolos que cualquier otro</li>
+      <li>Buena para interoperabilidad legacy</li>
+      <li>Gratuito y open-source</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cell-list con">
+      <li>Proyecto en mantenimiento lento</li>
+      <li>No recomendado para nuevos deployments 2026</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cell-list use">
+      <li>Migración de infraestructuras legacy multi-protocolo</li>
+      <li>Entornos con mezcla de clientes antiguos</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cell-list nouse">
+      <li>Nuevos proyectos: usar WireGuard/Tailscale</li>
+      <li>Entornos donde la seguridad moderna es crítica</li>
+    </ul>
+  </td>
+  <td><span class="badge badge-free">OSS (Apache)</span></td>
+  <td><span class="cross">✗</span></td>
+</tr>
+
+<!-- 13. Pritunl -->
+<tr data-tags="oss enterprise remote">
+  <td>
+    <span class="vpn-name">13 Pritunl</span>
+    <span class="vpn-version">1.32 / 2025</span>
+    <span class="vpn-type">OpenVPN + WireGuard</span><br>
+    <span class="tag tag-proto">WireGuard</span>
+    <span class="tag tag-proto">OpenVPN</span>
+  </td>
+  <td>
+    <ul class="cell-list">
+      <li>Panel de gestión enterprise para OpenVPN/WireGuard</li>
+      <li>Multi-servidor, clustering, HA</li>
+      <li>SSO con Google, SAML, OTP</li>
+      <li>Gestión de usuarios y organizaciones vía web</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cell-list">
+      <li>No es un protocolo VPN sino una capa de gestión</li>
+      <li>Funciones avanzadas solo en versión Enterprise de pago</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cell-list pro">
+      <li>Simplifica enormemente la gestión de OpenVPN</li>
+      <li>UI web moderna y usable</li>
+      <li>Self-hosted con control total</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cell-list con">
+      <li>Funciones enterprise costosas</li>
+      <li>Requiere servidor MongoDB</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cell-list use">
+      <li>Empresas medianas que necesitan gestión OpenVPN sin complejidad</li>
+      <li>Equipos IT sin expertise VPN profundo</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cell-list nouse">
+      <li>Cuando WireGuard puro con Headscale es suficiente</li>
+      <li>Entornos donde MongoDB es indeseable</li>
+    </ul>
+  </td>
+  <td><span class="badge badge-both">OSS limitado</span></td>
+  <td><span class="badge badge-ent">Enterprise plan</span></td>
+</tr>
+
+<!-- 14. Cloudflare WARP / Zero Trust -->
+<tr data-tags="cloud enterprise">
+  <td>
+    <span class="vpn-name">14 Cloudflare Zero Trust</span>
+    <span class="vpn-version">WARP + Access / 2025</span>
+    <span class="vpn-type">ZTNA / WireGuard</span><br>
+    <span class="tag tag-proto">WireGuard</span>
+    <span class="tag tag-os">ZTNA</span>
+  </td>
+  <td>
+    <ul class="cell-list">
+      <li>ZTNA basado en la red global de Cloudflare</li>
+      <li>Reemplaza VPN tradicional con acceso por aplicación</li>
+      <li>WARP usa WireGuard para acceso seguro a Internet</li>
+      <li>Integración con CASB, SWG, DLP, Magic WAN</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cell-list">
+      <li>No es una VPN site-to-site tradicional</li>
+      <li>Requiere connectors (cloudflared) en recursos privados</li>
+      <li>Sin soporte para protocolos no-HTTP en plan básico</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cell-list pro">
+      <li>Red global Anycast de Cloudflare (latencia mínima)</li>
+      <li>SSE completo: ZTNA + SWG + CASB + DLP</li>
+      <li>Free tier muy generoso (hasta 50 usuarios)</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cell-list con">
+      <li>Dependencia absoluta de Cloudflare</li>
+      <li>No ideal para tráfico no-web sin Magic WAN</li>
+      <li>Privacidad: todo el tráfico pasa por CF</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cell-list use">
+      <li>Equipos remotos accediendo a aplicaciones internas</li>
+      <li>Reemplazar VPN con ZTNA moderno</li>
+      <li>Startups hasta medianas empresas</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cell-list nouse">
+      <li>Entornos air-gap o sin acceso a Internet</li>
+      <li>Tráfico L4 masivo no-HTTP sin Magic WAN</li>
+    </ul>
+  </td>
+  <td><span class="badge badge-both">Free 50 users</span></td>
+  <td><span class="badge badge-ent">Enterprise Gateway</span></td>
+</tr>
+
+<!-- 15. Zscaler Private Access -->
+<tr data-tags="cloud enterprise">
+  <td>
+    <span class="vpn-name">15 Zscaler ZPA</span>
+    <span class="vpn-version">ZIA + ZPA 2025</span>
+    <span class="vpn-type">ZTNA / SaaS</span><br>
+    <span class="tag tag-os">SSE Leader</span>
+    <span class="tag tag-alert">No OSS</span>
+  </td>
+  <td>
+    <ul class="cell-list">
+      <li>ZTNA SaaS puro: acceso a apps sin VPN de red</li>
+      <li>Inspección TLS, CASB, DLP en línea</li>
+      <li>Zero Trust Exchange: nunca expone apps a Internet</li>
+      <li>Líder Gartner SSE 2024-2025</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cell-list">
+      <li>No es VPN tradicional, requiere rediseño de arquitectura</li>
+      <li>Sin versión self-hosted o gratuita</li>
+      <li>Costo muy elevado</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cell-list pro">
+      <li>Seguridad máxima sin exponer puertos al exterior</li>
+      <li>Escalabilidad ilimitada en SaaS</li>
+      <li>Reducción de superficie de ataque radical</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cell-list con">
+      <li>Precio: miles de dólares/usuario/año</li>
+      <li>Curva de transformación arquitectural alta</li>
+      <li>Vendor lock-in total</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cell-list use">
+      <li>Grandes enterprise con mandato Zero Trust</li>
+      <li>Sectores regulados (banca, salud, gobierno)</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cell-list nouse">
+      <li>PYMES y startups</li>
+      <li>Cuando se necesita VPN site-to-site clásica</li>
+    </ul>
+  </td>
+  <td><span class="cross">✗</span></td>
+  <td><span class="badge badge-ent">Enterprise SaaS</span></td>
+</tr>
+
+<!-- 16. Wireguard + Headscale -->
+<tr data-tags="oss mesh cloud">
+  <td>
+    <span class="vpn-name">16 Headscale</span>
+    <span class="vpn-version">0.23 / 2025</span>
+    <span class="vpn-type">Tailscale ctrl-plane OSS</span><br>
+    <span class="tag tag-proto">WireGuard</span>
+    <span class="tag tag-new">Self-hosted</span>
+  </td>
+  <td>
+    <ul class="cell-list">
+      <li>Reimplementación OSS del control plane de Tailscale</li>
+      <li>Compatible con clientes oficiales de Tailscale</li>
+      <li>Self-hosted: soberanía total de datos</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cell-list">
+      <li>No tiene todas las funciones de Tailscale (ACL UI, MagicDNS limitado)</li>
+      <li>Requiere infraestructura propia y mantenimiento</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cell-list pro">
+      <li>100% gratuito y self-hosted</li>
+      <li>Usa los mismos clientes pulidos de Tailscale</li>
+      <li>Sin límite de nodos</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cell-list con">
+      <li>Sin soporte comercial</li>
+      <li>Algunas features de Tailscale no soportadas</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cell-list use">
+      <li>Equipos técnicos que quieren soberanía de datos</li>
+      <li>Laboratorios, homelab, startup técnica</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cell-list nouse">
+      <li>Organizaciones que necesitan soporte garantizado</li>
+      <li>Ambientes con equipo IT no-técnico</li>
+    </ul>
+  </td>
+  <td><span class="badge badge-free">OSS (BSD)</span></td>
+  <td><span class="cross">✗</span></td>
+</tr>
+
+<!-- 17. Pfsense + OpenVPN/WireGuard -->
+<tr data-tags="oss enterprise remote">
+  <td>
+    <span class="vpn-name">17 pfSense / OPNsense</span>
+    <span class="vpn-version">CE 2.7 / OPN 24.7</span>
+    <span class="vpn-type">Firewall + VPN</span><br>
+    <span class="tag tag-proto">WireGuard</span>
+    <span class="tag tag-proto">IPsec</span>
+  </td>
+  <td>
+    <ul class="cell-list">
+      <li>Firewall OSS con VPN integrada (IPsec, OpenVPN, WireGuard)</li>
+      <li>pfSense CE gratuito; pfSense Plus comercial</li>
+      <li>OPNsense: fork más activo y moderno (recomendado 2026)</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cell-list">
+      <li>No es VPN pura sino firewall con VPN</li>
+      <li>Requiere hardware dedicado o VM</li>
+      <li>pfSense CE en desaceleración vs OPNsense</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cell-list pro">
+      <li>Plataforma todo-en-uno muy completa</li>
+      <li>Enorme ecosistema de plugins</li>
+      <li>OPNsense: actualizaciones frecuentes y UI moderna</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cell-list con">
+      <li>Gestión manual y compleja</li>
+      <li>Sin orquestación cloud-native</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cell-list use">
+      <li>Oficinas pequeñas/medianas con router OSS</li>
+      <li>Laboratorios y homelabs</li>
+      <li>VPN site-to-site en hardware propio</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cell-list nouse">
+      <li>Entornos cloud-native sin hardware</li>
+      <li>Grandes enterprise que necesitan orquestación</li>
+    </ul>
+  </td>
+  <td><span class="badge badge-free">CE gratuito</span></td>
+  <td><span class="badge badge-ent">pfSense Plus / Netgate</span></td>
+</tr>
+
+<!-- 18. AWS VPN / Client VPN -->
+<tr data-tags="cloud enterprise">
+  <td>
+    <span class="vpn-name">18 AWS VPN</span>
+    <span class="vpn-version">Site-to-Site + Client VPN</span>
+    <span class="vpn-type">IPsec + OpenVPN</span><br>
+    <span class="tag tag-proto">IKEv2</span>
+    <span class="tag tag-os">Cloud Native</span>
+  </td>
+  <td>
+    <ul class="cell-list">
+      <li>Site-to-Site VPN: IPsec hacia VPCs de AWS</li>
+      <li>Client VPN: acceso OpenVPN a recursos AWS</li>
+      <li>Integración con VPC, Transit Gateway, Direct Connect</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cell-list">
+      <li>No conecta redes no-AWS entre sí directamente</li>
+      <li>Costo por hora de conexión y transferencia</li>
+      <li>Sin versión self-hosted</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cell-list pro">
+      <li>Integración nativa perfecta con ecosistema AWS</li>
+      <li>HA automática, dos túneles redundantes</li>
+      <li>Managed, sin infraestructura que gestionar</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cell-list con">
+      <li>Costos acumulativos en producción</li>
+      <li>Vendor lock-in al ecosistema AWS</li>
+      <li>Latencia mayor que soluciones on-prem</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cell-list use">
+      <li>Conectar datacenter on-prem con AWS VPC</li>
+      <li>Acceso remoto de desarrolladores a recursos AWS</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cell-list nouse">
+      <li>Interconexión entre nubes distintas (usar SD-WAN)</li>
+      <li>Entornos no-AWS</li>
+    </ul>
+  </td>
+  <td><span class="cross">✗</span></td>
+  <td><span class="badge badge-ent">Pay-as-you-go</span></td>
+</tr>
+
+<!-- 19. Azure VPN Gateway -->
+<tr data-tags="cloud enterprise">
+  <td>
+    <span class="vpn-name">19 Azure VPN Gateway</span>
+    <span class="vpn-version">Gen2 / VpnGw5 2025</span>
+    <span class="vpn-type">IPsec / IKEv2 / SSTP</span><br>
+    <span class="tag tag-proto">IKEv2</span>
+    <span class="tag tag-os">Cloud Native</span>
+  </td>
+  <td>
+    <ul class="cell-list">
+      <li>VPN gateway gestionado en Azure</li>
+      <li>Soporta P2S (SSTP, IKEv2, OpenVPN) y S2S (IPsec)</li>
+      <li>Integración con Azure AD, Conditional Access</li>
+      <li>BGP support para routing dinámico</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cell-list">
+      <li>Latencia de aprovisionamiento alta (30+ min)</li>
+      <li>Sin soporte WireGuard nativo</li>
+      <li>Costos por hora incluso sin tráfico</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cell-list pro">
+      <li>Integración nativa con Azure y Microsoft 365</li>
+      <li>SLA 99.99% con VPN activo-activo</li>
+      <li>Soporte SSTP para Windows sin config extra</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cell-list con">
+      <li>Más caro que soluciones OSS</li>
+      <li>Desaprovisionamiento lento</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cell-list use">
+      <li>Hybrid cloud con Azure y on-prem Windows Server</li>
+      <li>Acceso remoto en entornos Microsoft</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cell-list nouse">
+      <li>Entornos multi-cloud sin Azure</li>
+      <li>Cuando se necesita bajo costo o WireGuard</li>
+    </ul>
+  </td>
+  <td><span class="cross">✗</span></td>
+  <td><span class="badge badge-ent">Pay-per-hour</span></td>
+</tr>
+
+<!-- 20. Check Point Remote Access VPN -->
+<tr data-tags="enterprise remote">
+  <td>
+    <span class="vpn-name">20 Check Point VPN</span>
+    <span class="vpn-version">R82 / 2025</span>
+    <span class="vpn-type">IPsec + SSL</span><br>
+    <span class="tag tag-proto">IKEv2</span>
+    <span class="tag tag-alert">Propietario</span>
+  </td>
+  <td>
+    <ul class="cell-list">
+      <li>VPN integrada en Security Gateway de Check Point</li>
+      <li>Mobile Access blade para HTTPS + SSL VPN</li>
+      <li>Integración con SmartConsole e Identity Awareness</li>
+      <li>Endpoint Harmony para postura de dispositivo</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cell-list">
+      <li>Sin hardware Check Point, no funciona</li>
+      <li>Sin versión OSS o gratuita</li>
+      <li>Muy caro en implementaciones grandes</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cell-list pro">
+      <li>Integración profunda con NGFW Check Point</li>
+      <li>Threat Prevention inline en tráfico VPN</li>
+      <li>Gestión unificada SmartConsole</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cell-list con">
+      <li>Ecosistema cerrado</li>
+      <li>Licencias complejas y costosas</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cell-list use">
+      <li>Empresas ya con gateways Check Point</li>
+      <li>Sectores financiero y gobierno</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cell-list nouse">
+      <li>Ambientes multi-vendor</li>
+      <li>Startups o mediana empresa</li>
+    </ul>
+  </td>
+  <td><span class="cross">✗</span></td>
+  <td><span class="badge badge-ent">Enterprise</span></td>
+</tr>
+
+<!-- 21. Algo VPN -->
+<tr data-tags="oss remote cloud">
+  <td>
+    <span class="vpn-name">21 Algo VPN</span>
+    <span class="vpn-version">2024 (Ansible)</span>
+    <span class="vpn-type">WireGuard + IPsec</span><br>
+    <span class="tag tag-proto">WireGuard</span>
+    <span class="tag tag-new">Self-deploy</span>
+  </td>
+  <td>
+    <ul class="cell-list">
+      <li>Scripts Ansible para desplegar VPN WireGuard/IPsec en cloud</li>
+      <li>Deploy en DigitalOcean, AWS, Azure, GCP, Hetzner</li>
+      <li>Orientado a privacidad personal</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cell-list">
+      <li>Sin UI de gestión</li>
+      <li>Sin gestión multi-usuario enterprise</li>
+      <li>No escala a cientos de usuarios</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cell-list pro">
+      <li>Deploy en minutos con Ansible</li>
+      <li>Privacidad total: tu propio servidor</li>
+      <li>Configuraciones de seguridad modernas por defecto</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cell-list con">
+      <li>Solo para técnicos con conocimiento de Ansible</li>
+      <li>Mantenimiento manual del servidor</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cell-list use">
+      <li>Desarrolladores/sysadmins que quieren VPN privada</li>
+      <li>Bypass de censura con servidor propio</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cell-list nouse">
+      <li>Empresas o equipos de más de 10 personas</li>
+      <li>Usuarios sin conocimientos DevOps</li>
+    </ul>
+  </td>
+  <td><span class="badge badge-free">OSS (AGPL)</span></td>
+  <td><span class="cross">✗</span></td>
+</tr>
+
+<!-- 22. Outline VPN (Jigsaw/Google) -->
+<tr data-tags="oss remote">
+  <td>
+    <span class="vpn-name">22 Outline VPN</span>
+    <span class="vpn-version">1.12 / 2024</span>
+    <span class="vpn-type">Shadowsocks proxy</span><br>
+    <span class="tag tag-proto">Shadowsocks</span>
+    <span class="tag tag-new">Anti-censura</span>
+  </td>
+  <td>
+    <ul class="cell-list">
+      <li>VPN/proxy basado en Shadowsocks para evadir censura</li>
+      <li>Desarrollado por Jigsaw (Google)</li>
+      <li>Manager con UI sencilla para crear servidores</li>
+      <li>Clientes para todos los OS</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cell-list">
+      <li>No es VPN empresarial (sin ACLs, sin PKI)</li>
+      <li>No cifra todo el tráfico del sistema por defecto</li>
+      <li>Sin gestión centralizada multi-usuario avanzada</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cell-list pro">
+      <li>Excelente para evadir DPI y censura (China, Irán)</li>
+      <li>Setup ultra simple (no técnico)</li>
+      <li>Gratuito y open source</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cell-list con">
+      <li>No apto para uso corporativo de seguridad</li>
+      <li>Protocolo Shadowsocks no es VPN estándar</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cell-list use">
+      <li>Periodistas y activistas en regímenes censores</li>
+      <li>Acceso a Internet libre en países restrictivos</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cell-list nouse">
+      <li>Uso corporativo de acceso remoto</li>
+      <li>Cumplimiento normativo</li>
+    </ul>
+  </td>
+  <td><span class="badge badge-free">OSS (Apache)</span></td>
+  <td><span class="cross">✗</span></td>
+</tr>
+
+<!-- 23. Xray / V2Ray -->
+<tr data-tags="oss remote">
+  <td>
+    <span class="vpn-name">23 Xray / V2Ray</span>
+    <span class="vpn-version">Xray 1.8.x / 2025</span>
+    <span class="vpn-type">Proxy / VLESS / XTLS</span><br>
+    <span class="tag tag-proto">VLESS</span>
+    <span class="tag tag-proto">XTLS-Reality</span>
+  </td>
+  <td>
+    <ul class="cell-list">
+      <li>Framework de proxy con protocolos VLESS, VMess, XTLS</li>
+      <li>XTLS-Reality: camufla tráfico como HTTPS legítimo</li>
+      <li>Evasión avanzada de DPI en China (GFW)</li>
+      <li>Xray es el fork más activo de V2Ray</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cell-list">
+      <li>No es VPN empresarial estándar</li>
+      <li>Sin gestión centralizada de usuarios</li>
+      <li>Configuración JSON compleja</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cell-list pro">
+      <li>Máxima capacidad de evasión de censura conocida</li>
+      <li>XTLS-Reality: el estado del arte anti-GFW 2025-2026</li>
+      <li>Gratuito y OSS</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cell-list con">
+      <li>Configuración avanzada para no técnicos</li>
+      <li>No estandarizado (protocolos propios)</li>
+      <li>Uso primario: evasión de censura, no seguridad</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cell-list use">
+      <li>Bypass de GFW en China</li>
+      <li>Evasión de censura en regímenes restrictivos</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cell-list nouse">
+      <li>VPN corporativa</li>
+      <li>Cumplimiento PCI/HIPAA</li>
+    </ul>
+  </td>
+  <td><span class="badge badge-free">OSS (MPL)</span></td>
+  <td><span class="cross">✗</span></td>
+</tr>
+
+<!-- 24. Banyan Security / Appgate SDP -->
+<tr data-tags="enterprise cloud">
+  <td>
+    <span class="vpn-name">24 Appgate SDP</span>
+    <span class="vpn-version">6.3 / 2025</span>
+    <span class="vpn-type">SDP / ZTNA</span><br>
+    <span class="tag tag-os">Zero Trust</span>
+    <span class="tag tag-alert">Enterprise</span>
+  </td>
+  <td>
+    <ul class="cell-list">
+      <li>Software Defined Perimeter (SDP) para ZTNA</li>
+      <li>Micro-segmentación dinámica basada en identidad</li>
+      <li>Integración con SIEM, PAM, IdP</li>
+      <li>Muy usado en OT/ICS y defensa</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cell-list">
+      <li>Sin versión gratuita ni OSS</li>
+      <li>Despliegue complejo</li>
+      <li>Menos conocido que Zscaler/Cloudflare</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cell-list pro">
+      <li>Líder en sectores OT/ICS y gobierno</li>
+      <li>SDP estricto: no VPN sino acceso por identidad</li>
+      <li>Integración profunda con PAM</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cell-list con">
+      <li>Precio elevado</li>
+      <li>Requiere transformación arquitectural</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cell-list use">
+      <li>Infraestructura crítica (energía, agua, defensa)</li>
+      <li>Acceso privilegiado a OT/ICS</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cell-list nouse">
+      <li>PYMES</li>
+      <li>Cuando Cloudflare ZT cubre el caso</li>
+    </ul>
+  </td>
+  <td><span class="cross">✗</span></td>
+  <td><span class="badge badge-ent">Enterprise</span></td>
+</tr>
+
+<!-- 25. Netmaker -->
+<tr data-tags="oss mesh cloud">
+  <td>
+    <span class="vpn-name">25 Netmaker</span>
+    <span class="vpn-version">0.24 / 2025</span>
+    <span class="vpn-type">WireGuard Mesh</span><br>
+    <span class="tag tag-proto">WireGuard</span>
+    <span class="tag tag-new">Full-mesh</span>
+  </td>
+  <td>
+    <ul class="cell-list">
+      <li>Automatiza redes full-mesh WireGuard a escala</li>
+      <li>Control plane con API REST, UI web y CLI</li>
+      <li>Soporta Kubernetes, Docker, VMs, bare metal</li>
+      <li>Ingress/Egress gateways para acceso externo</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cell-list">
+      <li>Sin soporte nativo para dispositivos no-WireGuard</li>
+      <li>Complejidad operacional en deployments muy grandes</li>
+      <li>Community edition con funciones limitadas</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cell-list pro">
+      <li>Mejor solución OSS para mesh WireGuard a escala</li>
+      <li>API-first, fácil integración GitOps/IaC</li>
+      <li>Self-hosteable con servidor propio</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cell-list con">
+      <li>Funciones enterprise en plan de pago</li>
+      <li>Proyecto en crecimiento (menor madurity)</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cell-list use">
+      <li>Redes Kubernetes multi-cluster</li>
+      <li>Infraestructura DevOps distribuida</li>
+      <li>Multi-cloud mesh networking</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cell-list nouse">
+      <li>Cuando Tailscale/Headscale es suficiente</li>
+      <li>Usuarios no técnicos</li>
+    </ul>
+  </td>
+  <td><span class="badge badge-both">CE gratuito</span></td>
+  <td><span class="badge badge-ent">Pro plan</span></td>
+</tr>
+
+</tbody>
+</table>
+</div>
+
+<footer>
+  Tabla comparativa VPN — Estado del Arte <strong>Q2 2026</strong> · 25 soluciones · Generado con análisis técnico actualizado
+  <br style="margin-top:6px">
+  <span style="color: var(--text-dim)">Los precios y características pueden cambiar. Verificar con cada vendor para información actualizada.</span>
+</footer>
+
+<script>
+  function filterTable(tag, btn) {
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    const rows = document.querySelectorAll('#vpnTable tbody tr');
+    let count = 0;
+    rows.forEach(row => {
+      if (tag === 'all') {
+        row.classList.remove('hidden');
+        count++;
+      } else {
+        const tags = row.getAttribute('data-tags') || '';
+        if (tags.includes(tag)) {
+          row.classList.remove('hidden');
+          count++;
+        } else {
+          row.classList.add('hidden');
+        }
+      }
+    });
+    document.getElementById('row-count').textContent = count + ' entradas';
+  }
+
+  function searchTable(val) {
+    const q = val.toLowerCase().trim();
+    const rows = document.querySelectorAll('#vpnTable tbody tr');
+    let count = 0;
+    rows.forEach(row => {
+      const text = row.textContent.toLowerCase();
+      if (!q || text.includes(q)) {
+        row.classList.remove('hidden');
+        count++;
+      } else {
+        row.classList.add('hidden');
+      }
+    });
+    document.getElementById('row-count').textContent = count + ' entradas';
+  }
+</script>
+</body>
+</html>

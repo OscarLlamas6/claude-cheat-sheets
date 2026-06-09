@@ -1,0 +1,1917 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cache & In-Memory DB — Comparativa 2026</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap');
+
+  :root {
+    --bg:        #0c0a07;
+    --surface:   #111009;
+    --panel:     #181510;
+    --border:    #2a2318;
+    --border-hi: #3d3422;
+    --ink:       #f0e8d8;
+    --ink-mid:   #a89880;
+    --ink-dim:   #5a4e3a;
+    --fire:      #ff6b00;
+    --fire-lt:   rgba(255,107,0,0.12);
+    --amber:     #ffb300;
+    --amber-lt:  rgba(255,179,0,0.10);
+    --teal:      #00d4b4;
+    --teal-lt:   rgba(0,212,180,0.10);
+    --red:       #ff3d5a;
+    --red-lt:    rgba(255,61,90,0.10);
+    --green:     #4dff91;
+    --green-lt:  rgba(77,255,145,0.08);
+    --purple:    #b06cff;
+    --purple-lt: rgba(176,108,255,0.10);
+    --mono:      'Space Mono', monospace;
+    --sans:      'Space Grotesk', sans-serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--sans);
+    font-size: 13px;
+    line-height: 1.5;
+  }
+
+  /* ── HEADER ── */
+  header {
+    background: var(--bg);
+    border-bottom: 1px solid var(--border-hi);
+    padding: 44px 48px 36px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* Heatmap signature element */
+  .heatmap {
+    position: absolute;
+    top: 0; right: 0;
+    display: grid;
+    grid-template-columns: repeat(20, 18px);
+    grid-template-rows: repeat(10, 18px);
+    gap: 2px;
+    padding: 20px;
+    opacity: 0.18;
+    pointer-events: none;
+  }
+  .heatmap-cell {
+    border-radius: 2px;
+    animation: pulse 3s ease-in-out infinite;
+  }
+  .heatmap-cell:nth-child(3n)   { animation-delay: 0.3s; }
+  .heatmap-cell:nth-child(5n)   { animation-delay: 0.7s; }
+  .heatmap-cell:nth-child(7n)   { animation-delay: 1.1s; }
+  .heatmap-cell:nth-child(11n)  { animation-delay: 1.6s; }
+  @keyframes pulse {
+    0%, 100% { opacity: 0.4; }
+    50%       { opacity: 1; }
+  }
+
+  .h-tag {
+    font-family: var(--mono);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    color: var(--fire);
+    text-transform: uppercase;
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .h-tag::before {
+    content: '';
+    display: inline-block;
+    width: 28px; height: 2px;
+    background: var(--fire);
+  }
+
+  h1 {
+    font-family: var(--mono);
+    font-size: clamp(26px, 4vw, 46px);
+    font-weight: 700;
+    color: var(--ink);
+    letter-spacing: -0.03em;
+    line-height: 1.0;
+    margin-bottom: 16px;
+  }
+  h1 em {
+    font-style: normal;
+    color: var(--fire);
+  }
+  h1 small {
+    display: block;
+    font-size: 0.45em;
+    color: var(--ink-dim);
+    letter-spacing: 0.05em;
+    margin-top: 6px;
+    font-weight: 400;
+  }
+
+  .h-sub {
+    font-size: 13.5px;
+    color: var(--ink-mid);
+    max-width: 600px;
+    line-height: 1.65;
+    margin-bottom: 22px;
+  }
+
+  .h-chips {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .chip {
+    font-family: var(--mono);
+    font-size: 10px;
+    padding: 4px 12px;
+    border: 1px solid var(--border-hi);
+    color: var(--ink-dim);
+    border-radius: 2px;
+  }
+  .chip b { color: var(--amber); }
+
+  /* ── LEGEND ── */
+  .legend {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 13px 48px;
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .ll { font-family: var(--mono); font-size: 9px; font-weight: 700; color: var(--ink-dim); text-transform: uppercase; letter-spacing: 0.1em; margin-right: 4px; }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    font-family: var(--mono);
+    font-size: 9px;
+    font-weight: 700;
+    padding: 2px 9px;
+    border-radius: 2px;
+    white-space: nowrap;
+    letter-spacing: 0.04em;
+  }
+  .b-oss     { background: var(--green-lt);   color: var(--green);  border: 1px solid rgba(77,255,145,0.25); }
+  .b-ent     { background: var(--fire-lt);     color: var(--fire);   border: 1px solid rgba(255,107,0,0.3); }
+  .b-both    { background: var(--amber-lt);    color: var(--amber);  border: 1px solid rgba(255,179,0,0.3); }
+  .b-cloud   { background: var(--purple-lt);   color: var(--purple); border: 1px solid rgba(176,108,255,0.3); }
+  .b-embed   { background: var(--teal-lt);     color: var(--teal);   border: 1px solid rgba(0,212,180,0.3); }
+  .b-legacy  { background: rgba(90,78,58,0.2); color: var(--ink-dim);border: 1px solid var(--border-hi); }
+
+  /* ── CONTROLS ── */
+  .controls {
+    background: var(--panel);
+    border-bottom: 1px solid var(--border-hi);
+    padding: 12px 48px;
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .cl { font-family: var(--mono); font-size: 9px; color: var(--ink-dim); text-transform: uppercase; letter-spacing: 0.1em; margin-right: 2px; }
+  .fbtn {
+    font-family: var(--mono);
+    font-size: 10px;
+    font-weight: 700;
+    padding: 5px 13px;
+    border: 1px solid var(--border-hi);
+    background: transparent;
+    color: var(--ink-dim);
+    cursor: pointer;
+    border-radius: 2px;
+    letter-spacing: 0.05em;
+    transition: all 0.12s;
+  }
+  .fbtn:hover { border-color: var(--fire); color: var(--fire); }
+  .fbtn.active { background: var(--fire); border-color: var(--fire); color: #000; }
+
+  .sep2 { width: 1px; height: 18px; background: var(--border); flex-shrink: 0; }
+  #cnt { font-family: var(--mono); font-size: 10px; color: var(--ink-dim); margin-left: 4px; }
+  .srch {
+    margin-left: auto;
+    font-family: var(--mono);
+    font-size: 11px;
+    background: var(--surface);
+    border: 1px solid var(--border-hi);
+    color: var(--ink);
+    padding: 5px 12px;
+    border-radius: 2px;
+    width: 220px;
+    outline: none;
+  }
+  .srch:focus { border-color: var(--fire); }
+  .srch::placeholder { color: var(--ink-dim); }
+
+  /* ── TABLE ── */
+  .tw { padding: 18px 48px 60px; overflow-x: auto; }
+  .snote { font-family: var(--mono); font-size: 9px; color: var(--ink-dim); text-align: right; margin-bottom: 8px; }
+
+  table { border-collapse: collapse; width: 100%; min-width: 1550px; }
+
+  thead th {
+    font-family: var(--mono);
+    font-size: 9px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--ink-dim);
+    background: var(--panel);
+    border: 1px solid var(--border);
+    padding: 10px 14px;
+    text-align: left;
+    white-space: nowrap;
+    position: sticky;
+    top: 0; z-index: 1;
+  }
+  thead th:first-child { color: var(--fire); min-width: 168px; position: sticky; left: 0; z-index: 3; background: var(--panel); }
+  thead th:nth-child(2)  { min-width: 240px; }
+  thead th:nth-child(3)  { min-width: 210px; }
+  thead th:nth-child(4)  { min-width: 210px; }
+  thead th:nth-child(5)  { min-width: 200px; }
+  thead th:nth-child(6)  { min-width: 225px; }
+  thead th:nth-child(7)  { min-width: 215px; }
+  thead th:nth-child(8)  { min-width: 115px; }
+  thead th:nth-child(9)  { min-width: 115px; }
+
+  tbody tr { transition: background 0.1s; }
+  tbody tr:hover td { background: rgba(255,107,0,0.04) !important; }
+  tbody tr.hidden { display: none; }
+  tbody tr:nth-child(even) td { background: rgba(255,255,255,0.016); }
+  tbody tr:nth-child(odd)  td { background: transparent; }
+
+  td {
+    border: 1px solid var(--border);
+    padding: 11px 14px;
+    vertical-align: top;
+    font-size: 12px;
+    line-height: 1.55;
+    color: var(--ink-mid);
+  }
+  td:first-child {
+    position: sticky; left: 0; z-index: 1;
+    background: var(--bg);
+    border-right: 2px solid var(--border-hi);
+  }
+  tbody tr:nth-child(even) td:first-child { background: #0e0b08; }
+
+  .sn { font-family: var(--mono); font-size: 13px; font-weight: 700; color: var(--ink); display: block; margin-bottom: 3px; }
+  .sv { font-family: var(--mono); font-size: 9px; color: var(--ink-dim); display: block; margin-bottom: 5px; }
+  .stags { display: flex; flex-wrap: wrap; gap: 3px; margin-top: 4px; }
+
+  .tag {
+    display: inline-block;
+    font-family: var(--mono);
+    font-size: 9px;
+    font-weight: 700;
+    padding: 1px 6px;
+    border-radius: 2px;
+    letter-spacing: 0.03em;
+  }
+  .t-lang  { background: rgba(255,179,0,0.1);     color: var(--amber);  border: 1px solid rgba(255,179,0,0.25); }
+  .t-prot  { background: rgba(0,212,180,0.08);    color: var(--teal);   border: 1px solid rgba(0,212,180,0.2); }
+  .t-hot   { background: rgba(255,107,0,0.1);     color: var(--fire);   border: 1px solid rgba(255,107,0,0.25); }
+  .t-embed { background: rgba(176,108,255,0.1);   color: var(--purple); border: 1px solid rgba(176,108,255,0.25); }
+  .t-warn  { background: rgba(255,61,90,0.08);    color: var(--red);    border: 1px solid rgba(255,61,90,0.2); }
+  .t-new   { background: rgba(77,255,145,0.08);   color: var(--green);  border: 1px solid rgba(77,255,145,0.2); }
+
+  ul.cl { list-style: none; padding: 0; }
+  ul.cl li { padding: 2px 0 2px 16px; font-size: 12px; position: relative; color: var(--ink-mid); }
+  ul.cl li::before { position: absolute; left: 0; font-family: var(--mono); font-weight: 700; font-size: 11px; }
+  ul.cl.what  li::before { content: '·';  color: var(--border-hi); }
+  ul.cl.pro   li::before { content: '+';  color: var(--green); }
+  ul.cl.con   li::before { content: '−';  color: var(--red); }
+  ul.cl.use   li::before { content: '▸';  color: var(--fire); }
+  ul.cl.nouse li::before { content: '✗';  color: var(--red); }
+
+  .chk { color: var(--green); font-family: var(--mono); font-weight: 700; }
+  .crs { color: var(--red);   font-family: var(--mono); font-weight: 700; }
+
+  /* ── PERF INDICATOR ── */
+  .perf {
+    display: inline-flex;
+    gap: 2px;
+    margin-top: 5px;
+    align-items: center;
+  }
+  .perf-bar {
+    width: 8px; height: 12px;
+    border-radius: 1px;
+    background: var(--border);
+  }
+  .perf-bar.on-fire  { background: var(--fire); }
+  .perf-bar.on-amber { background: var(--amber); }
+  .perf-bar.on-green { background: var(--green); }
+  .perf-lbl { font-family: var(--mono); font-size: 9px; color: var(--ink-dim); margin-left: 5px; }
+
+  /* ── FOOTER ── */
+  footer {
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    text-align: center;
+    padding: 28px 48px;
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--ink-dim);
+    line-height: 1.9;
+  }
+  footer b { color: var(--amber); }
+</style>
+</head>
+<body>
+
+<header>
+  <!-- Signature: heatmap -->
+  <div class="heatmap" id="hm"></div>
+
+  <div class="h-tag">PERFORMANCE · MEMORY · LATENCY</div>
+  <h1>Cache &amp; In-Memory<br><em>Databases</em>
+    <small>ESTADO DEL ARTE · Q2 2026 · 25 IMPLEMENTACIONES</small>
+  </h1>
+  <p class="h-sub">Análisis comparativo de soluciones de caché y bases de datos en memoria: desde librerías embebidas por proceso hasta clústeres distribuidos y soluciones cloud-managed. Cobertura de eviction policies, persistencia, protocolo, lenguaje y casos de uso reales.</p>
+  <div class="h-chips">
+    <span class="chip"><b>25</b> soluciones</span>
+    <span class="chip"><b>8</b> dimensiones de análisis</span>
+    <span class="chip">Policies: <b>LRU · LFU · TinyLFU · S3-FIFO · CLOCK-Pro · ARC</b></span>
+    <span class="chip">Actualizado <b>Q2 2026</b></span>
+  </div>
+</header>
+
+<div class="legend">
+  <span class="ll">Tipo:</span>
+  <span class="badge b-oss">OSS / Gratuito</span>
+  <span class="badge b-ent">Enterprise</span>
+  <span class="badge b-both">OSS + Enterprise</span>
+  <span class="badge b-cloud">Cloud Managed</span>
+  <span class="badge b-embed">Embebido</span>
+  <span class="badge b-legacy">Legacy / Mantenimiento</span>
+</div>
+
+<div class="controls">
+  <span class="cl">Filtrar:</span>
+  <button class="fbtn active" onclick="flt('all',this)">Todos (25)</button>
+  <button class="fbtn" onclick="flt('distributed',this)">Distribuido</button>
+  <button class="fbtn" onclick="flt('embedded',this)">Embebido</button>
+  <button class="fbtn" onclick="flt('golang',this)">Go</button>
+  <button class="fbtn" onclick="flt('rust',this)">Rust</button>
+  <button class="fbtn" onclick="flt('java',this)">Java / JVM</button>
+  <button class="fbtn" onclick="flt('persistent',this)">Con persistencia</button>
+  <button class="fbtn" onclick="flt('cloud',this)">Cloud managed</button>
+  <div class="sep2"></div>
+  <span id="cnt">25 entradas</span>
+  <input class="srch" type="text" placeholder="Buscar solución, lenguaje, política..." oninput="srch(this.value)">
+</div>
+
+<div class="tw">
+  <div class="snote">← scroll horizontal →</div>
+  <table id="T">
+  <thead>
+    <tr>
+      <th>#  Solución</th>
+      <th>¿Qué hace?</th>
+      <th>¿Qué NO hace?</th>
+      <th>Ventajas</th>
+      <th>Desventajas</th>
+      <th>Casos de uso RECOMENDADOS</th>
+      <th>Casos de uso NO recomendados</th>
+      <th>Gratuito / OSS</th>
+      <th>Enterprise</th>
+    </tr>
+  </thead>
+  <tbody>
+
+<!-- 1. Redis -->
+<tr data-tags="distributed persistent golang java rust">
+  <td>
+    <span class="sn">01 Redis</span>
+    <span class="sv">8.x / 2025 — BSD + RSAL</span>
+    <div class="stags">
+      <span class="tag t-prot">TCP / RESP3</span>
+      <span class="tag t-hot">El estándar</span>
+      <span class="tag t-lang">C</span>
+    </div>
+    <div class="perf"><div class="perf-bar on-fire"></div><div class="perf-bar on-fire"></div><div class="perf-bar on-fire"></div><div class="perf-bar on-fire"></div><div class="perf-bar on-fire"></div><span class="perf-lbl">~1M ops/s</span></div>
+  </td>
+  <td>
+    <ul class="cl what">
+      <li>Estructura de datos in-memory: strings, hashes, lists, sets, sorted sets, streams, bitmaps, HyperLogLog</li>
+      <li>Persistencia: RDB snapshots + AOF (append-only file)</li>
+      <li>Pub/Sub, Lua scripting, transactions (MULTI/EXEC)</li>
+      <li>Redis Cluster: sharding automático horizontal</li>
+      <li>Redis Sentinel: HA con failover automático</li>
+      <li>Modules: RedisSearch, RedisJSON, RedisTimeSeries, RedisBloom</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl what">
+      <li>No es base de datos relacional ni soporta JOINs</li>
+      <li>Operaciones multi-key en cluster con limitaciones</li>
+      <li>Sin soporte nativo de tipos geoespaciales complejos</li>
+      <li>Licencia RSAL desde 7.4 (no OSS puro)</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl pro">
+      <li>El caché distribuido más adoptado del planeta</li>
+      <li>Latencia sub-milisegundo consistente</li>
+      <li>Ecosistema de clientes en todos los lenguajes</li>
+      <li>Versatilidad: caché, cola, pub/sub, leaderboards, rate limiting</li>
+      <li>Redis 8: vector search nativo para AI workloads</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl con">
+      <li>Licencia RSAL desde v7.4 (cambio controvertido)</li>
+      <li>Single-threaded por comando (I/O multihilo, pero ejecución mono)</li>
+      <li>Memoria es el límite: datasets mayores que RAM = problema</li>
+      <li>Cluster: operaciones cross-slot son costosas</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl use">
+      <li>Caché de sesión, rate limiting, leaderboards</li>
+      <li>Pub/Sub para notificaciones en tiempo real</li>
+      <li>Colas de trabajo (RPUSH/BLPOP o Redis Streams)</li>
+      <li>Vector store para RAG / embeddings (Redis 8)</li>
+      <li>Caché distribuido en microservicios</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl nouse">
+      <li>Datos que excedan significativamente la RAM disponible</li>
+      <li>Queries analíticas complejas o joins</li>
+      <li>Cuando la licencia RSAL es un bloqueador legal</li>
+    </ul>
+  </td>
+  <td><span class="badge b-legacy">RSAL (no OSS puro)</span></td>
+  <td><span class="badge b-ent">Redis Cloud / Enterprise</span></td>
+</tr>
+
+<!-- 2. Valkey -->
+<tr data-tags="distributed persistent golang java rust">
+  <td>
+    <span class="sn">02 Valkey</span>
+    <span class="sv">8.1.x / 2025 — Linux Foundation</span>
+    <div class="stags">
+      <span class="tag t-prot">RESP3</span>
+      <span class="tag t-new">Fork OSS de Redis</span>
+      <span class="tag t-lang">C</span>
+    </div>
+    <div class="perf"><div class="perf-bar on-fire"></div><div class="perf-bar on-fire"></div><div class="perf-bar on-fire"></div><div class="perf-bar on-fire"></div><div class="perf-bar on-fire"></div><span class="perf-lbl">~1M+ ops/s</span></div>
+  </td>
+  <td>
+    <ul class="cl what">
+      <li>Fork OSS de Redis 7.2 bajo Linux Foundation (BSD license)</li>
+      <li>Compatible al 100% con clientes Redis (mismo protocolo RESP3)</li>
+      <li>Multithreading mejorado respecto a Redis 7 (I/O + ejecución)</li>
+      <li>Mismas estructuras: strings, hashes, sets, streams, etc.</li>
+      <li>Cluster, Sentinel, persistencia RDB + AOF</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl what">
+      <li>Ecosistema de módulos aún menor que Redis (RedisSearch, etc.)</li>
+      <li>Sin soporte vector nativo comparable a Redis 8 aún</li>
+      <li>Menor adopción empresarial aún en maduración (2026)</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl pro">
+      <li>100% OSS (BSD): sin restricciones de licencia RSAL</li>
+      <li>Respaldado por AWS, Google, Oracle, Ericsson, Alibaba</li>
+      <li>Multithreading mejorado: mejor throughput en multi-core</li>
+      <li>Drop-in replacement de Redis sin cambiar clientes</li>
+      <li>Innovación más rápida al ser community-driven</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl con">
+      <li>Proyecto joven (2024): menor historial en producción</li>
+      <li>Módulos enterprise (Search, JSON) menos maduros</li>
+      <li>Documentación aún creciendo</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl use">
+      <li>Reemplazo directo de Redis donde la licencia RSAL es problema</li>
+      <li>Entornos AWS (ElastiCache Valkey), GCP, Azure</li>
+      <li>Nuevos proyectos que quieren OSS sin compromisos futuros</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl nouse">
+      <li>Cuando se necesitan módulos Redis enterprise maduros hoy</li>
+      <li>Equipos que prefieren soporte comercial Redis Labs</li>
+    </ul>
+  </td>
+  <td><span class="badge b-oss">OSS (BSD-3)</span></td>
+  <td><span class="badge b-cloud">AWS / GCP / Azure</span></td>
+</tr>
+
+<!-- 3. Memcached -->
+<tr data-tags="distributed">
+  <td>
+    <span class="sn">03 Memcached</span>
+    <span class="sv">1.6.x / 2024</span>
+    <div class="stags">
+      <span class="tag t-prot">ASCII / Binary</span>
+      <span class="tag t-warn">Sin persistencia</span>
+      <span class="tag t-lang">C</span>
+    </div>
+    <div class="perf"><div class="perf-bar on-fire"></div><div class="perf-bar on-fire"></div><div class="perf-bar on-fire"></div><div class="perf-bar on-fire"></div><div class="perf-bar"></div><span class="perf-lbl">~800K ops/s</span></div>
+  </td>
+  <td>
+    <ul class="cl what">
+      <li>Caché key-value en memoria ultra-simple y multi-threaded</li>
+      <li>LRU eviction, TTL por entrada</li>
+      <li>Solo strings/bytes: sin estructuras de datos complejas</li>
+      <li>Diseño sin estado: escala horizontalmente añadiendo nodos</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl what">
+      <li>Sin persistencia de ningún tipo</li>
+      <li>Sin replicación ni clustering nativo</li>
+      <li>Sin pub/sub, streams, sorted sets</li>
+      <li>Sin autenticación robusta (solo SASL básico)</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl pro">
+      <li>Multi-threaded nativo: escala muy bien en multi-core</li>
+      <li>Protocolo simple = overhead mínimo</li>
+      <li>Décadas de madurez y robustez probada</li>
+      <li>Uso de memoria muy eficiente para cache puro</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl con">
+      <li>Sin persistencia: datos perdidos en restart</li>
+      <li>Solo caching: no sirve para otras estructuras de datos</li>
+      <li>Innovación estancada frente a Redis/Valkey</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl use">
+      <li>Caché de objetos para aplicaciones web de alta escala</li>
+      <li>Cuando se necesita cache puro sin overhead de Redis</li>
+      <li>Sistemas legacy con Memcached ya integrado</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl nouse">
+      <li>Cualquier caso que requiera persistencia</li>
+      <li>Pub/sub, colas, leaderboards</li>
+      <li>Proyectos nuevos (usar Valkey/Redis)</li>
+    </ul>
+  </td>
+  <td><span class="badge b-oss">OSS (BSD)</span></td>
+  <td><span class="badge b-cloud">AWS ElastiCache</span></td>
+</tr>
+
+<!-- 4. Dragonfly -->
+<tr data-tags="distributed persistent">
+  <td>
+    <span class="sn">04 Dragonfly</span>
+    <span class="sv">1.x / 2025</span>
+    <div class="stags">
+      <span class="tag t-prot">RESP / Redis compat.</span>
+      <span class="tag t-hot">25x vs Redis</span>
+      <span class="tag t-lang">C++</span>
+    </div>
+    <div class="perf"><div class="perf-bar on-fire"></div><div class="perf-bar on-fire"></div><div class="perf-bar on-fire"></div><div class="perf-bar on-fire"></div><div class="perf-bar on-fire"></div><span class="perf-lbl">~4M+ ops/s</span></div>
+  </td>
+  <td>
+    <ul class="cl what">
+      <li>Reemplazo drop-in de Redis/Memcached totalmente multi-threaded</li>
+      <li>Arquitectura shared-nothing: sin contención de locks entre cores</li>
+      <li>Compatible con comandos Redis y Memcached</li>
+      <li>Persistencia snapshot + AOF</li>
+      <li>Hasta 25x más throughput que Redis en benchmarks multi-core</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl what">
+      <li>Licencia BSL (Business Source License): restricciones de uso productivo con competidores</li>
+      <li>Módulos Redis (Search, JSON avanzado) no soportados</li>
+      <li>Clustering menos maduro que Redis Cluster</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl pro">
+      <li>Throughput excepcional en hardware multi-core moderno</li>
+      <li>Un solo proceso vs shards Redis: operaciones simplificadas</li>
+      <li>Misma API que Redis: migración transparente</li>
+      <li>Eficiencia de memoria superior (Dashtable vs Redis hashtable)</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl con">
+      <li>BSL: no puede usarse como servicio cloud competidor</li>
+      <li>Ecosistema y módulos mucho menores que Redis</li>
+      <li>Menos historial en producción a escala extrema</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl use">
+      <li>Reemplazo de Redis donde el throughput es el cuello de botella</li>
+      <li>Aplicaciones que usan mucho CPU en Redis single-threaded</li>
+      <li>Reducir número de nodos Redis con un solo Dragonfly</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl nouse">
+      <li>Cuando se necesitan módulos Redis maduros</li>
+      <li>Si la licencia BSL es un problema legal</li>
+      <li>Entornos con clustering Redis ya optimizado</li>
+    </ul>
+  </td>
+  <td><span class="badge b-legacy">BSL (no OSS puro)</span></td>
+  <td><span class="badge b-ent">Dragonfly Cloud</span></td>
+</tr>
+
+<!-- 5. KeyDB -->
+<tr data-tags="distributed persistent">
+  <td>
+    <span class="sn">05 KeyDB</span>
+    <span class="sv">6.3.x / 2024 — Snap Inc.</span>
+    <div class="stags">
+      <span class="tag t-prot">RESP / Redis compat.</span>
+      <span class="tag t-warn">Snap owned</span>
+      <span class="tag t-lang">C++</span>
+    </div>
+    <div class="perf"><div class="perf-bar on-fire"></div><div class="perf-bar on-fire"></div><div class="perf-bar on-fire"></div><div class="perf-bar on-fire"></div><div class="perf-bar"></div><span class="perf-lbl">~2M ops/s</span></div>
+  </td>
+  <td>
+    <ul class="cl what">
+      <li>Fork multi-threaded de Redis mantenido por Snapchat</li>
+      <li>Active-Active replication: múltiples masters escribibles</li>
+      <li>Compatible al 100% con clientes y comandos Redis</li>
+      <li>FLASH: permite datos en SSD además de RAM</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl what">
+      <li>Desarrollo más lento desde adquisición por Snap</li>
+      <li>Comunidad más pequeña que Valkey</li>
+      <li>Sin módulos Redis enterprise</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl pro">
+      <li>Multi-threaded nativo: mejor que Redis single-threaded</li>
+      <li>Active-Active: múltiples nodos pueden escribir simultáneamente</li>
+      <li>FLASH: escala más allá de RAM con SSD</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl con">
+      <li>Roadmap incierto bajo Snap</li>
+      <li>Valkey y Dragonfly han superado el caso de uso en 2026</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl use">
+      <li>Casos con Active-Active replication requerida</li>
+      <li>Datasets que exceden RAM (FLASH mode)</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl nouse">
+      <li>Nuevos proyectos: preferir Valkey o Dragonfly</li>
+      <li>Cuando se necesita ecosistema activo</li>
+    </ul>
+  </td>
+  <td><span class="badge b-oss">OSS (BSD)</span></td>
+  <td><span class="badge b-ent">KeyDB Enterprise</span></td>
+</tr>
+
+<!-- 6. Apache Ignite -->
+<tr data-tags="distributed persistent java">
+  <td>
+    <span class="sn">06 Apache Ignite</span>
+    <span class="sv">2.16.x / 3.0-alpha — 2025</span>
+    <div class="stags">
+      <span class="tag t-prot">JDBC / SQL / REST</span>
+      <span class="tag t-lang">Java</span>
+      <span class="tag t-hot">In-Memory SQL</span>
+    </div>
+    <div class="perf"><div class="perf-bar on-fire"></div><div class="perf-bar on-fire"></div><div class="perf-bar on-fire"></div><div class="perf-bar on-fire"></div><div class="perf-bar"></div><span class="perf-lbl">Millones TPS</span></div>
+  </td>
+  <td>
+    <ul class="cl what">
+      <li>Plataforma de computación in-memory distribuida con SQL ANSI completo</li>
+      <li>Cache distribuido + base de datos in-memory + compute grid</li>
+      <li>Persistencia nativa (Ignite Persistence) con WAL</li>
+      <li>Transacciones ACID distribuidas</li>
+      <li>ML/AI integrado con Ignite ML</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl what">
+      <li>Complejidad operacional alta</li>
+      <li>JVM: overhead de memoria y GC pauses</li>
+      <li>Ignite 3 en reescritura, API no estable aún</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl pro">
+      <li>SQL completo sobre datos in-memory distribuidos</li>
+      <li>ACID distribuido: el más completo de la categoría OSS</li>
+      <li>Dualidad: cache distribuido + base de datos</li>
+      <li>Colocation de cómputo con datos</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl con">
+      <li>Curva de aprendizaje muy pronunciada</li>
+      <li>GC pauses en JVM pueden afectar latencia</li>
+      <li>Ignite 3 aún inestable en 2026</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl use">
+      <li>Procesamiento in-memory de datos financieros con SQL</li>
+      <li>Aceleración de bases de datos relacionales lentas</li>
+      <li>Computación distribuida con datos colocados</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl nouse">
+      <li>Casos simples de caché (usar Redis/Valkey)</li>
+      <li>Equipos sin experiencia en sistemas distribuidos Java</li>
+    </ul>
+  </td>
+  <td><span class="badge b-oss">OSS (Apache 2.0)</span></td>
+  <td><span class="badge b-ent">GridGain (comercial)</span></td>
+</tr>
+
+<!-- 7. Hazelcast -->
+<tr data-tags="distributed persistent java">
+  <td>
+    <span class="sn">07 Hazelcast</span>
+    <span class="sv">5.5.x / 2025</span>
+    <div class="stags">
+      <span class="tag t-prot">Java API / SQL</span>
+      <span class="tag t-lang">Java</span>
+      <span class="tag t-hot">Stream + Cache</span>
+    </div>
+    <div class="perf"><div class="perf-bar on-fire"></div><div class="perf-bar on-fire"></div><div class="perf-bar on-fire"></div><div class="perf-bar on-fire"></div><div class="perf-bar"></div><span class="perf-lbl">Alta escala</span></div>
+  </td>
+  <td>
+    <ul class="cl what">
+      <li>In-memory data grid + streaming platform distribuido</li>
+      <li>IMap (cache distribuido), IQueue, ISet, ITopic</li>
+      <li>SQL sobre datos en memoria, JET streaming engine</li>
+      <li>CP Subsystem: Raft-based linearizable ops</li>
+      <li>Persistencia con Hot Restart Store</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl what">
+      <li>Funciones avanzadas detrás de licencia enterprise</li>
+      <li>Overhead JVM</li>
+      <li>Más complejo de operar que Redis</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl pro">
+      <li>Streaming + caching en una sola plataforma</li>
+      <li>CP Subsystem: consistencia fuerte con Raft</li>
+      <li>Integración Java nativa sin serialización</li>
+      <li>Muy maduro en entornos bancarios y financieros</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl con">
+      <li>Modelo de licencias confuso (open vs enterprise)</li>
+      <li>JVM: GC pauses en datasets grandes</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl use">
+      <li>Aplicaciones Java que necesitan cache + streaming</li>
+      <li>Sistemas financieros con consistencia fuerte</li>
+      <li>Microservicios JVM con cache distribuido nativo</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl nouse">
+      <li>Stacks no-Java (preferir Redis/Valkey)</li>
+      <li>Cuando Apache Ignite cubre el SQL distribuido</li>
+    </ul>
+  </td>
+  <td><span class="badge b-both">CE gratuita</span></td>
+  <td><span class="badge b-ent">Enterprise / Cloud</span></td>
+</tr>
+
+<!-- 8. Badger -->
+<tr data-tags="embedded persistent golang">
+  <td>
+    <span class="sn">08 Badger</span>
+    <span class="sv">v4.x / 2025 — dgraph-io</span>
+    <div class="stags">
+      <span class="tag t-embed">Embebido Go</span>
+      <span class="tag t-lang">Go</span>
+      <span class="tag t-new">LSM + VLOG</span>
+    </div>
+    <div class="perf"><div class="perf-bar on-fire"></div><div class="perf-bar on-fire"></div><div class="perf-bar on-fire"></div><div class="perf-bar on-fire"></div><div class="perf-bar"></div><span class="perf-lbl">Muy rápido en SSD</span></div>
+  </td>
+  <td>
+    <ul class="cl what">
+      <li>Motor key-value embebido en Go inspirado en WiscKey</li>
+      <li>LSM tree para keys + value log separado (eficiencia SSD)</li>
+      <li>Transacciones ACID con MVCC</li>
+      <li>Iteradores, TTL, compresión (Zstandard)</li>
+      <li>Backups en streaming, cifrado en reposo</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl what">
+      <li>Sin protocolo de red: solo embebido en proceso Go</li>
+      <li>Sin replicación nativa</li>
+      <li>Compactación puede ser costosa en CPU</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl pro">
+      <li>Lectura de values sin ir al LSM tree: muy eficiente</li>
+      <li>MVCC: lecturas no bloquean escrituras</li>
+      <li>Ideal para datasets que no caben en RAM</li>
+      <li>Usado internamente por Dgraph</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl con">
+      <li>Solo Go: sin bindings para otros lenguajes</li>
+      <li>Compactación puede generar latencia spike</li>
+      <li>Sin soporte de server nativo</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl use">
+      <li>Base de datos local en aplicaciones Go que necesitan persistencia</li>
+      <li>Metadata store en sistemas distribuidos Go</li>
+      <li>Datasets grandes en SSD donde RocksDB sería alternativa</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl nouse">
+      <li>Aplicaciones multi-lenguaje</li>
+      <li>Cuando se necesita acceso remoto</li>
+      <li>Cargas write-heavy extremas (RocksDB puede ser mejor)</li>
+    </ul>
+  </td>
+  <td><span class="badge b-oss">OSS (Apache 2.0)</span></td>
+  <td><span class="crs">✗</span></td>
+</tr>
+
+<!-- 9. Ristretto -->
+<tr data-tags="embedded golang">
+  <td>
+    <span class="sn">09 Ristretto</span>
+    <span class="sv">v2.4.0 / Jan 2026 — dgraph-io</span>
+    <div class="stags">
+      <span class="tag t-embed">Embebido Go</span>
+      <span class="tag t-lang">Go</span>
+      <span class="tag t-hot">TinyLFU + SampledLFU</span>
+    </div>
+    <div class="perf"><div class="perf-bar on-fire"></div><div class="perf-bar on-fire"></div><div class="perf-bar on-fire"></div><div class="perf-bar on-fire"></div><div class="perf-bar on-fire"></div><span class="perf-lbl">Best-in-class hit ratio</span></div>
+  </td>
+  <td>
+    <ul class="cl what">
+      <li>Caché in-process Go con políticas de admisión y eviction de alto rendimiento</li>
+      <li>Admission: TinyLFU (12 bits/counter, mínimo overhead)</li>
+      <li>Eviction: SampledLFU (comparable a LRU exacto)</li>
+      <li>Cost-based eviction: cada entrada tiene un "costo" configurable</li>
+      <li>Totalmente concurrente, métricas integradas</li>
+      <li>Generics en v2 (Go 1.21+)</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl what">
+      <li>Sin persistencia: solo in-memory</li>
+      <li>Sin protocolo de red</li>
+      <li>Set no garantizado: items pueden descartarse por política</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl pro">
+      <li>Hit ratio superior a LRU clásico en workloads reales</li>
+      <li>Throughput excepcional con mínimo contención</li>
+      <li>Cost-based eviction: flexibilidad única</li>
+      <li>27K+ proyectos Go lo usan (GitHub + Badger + Dgraph)</li>
+      <li>v2 con generics: type-safe sin boxing</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl con">
+      <li>Sets pueden dropearse (diseño intencional, afecta casos de uso)</li>
+      <li>Solo proceso único</li>
+      <li>Sin TTL por entrada en versiones antiguas (mejorado en v2)</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl use">
+      <li>Caché in-process en servicios Go de alto tráfico</li>
+      <li>Caché L1 local frente a Redis/Valkey (L2)</li>
+      <li>Sistemas donde el hit ratio importa más que la latencia de eviction</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl nouse">
+      <li>Cuando se necesita garantía de que Set persiste</li>
+      <li>Aplicaciones multi-proceso o distribuidas</li>
+      <li>Lenguajes fuera de Go</li>
+    </ul>
+  </td>
+  <td><span class="badge b-oss">OSS (Apache 2.0)</span></td>
+  <td><span class="crs">✗</span></td>
+</tr>
+
+<!-- 10. BigCache -->
+<tr data-tags="embedded golang">
+  <td>
+    <span class="sn">10 BigCache</span>
+    <span class="sv">v3.1.0 / 2022 — allegro</span>
+    <div class="stags">
+      <span class="tag t-embed">Embebido Go</span>
+      <span class="tag t-lang">Go</span>
+      <span class="tag t-hot">GC-free design</span>
+    </div>
+    <div class="perf"><div class="perf-bar on-fire"></div><div class="perf-bar on-fire"></div><div class="perf-bar on-fire"></div><div class="perf-bar on-fire"></div><div class="perf-bar"></div><span class="perf-lbl">~86ns/op parallel</span></div>
+  </td>
+  <td>
+    <ul class="cl what">
+      <li>Caché in-process en Go optimizado para evadir el GC</li>
+      <li>Usa map[uint64]uint32 (sin punteros) → GC ignora el contenido</li>
+      <li>Byte slices como storage: crece a GB sin impacto en GC</li>
+      <li>Sharding interno (1024 shards por defecto)</li>
+      <li>TTL global (LifeWindow), limpieza periódica (CleanWindow)</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl what">
+      <li>Sin eviction por LRU/LFU avanzado: overwrite al llenarse</li>
+      <li>Sin TTL por entrada individual</li>
+      <li>Sin colisión handling: colisiones sobrescriben</li>
+      <li>Sin persistencia</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl pro">
+      <li>Pausa GC mínima: 1.5ms con 20M entradas vs 9ms de map nativo</li>
+      <li>Ideal para cachés de gigabytes sin degradación de GC</li>
+      <li>Diseño simple y predecible</li>
+      <li>Creado en producción real en Allegro (e-commerce escala)</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl con">
+      <li>Desarrollo lento: última release 2022</li>
+      <li>Sin TTL por entrada</li>
+      <li>Colisiones de hash sobrescriben datos silenciosamente</li>
+      <li>Ristretto supera su hit ratio en la mayoría de workloads</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl use">
+      <li>Servicios Go con datasets de varios GB que sufren GC pauses</li>
+      <li>Cache de respuestas HTTP grandes (HTML, JSON grandes)</li>
+      <li>Cuando el TTL global es suficiente</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl nouse">
+      <li>Cuando se necesita TTL por entrada</li>
+      <li>Nuevos proyectos con Ristretto disponible (mejor alternativa)</li>
+    </ul>
+  </td>
+  <td><span class="badge b-oss">OSS (Apache 2.0)</span></td>
+  <td><span class="crs">✗</span></td>
+</tr>
+
+<!-- 11. FreeCache -->
+<tr data-tags="embedded golang">
+  <td>
+    <span class="sn">11 FreeCache</span>
+    <span class="sv">v1.2.x — coocood</span>
+    <div class="stags">
+      <span class="tag t-embed">Embebido Go</span>
+      <span class="tag t-lang">Go</span>
+      <span class="tag t-hot">Zero GC overhead</span>
+    </div>
+    <div class="perf"><div class="perf-bar on-fire"></div><div class="perf-bar on-fire"></div><div class="perf-bar on-fire"></div><div class="perf-bar on-fire"></div><div class="perf-bar"></div><span class="perf-lbl">~147ns/op parallel</span></div>
+  </td>
+  <td>
+    <ul class="cl what">
+      <li>Caché Go con cero objetos en heap → zero GC overhead</li>
+      <li>Implementa su propio hash map con slice backing</li>
+      <li>TTL por entrada individual</li>
+      <li>256 segmentos para baja contención</li>
+      <li>Tamaño fijo predefinido en la creación</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl what">
+      <li>Tamaño fijo: no crece dinámicamente</li>
+      <li>Sin generics (API con []byte)</li>
+      <li>Hit ratio menor que Ristretto</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl pro">
+      <li>TTL por entrada (ventaja sobre BigCache)</li>
+      <li>Zero GC igual que BigCache</li>
+      <li>Tamaño predecible y controlado</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl con">
+      <li>Debe saber el tamaño del caché al crear</li>
+      <li>Rendimiento inferior a BigCache en paralelo</li>
+      <li>Mantenimiento lento</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl use">
+      <li>Cuando se necesita TTL por entrada + zero GC</li>
+      <li>Cache de tamaño conocido y fijo</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl nouse">
+      <li>Datasets de tamaño dinámico</li>
+      <li>Cuando Ristretto es opción (mejor hit ratio)</li>
+    </ul>
+  </td>
+  <td><span class="badge b-oss">OSS (MIT)</span></td>
+  <td><span class="crs">✗</span></td>
+</tr>
+
+<!-- 12. Theine / Otter (Go S3-FIFO) -->
+<tr data-tags="embedded golang">
+  <td>
+    <span class="sn">12 Otter / Theine-go</span>
+    <span class="sv">Otter v2 / Theine v0.6 — 2025</span>
+    <div class="stags">
+      <span class="tag t-embed">Embebido Go</span>
+      <span class="tag t-lang">Go</span>
+      <span class="tag t-new">S3-FIFO / W-TinyLFU</span>
+    </div>
+    <div class="perf"><div class="perf-bar on-fire"></div><div class="perf-bar on-fire"></div><div class="perf-bar on-fire"></div><div class="perf-bar on-fire"></div><div class="perf-bar on-fire"></div><span class="perf-lbl">Estado del arte 2026</span></div>
+  </td>
+  <td>
+    <ul class="cl what">
+      <li>Otter: caché Go con política S3-FIFO (estado del arte en eviction 2024-2026)</li>
+      <li>Theine-go: W-TinyLFU con soporte Redis-compatible vía Theine</li>
+      <li>S3-FIFO: supera a LRU/LFU en la mayoría de traces reales</li>
+      <li>Generics, TTL por entrada, concurrencia alta</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl what">
+      <li>Proyectos relativamente nuevos</li>
+      <li>Solo in-process, sin distribución</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl pro">
+      <li>S3-FIFO: el algoritmo de eviction con mejores resultados en investigación reciente (2023-2025)</li>
+      <li>Hit ratio superior a Ristretto/TinyLFU en muchos workloads</li>
+      <li>Diseño limpio con generics Go modernos</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl con">
+      <li>Comunidad menor que Ristretto/BigCache</li>
+      <li>Menos probado en producción masiva</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl use">
+      <li>Nuevos proyectos Go que quieren la mejor política de eviction</li>
+      <li>Investigación y benchmarking de políticas de caché</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl nouse">
+      <li>Cuando la estabilidad de producción larga trayectoria importa</li>
+    </ul>
+  </td>
+  <td><span class="badge b-oss">OSS (Apache 2.0)</span></td>
+  <td><span class="crs">✗</span></td>
+</tr>
+
+<!-- 13. Caffeine (Java) -->
+<tr data-tags="embedded java">
+  <td>
+    <span class="sn">13 Caffeine</span>
+    <span class="sv">3.x / 2025 — ben-manes</span>
+    <div class="stags">
+      <span class="tag t-embed">Embebido JVM</span>
+      <span class="tag t-lang">Java</span>
+      <span class="tag t-hot">W-TinyLFU</span>
+    </div>
+    <div class="perf"><div class="perf-bar on-fire"></div><div class="perf-bar on-fire"></div><div class="perf-bar on-fire"></div><div class="perf-bar on-fire"></div><div class="perf-bar on-fire"></div><span class="perf-lbl">Best Java cache</span></div>
+  </td>
+  <td>
+    <ul class="cl what">
+      <li>Librería de caché in-process Java con W-TinyLFU</li>
+      <li>W-TinyLFU: Window + TinyLFU → mejor hit ratio que LRU/Guava</li>
+      <li>Carga asíncrona (AsyncLoadingCache), refresh-ahead</li>
+      <li>Soft/weak references, size + weight-based eviction</li>
+      <li>Integración con Spring Cache, Hibernate 2LC, Micronaut</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl what">
+      <li>Solo JVM: sin soporte para otros lenguajes</li>
+      <li>Sin persistencia ni distribución</li>
+      <li>GC pauses en datasets muy grandes</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl pro">
+      <li>El caché in-process más eficiente para Java: supera Guava, EhCache</li>
+      <li>W-TinyLFU: hit ratio excepcional con overhead mínimo</li>
+      <li>Integración nativa en Spring Boot, Quarkus, Micronaut</li>
+      <li>API fluente y bien documentada</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl con">
+      <li>Solo in-process: requiere Redis para caché compartido</li>
+      <li>GC del JVM afecta en datasets de varios GB</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl use">
+      <li>Caché L1 en servicios Java/Spring antes de Redis (L2)</li>
+      <li>Hibernate 2nd Level Cache</li>
+      <li>APIs Java con rate limiting o memoization</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl nouse">
+      <li>Caché compartido entre procesos</li>
+      <li>Stacks no-JVM</li>
+    </ul>
+  </td>
+  <td><span class="badge b-oss">OSS (Apache 2.0)</span></td>
+  <td><span class="crs">✗</span></td>
+</tr>
+
+<!-- 14. Ehcache -->
+<tr data-tags="embedded java persistent">
+  <td>
+    <span class="sn">14 Ehcache</span>
+    <span class="sv">3.10.x / 2024 — Terracotta</span>
+    <div class="stags">
+      <span class="tag t-embed">JVM / Distribuido</span>
+      <span class="tag t-lang">Java</span>
+      <span class="tag t-prot">JCache / JSR-107</span>
+    </div>
+    <div class="perf"><div class="perf-bar on-fire"></div><div class="perf-bar on-fire"></div><div class="perf-bar on-fire"></div><div class="perf-bar"></div><div class="perf-bar"></div><span class="perf-lbl">Sólido, no top</span></div>
+  </td>
+  <td>
+    <ul class="cl what">
+      <li>Caché JVM más veterano: in-heap, off-heap, disco</li>
+      <li>Implementación de referencia JSR-107 (JCache)</li>
+      <li>3 tiers: heap → off-heap → disco</li>
+      <li>Terracotta server para distribución</li>
+      <li>Muy integrado en Hibernate como 2LC</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl what">
+      <li>Clustering solo con Terracotta (comercial)</li>
+      <li>Caffeine lo supera en hit ratio y rendimiento local</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl pro">
+      <li>Tres capas de almacenamiento (heap + off-heap + disco)</li>
+      <li>JSR-107: portabilidad entre implementaciones</li>
+      <li>El más maduro en el ecosistema Java/Hibernate</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl con">
+      <li>Rendimiento inferior a Caffeine en local</li>
+      <li>Distribución requiere Terracotta (de pago)</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl use">
+      <li>Hibernate 2LC donde Ehcache ya está integrado</li>
+      <li>Cuando se necesita off-heap o tier a disco</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl nouse">
+      <li>Nuevos proyectos Java sin Hibernate: preferir Caffeine</li>
+      <li>Distribución sin Terracotta</li>
+    </ul>
+  </td>
+  <td><span class="badge b-oss">OSS (Apache 2.0)</span></td>
+  <td><span class="badge b-ent">Terracotta BigMemory</span></td>
+</tr>
+
+<!-- 15. Moka (Rust) -->
+<tr data-tags="embedded rust">
+  <td>
+    <span class="sn">15 Moka</span>
+    <span class="sv">0.12.x / 2025</span>
+    <div class="stags">
+      <span class="tag t-embed">Embebido Rust</span>
+      <span class="tag t-lang">Rust</span>
+      <span class="tag t-new">W-TinyLFU en Rust</span>
+    </div>
+    <div class="perf"><div class="perf-bar on-fire"></div><div class="perf-bar on-fire"></div><div class="perf-bar on-fire"></div><div class="perf-bar on-fire"></div><div class="perf-bar on-fire"></div><span class="perf-lbl">Sin GC, top perf</span></div>
+  </td>
+  <td>
+    <ul class="cl what">
+      <li>Caché in-process Rust con W-TinyLFU (inspirado en Caffeine)</li>
+      <li>Sync y async (Tokio, async-std) en la misma librería</li>
+      <li>TTL por entrada, size + weight-based eviction</li>
+      <li>Invalidación por tags (cache_2 feature)</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl what">
+      <li>Solo in-process: sin distribución</li>
+      <li>Sin persistencia</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl pro">
+      <li>El Caffeine del ecosistema Rust: mismo algoritmo, sin GC</li>
+      <li>Soporte async nativo (Tokio) sin bloqueos</li>
+      <li>Seguridad de memoria de Rust: sin race conditions</li>
+      <li>Muy activo y bien mantenido en 2025-2026</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl con">
+      <li>Solo proceso único</li>
+      <li>Ecosistema Rust más joven que Java/Go</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl use">
+      <li>Servicios Rust que necesitan caché L1 de alto rendimiento</li>
+      <li>Aplicaciones async Tokio con caching</li>
+      <li>La opción por defecto para caché en Rust 2026</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl nouse">
+      <li>Caché compartido entre procesos</li>
+      <li>Lenguajes fuera de Rust</li>
+    </ul>
+  </td>
+  <td><span class="badge b-oss">OSS (MIT / Apache)</span></td>
+  <td><span class="crs">✗</span></td>
+</tr>
+
+<!-- 16. Stretto (Rust port of Ristretto) -->
+<tr data-tags="embedded rust">
+  <td>
+    <span class="sn">16 Stretto</span>
+    <span class="sv">0.5.x / 2025</span>
+    <div class="stags">
+      <span class="tag t-embed">Embebido Rust</span>
+      <span class="tag t-lang">Rust</span>
+      <span class="tag t-hot">Port de Ristretto</span>
+    </div>
+    <div class="perf"><div class="perf-bar on-fire"></div><div class="perf-bar on-fire"></div><div class="perf-bar on-fire"></div><div class="perf-bar on-fire"></div><div class="perf-bar"></div><span class="perf-lbl">TinyLFU + cost-based</span></div>
+  </td>
+  <td>
+    <ul class="cl what">
+      <li>Port de Ristretto (Go) a Rust: mismos algoritmos TinyLFU + SampledLFU</li>
+      <li>Cost-based eviction configurable</li>
+      <li>Soporte sync y async</li>
+      <li>Métricas de hit ratio integradas</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl what">
+      <li>Menor adopción que Moka</li>
+      <li>Sin algunas features de Moka (invalidación por tags)</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl pro">
+      <li>Cost-based eviction: ventaja sobre Moka</li>
+      <li>Misma semántica que Ristretto para equipos Go+Rust</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl con">
+      <li>Moka más adoptado y mantenido en Rust</li>
+      <li>Comunidad más pequeña</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl use">
+      <li>Equipos que usan Ristretto en Go y quieren misma semántica en Rust</li>
+      <li>Cuando se necesita cost-based eviction en Rust</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl nouse">
+      <li>Para la mayoría de casos: Moka es más madura</li>
+    </ul>
+  </td>
+  <td><span class="badge b-oss">OSS (MIT)</span></td>
+  <td><span class="crs">✗</span></td>
+</tr>
+
+<!-- 17. Groupcache -->
+<tr data-tags="distributed golang">
+  <td>
+    <span class="sn">17 Groupcache</span>
+    <span class="sv">v2 / 2024 — mailgun fork</span>
+    <div class="stags">
+      <span class="tag t-prot">HTTP / gRPC</span>
+      <span class="tag t-lang">Go</span>
+      <span class="tag t-new">Fill-on-miss</span>
+    </div>
+    <div class="perf"><div class="perf-bar on-fire"></div><div class="perf-bar on-fire"></div><div class="perf-bar on-fire"></div><div class="perf-bar"></div><div class="perf-bar"></div><span class="perf-lbl">Cache + fill</span></div>
+  </td>
+  <td>
+    <ul class="cl what">
+      <li>Caché distribuido Go usado por Google DL (YouTube)</li>
+      <li>Modelo: cada nodo es a la vez cliente y servidor</li>
+      <li>Single-flight: múltiples requests al mismo key generan un solo backend call</li>
+      <li>LRU eviction, sin escrituras explícitas (solo fill on miss)</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl what">
+      <li>Sin escrituras explícitas: solo caché de lectura</li>
+      <li>Sin TTL configurable en el original</li>
+      <li>Sin autenticación ni TLS nativo</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl pro">
+      <li>Single-flight: elimina thundering herd en fill</li>
+      <li>Sin infraestructura externa: los propios nodos son el caché</li>
+      <li>Ideal para cachés de recursos read-heavy</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl con">
+      <li>No apto para caché de escritura</li>
+      <li>Topología rígida: todos los nodos conocen a todos</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl use">
+      <li>Caché de resultados de queries o recursos estáticos en clusters Go</li>
+      <li>Cuando se quiere eliminar thundering herd sin Redis</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl nouse">
+      <li>Casos con escrituras frecuentes</li>
+      <li>Cuando Redis/Valkey es viable</li>
+    </ul>
+  </td>
+  <td><span class="badge b-oss">OSS (Apache 2.0)</span></td>
+  <td><span class="crs">✗</span></td>
+</tr>
+
+<!-- 18. VictoriaMetrics / VictoriaCache -->
+<tr data-tags="distributed persistent golang">
+  <td>
+    <span class="sn">18 VictoriaMetrics</span>
+    <span class="sv">1.102.x / 2025</span>
+    <div class="stags">
+      <span class="tag t-prot">PromQL / HTTP</span>
+      <span class="tag t-lang">Go</span>
+      <span class="tag t-hot">TSDB in-memory</span>
+    </div>
+    <div class="perf"><div class="perf-bar on-fire"></div><div class="perf-bar on-fire"></div><div class="perf-bar on-fire"></div><div class="perf-bar on-fire"></div><div class="perf-bar on-fire"></div><span class="perf-lbl">10x+ vs Prometheus</span></div>
+  </td>
+  <td>
+    <ul class="cl what">
+      <li>Base de datos de series temporales in-memory + persistencia de alto rendimiento</li>
+      <li>Compatible con Prometheus (PromQL, remote_write)</li>
+      <li>Ingesta: millones de samples/segundo en un solo nodo</li>
+      <li>Compresión excepcional: 10x más eficiente que Prometheus</li>
+      <li>Clustering nativo en versión Enterprise</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl what">
+      <li>No es caché general: específico para series temporales</li>
+      <li>Cluster en versión enterprise (de pago)</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl pro">
+      <li>El TSDB más eficiente del mercado OSS en 2026</li>
+      <li>Drop-in replacement de Prometheus con mucho mejor rendimiento</li>
+      <li>Muy bajo uso de CPU y memoria vs alternativas</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl con">
+      <li>Caché de uso general: no aplica</li>
+      <li>QL menos expresivo que SQL para análisis</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl use">
+      <li>Métricas de infraestructura, observabilidad, Kubernetes</li>
+      <li>Reemplazar Prometheus a escala</li>
+      <li>Ingesta masiva de series temporales</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl nouse">
+      <li>Caché de propósito general</li>
+      <li>Datos no temporales</li>
+    </ul>
+  </td>
+  <td><span class="badge b-oss">OSS (Apache 2.0)</span></td>
+  <td><span class="badge b-ent">Cluster enterprise</span></td>
+</tr>
+
+<!-- 19. Aerospike -->
+<tr data-tags="distributed persistent">
+  <td>
+    <span class="sn">19 Aerospike</span>
+    <span class="sv">7.x / 2025</span>
+    <div class="stags">
+      <span class="tag t-prot">Aerospike Protocol</span>
+      <span class="tag t-warn">Propietario</span>
+      <span class="tag t-hot">Hybrid Memory</span>
+    </div>
+    <div class="perf"><div class="perf-bar on-fire"></div><div class="perf-bar on-fire"></div><div class="perf-bar on-fire"></div><div class="perf-bar on-fire"></div><div class="perf-bar on-fire"></div><span class="perf-lbl">Sub-ms a escala</span></div>
+  </td>
+  <td>
+    <ul class="cl what">
+      <li>Base de datos NoSQL distribuida con Hybrid Memory (RAM + SSD)</li>
+      <li>Index en RAM, datos en SSD: escala más allá de la RAM</li>
+      <li>Latencia sub-milisegundo garantizada a escala masiva</li>
+      <li>ACID a nivel de registro, replicación síncrona</li>
+      <li>Cross-datacenter replication (XDR)</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl what">
+      <li>Sin versión OSS real (community edition muy limitada)</li>
+      <li>Protocolo propietario</li>
+      <li>Costo elevado a escala</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl pro">
+      <li>Latencia sub-ms garantizada incluso con datos en SSD</li>
+      <li>Escala a terabytes sin degradación de latencia</li>
+      <li>Muy usado en AdTech y gaming (Criteo, Samsung)</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl con">
+      <li>Precio enterprise elevado</li>
+      <li>Lock-in al ecosistema Aerospike</li>
+      <li>Complejidad de operación</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl use">
+      <li>AdTech: bidding en tiempo real (sub-ms crítico)</li>
+      <li>Perfiles de usuario a escala de terabytes</li>
+      <li>Fraud detection en tiempo real</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl nouse">
+      <li>PYMES o startups (costo)</li>
+      <li>Casos donde Redis/Valkey es suficiente</li>
+    </ul>
+  </td>
+  <td><span class="badge b-legacy">Community muy limitada</span></td>
+  <td><span class="badge b-ent">Enterprise</span></td>
+</tr>
+
+<!-- 20. Amazon ElastiCache / MemoryDB -->
+<tr data-tags="cloud distributed persistent">
+  <td>
+    <span class="sn">20 AWS MemoryDB</span>
+    <span class="sv">Valkey / Redis — 2025</span>
+    <div class="stags">
+      <span class="tag t-prot">RESP3</span>
+      <span class="tag t-lang">Cloud managed</span>
+      <span class="tag t-hot">Durable Redis</span>
+    </div>
+    <div class="perf"><div class="perf-bar on-fire"></div><div class="perf-bar on-fire"></div><div class="perf-bar on-fire"></div><div class="perf-bar on-fire"></div><div class="perf-bar"></div><span class="perf-lbl">Managed SLA</span></div>
+  </td>
+  <td>
+    <ul class="cl what">
+      <li>Redis/Valkey como servicio en AWS con durabilidad Multi-AZ</li>
+      <li>MemoryDB: WAL en S3 para durabilidad total (no solo cache)</li>
+      <li>ElastiCache: cache puro (Redis o Valkey o Memcached)</li>
+      <li>Patching automático, backups, failover gestionado</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl what">
+      <li>Sin self-hosted</li>
+      <li>Vendor lock-in AWS</li>
+      <li>Costo por hora + transferencia de datos</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl pro">
+      <li>Zero operaciones: AWS gestiona todo</li>
+      <li>MemoryDB: durabilidad real con compatibilidad Redis</li>
+      <li>Integración perfecta con VPC, IAM, CloudWatch</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl con">
+      <li>Costoso a escala vs auto-gestionado</li>
+      <li>Latencia mayor que on-prem en mismo datacenter</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl use">
+      <li>Aplicaciones en AWS que necesitan Redis/Valkey sin operaciones</li>
+      <li>Cuando la durabilidad de MemoryDB es necesaria</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl nouse">
+      <li>Entornos no-AWS</li>
+      <li>Cuando el costo de managed supera el de auto-gestionado</li>
+    </ul>
+  </td>
+  <td><span class="crs">✗</span></td>
+  <td><span class="badge b-cloud">AWS Pay-as-you-go</span></td>
+</tr>
+
+<!-- 21. Momento Cache -->
+<tr data-tags="cloud distributed">
+  <td>
+    <span class="sn">21 Momento Cache</span>
+    <span class="sv">SaaS — 2025</span>
+    <div class="stags">
+      <span class="tag t-prot">gRPC / HTTP</span>
+      <span class="tag t-lang">Serverless</span>
+      <span class="tag t-new">Zero-infra cache</span>
+    </div>
+    <div class="perf"><div class="perf-bar on-fire"></div><div class="perf-bar on-fire"></div><div class="perf-bar on-fire"></div><div class="perf-bar on-fire"></div><div class="perf-bar"></div><span class="perf-lbl">Serverless latency</span></div>
+  </td>
+  <td>
+    <ul class="cl what">
+      <li>Caché serverless: sin provisionar nodos, sin gestionar clusters</li>
+      <li>Pay-per-use: se paga por GB transferidos, no por nodo hora</li>
+      <li>SDKs en 10+ lenguajes, Momento Topics (pub/sub)</li>
+      <li>Free tier generoso: 5 GB/mes gratis en 2026</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl what">
+      <li>Sin self-hosted ni compatibilidad Redis</li>
+      <li>Sin estructuras de datos avanzadas (Redis Sets, Sorted Sets complejos)</li>
+      <li>Dependencia de conectividad a Momento cloud</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl pro">
+      <li>Cero operaciones: literalmente serverless</li>
+      <li>Pricing más justo que ElastiCache para cargas variables</li>
+      <li>Cold start instant: sin provisioning</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl con">
+      <li>Vendor lock-in total</li>
+      <li>Sin compatibilidad Redis: migración requiere cambios en código</li>
+      <li>Latencia algo mayor que Redis en mismo datacenter</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl use">
+      <li>Aplicaciones serverless (Lambda, Cloud Run) con caché</li>
+      <li>Startups que no quieren operar infraestructura de caché</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl nouse">
+      <li>Aplicaciones on-prem o sin acceso a Internet</li>
+      <li>Cuando se necesita compatibilidad Redis</li>
+    </ul>
+  </td>
+  <td><span class="badge b-both">Free 5GB/mes</span></td>
+  <td><span class="badge b-cloud">SaaS pay-per-use</span></td>
+</tr>
+
+<!-- 22. Infinispan -->
+<tr data-tags="distributed persistent java">
+  <td>
+    <span class="sn">22 Infinispan</span>
+    <span class="sv">15.x / 2025 — Red Hat</span>
+    <div class="stags">
+      <span class="tag t-prot">HotRod / REST / RESP</span>
+      <span class="tag t-lang">Java</span>
+      <span class="tag t-hot">JCache + Distributed</span>
+    </div>
+    <div class="perf"><div class="perf-bar on-fire"></div><div class="perf-bar on-fire"></div><div class="perf-bar on-fire"></div><div class="perf-bar on-fire"></div><div class="perf-bar"></div><span class="perf-lbl">Enterprise Java</span></div>
+  </td>
+  <td>
+    <ul class="cl what">
+      <li>Data grid distribuido Java con protocolos múltiples (HotRod, REST, RESP3)</li>
+      <li>JCache (JSR-107), transacciones distribuidas XA</li>
+      <li>Persistencia: RocksDB, JDBC, remote stores</li>
+      <li>Cross-site replication, near-caching</li>
+      <li>Integración con Quarkus, WildFly, Kubernetes Operator</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl what">
+      <li>Complejidad operacional alta</li>
+      <li>Principalmente ecosistema Red Hat / JBoss</li>
+      <li>Overhead JVM</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl pro">
+      <li>RESP3 nativo: clientes Redis pueden usarlo directamente</li>
+      <li>Operator Kubernetes bien integrado</li>
+      <li>Soporte Red Hat con SLA enterprise</li>
+      <li>Cross-site replication para multi-datacenter</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl con">
+      <li>Curva de aprendizaje alta</li>
+      <li>Principalmente relevante en ecosistema JBoss/Quarkus</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl use">
+      <li>Aplicaciones Quarkus/WildFly que necesitan cache distribuido</li>
+      <li>Multi-datacenter con cross-site replication en Java</li>
+      <li>JCache JSR-107 con distribución real</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl nouse">
+      <li>Stacks no-Java</li>
+      <li>Cuando Redis/Valkey cubre el caso</li>
+    </ul>
+  </td>
+  <td><span class="badge b-oss">OSS (Apache 2.0)</span></td>
+  <td><span class="badge b-ent">Red Hat Data Grid</span></td>
+</tr>
+
+<!-- 23. Garnet (Microsoft) -->
+<tr data-tags="distributed persistent">
+  <td>
+    <span class="sn">23 Garnet</span>
+    <span class="sv">1.0.x / 2025 — Microsoft Research</span>
+    <div class="stags">
+      <span class="tag t-prot">RESP3 / Redis compat.</span>
+      <span class="tag t-new">OSS 2024 Microsoft</span>
+      <span class="tag t-lang">C#</span>
+    </div>
+    <div class="perf"><div class="perf-bar on-fire"></div><div class="perf-bar on-fire"></div><div class="perf-bar on-fire"></div><div class="perf-bar on-fire"></div><div class="perf-bar on-fire"></div><span class="perf-lbl">Best throughput 2025</span></div>
+  </td>
+  <td>
+    <ul class="cl what">
+      <li>Servidor cache/store de Microsoft Research publicado OSS en 2024</li>
+      <li>Protocolo RESP compatible con Redis: drop-in replacement</li>
+      <li>Diseñado en C# con .NET 9: máximo rendimiento en Windows/Linux</li>
+      <li>FASTER storage engine: throughput superior a Redis en benchmarks</li>
+      <li>Tiered storage: RAM + SSD transparente</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl what">
+      <li>Proyecto nuevo (2024): menor historial en producción</li>
+      <li>Ecosistema de módulos inexistente</li>
+      <li>Comunidad aún pequeña</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl pro">
+      <li>Benchmarks superiores a Redis en throughput multi-core</li>
+      <li>Tiered memory: datasets > RAM sin sacrificar latencia</li>
+      <li>Respaldado por Microsoft Research: base sólida</li>
+      <li>Compatible con clientes Redis existentes</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl con">
+      <li>Muy nuevo: riesgo de producción en 2026</li>
+      <li>C# / .NET: menos familiar fuera de ecosistema Microsoft</li>
+      <li>Sin módulos Redis (Search, JSON)</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl use">
+      <li>Entornos .NET / Azure que quieren alto rendimiento</li>
+      <li>Experimentación como alternativa a Dragonfly</li>
+      <li>Investigación de sistemas de almacenamiento</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl nouse">
+      <li>Producción crítica donde se necesita madurez probada</li>
+      <li>Cuando Valkey o Dragonfly cubren el caso</li>
+    </ul>
+  </td>
+  <td><span class="badge b-oss">OSS (MIT)</span></td>
+  <td><span class="crs">✗</span></td>
+</tr>
+
+<!-- 24. Apache Geode / GemFire -->
+<tr data-tags="distributed persistent java">
+  <td>
+    <span class="sn">24 Apache Geode / GemFire</span>
+    <span class="sv">Geode 1.15 / GemFire 10.x</span>
+    <div class="stags">
+      <span class="tag t-prot">Client-Server / P2P</span>
+      <span class="tag t-lang">Java</span>
+      <span class="tag t-warn">VMware/Broadcom</span>
+    </div>
+    <div class="perf"><div class="perf-bar on-fire"></div><div class="perf-bar on-fire"></div><div class="perf-bar on-fire"></div><div class="perf-bar on-fire"></div><div class="perf-bar"></div><span class="perf-lbl">Enterprise proven</span></div>
+  </td>
+  <td>
+    <ul class="cl what">
+      <li>In-memory data grid con consistencia distribuida fuerte</li>
+      <li>Transacciones ACID distribuidas</li>
+      <li>Queries OQL (Object Query Language) sobre datos en memoria</li>
+      <li>WAN replication para multi-datacenter</li>
+      <li>GemFire: versión enterprise de VMware/Broadcom</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl what">
+      <li>Complejidad extrema de operación</li>
+      <li>JVM con GC pauses en datasets muy grandes</li>
+      <li>Adopción declinando en favor de alternativas modernas</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl pro">
+      <li>Décadas de uso en sistemas financieros críticos</li>
+      <li>ACID distribuido muy robusto</li>
+      <li>WAN replication probada en banca global</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl con">
+      <li>Complejidad operacional muy alta</li>
+      <li>GemFire muy costoso bajo Broadcom</li>
+      <li>Innovación lenta vs Ignite/Hazelcast</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl use">
+      <li>Sistemas bancarios legacy ya sobre Geode/GemFire</li>
+      <li>Multi-datacenter con ACID distribuido en Java</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl nouse">
+      <li>Nuevos proyectos: preferir Apache Ignite o Hazelcast</li>
+      <li>Entornos con presupuesto limitado</li>
+    </ul>
+  </td>
+  <td><span class="badge b-oss">Geode OSS (Apache)</span></td>
+  <td><span class="badge b-ent">GemFire (Broadcom)</span></td>
+</tr>
+
+<!-- 25. Pelikan / Segcache -->
+<tr data-tags="distributed embedded rust">
+  <td>
+    <span class="sn">25 Pelikan / Segcache</span>
+    <span class="sv">Pelikan 0.5 / 2025 — Twitter/Momento</span>
+    <div class="stags">
+      <span class="tag t-prot">Memcached compat.</span>
+      <span class="tag t-lang">Rust / C</span>
+      <span class="tag t-new">Segcache eviction</span>
+    </div>
+    <div class="perf"><div class="perf-bar on-fire"></div><div class="perf-bar on-fire"></div><div class="perf-bar on-fire"></div><div class="perf-bar on-fire"></div><div class="perf-bar on-fire"></div><span class="perf-lbl">10x throughput Memcached</span></div>
+  </td>
+  <td>
+    <ul class="cl what">
+      <li>Framework de servidores de caché modular originado en Twitter</li>
+      <li>Segcache: política de eviction por segmentos (mejor que LRU para TTL cortos)</li>
+      <li>Compatible con protocolo Memcached</li>
+      <li>Reescritura en Rust: seguridad de memoria y alto rendimiento</li>
+      <li>Throughput 10x superior a Memcached en benchmarks</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl what">
+      <li>Proyecto de investigación/producción con adopción limitada fuera de Twitter/Momento</li>
+      <li>Sin clustering nativo</li>
+      <li>Documentación escasa</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl pro">
+      <li>Segcache: eviction eficiente para cargas con TTL cortos</li>
+      <li>Throughput excepcional en benchmarks</li>
+      <li>Rust: seguridad y rendimiento sin GC</li>
+      <li>Base del backend de Momento Cache (producción real)</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl con">
+      <li>Comunidad pequeña, documentación limitada</li>
+      <li>No es un producto listo para consumo general</li>
+      <li>Sin módulos ni ecosistema</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl use">
+      <li>Investigación de sistemas de caché de alto rendimiento</li>
+      <li>Cargas con TTL cortos donde LRU es ineficiente</li>
+      <li>Base para construir servicios de caché propios</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl nouse">
+      <li>Producción general: preferir Redis/Valkey/Dragonfly</li>
+      <li>Equipos sin expertise en sistemas de caché de bajo nivel</li>
+    </ul>
+  </td>
+  <td><span class="badge b-oss">OSS (Apache 2.0)</span></td>
+  <td><span class="crs">✗</span></td>
+</tr>
+
+  </tbody>
+  </table>
+</div>
+
+<footer>
+  Cache &amp; In-Memory Databases — Estado del Arte <b>Q2 2026</b> · 25 implementaciones · 8 dimensiones de análisis
+  <br>
+  Políticas de eviction cubiertas: <b>LRU · LFU · TinyLFU · W-TinyLFU · S3-FIFO · SampledLFU · Segcache · ARC · CLOCK-Pro</b>
+  <br>
+  Lenguajes: <b>C · C++ · Go · Rust · Java · C#</b> &nbsp;|&nbsp; Protocolos: <b>RESP3 · Memcached ASCII · HotRod · gRPC · REST · JDBC</b>
+  <br><br>
+  <span style="color:#3a2e1e">Los precios y características pueden cambiar. Verificar con cada proyecto o vendor para información actualizada.</span>
+</footer>
+
+<script>
+  // Generate heatmap
+  const hm = document.getElementById('hm');
+  const colors = ['#ff6b00','#ff8c00','#ffb300','#e05000','#cc4400','#ff9940','#ffcc00','#3d3422','#2a2318','#ff5500'];
+  for (let i = 0; i < 200; i++) {
+    const c = document.createElement('div');
+    c.className = 'heatmap-cell';
+    const ci = Math.floor(Math.pow(Math.random(), 2) * colors.length);
+    c.style.background = colors[ci];
+    hm.appendChild(c);
+  }
+
+  function flt(tag, btn) {
+    document.querySelectorAll('.fbtn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    const rows = document.querySelectorAll('#T tbody tr');
+    let n = 0;
+    rows.forEach(r => {
+      const show = tag === 'all' || (r.getAttribute('data-tags') || '').includes(tag);
+      r.classList.toggle('hidden', !show);
+      if (show) n++;
+    });
+    document.getElementById('cnt').textContent = n + ' entradas';
+  }
+
+  function srch(val) {
+    const q = val.toLowerCase().trim();
+    const rows = document.querySelectorAll('#T tbody tr');
+    let n = 0;
+    rows.forEach(r => {
+      const show = !q || r.textContent.toLowerCase().includes(q);
+      r.classList.toggle('hidden', !show);
+      if (show) n++;
+    });
+    document.getElementById('cnt').textContent = n + ' entradas';
+  }
+</script>
+</body>
+</html>

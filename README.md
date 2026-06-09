@@ -27,6 +27,9 @@ Cuadros comparativos y guías de referencia generados con Claude, centralizados 
 | Cuadro Comparativo — Herramientas de Ciberseguridad | IT, Seguridad |
 | Métodos para Potenciar LLMs — Guía 2026 | AI, LLM |
 | Comparativa de Términos — Gestión de Vulnerabilidades | IT, Seguridad |
+| Cache & In-Memory DB — Comparativa 2026 | IT, DevOps |
+| LDAP Directory Services — Comparativa 2026 | IT, Infra |
+| VPN Comparativa 2026 — Estado del Arte | IT, Seguridad |
 
 ## Activar GitHub Pages
 

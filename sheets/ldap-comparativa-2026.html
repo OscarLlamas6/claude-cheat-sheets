@@ -1,0 +1,1676 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LDAP Directory Services — Comparativa 2026</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600;700&family=IBM+Plex+Sans:wght@300;400;500;600;700&display=swap');
+
+  :root {
+    --bg:          #f4f6f9;
+    --surface:     #ffffff;
+    --panel:       #eef1f6;
+    --panel2:      #e4e9f2;
+    --border:      #d0d8e8;
+    --border-hi:   #a8b8d4;
+    --ink:         #1a2035;
+    --ink-mid:     #4a5570;
+    --ink-dim:     #8a96b0;
+    --accent:      #1a4fd6;
+    --accent-light:#dce8ff;
+    --accent2:     #7c3aed;
+    --accent2-lt:  #ede9fe;
+    --green:       #0d7a4e;
+    --green-lt:    #d1fae5;
+    --red:         #b91c1c;
+    --red-lt:      #fee2e2;
+    --amber:       #92400e;
+    --amber-lt:    #fef3c7;
+    --teal:        #0f766e;
+    --teal-lt:     #ccfbf1;
+    --mono:        'IBM Plex Mono', monospace;
+    --sans:        'IBM Plex Sans', sans-serif;
+    --radius:      3px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--sans);
+    font-size: 13px;
+    line-height: 1.55;
+  }
+
+  /* ── HEADER ── */
+  header {
+    background: var(--ink);
+    color: #e8edf5;
+    padding: 48px 48px 36px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* Signature element: animated tree structure in background */
+  .tree-bg {
+    position: absolute;
+    top: 0; right: 0;
+    width: 340px; height: 100%;
+    opacity: 0.06;
+    font-family: var(--mono);
+    font-size: 11px;
+    line-height: 1.7;
+    color: #fff;
+    padding: 20px;
+    pointer-events: none;
+    white-space: pre;
+    overflow: hidden;
+  }
+
+  .header-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.18em;
+    color: #6b8fd4;
+    text-transform: uppercase;
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .header-label::before {
+    content: 'dc=comparativa,dc=2026';
+    background: rgba(107,143,212,0.15);
+    border: 1px solid rgba(107,143,212,0.3);
+    padding: 2px 10px;
+    border-radius: var(--radius);
+  }
+
+  h1 {
+    font-family: var(--mono);
+    font-size: clamp(24px, 3.5vw, 42px);
+    font-weight: 700;
+    color: #ffffff;
+    letter-spacing: -0.025em;
+    line-height: 1.05;
+    margin-bottom: 14px;
+  }
+  h1 span {
+    color: #6b8fd4;
+  }
+
+  .header-sub {
+    font-family: var(--sans);
+    font-size: 13.5px;
+    color: #8a9fc0;
+    max-width: 580px;
+    line-height: 1.65;
+    margin-bottom: 24px;
+  }
+
+  .header-chips {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .chip {
+    font-family: var(--mono);
+    font-size: 10px;
+    font-weight: 500;
+    padding: 4px 12px;
+    border-radius: var(--radius);
+    border: 1px solid rgba(255,255,255,0.1);
+    color: #8a9fc0;
+  }
+  .chip strong { color: #c8d8f0; }
+
+  /* ── LEGEND ── */
+  .legend {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 14px 48px;
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .legend-lbl {
+    font-family: var(--mono);
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--ink-dim);
+    margin-right: 4px;
+  }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-family: var(--mono);
+    font-size: 9px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: var(--radius);
+    white-space: nowrap;
+  }
+  .b-oss    { background: var(--green-lt);  color: var(--green);  border: 1px solid #6ee7b7; }
+  .b-ent    { background: var(--accent-light); color: var(--accent); border: 1px solid #93c5fd; }
+  .b-both   { background: var(--teal-lt);   color: var(--teal);   border: 1px solid #99f6e4; }
+  .b-cloud  { background: var(--accent2-lt); color: var(--accent2); border: 1px solid #c4b5fd; }
+  .b-legacy { background: var(--amber-lt);  color: var(--amber);  border: 1px solid #fcd34d; }
+
+  /* ── CONTROLS ── */
+  .controls {
+    background: var(--panel);
+    border-bottom: 2px solid var(--border);
+    padding: 12px 48px;
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .ctrl-lbl {
+    font-family: var(--mono);
+    font-size: 9px;
+    font-weight: 600;
+    color: var(--ink-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-right: 2px;
+  }
+  .fbtn {
+    font-family: var(--mono);
+    font-size: 10px;
+    font-weight: 500;
+    padding: 5px 13px;
+    border: 1px solid var(--border-hi);
+    background: var(--surface);
+    color: var(--ink-mid);
+    cursor: pointer;
+    border-radius: var(--radius);
+    transition: all 0.12s;
+  }
+  .fbtn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-light); }
+  .fbtn.active { border-color: var(--accent); color: var(--surface); background: var(--accent); }
+
+  .sep { width: 1px; height: 20px; background: var(--border); margin: 0 4px; }
+
+  #count-badge {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--ink-dim);
+    margin-left: 4px;
+  }
+  .srch {
+    margin-left: auto;
+    font-family: var(--mono);
+    font-size: 11px;
+    background: var(--surface);
+    border: 1px solid var(--border-hi);
+    color: var(--ink);
+    padding: 5px 12px;
+    border-radius: var(--radius);
+    width: 210px;
+    outline: none;
+  }
+  .srch:focus { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(26,79,214,0.1); }
+  .srch::placeholder { color: var(--ink-dim); }
+
+  /* ── TABLE WRAP ── */
+  .tbl-outer {
+    padding: 20px 48px 60px;
+    overflow-x: auto;
+  }
+
+  .scroll-note {
+    font-family: var(--mono);
+    font-size: 9px;
+    color: var(--ink-dim);
+    text-align: right;
+    margin-bottom: 8px;
+    letter-spacing: 0.05em;
+  }
+
+  table {
+    border-collapse: collapse;
+    width: 100%;
+    min-width: 1500px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+
+  thead th {
+    font-family: var(--mono);
+    font-size: 9px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.13em;
+    color: var(--ink-dim);
+    background: var(--panel2);
+    border: 1px solid var(--border);
+    padding: 10px 14px;
+    text-align: left;
+    white-space: nowrap;
+    position: sticky;
+    top: 0;
+    z-index: 1;
+  }
+  thead th:first-child {
+    min-width: 170px;
+    color: var(--accent);
+    position: sticky;
+    left: 0;
+    z-index: 3;
+    background: var(--panel2);
+  }
+  thead th:nth-child(2) { min-width: 230px; }
+  thead th:nth-child(3) { min-width: 210px; }
+  thead th:nth-child(4) { min-width: 210px; }
+  thead th:nth-child(5) { min-width: 200px; }
+  thead th:nth-child(6) { min-width: 220px; }
+  thead th:nth-child(7) { min-width: 210px; }
+  thead th:nth-child(8) { min-width: 115px; }
+  thead th:nth-child(9) { min-width: 115px; }
+
+  tbody tr { transition: background 0.1s; }
+  tbody tr:hover td { background: #f0f4ff !important; }
+  tbody tr.hidden { display: none; }
+
+  tbody tr:nth-child(even) td { background: #fafbfd; }
+  tbody tr:nth-child(odd)  td { background: var(--surface); }
+
+  td {
+    border: 1px solid var(--border);
+    padding: 11px 14px;
+    vertical-align: top;
+    font-size: 12px;
+    line-height: 1.55;
+    color: var(--ink-mid);
+  }
+  td:first-child {
+    position: sticky;
+    left: 0;
+    z-index: 1;
+    background: inherit;
+    border-right: 2px solid var(--border-hi);
+  }
+
+  .sol-name {
+    font-family: var(--mono);
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--ink);
+    display: block;
+    margin-bottom: 3px;
+  }
+  .sol-ver {
+    font-family: var(--mono);
+    font-size: 9px;
+    color: var(--ink-dim);
+    display: block;
+    margin-bottom: 5px;
+  }
+  .sol-tags { display: flex; flex-wrap: wrap; gap: 3px; margin-top: 4px; }
+
+  .tag {
+    display: inline-block;
+    font-family: var(--mono);
+    font-size: 9px;
+    font-weight: 500;
+    padding: 1px 6px;
+    border-radius: 2px;
+  }
+  .t-proto  { background: var(--accent-light);  color: var(--accent);  border: 1px solid #93c5fd; }
+  .t-os     { background: var(--panel2);         color: var(--ink-mid); border: 1px solid var(--border); }
+  .t-new    { background: var(--green-lt);       color: var(--green);   border: 1px solid #6ee7b7; }
+  .t-warn   { background: var(--amber-lt);       color: var(--amber);   border: 1px solid #fcd34d; }
+  .t-cloud  { background: var(--accent2-lt);     color: var(--accent2); border: 1px solid #c4b5fd; }
+
+  ul.cl {
+    list-style: none;
+    padding: 0;
+  }
+  ul.cl li {
+    padding: 2px 0;
+    font-size: 12px;
+    padding-left: 14px;
+    position: relative;
+    color: var(--ink-mid);
+  }
+  ul.cl li::before {
+    position: absolute;
+    left: 0;
+    font-family: var(--mono);
+    font-weight: 600;
+  }
+  ul.cl.what  li::before { content: '├'; color: var(--ink-dim); }
+  ul.cl.pro   li::before { content: '+'; color: var(--green); }
+  ul.cl.con   li::before { content: '−'; color: var(--red); }
+  ul.cl.use   li::before { content: '▸'; color: var(--accent); }
+  ul.cl.nouse li::before { content: '✗'; color: var(--red); }
+
+  .pricing-wrap { display: flex; flex-direction: column; gap: 5px; }
+  .chk { color: var(--green); font-weight: 700; font-size: 13px; }
+  .crs { color: var(--red);   font-weight: 700; font-size: 13px; }
+
+  /* ── FOOTER ── */
+  footer {
+    background: var(--ink);
+    color: #6b8fd4;
+    text-align: center;
+    padding: 28px 48px;
+    font-family: var(--mono);
+    font-size: 10px;
+    line-height: 1.8;
+  }
+  footer strong { color: #c8d8f0; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="tree-bg">dc=directorio,dc=2026
+├── ou=soluciones
+│   ├── cn=OpenLDAP
+│   ├── cn=389DS
+│   ├── cn=ApacheDS
+│   ├── cn=FreeIPA
+│   ├── cn=Samba
+│   ├── cn=ActiveDirectory
+│   ├── cn=AzureAD
+│   ├── cn=OpenDJ
+│   ├── cn=Lasso
+│   └── cn=Univention
+├── ou=atributos
+│   ├── cn=ventajas
+│   ├── cn=desventajas
+│   ├── cn=casos-uso
+│   └── cn=licencia
+└── ou=meta
+    ├── cn=version=2026
+    └── cn=protocolo=LDAPv3</div>
+
+  <div class="header-label"></div>
+  <h1>Directory Services<br><span>&amp; LDAP</span> Comparativa 2026</h1>
+  <p class="header-sub">Análisis técnico de 20 implementaciones de servicios de directorio LDAP: desde proyectos OSS clásicos hasta soluciones cloud-native y enterprise. Estado del arte Q2 2026.</p>
+  <div class="header-chips">
+    <span class="chip"><strong>20</strong> implementaciones</span>
+    <span class="chip"><strong>8</strong> dimensiones de análisis</span>
+    <span class="chip">Protocolo base <strong>LDAPv3 · RFC 4511</strong></span>
+    <span class="chip">Actualizado <strong>Q2 2026</strong></span>
+  </div>
+</header>
+
+<div class="legend">
+  <span class="legend-lbl">Modelo:</span>
+  <span class="badge b-oss">OSS / Gratuito</span>
+  <span class="badge b-ent">Enterprise</span>
+  <span class="badge b-both">OSS + Enterprise</span>
+  <span class="badge b-cloud">Cloud / SaaS</span>
+  <span class="badge b-legacy">Legacy / Mantenimiento</span>
+  &nbsp;
+  <span class="legend-lbl">Protocolo:</span>
+  <span style="font-family:var(--mono);font-size:10px;color:var(--ink-mid)">LDAPv3 · Kerberos · SAML · SCIM · RADIUS · OAuth2 / OIDC</span>
+</div>
+
+<div class="controls">
+  <span class="ctrl-lbl">Filtrar:</span>
+  <button class="fbtn active" onclick="doFilter('all',this)">Todos (20)</button>
+  <button class="fbtn" onclick="doFilter('oss',this)">Open Source</button>
+  <button class="fbtn" onclick="doFilter('enterprise',this)">Enterprise</button>
+  <button class="fbtn" onclick="doFilter('cloud',this)">Cloud / SaaS</button>
+  <button class="fbtn" onclick="doFilter('kerberos',this)">Con Kerberos</button>
+  <button class="fbtn" onclick="doFilter('legacy',this)">Legacy</button>
+  <div class="sep"></div>
+  <span id="count-badge">20 entradas</span>
+  <input class="srch" type="text" placeholder="Buscar solución o característica..." oninput="doSearch(this.value)">
+</div>
+
+<div class="tbl-outer">
+  <div class="scroll-note">← scroll horizontal para ver todas las columnas →</div>
+  <table id="ldapTable">
+  <thead>
+    <tr>
+      <th>#  Solución</th>
+      <th>¿Qué hace?</th>
+      <th>¿Qué NO hace?</th>
+      <th>Ventajas</th>
+      <th>Desventajas</th>
+      <th>Casos de uso RECOMENDADOS</th>
+      <th>Casos de uso NO recomendados</th>
+      <th>Gratuito / OSS</th>
+      <th>Enterprise</th>
+    </tr>
+  </thead>
+  <tbody>
+
+<!-- 1. OpenLDAP -->
+<tr data-tags="oss">
+  <td>
+    <span class="sol-name">01 OpenLDAP</span>
+    <span class="sol-ver">2.6.x / slapd — 2025</span>
+    <div class="sol-tags">
+      <span class="tag t-proto">LDAPv3</span>
+      <span class="tag t-os">Linux / BSD</span>
+      <span class="tag t-new">Referencia OSS</span>
+    </div>
+  </td>
+  <td>
+    <ul class="cl what">
+      <li>Servidor LDAP de referencia en el mundo OSS</li>
+      <li>Motor MDB (LMDB) de alto rendimiento como backend por defecto</li>
+      <li>Soporte completo LDAPv3: replicación syncrepl, SASL, TLS</li>
+      <li>Overlays: memberOf, ppolicy, accesslog, syncprov, auditlog</li>
+      <li>Esquemas extensibles (OID personalizados)</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl what">
+      <li>Sin GUI de gestión oficial</li>
+      <li>Sin soporte Kerberos/KDC nativo (delegar a MIT Kerberos)</li>
+      <li>Sin consola web, SCIM o provisioning nativo</li>
+      <li>Sin soporte OAuth2/OIDC built-in</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl pro">
+      <li>El servidor LDAP más extendido en Unix/Linux</li>
+      <li>LMDB: backend extremadamente rápido y confiable</li>
+      <li>Máxima flexibilidad de esquemas y ACLs</li>
+      <li>Sin licencia, sin costos, sin vendor</li>
+      <li>Enorme ecosistema de documentación y herramientas</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl con">
+      <li>Configuración vía LDIF (cn=config) muy arcana</li>
+      <li>Sin soporte comercial oficial</li>
+      <li>Curva de aprendizaje pronunciada</li>
+      <li>Documentación fragmentada y a veces desactualizada</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl use">
+      <li>Backend LDAP para aplicaciones Linux/Unix</li>
+      <li>Directorio de usuarios para sistemas internos</li>
+      <li>Base de autenticación para RADIUS, PAM, SSH</li>
+      <li>Laboratorios y entornos de aprendizaje</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl nouse">
+      <li>Organizaciones sin equipo técnico LDAP</li>
+      <li>Cuando se necesita UI de gestión amigable</li>
+      <li>Reemplazo directo de Active Directory (usar Samba o FreeIPA)</li>
+    </ul>
+  </td>
+  <td><span class="badge b-oss">OSS (OpenLDAP Public License)</span></td>
+  <td><span class="crs">✗</span></td>
+</tr>
+
+<!-- 2. 389 Directory Server -->
+<tr data-tags="oss enterprise kerberos">
+  <td>
+    <span class="sol-name">02 389 Directory Server</span>
+    <span class="sol-ver">3.1.x — Red Hat / 2025</span>
+    <div class="sol-tags">
+      <span class="tag t-proto">LDAPv3</span>
+      <span class="tag t-os">RHEL / Fedora</span>
+      <span class="tag t-new">Base de FreeIPA</span>
+    </div>
+  </td>
+  <td>
+    <ul class="cl what">
+      <li>Servidor de directorio empresarial derivado de Netscape Directory Server</li>
+      <li>Replicación multi-master (Multi-Supplier), sync agreements</li>
+      <li>Web Console moderno (Cockpit plugin)</li>
+      <li>DNA plugin para autoincremento de UIDs/GIDs</li>
+      <li>Password policy, lockout, history built-in</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl what">
+      <li>Sin KDC Kerberos nativo (requiere MIT Kerberos externo o FreeIPA)</li>
+      <li>Sin SCIM nativo</li>
+      <li>Sin soporte OAuth2/OIDC built-in</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl pro">
+      <li>Replicación multi-master robusta y probada en producción</li>
+      <li>Web Console usable sin línea de comandos</li>
+      <li>Base de datos Berkeley DB → LMDB (migración en curso)</li>
+      <li>Muy activo: Red Hat mantiene desarrollo continuo</li>
+      <li>Integración natural con FreeIPA y RHEL</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl con">
+      <li>Principalmente orientado a ecosistema Red Hat</li>
+      <li>Menos conocido fuera del mundo RHEL/Fedora</li>
+      <li>Configuración inicial más compleja que OpenLDAP básico</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl use">
+      <li>Directorio enterprise en entornos RHEL/CentOS/Fedora</li>
+      <li>Backend de FreeIPA en producción</li>
+      <li>Organizaciones que necesitan replicación multi-master estable</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl nouse">
+      <li>Entornos Debian/Ubuntu (OpenLDAP más natural)</li>
+      <li>Cuando se necesita Kerberos integrado (usar FreeIPA completo)</li>
+    </ul>
+  </td>
+  <td><span class="badge b-oss">OSS (GPL)</span></td>
+  <td><span class="badge b-ent">Via Red Hat / RHDS</span></td>
+</tr>
+
+<!-- 3. FreeIPA -->
+<tr data-tags="oss enterprise kerberos">
+  <td>
+    <span class="sol-name">03 FreeIPA</span>
+    <span class="sol-ver">4.12.x — 2025</span>
+    <div class="sol-tags">
+      <span class="tag t-proto">LDAP + Kerberos</span>
+      <span class="tag t-proto">DNS + CA</span>
+      <span class="tag t-new">Identity Suite</span>
+    </div>
+  </td>
+  <td>
+    <ul class="cl what">
+      <li>Suite completa de identidad Linux: LDAP (389DS) + Kerberos + DNS + CA + NTP</li>
+      <li>SSO unificado para sistemas Linux con Kerberos tickets</li>
+      <li>Gestión de hosts, servicios, sudo rules, HBAC, SELinux mapping</li>
+      <li>Trusts bidireccionales con Active Directory (AD Trust)</li>
+      <li>Web UI completa y CLI (ipa command)</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl what">
+      <li>No gestiona dispositivos Windows nativamente</li>
+      <li>Sin gestión de Microsoft 365 / Azure AD</li>
+      <li>No es IdP SAML/OIDC por sí solo (requiere Keycloak/Dex)</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl pro">
+      <li>El "Active Directory" de Linux: solución todo-en-uno</li>
+      <li>Kerberos SSO transparente en toda la infraestructura Linux</li>
+      <li>AD Trust permite coexistir con entornos Windows</li>
+      <li>Replicación multi-master con 389DS de base</li>
+      <li>Gestión de certificados con Dogtag CA integrado</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl con">
+      <li>Instalación consume muchos recursos (no apto para VMs pequeñas)</li>
+      <li>RHEL/Fedora/CentOS recomendado; Debian/Ubuntu con fricción</li>
+      <li>Complejidad operacional alta en entornos heterogéneos</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl use">
+      <li>Infraestructuras Linux-centric con SSO Kerberos</li>
+      <li>Organizaciones con servidores RHEL y necesidad de PKI propia</li>
+      <li>Entornos mixtos Linux+Windows con AD Trust</li>
+      <li>Datacenter on-prem con gestión centralizada de identidades</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl nouse">
+      <li>Entornos 100% Windows (usar AD directamente)</li>
+      <li>Equipos pequeños sin experiencia en Kerberos</li>
+      <li>Cloud-native sin servidores on-prem</li>
+    </ul>
+  </td>
+  <td><span class="badge b-oss">OSS (GPL)</span></td>
+  <td><span class="badge b-ent">Via Red Hat IDM</span></td>
+</tr>
+
+<!-- 4. Samba (Active Directory DC) -->
+<tr data-tags="oss enterprise kerberos">
+  <td>
+    <span class="sol-name">04 Samba AD DC</span>
+    <span class="sol-ver">4.20.x — 2025</span>
+    <div class="sol-tags">
+      <span class="tag t-proto">AD / Kerberos</span>
+      <span class="tag t-proto">SMB / LDAP</span>
+      <span class="tag t-new">AD Compatible</span>
+    </div>
+  </td>
+  <td>
+    <ul class="cl what">
+      <li>Implementación OSS completa de Active Directory Domain Controller</li>
+      <li>Compatible con clientes Windows sin licencias Microsoft</li>
+      <li>Kerberos KDC integrado, GPO básicas, DNS</li>
+      <li>Autenticación NTLM y Kerberos para Windows, Linux, macOS</li>
+      <li>Unión de equipos Windows al dominio sin AD de Microsoft</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl what">
+      <li>GPOs complejas con limitaciones vs AD real</li>
+      <li>Sin soporte de algunas funciones AD modernas (PAC, Dynamic Access Control)</li>
+      <li>Sin gestión de Azure AD / Entra ID</li>
+      <li>Sin replicación DFS completa</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl pro">
+      <li>Único OSS que emula un AD DC real para clientes Windows</li>
+      <li>Cero licencias Microsoft para el servidor de directorio</li>
+      <li>Madurez alta: décadas de desarrollo activo</li>
+      <li>Comunidad enorme y documentación extensa</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl con">
+      <li>Compatibilidad no siempre perfecta con AD reciente (Windows Server 2022+)</li>
+      <li>Administración compleja comparada con AD real</li>
+      <li>Funcionalidades AD avanzadas requieren workarounds</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl use">
+      <li>PYMES que necesitan dominio Windows sin licencias Microsoft</li>
+      <li>Entornos Linux/Windows mixtos donde se administran PCs Windows</li>
+      <li>Reducción de costos de licenciamiento Microsoft</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl nouse">
+      <li>Grandes enterprise con GPOs complejas (usar AD real)</li>
+      <li>Entornos con Azure AD / Entra ID</li>
+      <li>Cuando se necesitan funciones AD avanzadas (PAC, DAC)</li>
+    </ul>
+  </td>
+  <td><span class="badge b-oss">OSS (GPL)</span></td>
+  <td><span class="badge b-ent">Soporte comercial externo</span></td>
+</tr>
+
+<!-- 5. Microsoft Active Directory -->
+<tr data-tags="enterprise kerberos">
+  <td>
+    <span class="sol-name">05 Microsoft Active Directory</span>
+    <span class="sol-ver">Windows Server 2025</span>
+    <div class="sol-tags">
+      <span class="tag t-proto">AD / Kerberos</span>
+      <span class="tag t-proto">LDAP / DNS</span>
+      <span class="tag t-warn">Propietario</span>
+    </div>
+  </td>
+  <td>
+    <ul class="cl what">
+      <li>Servicio de directorio estándar del ecosistema Microsoft</li>
+      <li>Kerberos KDC, DNS integrado, GPOs completas</li>
+      <li>Gestión centralizada de usuarios, equipos, políticas</li>
+      <li>Confianzas de dominio, bosques, sites y servicios</li>
+      <li>Integración nativa con Azure AD / Entra ID (Hybrid Join)</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl what">
+      <li>Sin versión Linux nativa del Domain Controller</li>
+      <li>Gestión de dispositivos Linux/macOS limitada sin extensiones</li>
+      <li>Sin opción OSS ni autohospedaje gratuito</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl pro">
+      <li>El estándar de facto en enterprise Windows: máxima compatibilidad</li>
+      <li>GPOs poderosas: gestión granular de miles de equipos</li>
+      <li>Hybrid Join + Entra ID: puente perfecto on-prem/cloud</li>
+      <li>Soporte Microsoft 24/7 con SLA</li>
+      <li>Integración nativa con M365, Exchange, Intune</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl con">
+      <li>Requiere licencias Windows Server (costosas)</li>
+      <li>Vendor lock-in total al ecosistema Microsoft</li>
+      <li>Complejidad en entornos multi-OS (Linux/macOS)</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl use">
+      <li>Cualquier entorno predominantemente Windows</li>
+      <li>Organizaciones con Microsoft 365 y Entra ID</li>
+      <li>Sectores regulados que ya tienen inversión Microsoft</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl nouse">
+      <li>Infraestructuras Linux-first</li>
+      <li>Organizaciones con política anti-vendor-lock</li>
+      <li>Presupuesto limitado (costo de licencias Windows Server)</li>
+    </ul>
+  </td>
+  <td><span class="crs">✗</span></td>
+  <td><span class="badge b-ent">Windows Server License</span></td>
+</tr>
+
+<!-- 6. Microsoft Entra ID (Azure AD) -->
+<tr data-tags="enterprise cloud">
+  <td>
+    <span class="sol-name">06 Microsoft Entra ID</span>
+    <span class="sol-ver">ex-Azure AD / 2025</span>
+    <div class="sol-tags">
+      <span class="tag t-cloud">Cloud SaaS</span>
+      <span class="tag t-proto">OIDC / SAML</span>
+      <span class="tag t-proto">SCIM</span>
+    </div>
+  </td>
+  <td>
+    <ul class="cl what">
+      <li>IdP cloud de Microsoft: OAuth2, OIDC, SAML 2.0</li>
+      <li>Gestión de identidades para M365, Azure, apps SaaS</li>
+      <li>Conditional Access, MFA, Passwordless (FIDO2)</li>
+      <li>SCIM provisioning hacia miles de apps SaaS</li>
+      <li>Entra ID Domain Services (LDAP/Kerberos como servicio)</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl what">
+      <li>No es LDAP nativo (requiere Entra Domain Services para eso)</li>
+      <li>Sin self-hosted — 100% SaaS</li>
+      <li>Vendor lock-in total a Microsoft</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl pro">
+      <li>IdP #1 en el mercado enterprise 2026</li>
+      <li>Integración perfecta con M365 / Azure / Intune / Defender</li>
+      <li>Conditional Access + Passwordless FIDO2: seguridad moderna</li>
+      <li>SCIM hacia miles de apps pre-integradas</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl con">
+      <li>Costo por usuario (P1/P2 para funciones avanzadas)</li>
+      <li>LDAP nativo = Entra Domain Services = costo adicional</li>
+      <li>Dependencia absoluta de conectividad a Azure</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl use">
+      <li>Organizaciones con Microsoft 365</li>
+      <li>IdP principal para apps SaaS corporativas</li>
+      <li>Hybrid identity con AD on-prem sincronizado</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl nouse">
+      <li>Entornos air-gap o sin Internet</li>
+      <li>Cuando se necesita LDAP on-prem sin costo adicional</li>
+      <li>Organizaciones con política de no-cloud</li>
+    </ul>
+  </td>
+  <td><span class="badge b-cloud">Free tier básico</span></td>
+  <td><span class="badge b-ent">P1 / P2 / Governance</span></td>
+</tr>
+
+<!-- 7. ApacheDS -->
+<tr data-tags="oss legacy">
+  <td>
+    <span class="sol-name">07 ApacheDS</span>
+    <span class="sol-ver">2.0.0.AM27 — Apache</span>
+    <div class="sol-tags">
+      <span class="tag t-proto">LDAPv3</span>
+      <span class="tag t-proto">Kerberos</span>
+      <span class="tag t-warn">Slow release</span>
+    </div>
+  </td>
+  <td>
+    <ul class="cl what">
+      <li>Servidor LDAP embebible en Java con KDC Kerberos integrado</li>
+      <li>Ideal para testing y desarrollo (modo embebido)</li>
+      <li>Soporte LDAPv3, DNS, NTP, ChangePassword</li>
+      <li>Apache Directory Studio: cliente LDAP GUI multiplataforma</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl what">
+      <li>Rendimiento inferior a OpenLDAP o 389DS en producción</li>
+      <li>Desarrollo muy lento (releases infrecuentes)</li>
+      <li>No recomendado para grandes volúmenes de producción</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl pro">
+      <li>Apache Directory Studio es el mejor cliente LDAP GUI del mercado OSS</li>
+      <li>Embebible en Java: perfecto para tests de integración</li>
+      <li>KDC Kerberos integrado para pruebas</li>
+      <li>100% Java: multiplataforma sin dependencias nativas</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl con">
+      <li>Cadencia de release muy lenta</li>
+      <li>No apto para producción de alto volumen</li>
+      <li>Comunidad pequeña</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl use">
+      <li>Tests de integración LDAP en proyectos Java</li>
+      <li>Desarrollo y QA donde se necesita LDAP embebido</li>
+      <li>Exploración de directorios con Apache Directory Studio</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl nouse">
+      <li>Producción con alta carga o alta disponibilidad</li>
+      <li>Entornos donde se necesita soporte activo</li>
+    </ul>
+  </td>
+  <td><span class="badge b-oss">OSS (Apache 2.0)</span></td>
+  <td><span class="crs">✗</span></td>
+</tr>
+
+<!-- 8. OpenDJ / ForgeRock DS -->
+<tr data-tags="oss enterprise">
+  <td>
+    <span class="sol-name">08 OpenDJ / PingDS</span>
+    <span class="sol-ver">PingDS 8.x — 2025</span>
+    <div class="sol-tags">
+      <span class="tag t-proto">LDAPv3</span>
+      <span class="tag t-proto">REST / SCIM</span>
+      <span class="tag t-new">Alto rendimiento</span>
+    </div>
+  </td>
+  <td>
+    <ul class="cl what">
+      <li>Servidor de directorio Java de alto rendimiento (fork de OpenDS de Sun)</li>
+      <li>API REST nativa sobre LDAP</li>
+      <li>Replicación multi-master, topología flexible</li>
+      <li>SCIM 2.0 built-in, soporte OAuth2/OIDC</li>
+      <li>Ahora parte de Ping Identity (PingDS)</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl what">
+      <li>OpenDJ OSS abandonado; PingDS es comercial</li>
+      <li>Sin Kerberos KDC nativo</li>
+      <li>Complejidad de gestión en topologías grandes</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl pro">
+      <li>Rendimiento excepcional para millones de entradas</li>
+      <li>API REST + SCIM nativa: integración moderna</li>
+      <li>Replicación robusta para entornos de alta disponibilidad</li>
+      <li>Muy usado en telcos, banca, sector público a escala masiva</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl con">
+      <li>La versión OSS (OpenDJ) quedó abandonada por ForgeRock</li>
+      <li>PingDS requiere licencia comercial (Ping Identity)</li>
+      <li>Migración a Ping Identity genera incertidumbre de roadmap</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl use">
+      <li>Directorios a escala masiva (millones de usuarios)</li>
+      <li>Telcos e ISPs con LDAP de abonados</li>
+      <li>Banca con necesidad de REST + LDAP + SCIM</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl nouse">
+      <li>Proyectos nuevos sin necesidad de escala masiva</li>
+      <li>Cuando se requiere OSS sin dependencia comercial</li>
+    </ul>
+  </td>
+  <td><span class="badge b-legacy">OpenDJ (abandonado)</span></td>
+  <td><span class="badge b-ent">PingDS (comercial)</span></td>
+</tr>
+
+<!-- 9. Keycloak (como directorio/IdP) -->
+<tr data-tags="oss enterprise cloud">
+  <td>
+    <span class="sol-name">09 Keycloak</span>
+    <span class="sol-ver">25.x — Red Hat / 2025</span>
+    <div class="sol-tags">
+      <span class="tag t-cloud">IdP OSS</span>
+      <span class="tag t-proto">OIDC / SAML</span>
+      <span class="tag t-proto">LDAP Proxy</span>
+    </div>
+  </td>
+  <td>
+    <ul class="cl what">
+      <li>IdP/SSO OSS con federación a backends LDAP/AD</li>
+      <li>OAuth2, OIDC, SAML 2.0, WebAuthn, FIDO2</li>
+      <li>User federation: sincroniza usuarios desde LDAP/AD</li>
+      <li>Social login, MFA, Passwordless</li>
+      <li>Admin console, User account console</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl what">
+      <li>No es un servidor LDAP puro (es capa IdP sobre LDAP)</li>
+      <li>Sin KDC Kerberos nativo</li>
+      <li>Elevado consumo de recursos para instancias pequeñas</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl pro">
+      <li>El IdP OSS más adoptado en 2026</li>
+      <li>LDAP federation: conecta a OpenLDAP/AD sin migrar usuarios</li>
+      <li>Soporte completo OIDC + SAML: bridge perfecto entre protocolos</li>
+      <li>Red Hat SSO: soporte enterprise disponible</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl con">
+      <li>No reemplaza un servidor LDAP, lo complementa</li>
+      <li>Requiere JVM + base de datos (Postgres recomendado)</li>
+      <li>Complejidad operacional en HA</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl use">
+      <li>Modernizar autenticación añadiendo OIDC/SAML sobre LDAP legacy</li>
+      <li>SSO para aplicaciones web y microservicios</li>
+      <li>IdP centralizado en Kubernetes (Operator disponible)</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl nouse">
+      <li>Cuando se necesita solo LDAP sin IdP web</li>
+      <li>Entornos con muy pocos recursos</li>
+    </ul>
+  </td>
+  <td><span class="badge b-oss">OSS (Apache 2.0)</span></td>
+  <td><span class="badge b-ent">Red Hat SSO / RH Build</span></td>
+</tr>
+
+<!-- 10. Okta (IDaaS) -->
+<tr data-tags="enterprise cloud">
+  <td>
+    <span class="sol-name">10 Okta Workforce Identity</span>
+    <span class="sol-ver">IDaaS / SaaS — 2025</span>
+    <div class="sol-tags">
+      <span class="tag t-cloud">Cloud SaaS</span>
+      <span class="tag t-proto">OIDC / SAML</span>
+      <span class="tag t-proto">SCIM / LDAP</span>
+    </div>
+  </td>
+  <td>
+    <ul class="cl what">
+      <li>IDaaS líder: gestión de identidades SaaS completa</li>
+      <li>LDAP Interface: expone directorio LDAP para apps legacy</li>
+      <li>Universal Directory con atributos personalizables</li>
+      <li>Lifecycle management, SCIM provisioning masivo</li>
+      <li>Adaptive MFA, Device Trust, FastPass Passwordless</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl what">
+      <li>Sin self-hosted; 100% SaaS</li>
+      <li>Sin KDC Kerberos propio</li>
+      <li>Costo muy elevado a escala</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl pro">
+      <li>Líder Gartner Access Management 2025</li>
+      <li>Integración pre-construida con 7,000+ apps SaaS</li>
+      <li>LDAP Interface: conecta apps legacy al directorio cloud</li>
+      <li>Lifecycle Management automático: onboarding/offboarding</li>
+      <li>Soporte global enterprise con SLA</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl con">
+      <li>Uno de los servicios más caros del mercado</li>
+      <li>Vendor lock-in total</li>
+      <li>Breaches de seguridad resonantes (2022, 2023) — mejorado en 2024-2025</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl use">
+      <li>Enterprise con muchas apps SaaS y necesidad de SSO unificado</li>
+      <li>Organizaciones con lifecycle management complejo</li>
+      <li>Sectores regulados con audit trail detallado</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl nouse">
+      <li>PYMES con presupuesto limitado</li>
+      <li>Entornos air-gap o sin Internet</li>
+      <li>Cuando se prefiere soberanía de datos on-prem</li>
+    </ul>
+  </td>
+  <td><span class="crs">✗</span></td>
+  <td><span class="badge b-ent">Enterprise SaaS</span></td>
+</tr>
+
+<!-- 11. LLDAP -->
+<tr data-tags="oss">
+  <td>
+    <span class="sol-name">11 LLDAP</span>
+    <span class="sol-ver">0.6.x — Rust / 2025</span>
+    <div class="sol-tags">
+      <span class="tag t-proto">LDAPv3 básico</span>
+      <span class="tag t-new">Lightweight</span>
+      <span class="tag t-os">Self-hosted</span>
+    </div>
+  </td>
+  <td>
+    <ul class="cl what">
+      <li>Servidor LDAP ultra-ligero escrito en Rust</li>
+      <li>Diseñado para autenticación en apps self-hosted (Nextcloud, Gitea, etc.)</li>
+      <li>Web UI simple para gestión de usuarios y grupos</li>
+      <li>Backend SQLite o PostgreSQL</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl what">
+      <li>No implementa LDAP completo (sin schema extensible, sin referrals)</li>
+      <li>Sin replicación</li>
+      <li>No apto para producción enterprise</li>
+      <li>Sin Kerberos ni SCIM</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl pro">
+      <li>Extremadamente ligero: ~10 MB RAM</li>
+      <li>Docker image minúscula, deploy en segundos</li>
+      <li>Ideal para homelab y stacks self-hosted</li>
+      <li>UI web simple para usuarios no técnicos</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl con">
+      <li>LDAP muy limitado: no válido para aplicaciones que usen esquemas complejos</li>
+      <li>Sin HA ni replicación</li>
+      <li>Proyecto joven con funcionalidad acotada deliberadamente</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl use">
+      <li>Homelab con Nextcloud, Gitea, Jellyfin, Authelia</li>
+      <li>Stacks self-hosted que necesitan LDAP básico centralizado</li>
+      <li>Cuando OpenLDAP es excesivo para el caso</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl nouse">
+      <li>Cualquier entorno enterprise</li>
+      <li>Apps que usen schemas LDAP no estándar</li>
+      <li>Cuando se necesita replicación o HA</li>
+    </ul>
+  </td>
+  <td><span class="badge b-oss">OSS (GPL)</span></td>
+  <td><span class="crs">✗</span></td>
+</tr>
+
+<!-- 12. Gluu / Janssen -->
+<tr data-tags="oss enterprise cloud">
+  <td>
+    <span class="sol-name">12 Janssen (ex-Gluu)</span>
+    <span class="sol-ver">1.1.x — Linux Foundation / 2025</span>
+    <div class="sol-tags">
+      <span class="tag t-proto">OIDC / FIDO2</span>
+      <span class="tag t-proto">SCIM / LDAP</span>
+      <span class="tag t-cloud">OSS Enterprise IdP</span>
+    </div>
+  </td>
+  <td>
+    <ul class="cl what">
+      <li>Plataforma IdP OSS enterprise bajo Linux Foundation</li>
+      <li>OAuth2, OIDC, FIDO2, SCIM, UMA</li>
+      <li>LDAP (OpenLDAP) como backend de directorio</li>
+      <li>Interoperabilidad con múltiples backends de autenticación</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl what">
+      <li>Complejidad operacional muy alta</li>
+      <li>Documentación en transición (Gluu → Janssen)</li>
+      <li>Comunidad más pequeña que Keycloak</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl pro">
+      <li>Bajo Linux Foundation: gobernanza neutral y sostenible</li>
+      <li>FIDO2 / Passkeys nativos</li>
+      <li>Diseñado para cumplimiento regulatorio (eIDAS, HIPAA)</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl con">
+      <li>Menos adoptado que Keycloak en la práctica</li>
+      <li>Requiere expertise considerable para operar</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl use">
+      <li>Sector salud y gobierno con requisitos FIDO2/SCIM</li>
+      <li>Cuando se necesita IdP OSS con gobernanza neutral</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl nouse">
+      <li>Equipos sin especialistas IAM</li>
+      <li>Cuando Keycloak cubre el caso con menor complejidad</li>
+    </ul>
+  </td>
+  <td><span class="badge b-oss">OSS (Apache 2.0)</span></td>
+  <td><span class="badge b-ent">Agama Lab / soporte</span></td>
+</tr>
+
+<!-- 13. Oracle Internet Directory -->
+<tr data-tags="enterprise legacy">
+  <td>
+    <span class="sol-name">13 Oracle Internet Directory</span>
+    <span class="sol-ver">OID 12c / 19c</span>
+    <div class="sol-tags">
+      <span class="tag t-proto">LDAPv3</span>
+      <span class="tag t-warn">Oracle stack</span>
+      <span class="tag t-warn">Legacy enterprise</span>
+    </div>
+  </td>
+  <td>
+    <ul class="cl what">
+      <li>Servidor LDAP enterprise sobre base de datos Oracle</li>
+      <li>Alta disponibilidad con Oracle RAC</li>
+      <li>Integración con Oracle E-Business Suite, PeopleSoft, Fusion</li>
+      <li>Replicación multi-master con Oracle DB como backend</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl what">
+      <li>Requiere licencia Oracle Database (muy costosa)</li>
+      <li>No tiene sentido fuera del ecosistema Oracle</li>
+      <li>Innovación estancada frente a soluciones modernas</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl pro">
+      <li>Máxima integración con aplicaciones Oracle</li>
+      <li>HA probada con Oracle RAC</li>
+      <li>Soporte global Oracle Premier</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl con">
+      <li>Precio prohibitivo (licencia Oracle DB obligatoria)</li>
+      <li>Lock-in total al ecosistema Oracle</li>
+      <li>Arquitectura anticuada comparada con alternativas modernas</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl use">
+      <li>Organizaciones con Oracle ERP que necesitan directorio integrado</li>
+      <li>Grandes corporativos con Oracle como stack principal</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl nouse">
+      <li>Cualquier organización sin Oracle ERP</li>
+      <li>Proyectos nuevos (usar opciones modernas)</li>
+    </ul>
+  </td>
+  <td><span class="crs">✗</span></td>
+  <td><span class="badge b-ent">Oracle License</span></td>
+</tr>
+
+<!-- 14. Univention Corporate Server -->
+<tr data-tags="enterprise oss kerberos">
+  <td>
+    <span class="sol-name">14 UCS / Univention</span>
+    <span class="sol-ver">5.2 — 2025</span>
+    <div class="sol-tags">
+      <span class="tag t-proto">Samba AD + LDAP</span>
+      <span class="tag t-proto">Kerberos</span>
+      <span class="tag t-new">All-in-one</span>
+    </div>
+  </td>
+  <td>
+    <ul class="cl what">
+      <li>Distribución Linux completa con directorio integrado (Samba AD + OpenLDAP)</li>
+      <li>Portal web unificado para gestión de usuarios, apps, politicas</li>
+      <li>App Center: Nextcloud, Kopano, Rocket.Chat integrados</li>
+      <li>Compatible con clientes Windows (Samba AD) y Linux (OpenLDAP)</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl what">
+      <li>Distribución propia (Debian-based): menos flexibilidad</li>
+      <li>Funciones avanzadas requieren suscripción</li>
+      <li>Menos conocido fuera de Europa (fuerte en DACH)</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl pro">
+      <li>Solución todo-en-uno: SO + directorio + apps</li>
+      <li>Alternativa a Microsoft AD server llave en mano</li>
+      <li>Muy popular en sector público europeo (GDPR-first)</li>
+      <li>Gestión visual sin CLI obligatoria</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl con">
+      <li>Ligado a su propia distribución Debian</li>
+      <li>Comunidad relativamente pequeña</li>
+      <li>Soporte enterprise de pago para funciones avanzadas</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl use">
+      <li>PYMES europeas como alternativa a Microsoft AD</li>
+      <li>Sector público con requisitos GDPR y soberanía de datos</li>
+      <li>Organizaciones que buscan suite completa on-prem</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl nouse">
+      <li>Grandes enterprise con infraestructura ya definida</li>
+      <li>Entornos que requieren máxima personalización del SO</li>
+    </ul>
+  </td>
+  <td><span class="badge b-oss">Core OSS (AGPL)</span></td>
+  <td><span class="badge b-ent">UCS @ Univention</span></td>
+</tr>
+
+<!-- 15. IBM Security Directory Server -->
+<tr data-tags="enterprise legacy">
+  <td>
+    <span class="sol-name">15 IBM Security Verify Directory</span>
+    <span class="sol-ver">10.x / 2024</span>
+    <div class="sol-tags">
+      <span class="tag t-proto">LDAPv3</span>
+      <span class="tag t-warn">IBM stack</span>
+      <span class="tag t-warn">Legacy enterprise</span>
+    </div>
+  </td>
+  <td>
+    <ul class="cl what">
+      <li>Servidor LDAP enterprise con backend IBM DB2</li>
+      <li>Replicación avanzada, proxy LDAP</li>
+      <li>Integración con IBM Security Verify (IDaaS)</li>
+      <li>Soporte z/OS (mainframe) y AIX</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl what">
+      <li>Requiere IBM DB2 como backend (costoso)</li>
+      <li>Sin versión OSS</li>
+      <li>Relevante solo en ecosistema IBM</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl pro">
+      <li>El único servidor LDAP con soporte z/OS mainframe</li>
+      <li>HA extrema probada en entornos críticos bancarios</li>
+      <li>Soporte IBM global con SLA muy estrictos</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl con">
+      <li>Costo total de propiedad altísimo (DB2 + licencias IBM)</li>
+      <li>Dependencia total de IBM</li>
+      <li>Innovación lenta en funciones modernas (OIDC, SCIM)</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl use">
+      <li>Mainframe IBM z/OS que necesita directorio LDAP</li>
+      <li>Banca y seguros con infraestructura IBM crítica</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl nouse">
+      <li>Cualquier organización sin mainframe IBM</li>
+      <li>Proyectos nuevos</li>
+    </ul>
+  </td>
+  <td><span class="crs">✗</span></td>
+  <td><span class="badge b-ent">IBM License</span></td>
+</tr>
+
+<!-- 16. Google Cloud Identity / Workspace -->
+<tr data-tags="enterprise cloud">
+  <td>
+    <span class="sol-name">16 Google Cloud Identity</span>
+    <span class="sol-ver">Workspace / GCDS — 2025</span>
+    <div class="sol-tags">
+      <span class="tag t-cloud">Cloud SaaS</span>
+      <span class="tag t-proto">OIDC / SAML</span>
+      <span class="tag t-proto">SCIM</span>
+    </div>
+  </td>
+  <td>
+    <ul class="cl what">
+      <li>IdP cloud de Google: OAuth2, OIDC, SAML 2.0</li>
+      <li>Gestión de identidades para Google Workspace y GCP</li>
+      <li>LDAP Secure (LDAPS) como servicio managed para apps legacy</li>
+      <li>SCIM provisioning, Endpoint Management, Context-Aware Access</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl what">
+      <li>Sin self-hosted; 100% SaaS</li>
+      <li>LDAP solo disponible en Google Workspace Enterprise</li>
+      <li>Sin KDC Kerberos nativo</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl pro">
+      <li>Integración perfecta con Google Workspace / GCP</li>
+      <li>LDAP Secure managed: sin gestionar infraestructura LDAP</li>
+      <li>SSO preintegrado con miles de apps SaaS via SAML/OIDC</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl con">
+      <li>LDAP solo en plan Enterprise (costoso)</li>
+      <li>Funcionalidad limitada fuera del ecosistema Google</li>
+      <li>Vendor lock-in a Google</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl use">
+      <li>Organizaciones Google Workspace que necesitan LDAP para apps legacy</li>
+      <li>Startups y empresas tech-first con stack Google</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl nouse">
+      <li>Entornos on-prem o sin Google Workspace</li>
+      <li>Organizaciones con política anti-cloud</li>
+    </ul>
+  </td>
+  <td><span class="badge b-cloud">Free Tier básico</span></td>
+  <td><span class="badge b-ent">Workspace Enterprise</span></td>
+</tr>
+
+<!-- 17. Authentik -->
+<tr data="oss enterprise cloud">
+  <td>
+    <span class="sol-name">17 Authentik</span>
+    <span class="sol-ver">2025.4.x — 2025</span>
+    <div class="sol-tags">
+      <span class="tag t-cloud">OSS IdP</span>
+      <span class="tag t-proto">OIDC / SAML</span>
+      <span class="tag t-new">LDAP Provider</span>
+    </div>
+  </td>
+  <td>
+    <ul class="cl what">
+      <li>IdP OSS moderno con LDAP Provider integrado (expone directorio LDAP)</li>
+      <li>OAuth2, OIDC, SAML, RADIUS, SCIM</li>
+      <li>Flows personalizables (UI de onboarding, enrollment, recovery)</li>
+      <li>Proxy provider para proteger apps sin modificarlas</li>
+      <li>Docker/Kubernetes friendly</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl what">
+      <li>No es servidor LDAP puro (es capa IdP que expone LDAP)</li>
+      <li>Sin KDC Kerberos</li>
+      <li>Menos maduro que Keycloak en enterprise</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl pro">
+      <li>El IdP OSS que más rápido crece en 2025-2026</li>
+      <li>LDAP Provider: apps legacy se conectan sin cambios</li>
+      <li>UI moderna y muy configurable</li>
+      <li>Proxy mode: SSO sin tocar el código de las apps</li>
+      <li>Excelente integración con stacks self-hosted</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl con">
+      <li>Menor trayectoria que Keycloak en enterprise de gran escala</li>
+      <li>Enterprise features detrás de plan de pago</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl use">
+      <li>Homelab y self-hosted avanzado con SSO unificado</li>
+      <li>Modernizar apps legacy añadiendo OIDC/SAML + LDAP</li>
+      <li>Equipos DevOps que quieren alternativa a Keycloak más simple</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl nouse">
+      <li>Cuando se necesita KDC Kerberos</li>
+      <li>Enterprise con soporte garantizado de nivel Okta/Ping</li>
+    </ul>
+  </td>
+  <td><span class="badge b-oss">OSS (MIT)</span></td>
+  <td><span class="badge b-ent">Authentik Enterprise</span></td>
+</tr>
+
+<!-- 18. Ping Identity / PingDirectory -->
+<tr data-tags="enterprise cloud">
+  <td>
+    <span class="sol-name">18 PingDirectory</span>
+    <span class="sol-ver">10.x — Ping Identity / 2025</span>
+    <div class="sol-tags">
+      <span class="tag t-proto">LDAPv3</span>
+      <span class="tag t-proto">REST / SCIM</span>
+      <span class="tag t-warn">Propietario</span>
+    </div>
+  </td>
+  <td>
+    <ul class="cl what">
+      <li>Servidor LDAP de alta escala con API REST y SCIM 2.0</li>
+      <li>Topologías de replicación complejas para millones de entradas</li>
+      <li>Data Sync para sincronización entre directorios heterogéneos</li>
+      <li>Métricas, auditoría, control de acceso granular</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl what">
+      <li>Sin versión OSS (comercial puro)</li>
+      <li>Precio muy elevado</li>
+      <li>Sin KDC Kerberos propio</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl pro">
+      <li>Mejor rendimiento del mercado para directorios a escala masiva</li>
+      <li>REST + SCIM nativos: arquitectura moderna sobre LDAP</li>
+      <li>Data Sync: migración y sincronización entre directorios</li>
+      <li>Soporte enterprise global Ping Identity</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl con">
+      <li>Precio muy alto (enterprise only)</li>
+      <li>Vendor lock-in a Ping Identity</li>
+      <li>Complejo de operar sin especialistas</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl use">
+      <li>Telcos con decenas de millones de abonados</li>
+      <li>Banca con directorios a escala extrema</li>
+      <li>CIAM (Customer Identity) de gran escala</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl nouse">
+      <li>Organizaciones medianas o pequeñas</li>
+      <li>Cuando OpenDJ o 389DS cubre el caso</li>
+    </ul>
+  </td>
+  <td><span class="crs">✗</span></td>
+  <td><span class="badge b-ent">Enterprise License</span></td>
+</tr>
+
+<!-- 19. eDirectory (NetIQ/OpenText) -->
+<tr data-tags="enterprise legacy">
+  <td>
+    <span class="sol-name">19 NetIQ eDirectory</span>
+    <span class="sol-ver">9.2.x — OpenText / 2024</span>
+    <div class="sol-tags">
+      <span class="tag t-proto">LDAPv3</span>
+      <span class="tag t-warn">Ex-Novell NDS</span>
+      <span class="tag t-warn">Legacy</span>
+    </div>
+  </td>
+  <td>
+    <ul class="cl what">
+      <li>Descendiente de Novell NDS (1993): el directorio empresarial más antiguo</li>
+      <li>Multi-plataforma: Linux, Windows, z/OS</li>
+      <li>Replicación y particionamiento avanzado para WAN</li>
+      <li>Integración con NetIQ Identity Manager (IDM)</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl what">
+      <li>Innovación estancada: sin funciones modernas (OIDC, SCIM)</li>
+      <li>Ecosistema en declive desde la venta de Novell</li>
+      <li>Sin versión OSS</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl pro">
+      <li>Décadas de madurez en entornos de misión crítica</li>
+      <li>Replicación WAN robusta para organizaciones distribuidas</li>
+      <li>Soporte OpenText para clientes legacy</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl con">
+      <li>Producto en declive: no invertir en nuevos deployments</li>
+      <li>Sin roadmap claro de modernización</li>
+      <li>Costoso y difícil de encontrar especialistas</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl use">
+      <li>Organizaciones con NDS/eDirectory legacy que aún no migraron</li>
+      <li>Mantenimiento de infraestructura Novell heredada</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl nouse">
+      <li>Cualquier proyecto nuevo</li>
+      <li>Migrar eDirectory a cualquier alternativa moderna ASAP</li>
+    </ul>
+  </td>
+  <td><span class="crs">✗</span></td>
+  <td><span class="badge b-legacy">OpenText (legacy)</span></td>
+</tr>
+
+<!-- 20. Kanidm -->
+<tr data-tags="oss cloud">
+  <td>
+    <span class="sol-name">20 Kanidm</span>
+    <span class="sol-ver">1.4.x — Rust / 2025</span>
+    <div class="sol-tags">
+      <span class="tag t-proto">LDAP compat.</span>
+      <span class="tag t-proto">OIDC / RADIUS</span>
+      <span class="tag t-new">Seguridad by design</span>
+    </div>
+  </td>
+  <td>
+    <ul class="cl what">
+      <li>Servidor de identidad moderno escrito en Rust (seguridad de memoria)</li>
+      <li>Diseño zero-legacy: sin compatibilidad con LDAPv2 ni esquemas anticuados</li>
+      <li>OAuth2/OIDC, RADIUS, LDAP (capa de compatibilidad), WebAuthn/FIDO2</li>
+      <li>Sin contraseñas en texto plano en ninguna capa del protocolo</li>
+      <li>Autenticación SSH keys, API tokens, TOTP, Passkeys nativos</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl what">
+      <li>LDAP como capa de compatibilidad limitada, no implementación completa</li>
+      <li>Sin soporte Windows/AD nativo</li>
+      <li>Sin soporte de esquemas LDAP personalizados (diseño intencional)</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl pro">
+      <li>El servidor de identidad más moderno y seguro en OSS 2025-2026</li>
+      <li>Rust: sin vulnerabilidades de memoria, rendimiento nativo</li>
+      <li>Passwordless y Passkeys nativos desde el día uno</li>
+      <li>Diseño opinionado: elimina patrones inseguros por arquitectura</li>
+      <li>Muy activo en 2025-2026, comunidad creciente</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl con">
+      <li>Compatibilidad LDAP limitada: no sirve como sustituto 1:1 de OpenLDAP</li>
+      <li>Aún en maduración para enterprise de gran escala</li>
+      <li>Sin soporte comercial oficial (comunidad)</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl use">
+      <li>Infraestructura Linux moderna que prioriza seguridad</li>
+      <li>Equipos que quieren Passwordless + FIDO2 + OIDC en OSS</li>
+      <li>Nuevos proyectos que pueden evitar LDAP legacy</li>
+      <li>Autenticación SSH y API con gestión centralizada OSS</li>
+    </ul>
+  </td>
+  <td>
+    <ul class="cl nouse">
+      <li>Apps que requieren LDAP completo con schemas personalizados</li>
+      <li>Entornos Windows o que necesitan interop AD</li>
+      <li>Organizaciones que necesitan soporte enterprise garantizado</li>
+    </ul>
+  </td>
+  <td><span class="badge b-oss">OSS (MPL 2.0)</span></td>
+  <td><span class="crs">✗</span></td>
+</tr>
+
+  </tbody>
+  </table>
+</div>
+
+<footer>
+  Comparativa Directory Services &amp; LDAP — Estado del Arte <strong>Q2 2026</strong> · 20 implementaciones · 8 dimensiones de análisis
+  <br>
+  Protocolos cubiertos: <strong>LDAPv3 · Kerberos · SAML 2.0 · OIDC · SCIM 2.0 · RADIUS · FIDO2 / Passkeys</strong>
+  <br><br>
+  <span style="color:#3a5080">Los precios y características pueden cambiar. Verificar con cada vendor o proyecto para información actualizada.</span>
+</footer>
+
+<script>
+  function doFilter(tag, btn) {
+    document.querySelectorAll('.fbtn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    const rows = document.querySelectorAll('#ldapTable tbody tr');
+    let n = 0;
+    rows.forEach(r => {
+      const tags = (r.getAttribute('data-tags') || '') + ' ' + (r.getAttribute('data') || '');
+      const show = tag === 'all' || tags.includes(tag);
+      r.classList.toggle('hidden', !show);
+      if (show) n++;
+    });
+    document.getElementById('count-badge').textContent = n + ' entradas';
+  }
+
+  function doSearch(val) {
+    const q = val.toLowerCase().trim();
+    const rows = document.querySelectorAll('#ldapTable tbody tr');
+    let n = 0;
+    rows.forEach(r => {
+      const show = !q || r.textContent.toLowerCase().includes(q);
+      r.classList.toggle('hidden', !show);
+      if (show) n++;
+    });
+    document.getElementById('count-badge').textContent = n + ' entradas';
+  }
+</script>
+</body>
+</html>

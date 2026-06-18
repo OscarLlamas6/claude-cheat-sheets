@@ -1,0 +1,943 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Comparativo de Certificaciones Profesionales 2026</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;700&display=swap');
+
+  :root {
+    --bg: #0D0F14;
+    --surface: #151820;
+    --surface2: #1C2030;
+    --border: #252A3A;
+    --accent: #4F8EF7;
+    --accent2: #7C5CFC;
+    --green: #3ECFA4;
+    --yellow: #F5C542;
+    --red: #F76F6F;
+    --text: #E8EAF0;
+    --text-muted: #7A82A0;
+    --text-dim: #4A5070;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    line-height: 1.5;
+  }
+
+  header {
+    background: linear-gradient(135deg, #0D0F14 0%, #151825 60%, #1a1535 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 40px 32px 32px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  header::before {
+    content: '';
+    position: absolute;
+    top: -60px; right: -60px;
+    width: 300px; height: 300px;
+    background: radial-gradient(circle, rgba(79,142,247,0.12) 0%, transparent 70%);
+    border-radius: 50%;
+  }
+
+  header::after {
+    content: '';
+    position: absolute;
+    bottom: -40px; left: 20%;
+    width: 200px; height: 200px;
+    background: radial-gradient(circle, rgba(124,92,252,0.08) 0%, transparent 70%);
+    border-radius: 50%;
+  }
+
+  .header-content { position: relative; z-index: 1; }
+
+  .header-eyebrow {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 10px;
+  }
+
+  h1 {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--text);
+    line-height: 1.2;
+    margin-bottom: 10px;
+  }
+
+  h1 span {
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .header-subtitle {
+    color: var(--text-muted);
+    font-size: 13px;
+    max-width: 600px;
+  }
+
+  .stats-row {
+    display: flex;
+    gap: 24px;
+    margin-top: 24px;
+    flex-wrap: wrap;
+  }
+
+  .stat {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .stat-num {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--accent);
+  }
+
+  .stat-label {
+    font-size: 11px;
+    color: var(--text-muted);
+    line-height: 1.3;
+  }
+
+  /* Filtros */
+  .filter-bar {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 14px 32px;
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+
+  .filter-label {
+    font-size: 11px;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-right: 4px;
+  }
+
+  .filter-btn {
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 5px 14px;
+    color: var(--text-muted);
+    font-size: 11px;
+    font-family: 'Inter', sans-serif;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .filter-btn:hover, .filter-btn.active {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: white;
+  }
+
+  /* Tabla */
+  .table-wrapper {
+    overflow-x: auto;
+    padding: 24px 32px 48px;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    min-width: 1400px;
+  }
+
+  thead th {
+    background: var(--surface2);
+    padding: 12px 14px;
+    text-align: left;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    border-bottom: 2px solid var(--border);
+    white-space: nowrap;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+
+  thead th:first-child { border-radius: 8px 0 0 0; }
+  thead th:last-child { border-radius: 0 8px 0 0; }
+
+  tbody tr {
+    transition: background 0.12s;
+    border-bottom: 1px solid var(--border);
+  }
+
+  tbody tr:hover td { background: rgba(79,142,247,0.04); }
+
+  tbody td {
+    padding: 14px 14px;
+    vertical-align: top;
+    border-bottom: 1px solid var(--border);
+    color: var(--text);
+  }
+
+  tbody tr:last-child td { border-bottom: none; }
+
+  /* Nombre de cert */
+  .cert-name {
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 700;
+    font-size: 14px;
+    color: white;
+    white-space: nowrap;
+  }
+
+  .cert-org {
+    font-size: 10px;
+    color: var(--text-dim);
+    margin-top: 2px;
+  }
+
+  /* Categoría badge */
+  .badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  .badge-lean { background: rgba(62,207,164,0.15); color: var(--green); border: 1px solid rgba(62,207,164,0.3); }
+  .badge-it { background: rgba(79,142,247,0.15); color: var(--accent); border: 1px solid rgba(79,142,247,0.3); }
+  .badge-arch { background: rgba(124,92,252,0.15); color: var(--accent2); border: 1px solid rgba(124,92,252,0.3); }
+  .badge-pm { background: rgba(245,197,66,0.15); color: var(--yellow); border: 1px solid rgba(245,197,66,0.3); }
+  .badge-agile { background: rgba(247,111,111,0.15); color: var(--red); border: 1px solid rgba(247,111,111,0.3); }
+  .badge-data { background: rgba(255,150,80,0.15); color: #FF9650; border: 1px solid rgba(255,150,80,0.3); }
+
+  /* Nivel */
+  .level {
+    display: flex;
+    gap: 3px;
+    align-items: center;
+    margin-bottom: 4px;
+  }
+
+  .level-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--border);
+  }
+
+  .level-dot.filled { background: var(--accent); }
+  .level-dot.filled.mid { background: var(--yellow); }
+  .level-dot.filled.hard { background: var(--red); }
+
+  .level-label {
+    font-size: 10px;
+    color: var(--text-muted);
+    margin-left: 4px;
+  }
+
+  /* Status 2026 */
+  .status-active {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 11px;
+    color: var(--green);
+  }
+
+  .status-active::before {
+    content: '';
+    width: 6px; height: 6px;
+    background: var(--green);
+    border-radius: 50%;
+    display: inline-block;
+    animation: pulse 2s infinite;
+  }
+
+  .status-evolving {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 11px;
+    color: var(--yellow);
+  }
+
+  .status-evolving::before {
+    content: '';
+    width: 6px; height: 6px;
+    background: var(--yellow);
+    border-radius: 50%;
+    display: inline-block;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+
+  /* Precio */
+  .price {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    color: white;
+  }
+
+  .price-range {
+    font-size: 10px;
+    color: var(--text-muted);
+    margin-top: 2px;
+  }
+
+  /* Examen */
+  .exam-yes {
+    color: var(--green);
+    font-size: 11px;
+    font-weight: 500;
+  }
+
+  .exam-no {
+    color: var(--text-dim);
+    font-size: 11px;
+  }
+
+  /* Descripción corta */
+  .desc {
+    font-size: 12px;
+    color: var(--text-muted);
+    line-height: 1.5;
+    max-width: 220px;
+  }
+
+  .purpose {
+    font-size: 12px;
+    color: var(--text-muted);
+    line-height: 1.5;
+    max-width: 200px;
+  }
+
+  .diff {
+    font-size: 11px;
+    color: var(--text-muted);
+    line-height: 1.5;
+    max-width: 210px;
+    font-style: italic;
+  }
+
+  /* Alternating rows */
+  tbody tr:nth-child(even) td {
+    background: rgba(255,255,255,0.012);
+  }
+
+  /* Número de fila */
+  .row-num {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 11px;
+    color: var(--text-dim);
+    font-weight: 500;
+    width: 28px;
+    text-align: center;
+  }
+
+  /* Footer */
+  footer {
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    padding: 20px 32px;
+    color: var(--text-dim);
+    font-size: 11px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  footer strong { color: var(--text-muted); }
+
+  /* Search */
+  .search-wrap {
+    position: relative;
+  }
+
+  .search-input {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 6px 12px 6px 32px;
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    font-size: 12px;
+    width: 220px;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+
+  .search-input:focus { border-color: var(--accent); }
+  .search-input::placeholder { color: var(--text-dim); }
+
+  .search-icon {
+    position: absolute;
+    left: 10px; top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-dim);
+    font-size: 12px;
+  }
+
+  @media print {
+    body { background: white; color: black; }
+    header { background: #f0f4ff; color: black; }
+    .filter-bar { display: none; }
+    thead th { background: #e0e8ff; color: #333; }
+    tbody td { border-color: #ddd; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-content">
+    <div class="header-eyebrow">Guía de referencia · Actualizado 2026</div>
+    <h1>Certificaciones <span>Profesionales</span> Comparativo</h1>
+    <p class="header-subtitle">Lean Six Sigma, ITIL, TOGAF, gestión de proyectos, arquitectura, agilidad y más. Conoce qué busca cada una, su precio y vigencia en 2026.</p>
+    <div class="stats-row">
+      <div class="stat">
+        <div class="stat-num">22</div>
+        <div class="stat-label">Certificaciones<br>analizadas</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num">6</div>
+        <div class="stat-label">Categorías<br>cubiertas</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num">100%</div>
+        <div class="stat-label">Con examen<br>oficial o equivalente</div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div class="filter-bar">
+  <span class="filter-label">Filtrar:</span>
+  <div class="search-wrap">
+    <span class="search-icon">🔍</span>
+    <input class="search-input" id="searchInput" placeholder="Buscar certificación..." oninput="filterTable()">
+  </div>
+  <button class="filter-btn active" onclick="filterCategory('all', this)">Todas</button>
+  <button class="filter-btn" onclick="filterCategory('lean', this)">Lean / Six Sigma</button>
+  <button class="filter-btn" onclick="filterCategory('it', this)">Gestión TI</button>
+  <button class="filter-btn" onclick="filterCategory('arch', this)">Arquitectura</button>
+  <button class="filter-btn" onclick="filterCategory('pm', this)">Project Mgmt</button>
+  <button class="filter-btn" onclick="filterCategory('agile', this)">Agilidad</button>
+  <button class="filter-btn" onclick="filterCategory('data', this)">Datos / IA</button>
+</div>
+
+<div class="table-wrapper">
+<table id="certTable">
+<thead>
+  <tr>
+    <th>#</th>
+    <th>Certificación</th>
+    <th>Categoría</th>
+    <th>¿Qué es?</th>
+    <th>¿Qué busca / Propósito?</th>
+    <th>Diferenciador clave</th>
+    <th>Dificultad</th>
+    <th>Status 2026</th>
+    <th>Examen oficial</th>
+    <th>Precio aprox. (USD)</th>
+  </tr>
+</thead>
+<tbody>
+
+<!-- 1 -->
+<tr data-category="lean">
+  <td class="row-num">01</td>
+  <td>
+    <div class="cert-name">Lean Six Sigma White Belt</div>
+    <div class="cert-org">IASSC / ASQ / Council for Six Sigma</div>
+  </td>
+  <td><span class="badge badge-lean">Lean / Six Sigma</span></td>
+  <td class="desc">Nivel introductorio de la metodología DMAIC para reducción de desperdicios y variabilidad en procesos.</td>
+  <td class="purpose">Conocer el vocabulario y conceptos básicos de Six Sigma. Apoya a equipos sin liderar proyectos.</td>
+  <td class="diff">Es la puerta de entrada; no requiere experiencia previa. Nivel participativo, no liderazgo.</td>
+  <td>
+    <div class="level"><div class="level-dot filled"></div><div class="level-dot"></div><div class="level-dot"></div><div class="level-dot"></div><div class="level-label">Básico</div></div>
+  </td>
+  <td><span class="status-active">Vigente</span></td>
+  <td class="exam-yes">✔ Sí — online o presencial</td>
+  <td><div class="price">$0 – $150</div><div class="price-range">Muchos proveedores gratuitos</div></td>
+</tr>
+
+<!-- 2 -->
+<tr data-category="lean">
+  <td class="row-num">02</td>
+  <td>
+    <div class="cert-name">Lean Six Sigma Yellow Belt</div>
+    <div class="cert-org">IASSC / ASQ</div>
+  </td>
+  <td><span class="badge badge-lean">Lean / Six Sigma</span></td>
+  <td class="desc">Nivel intermedio-bajo. Permite participar activamente en proyectos DMAIC como colaborador calificado.</td>
+  <td class="purpose">Apoyar proyectos de mejora bajo supervisión de un Green o Black Belt. Aplicar herramientas básicas.</td>
+  <td class="diff">Más profundo que White Belt; incluye herramientas como mapas de proceso y análisis causa-raíz básico.</td>
+  <td>
+    <div class="level"><div class="level-dot filled"></div><div class="level-dot filled mid"></div><div class="level-dot"></div><div class="level-dot"></div><div class="level-label">Básico-Medio</div></div>
+  </td>
+  <td><span class="status-active">Vigente</span></td>
+  <td class="exam-yes">✔ Sí</td>
+  <td><div class="price">$195 – $395</div><div class="price-range">IASSC: $195 · ASQ: ~$295</div></td>
+</tr>
+
+<!-- 3 -->
+<tr data-category="lean">
+  <td class="row-num">03</td>
+  <td>
+    <div class="cert-name">Lean Six Sigma Green Belt</div>
+    <div class="cert-org">IASSC / ASQ / PMI</div>
+  </td>
+  <td><span class="badge badge-lean">Lean / Six Sigma</span></td>
+  <td class="desc">Certificación práctica de gestión de proyectos de mejora de procesos mediante herramientas estadísticas intermedias.</td>
+  <td class="purpose">Liderar proyectos de mejora de mediana escala, análisis de datos con herramientas como ANOVA, control charts.</td>
+  <td class="diff">Perfil técnico-operativo. Lidera proyectos part-time mientras mantiene su rol funcional.</td>
+  <td>
+    <div class="level"><div class="level-dot filled"></div><div class="level-dot filled mid"></div><div class="level-dot filled mid"></div><div class="level-dot"></div><div class="level-label">Intermedio</div></div>
+  </td>
+  <td><span class="status-active">Vigente</span></td>
+  <td class="exam-yes">✔ Sí — 110 preguntas IASSC</td>
+  <td><div class="price">$295 – $595</div><div class="price-range">IASSC: $295 · ASQ: $438–$588</div></td>
+</tr>
+
+<!-- 4 -->
+<tr data-category="lean">
+  <td class="row-num">04</td>
+  <td>
+    <div class="cert-name">Lean Six Sigma Black Belt</div>
+    <div class="cert-org">IASSC / ASQ</div>
+  </td>
+  <td><span class="badge badge-lean">Lean / Six Sigma</span></td>
+  <td class="desc">Nivel experto. Dominio total de DMAIC y herramientas estadísticas avanzadas (regresión, DOE, MSA).</td>
+  <td class="purpose">Liderar proyectos complejos de transformación, mentorear Belts inferiores e impactar el P&L de la empresa.</td>
+  <td class="diff">La certificación más reconocida en manufactura y operaciones. Alta demanda en industria y consultoría.</td>
+  <td>
+    <div class="level"><div class="level-dot filled"></div><div class="level-dot filled mid"></div><div class="level-dot filled mid"></div><div class="level-dot filled hard"></div><div class="level-label">Avanzado</div></div>
+  </td>
+  <td><span class="status-active">Vigente</span></td>
+  <td class="exam-yes">✔ Sí — 150 preguntas IASSC</td>
+  <td><div class="price">$395 – $695</div><div class="price-range">IASSC: $395 · ASQ: $538–$738</div></td>
+</tr>
+
+<!-- 5 -->
+<tr data-category="lean">
+  <td class="row-num">05</td>
+  <td>
+    <div class="cert-name">Lean Six Sigma Master Black Belt</div>
+    <div class="cert-org">ASQ / Council for Six Sigma</div>
+  </td>
+  <td><span class="badge badge-lean">Lean / Six Sigma</span></td>
+  <td class="desc">Máximo nivel de Six Sigma. Diseña estrategias de mejora corporativa y forma a Black Belts.</td>
+  <td class="purpose">Transformar la cultura organizacional, entrenar coaches internos y conectar Six Sigma con la estrategia de negocio.</td>
+  <td class="diff">No es solo técnico; requiere liderazgo ejecutivo y haber completado múltiples proyectos certificados.</td>
+  <td>
+    <div class="level"><div class="level-dot filled"></div><div class="level-dot filled mid"></div><div class="level-dot filled mid"></div><div class="level-dot filled hard"></div><div class="level-label">Experto</div></div>
+  </td>
+  <td><span class="status-active">Vigente</span></td>
+  <td class="exam-yes">✔ Sí + portafolio de proyectos</td>
+  <td><div class="price">$1,500 – $4,000+</div><div class="price-range">Incluye formación intensiva</div></td>
+</tr>
+
+<!-- 6 -->
+<tr data-category="it">
+  <td class="row-num">06</td>
+  <td>
+    <div class="cert-name">ITIL 4 Foundation</div>
+    <div class="cert-org">PeopleCert / Axelos</div>
+  </td>
+  <td><span class="badge badge-it">Gestión TI</span></td>
+  <td class="desc">Marco de mejores prácticas para la gestión de servicios de TI (ITSM). Versión 4 integra agilidad y DevOps.</td>
+  <td class="purpose">Alinear los servicios de TI con el valor de negocio. Establecer un lenguaje común para equipos de soporte y operaciones TI.</td>
+  <td class="diff">Estándar de facto global en ITSM. ITIL 4 incorpora conceptos Agile y DevOps que v3 no tenía.</td>
+  <td>
+    <div class="level"><div class="level-dot filled"></div><div class="level-dot filled mid"></div><div class="level-dot"></div><div class="level-dot"></div><div class="level-label">Intermedio</div></div>
+  </td>
+  <td><span class="status-active">Vigente — v4 es el estándar</span></td>
+  <td class="exam-yes">✔ Sí — 40 preguntas, 65% para aprobar</td>
+  <td><div class="price">$385 – $450</div><div class="price-range">Precio PeopleCert directo</div></td>
+</tr>
+
+<!-- 7 -->
+<tr data-category="it">
+  <td class="row-num">07</td>
+  <td>
+    <div class="cert-name">ITIL 4 Managing Professional</div>
+    <div class="cert-org">PeopleCert / Axelos</div>
+  </td>
+  <td><span class="badge badge-it">Gestión TI</span></td>
+  <td class="desc">Nivel avanzado de ITIL 4 orientado a gestores de servicios de TI. Cubre 4 módulos especializados.</td>
+  <td class="purpose">Gestionar y operar servicios de TI de manera efectiva, liderando equipos y manejando relaciones con stakeholders.</td>
+  <td class="diff">Requiere Foundation + 4 módulos adicionales (High Velocity IT, Direct Plan & Improve, etc.). Enfoque gerencial.</td>
+  <td>
+    <div class="level"><div class="level-dot filled"></div><div class="level-dot filled mid"></div><div class="level-dot filled mid"></div><div class="level-dot"></div><div class="level-label">Avanzado</div></div>
+  </td>
+  <td><span class="status-active">Vigente</span></td>
+  <td class="exam-yes">✔ Sí — múltiples exámenes</td>
+  <td><div class="price">$1,200 – $2,000</div><div class="price-range">4 exámenes modulares</div></td>
+</tr>
+
+<!-- 8 -->
+<tr data-category="arch">
+  <td class="row-num">08</td>
+  <td>
+    <div class="cert-name">TOGAF 10 Foundation</div>
+    <div class="cert-org">The Open Group</div>
+  </td>
+  <td><span class="badge badge-arch">Arquitectura</span></td>
+  <td class="desc">Marco de arquitectura empresarial más adoptado mundialmente. TOGAF 10 (2022) es la versión actual.</td>
+  <td class="purpose">Diseñar, planificar, implementar y gobernar arquitecturas empresariales con el método ADM (Architecture Development Method).</td>
+  <td class="diff">No es técnico puro; es estratégico. Conecta negocio, datos, aplicaciones e infraestructura en una visión unificada.</td>
+  <td>
+    <div class="level"><div class="level-dot filled"></div><div class="level-dot filled mid"></div><div class="level-dot"></div><div class="level-dot"></div><div class="level-label">Intermedio</div></div>
+  </td>
+  <td><span class="status-active">Vigente — v10 desde 2022</span></td>
+  <td class="exam-yes">✔ Sí — Nivel 1 (Foundation)</td>
+  <td><div class="price">$550 – $650</div><div class="price-range">Open Group directo</div></td>
+</tr>
+
+<!-- 9 -->
+<tr data-category="arch">
+  <td class="row-num">09</td>
+  <td>
+    <div class="cert-name">TOGAF 10 Certified (Level 2)</div>
+    <div class="cert-org">The Open Group</div>
+  </td>
+  <td><span class="badge badge-arch">Arquitectura</span></td>
+  <td class="desc">Nivel avanzado de TOGAF. Evalúa la capacidad de aplicar ADM en escenarios complejos reales.</td>
+  <td class="purpose">Demostrar dominio práctico para liderar iniciativas de arquitectura empresarial a nivel organizacional.</td>
+  <td class="diff">Examen con escenarios (open book). Requiere análisis y síntesis, no solo memorización.</td>
+  <td>
+    <div class="level"><div class="level-dot filled"></div><div class="level-dot filled mid"></div><div class="level-dot filled mid"></div><div class="level-dot hard filled"></div><div class="level-label">Avanzado</div></div>
+  </td>
+  <td><span class="status-active">Vigente</span></td>
+  <td class="exam-yes">✔ Sí — escenarios open book</td>
+  <td><div class="price">$550 – $650</div><div class="price-range">Combinado L1+L2 ~$695</div></td>
+</tr>
+
+<!-- 10 -->
+<tr data-category="pm">
+  <td class="row-num">10</td>
+  <td>
+    <div class="cert-name">PMP — Project Mgmt Professional</div>
+    <div class="cert-org">PMI</div>
+  </td>
+  <td><span class="badge badge-pm">Project Mgmt</span></td>
+  <td class="desc">La certificación de gestión de proyectos más reconocida globalmente. Abarca métodos predictivos, ágiles e híbridos.</td>
+  <td class="purpose">Demostrar competencia para liderar y dirigir proyectos en cualquier industria, con enfoque en resultados de negocio.</td>
+  <td class="diff">Requiere 36 meses de experiencia liderando proyectos. Es la credencial premium del mercado laboral global.</td>
+  <td>
+    <div class="level"><div class="level-dot filled"></div><div class="level-dot filled mid"></div><div class="level-dot filled mid"></div><div class="level-dot"></div><div class="level-label">Avanzado</div></div>
+  </td>
+  <td><span class="status-active">Vigente — examen renovado 2021</span></td>
+  <td class="exam-yes">✔ Sí — 180 preguntas, 230 min</td>
+  <td><div class="price">$405 – $555</div><div class="price-range">Miembro PMI: $405 / No miembro: $555</div></td>
+</tr>
+
+<!-- 11 -->
+<tr data-category="pm">
+  <td class="row-num">11</td>
+  <td>
+    <div class="cert-name">CAPM — Certified Associate in PM</div>
+    <div class="cert-org">PMI</div>
+  </td>
+  <td><span class="badge badge-pm">Project Mgmt</span></td>
+  <td class="desc">Certificación introductoria de PMI para profesionales sin experiencia extensa en gestión de proyectos.</td>
+  <td class="purpose">Validar conocimientos del PMBOK y del proceso de gestión de proyectos para quienes inician su carrera.</td>
+  <td class="diff">No requiere experiencia previa en PM. Es la entrada al ecosistema PMI antes del PMP.</td>
+  <td>
+    <div class="level"><div class="level-dot filled"></div><div class="level-dot filled mid"></div><div class="level-dot"></div><div class="level-dot"></div><div class="level-label">Básico-Medio</div></div>
+  </td>
+  <td><span class="status-active">Vigente</span></td>
+  <td class="exam-yes">✔ Sí — 150 preguntas</td>
+  <td><div class="price">$225 – $300</div><div class="price-range">Miembro PMI: $225</div></td>
+</tr>
+
+<!-- 12 -->
+<tr data-category="pm">
+  <td class="row-num">12</td>
+  <td>
+    <div class="cert-name">PRINCE2 Foundation / Practitioner</div>
+    <div class="cert-org">PeopleCert / Axelos</div>
+  </td>
+  <td><span class="badge badge-pm">Project Mgmt</span></td>
+  <td class="desc">Metodología estructurada de gestión de proyectos originaria de Reino Unido. Muy popular en Europa y sector público.</td>
+  <td class="purpose">Gestionar proyectos con roles, procesos y documentación bien definidos. Énfasis en justificación de negocio continua.</td>
+  <td class="diff">Más prescriptivo que PMP. Domina en el sector público europeo y organizaciones gubernamentales.</td>
+  <td>
+    <div class="level"><div class="level-dot filled"></div><div class="level-dot filled mid"></div><div class="level-dot filled mid"></div><div class="level-dot"></div><div class="level-label">Intermedio</div></div>
+  </td>
+  <td><span class="status-active">Vigente — PRINCE2 7th ed. 2023</span></td>
+  <td class="exam-yes">✔ Sí — Foundation + Practitioner</td>
+  <td><div class="price">$350 – $550</div><div class="price-range">Examen Practitioner: ~$450</div></td>
+</tr>
+
+<!-- 13 -->
+<tr data-category="agile">
+  <td class="row-num">13</td>
+  <td>
+    <div class="cert-name">Certified ScrumMaster (CSM)</div>
+    <div class="cert-org">Scrum Alliance</div>
+  </td>
+  <td><span class="badge badge-agile">Agilidad</span></td>
+  <td class="desc">Certificación más popular de Scrum para ScrumMasters. Se obtiene mediante un taller de 2 días con instructor certificado.</td>
+  <td class="purpose">Facilitar equipos Scrum, eliminar impedimentos y proteger al equipo para que entregue valor en sprints.</td>
+  <td class="diff">Requiere taller en vivo (no solo examen). Reconocida globalmente pero requiere renovación cada 2 años.</td>
+  <td>
+    <div class="level"><div class="level-dot filled"></div><div class="level-dot filled mid"></div><div class="level-dot"></div><div class="level-dot"></div><div class="level-label">Básico-Medio</div></div>
+  </td>
+  <td><span class="status-active">Vigente</span></td>
+  <td class="exam-yes">✔ Sí — tras taller obligatorio</td>
+  <td><div class="price">$995 – $1,500</div><div class="price-range">Incluye taller con trainer</div></td>
+</tr>
+
+<!-- 14 -->
+<tr data-category="agile">
+  <td class="row-num">14</td>
+  <td>
+    <div class="cert-name">Professional Scrum Master (PSM I/II/III)</div>
+    <div class="cert-org">Scrum.org</div>
+  </td>
+  <td><span class="badge badge-agile">Agilidad</span></td>
+  <td class="desc">Alternativa al CSM sin taller obligatorio. Tres niveles progresivos. PSM I es ampliamente reconocido.</td>
+  <td class="purpose">Validar comprensión profunda de Scrum Framework. No expira, sin cuota de renovación.</td>
+  <td class="diff">Más técnico y riguroso que CSM. El PSM I requiere 85% para aprobar. No caduca nunca.</td>
+  <td>
+    <div class="level"><div class="level-dot filled"></div><div class="level-dot filled mid"></div><div class="level-dot filled mid"></div><div class="level-dot"></div><div class="level-label">Intermedio</div></div>
+  </td>
+  <td><span class="status-active">Vigente</span></td>
+  <td class="exam-yes">✔ Sí — examen en línea</td>
+  <td><div class="price">$150 – $500</div><div class="price-range">PSM I: $150 · PSM II: $250 · PSM III: $500</div></td>
+</tr>
+
+<!-- 15 -->
+<tr data-category="agile">
+  <td class="row-num">15</td>
+  <td>
+    <div class="cert-name">SAFe Agilist (SA)</div>
+    <div class="cert-org">Scaled Agile, Inc.</div>
+  </td>
+  <td><span class="badge badge-agile">Agilidad</span></td>
+  <td class="desc">Certificación en el marco SAFe para escalar Agile a nivel empresarial (ARTs, PIs, Value Streams).</td>
+  <td class="purpose">Aplicar Agile a nivel de portafolio y programa, no solo a nivel de equipo. Para grandes organizaciones.</td>
+  <td class="diff">Única certificación diseñada para escala empresarial con Agile. Muy demandada en Fortune 500.</td>
+  <td>
+    <div class="level"><div class="level-dot filled"></div><div class="level-dot filled mid"></div><div class="level-dot filled mid"></div><div class="level-dot"></div><div class="level-label">Intermedio</div></div>
+  </td>
+  <td><span class="status-active">Vigente — SAFe 6.0</span></td>
+  <td class="exam-yes">✔ Sí — tras taller de 2 días</td>
+  <td><div class="price">$995 – $1,295</div><div class="price-range">Incluye taller obligatorio</div></td>
+</tr>
+
+<!-- 16 -->
+<tr data-category="pm">
+  <td class="row-num">16</td>
+  <td>
+    <div class="cert-name">PMI-ACP — Agile Certified Practitioner</div>
+    <div class="cert-org">PMI</div>
+  </td>
+  <td><span class="badge badge-pm">Project Mgmt</span></td>
+  <td class="desc">Certificación de PMI que valida conocimientos en múltiples enfoques ágiles: Scrum, Kanban, XP, SAFe, etc.</td>
+  <td class="purpose">Demostrar competencia ágil multi-framework para líderes de proyecto que trabajan en entornos ágiles.</td>
+  <td class="diff">A diferencia de CSM/PSM, no es específico de Scrum. Abarca todo el espectro ágil con enfoque PMI.</td>
+  <td>
+    <div class="level"><div class="level-dot filled"></div><div class="level-dot filled mid"></div><div class="level-dot filled mid"></div><div class="level-dot"></div><div class="level-label">Intermedio</div></div>
+  </td>
+  <td><span class="status-active">Vigente</span></td>
+  <td class="exam-yes">✔ Sí — 120 preguntas</td>
+  <td><div class="price">$435 – $495</div><div class="price-range">Miembro PMI: $435</div></td>
+</tr>
+
+<!-- 17 -->
+<tr data-category="it">
+  <td class="row-num">17</td>
+  <td>
+    <div class="cert-name">COBIT 2019 Foundation</div>
+    <div class="cert-org">ISACA</div>
+  </td>
+  <td><span class="badge badge-it">Gestión TI</span></td>
+  <td class="desc">Marco de gobernanza y gestión de TI empresarial de ISACA. Enfoque en control, riesgo y cumplimiento.</td>
+  <td class="purpose">Gobernar y gestionar la TI empresarial asegurando que soporte objetivos de negocio y gestione riesgos adecuadamente.</td>
+  <td class="diff">Más orientado a gobernanza y cumplimiento que ITIL (que es operativo). Muy usado en auditoría y riesgo TI.</td>
+  <td>
+    <div class="level"><div class="level-dot filled"></div><div class="level-dot filled mid"></div><div class="level-dot filled mid"></div><div class="level-dot"></div><div class="level-label">Intermedio</div></div>
+  </td>
+  <td><span class="status-active">Vigente</span></td>
+  <td class="exam-yes">✔ Sí</td>
+  <td><div class="price">$200 – $415</div><div class="price-range">Miembro ISACA: $200</div></td>
+</tr>
+
+<!-- 18 -->
+<tr data-category="arch">
+  <td class="row-num">18</td>
+  <td>
+    <div class="cert-name">AWS / Azure / GCP Architect</div>
+    <div class="cert-org">Amazon / Microsoft / Google</div>
+  </td>
+  <td><span class="badge badge-arch">Arquitectura</span></td>
+  <td class="desc">Certificaciones de arquitectura cloud de los tres principales proveedores. Cada uno tiene niveles: Associate y Professional.</td>
+  <td class="purpose">Diseñar soluciones escalables, seguras y resilientes en nube pública. Altamente demandado en el mercado laboral 2026.</td>
+  <td class="diff">Son específicas de plataforma, no agnósticas. AWS Solutions Architect Professional es la más valorada globalmente.</td>
+  <td>
+    <div class="level"><div class="level-dot filled"></div><div class="level-dot filled mid"></div><div class="level-dot filled mid"></div><div class="level-dot hard filled"></div><div class="level-label">Avanzado</div></div>
+  </td>
+  <td><span class="status-active">Vigente — alta demanda 2026</span></td>
+  <td class="exam-yes">✔ Sí — examen de ~65–75 preguntas</td>
+  <td><div class="price">$150 – $300</div><div class="price-range">AWS: $300 Prof. · Azure: $165 Assoc.</div></td>
+</tr>
+
+<!-- 19 -->
+<tr data-category="data">
+  <td class="row-num">19</td>
+  <td>
+    <div class="cert-name">CDMP — Certified Data Mgmt Professional</div>
+    <div class="cert-org">DAMA International</div>
+  </td>
+  <td><span class="badge badge-data">Datos / IA</span></td>
+  <td class="desc">Certificación de gestión de datos del estándar DMBOK. Cubre gobernanza de datos, calidad, arquitectura y más.</td>
+  <td class="purpose">Demostrar expertise en la gestión estratégica de datos como activo empresarial. Muy relevante en era de IA.</td>
+  <td class="diff">El único estándar global de gestión de datos no ligado a una herramienta. Basado en DMBOK 2.0.</td>
+  <td>
+    <div class="level"><div class="level-dot filled"></div><div class="level-dot filled mid"></div><div class="level-dot filled mid"></div><div class="level-dot"></div><div class="level-label">Intermedio</div></div>
+  </td>
+  <td><span class="status-active">Vigente — alta demanda en IA</span></td>
+  <td class="exam-yes">✔ Sí — 100 preguntas</td>
+  <td><div class="price">$311 – $411</div><div class="price-range">Miembro DAMA: $311</div></td>
+</tr>
+
+<!-- 20 -->
+<tr data-category="lean">
+  <td class="row-num">20</td>
+  <td>
+    <div class="cert-name">Certified Lean Practitioner (CLP)</div>
+    <div class="cert-org">SME / Lean Enterprise Institute</div>
+  </td>
+  <td><span class="badge badge-lean">Lean / Six Sigma</span></td>
+  <td class="desc">Certificación especializada en metodología Lean pura (sin Six Sigma). Enfocada en eliminación de desperdicios y flujo de valor.</td>
+  <td class="purpose">Aplicar principios Lean: valor, flujo, pull y perfección en operaciones manufactureras y de servicio.</td>
+  <td class="diff">Es Lean sin componente estadístico de Six Sigma. Más simple de obtener pero muy valorado en manufactura esbelta.</td>
+  <td>
+    <div class="level"><div class="level-dot filled"></div><div class="level-dot filled mid"></div><div class="level-dot"></div><div class="level-dot"></div><div class="level-label">Básico-Medio</div></div>
+  </td>
+  <td><span class="status-active">Vigente</span></td>
+  <td class="exam-yes">✔ Sí</td>
+  <td><div class="price">$395 – $595</div><div class="price-range">Según proveedor</div></td>
+</tr>
+
+<!-- 21 -->
+<tr data-category="it">
+  <td class="row-num">21</td>
+  <td>
+    <div class="cert-name">DevOps Foundation (DOFD)</div>
+    <div class="cert-org">DevOps Institute / PeopleCert</div>
+  </td>
+  <td><span class="badge badge-it">Gestión TI</span></td>
+  <td class="desc">Certificación introductoria que valida comprensión de cultura, prácticas y principios DevOps en la entrega de software.</td>
+  <td class="purpose">Acelerar la entrega de software con calidad mediante CI/CD, automatización y colaboración entre Dev y Ops.</td>
+  <td class="diff">Complementa ITIL 4 en el lado de entrega de software. No reemplaza habilidades técnicas de desarrollo.</td>
+  <td>
+    <div class="level"><div class="level-dot filled"></div><div class="level-dot filled mid"></div><div class="level-dot"></div><div class="level-dot"></div><div class="level-label">Básico-Medio</div></div>
+  </td>
+  <td><span class="status-active">Vigente</span></td>
+  <td class="exam-yes">✔ Sí — 40 preguntas</td>
+  <td><div class="price">$300 – $400</div><div class="price-range">PeopleCert: ~$350</div></td>
+</tr>
+
+<!-- 22 -->
+<tr data-category="data">
+  <td class="row-num">22</td>
+  <td>
+    <div class="cert-name">Google / IBM AI & Data Science Cert.</div>
+    <div class="cert-org">Google / IBM (Coursera)</div>
+  </td>
+  <td><span class="badge badge-data">Datos / IA</span></td>
+  <td class="desc">Certificaciones profesionales de IA y ciencia de datos de Google e IBM. Muy accesibles y actualizadas al contexto de IA generativa 2025-2026.</td>
+  <td class="purpose">Preparar a profesionales para roles en análisis de datos, ML e IA con habilidades prácticas en Python, TensorFlow, BigQuery.</td>
+  <td class="diff">Son más accesibles y económicas que certificaciones tradicionales. Actualizadas con IA generativa. Creciente reconocimiento corporativo.</td>
+  <td>
+    <div class="level"><div class="level-dot filled"></div><div class="level-dot filled mid"></div><div class="level-dot"></div><div class="level-dot"></div><div class="level-label">Básico-Medio</div></div>
+  </td>
+  <td><span class="status-evolving">En evolución — IA generativa</span></td>
+  <td class="exam-yes">✔ Sí — proyectos + quiz finales</td>
+  <td><div class="price">$49 – $300</div><div class="price-range">Suscripción Coursera ~$49/mes</div></td>
+</tr>
+
+</tbody>
+</table>
+</div>
+
+<footer>
+  <div>
+    <strong>Nota:</strong> Los precios son aproximados en USD a 2026 y pueden variar según proveedor, región y si el candidato es miembro de la organización certificadora. Siempre verifica en el sitio oficial.
+  </div>
+  <div style="text-align:right;">
+    Generado con Claude · Anthropic · 2026
+  </div>
+</footer>
+
+<script>
+  let currentCategory = 'all';
+
+  function filterCategory(cat, btn) {
+    currentCategory = cat;
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    applyFilters();
+  }
+
+  function filterTable() {
+    applyFilters();
+  }
+
+  function applyFilters() {
+    const query = document.getElementById('searchInput').value.toLowerCase();
+    const rows = document.querySelectorAll('#certTable tbody tr');
+
+    rows.forEach(row => {
+      const cat = row.getAttribute('data-category');
+      const text = row.textContent.toLowerCase();
+      const catMatch = currentCategory === 'all' || cat === currentCategory;
+      const searchMatch = !query || text.includes(query);
+      row.style.display = (catMatch && searchMatch) ? '' : 'none';
+    });
+  }
+</script>
+
+</body>
+</html>

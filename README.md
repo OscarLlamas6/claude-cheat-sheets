@@ -30,6 +30,7 @@ Cuadros comparativos y guías de referencia generados con Claude, centralizados 
 | Cache & In-Memory DB — Comparativa 2026 | IT, DevOps |
 | LDAP Directory Services — Comparativa 2026 | IT, Infra |
 | VPN Comparativa 2026 — Estado del Arte | IT, Seguridad |
+| Comparativo de Certificaciones Profesionales 2026 | IT |
 
 ## Activar GitHub Pages
 

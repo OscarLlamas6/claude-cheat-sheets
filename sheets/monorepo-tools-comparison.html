@@ -1,0 +1,1270 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Comparativa de Herramientas para Monorepos 2026</title>
+<style>
+  :root {
+    --bg: #0f1117;
+    --bg2: #161b27;
+    --bg3: #1e2535;
+    --border: rgba(255,255,255,0.08);
+    --border2: rgba(255,255,255,0.14);
+    --text: #e8eaf0;
+    --muted: #8b93a8;
+    --accent: #6c8fff;
+    --accent2: #3dffc0;
+    --accent3: #ff7c6e;
+    --accent4: #ffc96e;
+    --yes: #2ecc71;
+    --no: #e74c3c;
+    --partial: #f39c12;
+    --paid: #e74c3c;
+    --free: #2ecc71;
+    --hybrid: #f39c12;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 0;
+  }
+
+  .hero {
+    background: linear-gradient(135deg, #0f1117 0%, #1a1f3a 50%, #0f1a2e 100%);
+    border-bottom: 1px solid var(--border2);
+    padding: 3rem 2rem 2.5rem;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: -80px; left: 50%; transform: translateX(-50%);
+    width: 600px; height: 300px;
+    background: radial-gradient(ellipse, rgba(108,143,255,0.12) 0%, transparent 70%);
+  }
+  .hero h1 {
+    font-size: 2.4rem;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    background: linear-gradient(90deg, #6c8fff, #3dffc0);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 0.6rem;
+    position: relative;
+  }
+  .hero p {
+    color: var(--muted);
+    font-size: 1rem;
+    position: relative;
+  }
+  .badge-year {
+    display: inline-block;
+    background: rgba(108,143,255,0.15);
+    color: var(--accent);
+    border: 1px solid rgba(108,143,255,0.3);
+    border-radius: 20px;
+    padding: 3px 12px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    position: relative;
+  }
+
+  .controls {
+    background: var(--bg2);
+    border-bottom: 1px solid var(--border);
+    padding: 1rem 2rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    align-items: center;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .controls label { color: var(--muted); font-size: 0.82rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+  .filter-btn {
+    padding: 5px 14px;
+    border-radius: 20px;
+    border: 1px solid var(--border2);
+    background: transparent;
+    color: var(--muted);
+    font-size: 0.82rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: inherit;
+  }
+  .filter-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .filter-btn.active { background: rgba(108,143,255,0.15); border-color: var(--accent); color: var(--accent); }
+  .search-input {
+    padding: 5px 14px;
+    border-radius: 20px;
+    border: 1px solid var(--border2);
+    background: var(--bg3);
+    color: var(--text);
+    font-size: 0.85rem;
+    font-family: inherit;
+    outline: none;
+    width: 200px;
+  }
+  .search-input:focus { border-color: var(--accent); }
+
+  .main { padding: 2rem; max-width: 1600px; margin: 0 auto; }
+
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+    padding: 1rem 1.5rem;
+    background: var(--bg2);
+    border-radius: 12px;
+    border: 1px solid var(--border);
+  }
+  .legend-item { display: flex; align-items: center; gap: 8px; font-size: 0.82rem; color: var(--muted); }
+  .dot { width: 10px; height: 10px; border-radius: 50%; }
+
+  .grid { display: flex; flex-direction: column; gap: 1.25rem; }
+
+  .card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+    transition: border-color 0.2s;
+  }
+  .card:hover { border-color: var(--border2); }
+  .card.hidden { display: none; }
+
+  .card-header {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 1rem;
+    padding: 1.5rem 1.75rem 1.25rem;
+    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+    user-select: none;
+  }
+  .card-header:hover { background: rgba(255,255,255,0.02); }
+
+  .tool-name { font-size: 1.3rem; font-weight: 700; color: var(--text); margin-bottom: 0.25rem; display: flex; align-items: center; gap: 10px; }
+  .tool-creator { font-size: 0.82rem; color: var(--muted); }
+  .tool-tagline { font-size: 0.92rem; color: var(--muted); margin-top: 0.4rem; }
+
+  .header-badges { display: flex; flex-direction: column; align-items: flex-end; gap: 8px; }
+  .badge {
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  .badge-oss { background: rgba(46,204,113,0.12); color: #2ecc71; border: 1px solid rgba(46,204,113,0.25); }
+  .badge-paid { background: rgba(231,76,60,0.12); color: #e74c3c; border: 1px solid rgba(231,76,60,0.25); }
+  .badge-hybrid { background: rgba(243,156,18,0.12); color: #f39c12; border: 1px solid rgba(243,156,18,0.25); }
+  .badge-multi { background: rgba(61,255,192,0.1); color: #3dffc0; border: 1px solid rgba(61,255,192,0.2); }
+  .badge-mono { background: rgba(108,143,255,0.1); color: #6c8fff; border: 1px solid rgba(108,143,255,0.2); }
+  .badge-status-hot { background: rgba(255,124,110,0.12); color: #ff7c6e; border: 1px solid rgba(255,124,110,0.25); }
+  .badge-status-stable { background: rgba(108,143,255,0.1); color: #6c8fff; border: 1px solid rgba(108,143,255,0.2); }
+  .badge-status-mature { background: rgba(139,147,168,0.12); color: #8b93a8; border: 1px solid rgba(139,147,168,0.25); }
+  .badge-status-growing { background: rgba(46,204,113,0.12); color: #2ecc71; border: 1px solid rgba(46,204,113,0.25); }
+
+  .card-body { display: none; padding: 1.5rem 1.75rem; }
+  .card.expanded .card-body { display: block; }
+
+  .chevron { color: var(--muted); font-size: 1.2rem; transition: transform 0.2s; align-self: center; }
+  .card.expanded .chevron { transform: rotate(180deg); }
+
+  .sections { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.25rem; }
+
+  .section { padding: 1.1rem 1.25rem; background: var(--bg3); border-radius: 10px; }
+  .section-title { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); margin-bottom: 0.85rem; display: flex; align-items: center; gap: 6px; }
+  .section-title .icon { font-size: 0.9rem; }
+
+  .feature-list { list-style: none; display: flex; flex-direction: column; gap: 5px; }
+  .feature-list li { font-size: 0.88rem; color: var(--text); display: flex; gap: 8px; align-items: flex-start; line-height: 1.5; }
+  .feature-list li::before { content: '•'; color: var(--accent); flex-shrink: 0; margin-top: 1px; }
+  .pros li::before { color: var(--yes); }
+  .cons li::before { color: var(--no); }
+
+  .pill-grid { display: flex; flex-wrap: wrap; gap: 6px; }
+  .pill {
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 0.78rem;
+    font-weight: 500;
+  }
+  .pill-yes { background: rgba(46,204,113,0.1); color: #2ecc71; border: 1px solid rgba(46,204,113,0.2); }
+  .pill-no { background: rgba(231,76,60,0.1); color: #e74c3c; border: 1px solid rgba(231,76,60,0.2); }
+  .pill-partial { background: rgba(243,156,18,0.1); color: #f39c12; border: 1px solid rgba(243,156,18,0.2); }
+  .pill-neutral { background: rgba(108,143,255,0.08); color: var(--accent); border: 1px solid rgba(108,143,255,0.2); }
+
+  .status-block {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    font-size: 0.87rem;
+    color: var(--text);
+  }
+  .status-item { display: flex; flex-direction: column; gap: 3px; }
+  .status-label { font-size: 0.72rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; }
+  .status-value { font-weight: 500; }
+
+  .when-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 1rem; }
+  .when-block { padding: 1rem; border-radius: 8px; }
+  .when-block.use { background: rgba(46,204,113,0.06); border: 1px solid rgba(46,204,113,0.15); }
+  .when-block.avoid { background: rgba(231,76,60,0.06); border: 1px solid rgba(231,76,60,0.15); }
+  .when-block h4 { font-size: 0.78rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 0.6rem; }
+  .when-block.use h4 { color: #2ecc71; }
+  .when-block.avoid h4 { color: #e74c3c; }
+  .when-block ul { list-style: none; }
+  .when-block ul li { font-size: 0.84rem; color: var(--muted); padding: 2px 0; }
+  .when-block.use ul li::before { content: '✓ '; color: #2ecc71; }
+  .when-block.avoid ul li::before { content: '✗ '; color: #e74c3c; }
+
+  .expand-all-bar { display: flex; gap: 0.75rem; margin-bottom: 1.25rem; }
+  .action-btn {
+    padding: 6px 16px;
+    border-radius: 8px;
+    border: 1px solid var(--border2);
+    background: var(--bg2);
+    color: var(--muted);
+    font-size: 0.82rem;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.2s;
+  }
+  .action-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+  .count-label { color: var(--muted); font-size: 0.82rem; margin-left: auto; align-self: center; }
+
+  .no-results { text-align: center; padding: 4rem; color: var(--muted); display: none; }
+  .no-results.visible { display: block; }
+
+  @media (max-width: 768px) {
+    .hero h1 { font-size: 1.6rem; }
+    .main { padding: 1rem; }
+    .sections { grid-template-columns: 1fr; }
+    .when-grid { grid-template-columns: 1fr; }
+    .controls { padding: 0.75rem 1rem; }
+  }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="badge-year">Edición 2026</div>
+  <h1>Herramientas para Monorepos</h1>
+  <p>Comparativa exhaustiva de 11 tecnologías &mdash; qué hacen, sus ventajas, limitaciones y cuándo usarlas</p>
+</div>
+
+<div class="controls">
+  <label>Filtrar:</label>
+  <button class="filter-btn active" onclick="filterCards('all', this)">Todas (11)</button>
+  <button class="filter-btn" onclick="filterCards('oss', this)">Open Source</button>
+  <button class="filter-btn" onclick="filterCards('paid', this)">Con costo</button>
+  <button class="filter-btn" onclick="filterCards('multi', this)">Multilenguaje</button>
+  <input class="search-input" type="text" placeholder="Buscar herramienta..." oninput="searchCards(this.value)" />
+</div>
+
+<div class="main">
+  <div class="legend">
+    <div class="legend-item"><div class="dot" style="background:#2ecc71"></div> Open Source / Gratis</div>
+    <div class="legend-item"><div class="dot" style="background:#e74c3c"></div> De paga</div>
+    <div class="legend-item"><div class="dot" style="background:#f39c12"></div> Freemium / Híbrido</div>
+    <div class="legend-item"><div class="dot" style="background:#3dffc0"></div> Multilenguaje</div>
+    <div class="legend-item"><div class="dot" style="background:#6c8fff"></div> Lenguajes específicos</div>
+  </div>
+
+  <div class="expand-all-bar">
+    <button class="action-btn" onclick="expandAll()">Expandir todas</button>
+    <button class="action-btn" onclick="collapseAll()">Colapsar todas</button>
+    <span class="count-label" id="count-label">Mostrando 11 herramientas</span>
+  </div>
+
+  <div class="grid" id="cards-grid">
+
+    <!-- ===== NX ===== -->
+    <div class="card" data-license="hybrid" data-multi="true" data-name="nx nrwl">
+      <div class="card-header" onclick="toggleCard(this.parentElement)">
+        <div>
+          <div class="tool-name">Nx <span style="font-size:0.75rem;color:var(--muted);font-weight:400">por Nrwl</span></div>
+          <div class="tool-creator">Creado por: Nrwl (Victor Savkin &amp; Jeff Cross, ex-Google)</div>
+          <div class="tool-tagline">Build system inteligente con caché distribuido y generadores de código para monorepos modernos</div>
+        </div>
+        <div class="header-badges">
+          <span class="badge badge-hybrid">Freemium (Nx Cloud)</span>
+          <span class="badge badge-multi">Multilenguaje</span>
+          <span class="badge badge-status-hot">🔥 Muy popular 2026</span>
+          <div class="chevron">▼</div>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="sections">
+          <div class="section">
+            <div class="section-title"><span class="icon">⚙️</span> Qué hace</div>
+            <ul class="feature-list">
+              <li>Gestión de workspaces y dependencias entre proyectos</li>
+              <li>Caché local y remota (Nx Cloud) de tareas y builds</li>
+              <li>Gráfico de dependencias visual del monorepo</li>
+              <li>Generadores y ejecutores de código (scaffolding)</li>
+              <li>Ejecución paralela y afectada de tareas</li>
+              <li>Soporte para React, Angular, Next.js, Node, Go, Rust, Python y más</li>
+              <li>Integración con CI/CD (GitHub Actions, GitLab, CircleCI)</li>
+            </ul>
+          </div>
+          <div class="section">
+            <div class="section-title"><span class="icon">🚫</span> Qué NO hace</div>
+            <ul class="feature-list">
+              <li>No gestiona paquetes de sistema operativo (no reemplaza Docker/Nix)</li>
+              <li>La caché remota premium requiere pago (Nx Cloud)</li>
+              <li>No es un gestor de paquetes (depende de npm/pnpm/yarn)</li>
+              <li>Configuración inicial puede ser compleja para proyectos legacy</li>
+            </ul>
+          </div>
+          <div class="section">
+            <div class="section-title"><span class="icon">✅</span> Ventajas</div>
+            <ul class="feature-list pros">
+              <li>Ecosistema enorme, documentación excepcional</li>
+              <li>Velocidad extrema con caché inteligente (solo re-ejecuta lo afectado)</li>
+              <li>Plugins oficiales para prácticamente todo el stack moderno</li>
+              <li>Comunidad muy activa, releases frecuentes</li>
+              <li>Excelente DX con visualización del grafo de dependencias</li>
+            </ul>
+          </div>
+          <div class="section">
+            <div class="section-title"><span class="icon">⚠️</span> Desventajas</div>
+            <ul class="feature-list cons">
+              <li>Caché distribuida requiere Nx Cloud (pago para equipos grandes)</li>
+              <li>Curva de aprendizaje con los conceptos de ejecutores/generadores</li>
+              <li>Puede sentirse "opinionado" en estructura de carpetas</li>
+            </ul>
+          </div>
+          <div class="section">
+            <div class="section-title"><span class="icon">🌐</span> Soporte de lenguajes</div>
+            <div class="pill-grid">
+              <span class="pill pill-yes">JavaScript/TypeScript</span>
+              <span class="pill pill-yes">Python</span>
+              <span class="pill pill-yes">Go</span>
+              <span class="pill pill-yes">Rust</span>
+              <span class="pill pill-yes">Java</span>
+              <span class="pill pill-yes">Dart/Flutter</span>
+              <span class="pill pill-partial">C/C++ (plugin)</span>
+            </div>
+          </div>
+          <div class="section">
+            <div class="section-title"><span class="icon">📊</span> Estado 2026</div>
+            <div class="status-block">
+              <div class="status-item"><span class="status-label">Estrellas GitHub</span><span class="status-value">~26k ⭐</span></div>
+              <div class="status-item"><span class="status-label">Tendencia</span><span class="status-value">📈 Líder del mercado JS</span></div>
+              <div class="status-item"><span class="status-label">Modelo</span><span class="status-value">OSS + Nx Cloud</span></div>
+              <div class="status-item"><span class="status-label">Adoptado por</span><span class="status-value">Meta, Stripe, Shopify</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="when-grid">
+          <div class="when-block use">
+            <h4>✓ Úsalo cuando...</h4>
+            <ul><li>Stack principalmente JS/TS</li><li>Necesitas velocidad con builds incrementales</li><li>Equipos medianos a grandes</li><li>Quieres generadores de código</li></ul>
+          </div>
+          <div class="when-block avoid">
+            <h4>✗ Evítalo cuando...</h4>
+            <ul><li>Proyecto pequeño de un solo lenguaje</li><li>Presupuesto cero y necesitas caché remota</li><li>Monorepo con muchos lenguajes no-JS</li></ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== TURBOREPO ===== -->
+    <div class="card" data-license="oss" data-multi="false" data-name="turborepo vercel">
+      <div class="card-header" onclick="toggleCard(this.parentElement)">
+        <div>
+          <div class="tool-name">Turborepo <span style="font-size:0.75rem;color:var(--muted);font-weight:400">por Vercel</span></div>
+          <div class="tool-creator">Creado por: Jared Palmer → adquirido por Vercel (2021)</div>
+          <div class="tool-tagline">Build system ultrarrápido para monorepos JavaScript/TypeScript, mínima configuración</div>
+        </div>
+        <div class="header-badges">
+          <span class="badge badge-oss">Open Source (MIT)</span>
+          <span class="badge badge-mono">JS/TS enfocado</span>
+          <span class="badge badge-status-hot">🔥 Alta adopción 2026</span>
+          <div class="chevron">▼</div>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="sections">
+          <div class="section">
+            <div class="section-title"><span class="icon">⚙️</span> Qué hace</div>
+            <ul class="feature-list">
+              <li>Ejecución paralela de tareas en todos los workspaces</li>
+              <li>Caché local y remota (Vercel Remote Cache, gratuita con cuenta Vercel)</li>
+              <li>Pipeline de tareas con dependencias entre packages</li>
+              <li>Pruning inteligente para CI (solo lo necesario)</li>
+              <li>Compatible con npm, pnpm, yarn workspaces</li>
+              <li>Escrito en Go/Rust (rendimiento nativo)</li>
+            </ul>
+          </div>
+          <div class="section">
+            <div class="section-title"><span class="icon">🚫</span> Qué NO hace</div>
+            <ul class="feature-list">
+              <li>No genera código (sin scaffolding)</li>
+              <li>No gestiona versiones ni publicación de paquetes</li>
+              <li>No tiene gráfico de dependencias visual</li>
+              <li>No soporta proyectos no-JavaScript nativamente</li>
+            </ul>
+          </div>
+          <div class="section">
+            <div class="section-title"><span class="icon">✅</span> Ventajas</div>
+            <ul class="feature-list pros">
+              <li>Configuración mínima, listo en minutos</li>
+              <li>Caché remota gratuita en proyectos Vercel</li>
+              <li>Extremadamente rápido para proyectos JS</li>
+              <li>Curva de aprendizaje muy baja</li>
+            </ul>
+          </div>
+          <div class="section">
+            <div class="section-title"><span class="icon">⚠️</span> Desventajas</div>
+            <ul class="feature-list cons">
+              <li>Muy limitado fuera del ecosistema JS</li>
+              <li>Sin generadores ni herramientas de scaffolding</li>
+              <li>Menos opcionabilidad que Nx para proyectos complejos</li>
+            </ul>
+          </div>
+          <div class="section">
+            <div class="section-title"><span class="icon">🌐</span> Soporte de lenguajes</div>
+            <div class="pill-grid">
+              <span class="pill pill-yes">JavaScript/TypeScript</span>
+              <span class="pill pill-partial">Otros (limitado)</span>
+            </div>
+          </div>
+          <div class="section">
+            <div class="section-title"><span class="icon">📊</span> Estado 2026</div>
+            <div class="status-block">
+              <div class="status-item"><span class="status-label">Estrellas GitHub</span><span class="status-value">~28k ⭐</span></div>
+              <div class="status-item"><span class="status-label">Tendencia</span><span class="status-value">📈 Favorito startups JS</span></div>
+              <div class="status-item"><span class="status-label">Adoptado por</span><span class="status-value">Vercel, Clerk, Linear</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="when-grid">
+          <div class="when-block use">
+            <h4>✓ Úsalo cuando...</h4>
+            <ul><li>Stack 100% JavaScript/TypeScript</li><li>Quieres setup ultra simple</li><li>Ya usas Vercel como plataforma</li><li>Equipo pequeño-mediano</li></ul>
+          </div>
+          <div class="when-block avoid">
+            <h4>✗ Evítalo cuando...</h4>
+            <ul><li>Necesitas soporte multilenguaje real</li><li>Requieres generadores de código</li><li>Proyecto enterprise con builds muy complejos</li></ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== MICROSOFT RUSH ===== -->
+    <div class="card" data-license="oss" data-multi="false" data-name="microsoft rush rushstack">
+      <div class="card-header" onclick="toggleCard(this.parentElement)">
+        <div>
+          <div class="tool-name">Microsoft Rush <span style="font-size:0.75rem;color:var(--muted);font-weight:400">por Microsoft</span></div>
+          <div class="tool-creator">Creado por: Microsoft (parte de RushStack)</div>
+          <div class="tool-tagline">Build orchestrator enterprise-grade para proyectos JavaScript/TypeScript a gran escala</div>
+        </div>
+        <div class="header-badges">
+          <span class="badge badge-oss">Open Source (MIT)</span>
+          <span class="badge badge-mono">JS/TS enfocado</span>
+          <span class="badge badge-status-stable">🔵 Estable / Enterprise</span>
+          <div class="chevron">▼</div>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="sections">
+          <div class="section">
+            <div class="section-title"><span class="icon">⚙️</span> Qué hace</div>
+            <ul class="feature-list">
+              <li>Gestión de proyectos NPM en monorepo a escala masiva (cientos de paquetes)</li>
+              <li>Build incremental con caché local</li>
+              <li>Reglas estrictas de versioning (changefiles, changelogs automáticos)</li>
+              <li>Aislamiento de dependencias entre proyectos</li>
+              <li>Verificación de ciclos de dependencias</li>
+              <li>RushX como CLI personalizable por proyecto</li>
+            </ul>
+          </div>
+          <div class="section">
+            <div class="section-title"><span class="icon">🚫</span> Qué NO hace</div>
+            <ul class="feature-list">
+              <li>No soporta lenguajes fuera de JS/TS nativamente</li>
+              <li>Sin generadores visuales de código</li>
+              <li>No tiene caché remota built-in (requiere solución externa)</li>
+              <li>Curva de aprendizaje alta para equipos pequeños</li>
+            </ul>
+          </div>
+          <div class="section">
+            <div class="section-title"><span class="icon">✅</span> Ventajas</div>
+            <ul class="feature-list pros">
+              <li>Diseñado para escala masiva (miles de paquetes)</li>
+              <li>Excelente gestión de versioning y changelogs</li>
+              <li>Fuerte aislamiento entre proyectos</li>
+              <li>Usado internamente en Microsoft</li>
+            </ul>
+          </div>
+          <div class="section">
+            <div class="section-title"><span class="icon">⚠️</span> Desventajas</div>
+            <ul class="feature-list cons">
+              <li>Overhead de configuración considerable</li>
+              <li>Ecosistema menos vibrante que Nx/Turborepo</li>
+              <li>Documentación técnica densa</li>
+            </ul>
+          </div>
+          <div class="section">
+            <div class="section-title"><span class="icon">🌐</span> Soporte de lenguajes</div>
+            <div class="pill-grid">
+              <span class="pill pill-yes">JavaScript/TypeScript</span>
+              <span class="pill pill-no">Otros lenguajes</span>
+            </div>
+          </div>
+          <div class="section">
+            <div class="section-title"><span class="icon">📊</span> Estado 2026</div>
+            <div class="status-block">
+              <div class="status-item"><span class="status-label">Estrellas GitHub</span><span class="status-value">~6k ⭐</span></div>
+              <div class="status-item"><span class="status-label">Tendencia</span><span class="status-value">📊 Nicho enterprise</span></div>
+              <div class="status-item"><span class="status-label">Adoptado por</span><span class="status-value">Microsoft, Adobe, Bentley</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="when-grid">
+          <div class="when-block use">
+            <h4>✓ Úsalo cuando...</h4>
+            <ul><li>Centenares de paquetes NPM</li><li>Necesitas control estricto de versioning</li><li>Empresa grande con procesos formales</li></ul>
+          </div>
+          <div class="when-block avoid">
+            <h4>✗ Evítalo cuando...</h4>
+            <ul><li>Proyecto pequeño o mediano</li><li>Stack multilenguaje</li><li>Quieres setup rápido</li></ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== BAZEL ===== -->
+    <div class="card" data-license="oss" data-multi="true" data-name="bazel google">
+      <div class="card-header" onclick="toggleCard(this.parentElement)">
+        <div>
+          <div class="tool-name">Bazel <span style="font-size:0.75rem;color:var(--muted);font-weight:400">por Google</span></div>
+          <div class="tool-creator">Creado por: Google (derivado de Blaze, open-sourced en 2015)</div>
+          <div class="tool-tagline">Sistema de build poderoso y reproducible para monorepos masivos multilenguaje</div>
+        </div>
+        <div class="header-badges">
+          <span class="badge badge-oss">Open Source (Apache 2.0)</span>
+          <span class="badge badge-multi">Multilenguaje</span>
+          <span class="badge badge-status-mature">🔘 Maduro / Enterprise</span>
+          <div class="chevron">▼</div>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="sections">
+          <div class="section">
+            <div class="section-title"><span class="icon">⚙️</span> Qué hace</div>
+            <ul class="feature-list">
+              <li>Builds 100% reproducibles y herméticos</li>
+              <li>Caché distribuida y ejecución remota de builds</li>
+              <li>Soporte nativo para Java, C++, Go, Python, Rust, JS y más</li>
+              <li>Análisis de dependencias a nivel de archivo</li>
+              <li>Ejecución en sandbox (aislamiento perfecto)</li>
+              <li>Escala a millones de líneas de código (usado en Google)</li>
+            </ul>
+          </div>
+          <div class="section">
+            <div class="section-title"><span class="icon">🚫</span> Qué NO hace</div>
+            <ul class="feature-list">
+              <li>No gestiona workspaces npm como Nx/Turborepo</li>
+              <li>Curva de aprendizaje extremadamente alta</li>
+              <li>No genera código de aplicación</li>
+              <li>BUILD files manuales son verbosos</li>
+            </ul>
+          </div>
+          <div class="section">
+            <div class="section-title"><span class="icon">✅</span> Ventajas</div>
+            <ul class="feature-list pros">
+              <li>Absolutamente escalable (millones de LOC)</li>
+              <li>Builds 100% reproducibles y determinísticos</li>
+              <li>Ejecución remota distribuida nativa</li>
+              <li>Multilenguaje de verdad</li>
+            </ul>
+          </div>
+          <div class="section">
+            <div class="section-title"><span class="icon">⚠️</span> Desventajas</div>
+            <ul class="feature-list cons">
+              <li>Complejidad de configuración extrema</li>
+              <li>Requiere equipo dedicado para mantener BUILD files</li>
+              <li>No es adecuado para equipos pequeños</li>
+              <li>Documentación dispersa fuera del mundo Google</li>
+            </ul>
+          </div>
+          <div class="section">
+            <div class="section-title"><span class="icon">🌐</span> Soporte de lenguajes</div>
+            <div class="pill-grid">
+              <span class="pill pill-yes">Java/Kotlin</span>
+              <span class="pill pill-yes">C/C++</span>
+              <span class="pill pill-yes">Go</span>
+              <span class="pill pill-yes">Python</span>
+              <span class="pill pill-yes">Rust</span>
+              <span class="pill pill-yes">JavaScript</span>
+              <span class="pill pill-yes">Swift/iOS</span>
+            </div>
+          </div>
+          <div class="section">
+            <div class="section-title"><span class="icon">📊</span> Estado 2026</div>
+            <div class="status-block">
+              <div class="status-item"><span class="status-label">Estrellas GitHub</span><span class="status-value">~23k ⭐</span></div>
+              <div class="status-item"><span class="status-label">Tendencia</span><span class="status-value">📊 Nicho grandes corps</span></div>
+              <div class="status-item"><span class="status-label">Adoptado por</span><span class="status-value">Google, Twitter, Dropbox</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="when-grid">
+          <div class="when-block use">
+            <h4>✓ Úsalo cuando...</h4>
+            <ul><li>Monorepo masivo con múltiples lenguajes</li><li>Necesitas reproducibilidad absoluta</li><li>Empresa con equipo de infraestructura dedicado</li></ul>
+          </div>
+          <div class="when-block avoid">
+            <h4>✗ Evítalo cuando...</h4>
+            <ul><li>Equipo menor a 50 personas</li><li>Solo tienes un lenguaje</li><li>No tienes ingenieros de DevOps/Infra</li></ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== LERNA ===== -->
+    <div class="card" data-license="oss" data-multi="false" data-name="lerna nrwl">
+      <div class="card-header" onclick="toggleCard(this.parentElement)">
+        <div>
+          <div class="tool-name">Lerna <span style="font-size:0.75rem;color:var(--muted);font-weight:400">ahora por Nrwl</span></div>
+          <div class="tool-creator">Creado por: Daniel Stockman → revivido por Nrwl en 2022</div>
+          <div class="tool-tagline">El pionero de monorepos JS: gestión de versiones y publicación de paquetes NPM</div>
+        </div>
+        <div class="header-badges">
+          <span class="badge badge-oss">Open Source (MIT)</span>
+          <span class="badge badge-mono">JS/TS enfocado</span>
+          <span class="badge badge-status-stable">🔵 Revivido / Activo</span>
+          <div class="chevron">▼</div>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="sections">
+          <div class="section">
+            <div class="section-title"><span class="icon">⚙️</span> Qué hace</div>
+            <ul class="feature-list">
+              <li>Gestión de versiones de paquetes (independiente o fija)</li>
+              <li>Publicación automatizada a NPM</li>
+              <li>Generación de changelogs por paquete</li>
+              <li>Ejecución de scripts en todos los paquetes</li>
+              <li>Integración con Nx para builds rápidos (desde v6)</li>
+            </ul>
+          </div>
+          <div class="section">
+            <div class="section-title"><span class="icon">🚫</span> Qué NO hace</div>
+            <ul class="feature-list">
+              <li>No es un build system por sí solo (delega a Nx)</li>
+              <li>Sin caché propia en versiones modernas</li>
+              <li>No gestiona proyectos no-NPM</li>
+            </ul>
+          </div>
+          <div class="section">
+            <div class="section-title"><span class="icon">✅</span> Ventajas</div>
+            <ul class="feature-list pros">
+              <li>El mejor para publicar librerías NPM desde monorepo</li>
+              <li>Manejo de versiones granular (convencional commits)</li>
+              <li>Se integra perfecto con Nx</li>
+            </ul>
+          </div>
+          <div class="section">
+            <div class="section-title"><span class="icon">⚠️</span> Desventajas</div>
+            <ul class="feature-list cons">
+              <li>Fue abandonado entre 2020-2022 (deuda técnica)</li>
+              <li>Menos capacidades de build que competidores modernos</li>
+            </ul>
+          </div>
+          <div class="section">
+            <div class="section-title"><span class="icon">🌐</span> Soporte de lenguajes</div>
+            <div class="pill-grid">
+              <span class="pill pill-yes">JavaScript/TypeScript</span>
+              <span class="pill pill-no">Otros lenguajes</span>
+            </div>
+          </div>
+          <div class="section">
+            <div class="section-title"><span class="icon">📊</span> Estado 2026</div>
+            <div class="status-block">
+              <div class="status-item"><span class="status-label">Estrellas GitHub</span><span class="status-value">~35k ⭐</span></div>
+              <div class="status-item"><span class="status-label">Tendencia</span><span class="status-value">📊 Estable, legacy fuerte</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="when-grid">
+          <div class="when-block use">
+            <h4>✓ Úsalo cuando...</h4>
+            <ul><li>Publicas múltiples paquetes NPM</li><li>Necesitas versioning independiente por paquete</li><li>Proyecto JS/TS existente en Lerna</li></ul>
+          </div>
+          <div class="when-block avoid">
+            <h4>✗ Evítalo cuando...</h4>
+            <ul><li>No publicas a NPM</li><li>Necesitas builds rápidos (usa Nx directamente)</li><li>Proyecto multilenguaje</li></ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== GRADLE ===== -->
+    <div class="card" data-license="hybrid" data-multi="true" data-name="gradle build tool">
+      <div class="card-header" onclick="toggleCard(this.parentElement)">
+        <div>
+          <div class="tool-name">Gradle <span style="font-size:0.75rem;color:var(--muted);font-weight:400">por Gradle Inc.</span></div>
+          <div class="tool-creator">Creado por: Hans Dockter y equipo (2007), Gradle Inc. fundada en 2012</div>
+          <div class="tool-tagline">Build system dominante en el ecosistema JVM con excelente soporte multilenguaje</div>
+        </div>
+        <div class="header-badges">
+          <span class="badge badge-hybrid">OSS + Gradle Enterprise (pago)</span>
+          <span class="badge badge-multi">Multilenguaje</span>
+          <span class="badge badge-status-mature">🔘 Maduro / Estándar JVM</span>
+          <div class="chevron">▼</div>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="sections">
+          <div class="section">
+            <div class="section-title"><span class="icon">⚙️</span> Qué hace</div>
+            <ul class="feature-list">
+              <li>Gestión de builds para proyectos Java, Kotlin, Android, Groovy</li>
+              <li>Multi-project builds (monorepos JVM nativos)</li>
+              <li>Caché de builds local y remota</li>
+              <li>Plugins para prácticamente cualquier tarea JVM</li>
+              <li>Integración con Maven, Ivy, npm</li>
+              <li>Build scan para análisis de rendimiento</li>
+            </ul>
+          </div>
+          <div class="section">
+            <div class="section-title"><span class="icon">🚫</span> Qué NO hace</div>
+            <ul class="feature-list">
+              <li>Gradle Enterprise (caché remota avanzada) es de pago</li>
+              <li>Configuración compleja con Groovy/Kotlin DSL</li>
+              <li>Lento en monorepos muy grandes sin optimización</li>
+            </ul>
+          </div>
+          <div class="section">
+            <div class="section-title"><span class="icon">✅</span> Ventajas</div>
+            <ul class="feature-list pros">
+              <li>Estándar de facto para proyectos Android y JVM</li>
+              <li>Ecosistema de plugins gigante</li>
+              <li>Excelente soporte multilenguaje JVM</li>
+              <li>Build incremental maduro</li>
+            </ul>
+          </div>
+          <div class="section">
+            <div class="section-title"><span class="icon">⚠️</span> Desventajas</div>
+            <ul class="feature-list cons">
+              <li>DSL (Groovy/Kotlin) tiene curva de aprendizaje</li>
+              <li>Puede ser lento en proyectos grandes sin tuning</li>
+              <li>Caché remota y análisis avanzado requieren pago</li>
+            </ul>
+          </div>
+          <div class="section">
+            <div class="section-title"><span class="icon">🌐</span> Soporte de lenguajes</div>
+            <div class="pill-grid">
+              <span class="pill pill-yes">Java/Kotlin</span>
+              <span class="pill pill-yes">Android</span>
+              <span class="pill pill-yes">Groovy</span>
+              <span class="pill pill-yes">Scala</span>
+              <span class="pill pill-yes">C/C++</span>
+              <span class="pill pill-partial">JavaScript (plugin)</span>
+            </div>
+          </div>
+          <div class="section">
+            <div class="section-title"><span class="icon">📊</span> Estado 2026</div>
+            <div class="status-block">
+              <div class="status-item"><span class="status-label">Estrellas GitHub</span><span class="status-value">~17k ⭐</span></div>
+              <div class="status-item"><span class="status-label">Tendencia</span><span class="status-value">📊 Estable, dominante JVM</span></div>
+              <div class="status-item"><span class="status-label">Adoptado por</span><span class="status-value">Netflix, LinkedIn, Android</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="when-grid">
+          <div class="when-block use">
+            <h4>✓ Úsalo cuando...</h4>
+            <ul><li>Proyecto Java/Kotlin/Android</li><li>Monorepo JVM multi-módulo</li><li>Necesitas ecosistema maduro JVM</li></ul>
+          </div>
+          <div class="when-block avoid">
+            <h4>✗ Evítalo cuando...</h4>
+            <ul><li>Stack JavaScript puro</li><li>No conoces JVM ecosystem</li><li>Quieres configuración ultra simple</li></ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== MOON ===== -->
+    <div class="card" data-license="oss" data-multi="true" data-name="moon moonrepo">
+      <div class="card-header" onclick="toggleCard(this.parentElement)">
+        <div>
+          <div class="tool-name">Moon <span style="font-size:0.75rem;color:var(--muted);font-weight:400">por moonrepo</span></div>
+          <div class="tool-creator">Creado por: Miles Johnson / moonrepo (2022)</div>
+          <div class="tool-tagline">Build system moderno escrito en Rust, multilenguaje, con enfoque en toolchain management</div>
+        </div>
+        <div class="header-badges">
+          <span class="badge badge-oss">Open Source (MIT)</span>
+          <span class="badge badge-multi">Multilenguaje</span>
+          <span class="badge badge-status-growing">🟢 Creciendo rápido</span>
+          <div class="chevron">▼</div>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="sections">
+          <div class="section">
+            <div class="section-title"><span class="icon">⚙️</span> Qué hace</div>
+            <ul class="feature-list">
+              <li>Gestión de toolchains (Node.js, Bun, Deno, Python, Rust, Go)</li>
+              <li>Caché inteligente basada en hashes de archivos</li>
+              <li>Ejecución paralela y pipeline de tareas</li>
+              <li>Gestión de versiones de runtime por proyecto</li>
+              <li>Integración con moonbase (caché remota cloud, OSS)</li>
+              <li>Escrito en Rust: rendimiento nativo</li>
+            </ul>
+          </div>
+          <div class="section">
+            <div class="section-title"><span class="icon">🚫</span> Qué NO hace</div>
+            <ul class="feature-list">
+              <li>No gestiona publicación de paquetes (NPM, etc.)</li>
+              <li>Ecosistema de plugins aún joven</li>
+              <li>Moonbase (caché remota) aún en desarrollo</li>
+            </ul>
+          </div>
+          <div class="section">
+            <div class="section-title"><span class="icon">✅</span> Ventajas</div>
+            <ul class="feature-list pros">
+              <li>Gestión de toolchains sin necesidad de herramientas externas</li>
+              <li>Rendimiento Rust nativo</li>
+              <li>Multilenguaje de verdad con configuración simple</li>
+              <li>Alternativa moderna muy prometedora</li>
+            </ul>
+          </div>
+          <div class="section">
+            <div class="section-title"><span class="icon">⚠️</span> Desventajas</div>
+            <ul class="feature-list cons">
+              <li>Ecosistema menos maduro que Nx o Bazel</li>
+              <li>Comunidad aún pequeña</li>
+              <li>Caché remota propia en beta</li>
+            </ul>
+          </div>
+          <div class="section">
+            <div class="section-title"><span class="icon">🌐</span> Soporte de lenguajes</div>
+            <div class="pill-grid">
+              <span class="pill pill-yes">JavaScript/TypeScript</span>
+              <span class="pill pill-yes">Python</span>
+              <span class="pill pill-yes">Rust</span>
+              <span class="pill pill-yes">Go</span>
+              <span class="pill pill-yes">Ruby</span>
+              <span class="pill pill-partial">Otros (creciendo)</span>
+            </div>
+          </div>
+          <div class="section">
+            <div class="section-title"><span class="icon">📊</span> Estado 2026</div>
+            <div class="status-block">
+              <div class="status-item"><span class="status-label">Estrellas GitHub</span><span class="status-value">~4k ⭐</span></div>
+              <div class="status-item"><span class="status-label">Tendencia</span><span class="status-value">📈 Joya emergente</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="when-grid">
+          <div class="when-block use">
+            <h4>✓ Úsalo cuando...</h4>
+            <ul><li>Monorepo con 2-3 lenguajes diferentes</li><li>Quieres gestión de toolchain integrada</li><li>Apuestas por tecnologías Rust-based</li></ul>
+          </div>
+          <div class="when-block avoid">
+            <h4>✗ Evítalo cuando...</h4>
+            <ul><li>Necesitas ecosistema maduro y estable</li><li>Empresa enterprise con poco apetito al riesgo</li></ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== PANTS ===== -->
+    <div class="card" data-license="oss" data-multi="true" data-name="pants build pantsbuild">
+      <div class="card-header" onclick="toggleCard(this.parentElement)">
+        <div>
+          <div class="tool-name">Pants <span style="font-size:0.75rem;color:var(--muted);font-weight:400">por Pantsbuild</span></div>
+          <div class="tool-creator">Creado por: Twitter, Foursquare, Square → ahora comunidad open source</div>
+          <div class="tool-tagline">Build system orientado a Python con soporte multilenguaje y arquitectura moderna</div>
+        </div>
+        <div class="header-badges">
+          <span class="badge badge-oss">Open Source (Apache 2.0)</span>
+          <span class="badge badge-multi">Multilenguaje</span>
+          <span class="badge badge-status-growing">🟢 Nicho Python / creciendo</span>
+          <div class="chevron">▼</div>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="sections">
+          <div class="section">
+            <div class="section-title"><span class="icon">⚙️</span> Qué hace</div>
+            <ul class="feature-list">
+              <li>Builds incrementales para Python, Go, Java, Scala, Kotlin, JavaScript</li>
+              <li>Análisis de dependencias automático (no manual BUILD files)</li>
+              <li>Ejecución en sandbox hermético</li>
+              <li>Soporte nativo para linters, formatters y tests</li>
+              <li>Generación de binarios y containers Docker</li>
+              <li>Caché local y remota (compatible con Bazel Remote Cache)</li>
+            </ul>
+          </div>
+          <div class="section">
+            <div class="section-title"><span class="icon">🚫</span> Qué NO hace</div>
+            <ul class="feature-list">
+              <li>Comunidad más pequeña que Bazel o Gradle</li>
+              <li>Sin soporte nativo para iOS/Android</li>
+              <li>Documentación más escasa en casos avanzados</li>
+            </ul>
+          </div>
+          <div class="section">
+            <div class="section-title"><span class="icon">✅</span> Ventajas</div>
+            <ul class="feature-list pros">
+              <li>La alternativa más amigable a Bazel</li>
+              <li>No requiere escribir BUILD files manualmente</li>
+              <li>Excelente para equipos Python + otros lenguajes</li>
+              <li>Más fácil de adoptar que Bazel</li>
+            </ul>
+          </div>
+          <div class="section">
+            <div class="section-title"><span class="icon">⚠️</span> Desventajas</div>
+            <ul class="feature-list cons">
+              <li>Comunidad mucho menor que Bazel</li>
+              <li>Menos plugins disponibles</li>
+              <li>Relativamente desconocido fuera del ecosistema Python</li>
+            </ul>
+          </div>
+          <div class="section">
+            <div class="section-title"><span class="icon">🌐</span> Soporte de lenguajes</div>
+            <div class="pill-grid">
+              <span class="pill pill-yes">Python</span>
+              <span class="pill pill-yes">Go</span>
+              <span class="pill pill-yes">Java/Kotlin/Scala</span>
+              <span class="pill pill-yes">JavaScript</span>
+              <span class="pill pill-yes">Shell</span>
+              <span class="pill pill-yes">Docker</span>
+            </div>
+          </div>
+          <div class="section">
+            <div class="section-title"><span class="icon">📊</span> Estado 2026</div>
+            <div class="status-block">
+              <div class="status-item"><span class="status-label">Estrellas GitHub</span><span class="status-value">~3k ⭐</span></div>
+              <div class="status-item"><span class="status-label">Tendencia</span><span class="status-value">📈 Alternativa Bazel amigable</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="when-grid">
+          <div class="when-block use">
+            <h4>✓ Úsalo cuando...</h4>
+            <ul><li>Monorepo Python + otros lenguajes</li><li>Quieres reproducibilidad sin complejidad Bazel</li><li>Microservicios en múltiples lenguajes</li></ul>
+          </div>
+          <div class="when-block avoid">
+            <h4>✗ Evítalo cuando...</h4>
+            <ul><li>Stack solo JavaScript</li><li>Necesitas gran ecosistema de plugins</li></ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== BUCK2 ===== -->
+    <div class="card" data-license="oss" data-multi="true" data-name="buck2 meta facebook">
+      <div class="card-header" onclick="toggleCard(this.parentElement)">
+        <div>
+          <div class="tool-name">Buck2 <span style="font-size:0.75rem;color:var(--muted);font-weight:400">por Meta</span></div>
+          <div class="tool-creator">Creado por: Meta (Facebook) — reescritura completa de Buck en Rust (2023)</div>
+          <div class="tool-tagline">Build system masivo escrito en Rust, diseñado para el monorepo gigante de Meta</div>
+        </div>
+        <div class="header-badges">
+          <span class="badge badge-oss">Open Source (Apache 2.0)</span>
+          <span class="badge badge-multi">Multilenguaje</span>
+          <span class="badge badge-status-growing">🟢 Nuevo / Prometedor</span>
+          <div class="chevron">▼</div>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="sections">
+          <div class="section">
+            <div class="section-title"><span class="icon">⚙️</span> Qué hace</div>
+            <ul class="feature-list">
+              <li>Builds ultrarrápidos con paralelización máxima</li>
+              <li>Escrito en Rust: rendimiento y seguridad de memoria</li>
+              <li>Compatible con reglas Bazel (prelude)</li>
+              <li>Soporte multilenguaje extensivo</li>
+              <li>Ejecución remota nativa</li>
+              <li>Usado internamente por Meta en su monorepo gigante</li>
+            </ul>
+          </div>
+          <div class="section">
+            <div class="section-title"><span class="icon">🚫</span> Qué NO hace</div>
+            <ul class="feature-list">
+              <li>Ecosistema externo muy joven</li>
+              <li>Documentación escasa fuera del contexto Meta</li>
+              <li>Poca comunidad externa aún</li>
+            </ul>
+          </div>
+          <div class="section">
+            <div class="section-title"><span class="icon">✅</span> Ventajas</div>
+            <ul class="feature-list pros">
+              <li>Rendimiento excepcional (Rust nativo)</li>
+              <li>Arquitectura moderna desde cero</li>
+              <li>Probado a escala Meta</li>
+              <li>Compatibilidad con reglas Bazel existentes</li>
+            </ul>
+          </div>
+          <div class="section">
+            <div class="section-title"><span class="icon">⚠️</span> Desventajas</div>
+            <ul class="feature-list cons">
+              <li>Muy nuevo para uso externo (2023)</li>
+              <li>Curva de aprendizaje alta</li>
+              <li>Poca documentación para casos no-Meta</li>
+            </ul>
+          </div>
+          <div class="section">
+            <div class="section-title"><span class="icon">🌐</span> Soporte de lenguajes</div>
+            <div class="pill-grid">
+              <span class="pill pill-yes">Python</span>
+              <span class="pill pill-yes">Rust</span>
+              <span class="pill pill-yes">C/C++</span>
+              <span class="pill pill-yes">Java/Kotlin</span>
+              <span class="pill pill-yes">JavaScript</span>
+              <span class="pill pill-yes">Swift/Haskell</span>
+            </div>
+          </div>
+          <div class="section">
+            <div class="section-title"><span class="icon">📊</span> Estado 2026</div>
+            <div class="status-block">
+              <div class="status-item"><span class="status-label">Estrellas GitHub</span><span class="status-value">~4k ⭐</span></div>
+              <div class="status-item"><span class="status-label">Tendencia</span><span class="status-value">👀 A seguir de cerca</span></div>
+              <div class="status-item"><span class="status-label">Adoptado por</span><span class="status-value">Meta internamente</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="when-grid">
+          <div class="when-block use">
+            <h4>✓ Úsalo cuando...</h4>
+            <ul><li>Apuestas por tecnología Rust moderna</li><li>Monorepo masivo multilenguaje</li><li>Ya usas Bazel y quieres migrar</li></ul>
+          </div>
+          <div class="when-block avoid">
+            <h4>✗ Evítalo cuando...</h4>
+            <ul><li>Necesitas estabilidad probada en producción externa</li><li>Documentación y comunidad son críticas</li></ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== CHANGESETS ===== -->
+    <div class="card" data-license="oss" data-multi="false" data-name="changesets versioning atlassian">
+      <div class="card-header" onclick="toggleCard(this.parentElement)">
+        <div>
+          <div class="tool-name">Changesets <span style="font-size:0.75rem;color:var(--muted);font-weight:400">por Atlassian / comunidad</span></div>
+          <div class="tool-creator">Creado por: Atlassian → mantenido por comunidad open source</div>
+          <div class="tool-tagline">Herramienta de gestión de versiones y changelogs para paquetes en monorepos JS</div>
+        </div>
+        <div class="header-badges">
+          <span class="badge badge-oss">Open Source (MIT)</span>
+          <span class="badge badge-mono">JS/TS enfocado</span>
+          <span class="badge badge-status-stable">🔵 Estable / Muy usado</span>
+          <div class="chevron">▼</div>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="sections">
+          <div class="section">
+            <div class="section-title"><span class="icon">⚙️</span> Qué hace</div>
+            <ul class="feature-list">
+              <li>Gestión de versiones semánticas por paquete en monorepo</li>
+              <li>Generación automática de CHANGELOGs</li>
+              <li>Publicación coordinada a NPM</li>
+              <li>Pull requests de versión (changelog PRs)</li>
+              <li>Flujo de trabajo con GitHub Actions</li>
+            </ul>
+          </div>
+          <div class="section">
+            <div class="section-title"><span class="icon">🚫</span> Qué NO hace</div>
+            <ul class="feature-list">
+              <li>No es un build system (solo versioning)</li>
+              <li>No acelera builds ni tiene caché</li>
+              <li>Solo para ecosistema NPM</li>
+            </ul>
+          </div>
+          <div class="section">
+            <div class="section-title"><span class="icon">✅</span> Ventajas</div>
+            <ul class="feature-list pros">
+              <li>Flujo de trabajo muy claro y simple</li>
+              <li>Se integra con cualquier build system</li>
+              <li>Estándar de facto para librerías NPM open source</li>
+            </ul>
+          </div>
+          <div class="section">
+            <div class="section-title"><span class="icon">⚠️</span> Desventajas</div>
+            <ul class="feature-list cons">
+              <li>Solo resuelve versionado, no el resto del monorepo</li>
+              <li>Requiere disciplina del equipo (llenar changesets)</li>
+            </ul>
+          </div>
+          <div class="section">
+            <div class="section-title"><span class="icon">🌐</span> Soporte de lenguajes</div>
+            <div class="pill-grid">
+              <span class="pill pill-yes">JavaScript/TypeScript</span>
+              <span class="pill pill-no">Otros lenguajes</span>
+            </div>
+          </div>
+          <div class="section">
+            <div class="section-title"><span class="icon">📊</span> Estado 2026</div>
+            <div class="status-block">
+              <div class="status-item"><span class="status-label">Estrellas GitHub</span><span class="status-value">~10k ⭐</span></div>
+              <div class="status-item"><span class="status-label">Tendencia</span><span class="status-value">📊 Estándar librerías OSS</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="when-grid">
+          <div class="when-block use">
+            <h4>✓ Úsalo cuando...</h4>
+            <ul><li>Publicas librerías NPM open source</li><li>Necesitas changelogs automáticos</li><li>Complementar Nx o Turborepo</li></ul>
+          </div>
+          <div class="when-block avoid">
+            <h4>✗ Evítalo cuando...</h4>
+            <ul><li>No publicas paquetes NPM</li><li>Buscas un build system completo</li></ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== PNPM WORKSPACES ===== -->
+    <div class="card" data-license="oss" data-multi="false" data-name="pnpm workspaces package manager">
+      <div class="card-header" onclick="toggleCard(this.parentElement)">
+        <div>
+          <div class="tool-name">pnpm Workspaces <span style="font-size:0.75rem;color:var(--muted);font-weight:400">por comunidad</span></div>
+          <div class="tool-creator">Creado por: Zoltan Kochan (2016), ahora bajo Open Source Collective</div>
+          <div class="tool-tagline">Gestor de paquetes ultraeficiente con workspaces nativos para monorepos JS</div>
+        </div>
+        <div class="header-badges">
+          <span class="badge badge-oss">Open Source (MIT)</span>
+          <span class="badge badge-mono">JS/TS enfocado</span>
+          <span class="badge badge-status-hot">🔥 Muy adoptado 2026</span>
+          <div class="chevron">▼</div>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="sections">
+          <div class="section">
+            <div class="section-title"><span class="icon">⚙️</span> Qué hace</div>
+            <ul class="feature-list">
+              <li>Gestión de paquetes con almacenamiento content-addressable (ahorra disco)</li>
+              <li>Workspaces nativos para monorepos</li>
+              <li>Instalación de dependencias hasta 3x más rápida que npm</li>
+              <li>Hoisting de dependencias controlable y estricto</li>
+              <li>Protocolo workspace: para referencias entre paquetes internos</li>
+              <li>Catálogos de versiones compartidas (pnpm v9+)</li>
+            </ul>
+          </div>
+          <div class="section">
+            <div class="section-title"><span class="icon">🚫</span> Qué NO hace</div>
+            <ul class="feature-list">
+              <li>No es un build system (no tiene caché de builds)</li>
+              <li>No genera código ni gestiona versiones</li>
+              <li>Solo para ecosistema NPM</li>
+            </ul>
+          </div>
+          <div class="section">
+            <div class="section-title"><span class="icon">✅</span> Ventajas</div>
+            <ul class="feature-list pros">
+              <li>Ahorra espacio en disco (links simbólicos)</li>
+              <li>Instalaciones muy rápidas</li>
+              <li>Estricto: evita dependencias fantasma</li>
+              <li>Se combina perfectamente con Nx/Turborepo</li>
+            </ul>
+          </div>
+          <div class="section">
+            <div class="section-title"><span class="icon">⚠️</span> Desventajas</div>
+            <ul class="feature-list cons">
+              <li>Algunos paquetes mal escritos tienen problemas con symlinks</li>
+              <li>No reemplaza un build system completo</li>
+            </ul>
+          </div>
+          <div class="section">
+            <div class="section-title"><span class="icon">🌐</span> Soporte de lenguajes</div>
+            <div class="pill-grid">
+              <span class="pill pill-yes">JavaScript/TypeScript</span>
+              <span class="pill pill-no">Otros lenguajes</span>
+            </div>
+          </div>
+          <div class="section">
+            <div class="section-title"><span class="icon">📊</span> Estado 2026</div>
+            <div class="status-block">
+              <div class="status-item"><span class="status-label">Estrellas GitHub</span><span class="status-value">~30k ⭐</span></div>
+              <div class="status-item"><span class="status-label">Tendencia</span><span class="status-value">📈 Estándar JS moderno</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="when-grid">
+          <div class="when-block use">
+            <h4>✓ Úsalo cuando...</h4>
+            <ul><li>Monorepo JS con muchos paquetes</li><li>Problema de espacio en disco</li><li>Como base para cualquier monorepo JS</li></ul>
+          </div>
+          <div class="when-block avoid">
+            <h4>✗ Evítalo cuando...</h4>
+            <ul><li>Necesitas build orchestration (combínalo con Nx/Turbo)</li><li>Paquetes legacy con problemas de symlinks</li></ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+  <div class="no-results" id="no-results">No se encontraron herramientas con los filtros actuales.</div>
+</div>
+
+<script>
+function toggleCard(card) {
+  card.classList.toggle('expanded');
+}
+
+function expandAll() {
+  document.querySelectorAll('.card:not(.hidden)').forEach(c => c.classList.add('expanded'));
+}
+
+function collapseAll() {
+  document.querySelectorAll('.card').forEach(c => c.classList.remove('expanded'));
+}
+
+function filterCards(type, btn) {
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  const cards = document.querySelectorAll('.card');
+  let visible = 0;
+  cards.forEach(card => {
+    let show = true;
+    if (type === 'oss') show = card.dataset.license === 'oss';
+    else if (type === 'paid') show = card.dataset.license === 'paid' || card.dataset.license === 'hybrid';
+    else if (type === 'multi') show = card.dataset.multi === 'true';
+    card.classList.toggle('hidden', !show);
+    if (show) visible++;
+  });
+  document.getElementById('count-label').textContent = `Mostrando ${visible} herramientas`;
+  document.getElementById('no-results').classList.toggle('visible', visible === 0);
+}
+
+function searchCards(query) {
+  const q = query.toLowerCase().trim();
+  const cards = document.querySelectorAll('.card');
+  let visible = 0;
+  cards.forEach(card => {
+    const name = card.dataset.name || '';
+    const text = card.textContent.toLowerCase();
+    const show = !q || name.includes(q) || text.includes(q);
+    card.classList.toggle('hidden', !show);
+    if (show) visible++;
+  });
+  document.getElementById('count-label').textContent = `Mostrando ${visible} herramientas`;
+  document.getElementById('no-results').classList.toggle('visible', visible === 0);
+}
+</script>
+</body>
+</html>

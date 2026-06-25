@@ -31,6 +31,7 @@ Cuadros comparativos y guías de referencia generados con Claude, centralizados 
 | LDAP Directory Services — Comparativa 2026 | IT, Infra |
 | VPN Comparativa 2026 — Estado del Arte | IT, Seguridad |
 | Comparativo de Certificaciones Profesionales 2026 | IT |
+| Herramientas para Monorepos — Comparativa 2026 | Dev Tools |
 
 ## Activar GitHub Pages
 

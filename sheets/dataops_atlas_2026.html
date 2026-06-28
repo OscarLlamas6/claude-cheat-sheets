@@ -1,0 +1,3083 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Atlas DataOps · Herramientas del flujo completo de Data Engineering (Junio 2026)</title>
+<style>
+  :root {
+    --bg: #FAFAF7;
+    --surface: #FFFFFF;
+    --ink: #0F172A;
+    --muted: #64748B;
+    --line: #E2E8F0;
+    --line-strong: #CBD5E1;
+    --accent: #0F766E;
+
+    /* Phase palette */
+    --c-ingest: #DC2626;
+    --c-process: #2563EB;
+    --c-serve: #059669;
+    --c-viz: #D97706;
+    --c-orchestrate: #7C3AED;
+    --c-govern: #BE185D;
+    --c-veracity: #0891B2;
+
+    /* Status */
+    --st-sota: #059669;
+    --st-active: #475569;
+    --st-legacy: #D97706;
+    --st-deprecated: #B91C1C;
+
+    /* License */
+    --lic-foss: #1D4ED8;
+    --lic-commercial: #7C2D92;
+    --lic-cloud: #0E7490;
+    --lic-freemium: #B45309;
+    --lic-enterprise: #6D28D9;
+  }
+
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    line-height: 1.55;
+    font-size: 15px;
+    font-feature-settings: 'ss01', 'cv11';
+  }
+
+  /* HERO */
+  .hero {
+    background: linear-gradient(135deg, #0F172A 0%, #1E293B 60%, #0F766E 140%);
+    color: #F8FAFC;
+    padding: 64px 32px 56px;
+    position: relative;
+    overflow: hidden;
+    border-bottom: 1px solid #1E293B;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image:
+      radial-gradient(circle at 20% 30%, rgba(15,118,110,0.18) 0, transparent 50%),
+      radial-gradient(circle at 80% 70%, rgba(124,58,237,0.12) 0, transparent 50%);
+    pointer-events: none;
+  }
+  .hero-inner {
+    max-width: 1280px;
+    margin: 0 auto;
+    position: relative;
+  }
+  .hero .eyebrow {
+    font-family: 'JetBrains Mono', 'SF Mono', Consolas, monospace;
+    font-size: 12px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: #5EEAD4;
+    margin-bottom: 18px;
+  }
+  .hero h1 {
+    font-family: 'Inter', sans-serif;
+    font-size: clamp(34px, 5vw, 56px);
+    line-height: 1.05;
+    font-weight: 800;
+    letter-spacing: -0.025em;
+    margin: 0 0 16px;
+    max-width: 900px;
+  }
+  .hero h1 .accent { color: #5EEAD4; }
+  .hero p {
+    font-size: 17px;
+    max-width: 760px;
+    color: #CBD5E1;
+    margin: 0 0 28px;
+  }
+  .hero-meta {
+    display: flex;
+    gap: 24px;
+    flex-wrap: wrap;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: #94A3B8;
+    border-top: 1px solid rgba(148,163,184,0.2);
+    padding-top: 20px;
+  }
+  .hero-meta span { display: flex; align-items: center; gap: 8px; }
+  .hero-meta strong { color: #F1F5F9; font-weight: 600; }
+  .dot { width: 6px; height: 6px; border-radius: 50%; background: #5EEAD4; }
+
+  /* LEGEND */
+  .legend {
+    background: var(--surface);
+    border-bottom: 1px solid var(--line);
+    padding: 24px 32px;
+  }
+  .legend-inner {
+    max-width: 1280px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 28px;
+  }
+  .legend-group h4 {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin: 0 0 10px;
+    font-weight: 600;
+  }
+  .legend-items { display: flex; flex-wrap: wrap; gap: 8px; }
+
+  /* CONTROLS */
+  .controls {
+    background: var(--surface);
+    border-bottom: 1px solid var(--line);
+    padding: 18px 32px;
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    box-shadow: 0 1px 0 rgba(15,23,42,0.04), 0 4px 16px rgba(15,23,42,0.04);
+  }
+  .controls-inner {
+    max-width: 1280px;
+    margin: 0 auto;
+    display: flex;
+    gap: 14px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  .search-input {
+    flex: 1 1 280px;
+    min-width: 240px;
+    padding: 10px 14px 10px 38px;
+    font-size: 14px;
+    font-family: inherit;
+    border: 1px solid var(--line-strong);
+    border-radius: 8px;
+    background: var(--bg) url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2364748B' stroke-width='2.5' stroke-linecap='round'><circle cx='11' cy='11' r='7'/><line x1='21' y1='21' x2='16.65' y2='16.65'/></svg>") no-repeat 12px center;
+    color: var(--ink);
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  .search-input:focus { border-color: var(--accent); }
+  .filter-group {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+  .filter-btn {
+    padding: 7px 12px;
+    font-size: 12px;
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    border: 1px solid var(--line-strong);
+    border-radius: 6px;
+    background: var(--surface);
+    color: var(--muted);
+    cursor: pointer;
+    transition: all 0.15s;
+    text-transform: uppercase;
+  }
+  .filter-btn:hover { border-color: var(--ink); color: var(--ink); }
+  .filter-btn.active {
+    background: var(--ink);
+    color: #FFF;
+    border-color: var(--ink);
+  }
+
+  /* PHASE NAV */
+  .phase-nav {
+    background: var(--bg);
+    border-bottom: 1px solid var(--line);
+    padding: 14px 32px;
+    overflow-x: auto;
+  }
+  .phase-nav-inner {
+    max-width: 1280px;
+    margin: 0 auto;
+    display: flex;
+    gap: 4px;
+    min-width: max-content;
+  }
+  .phase-tab {
+    padding: 10px 16px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--muted);
+    text-decoration: none;
+    border-radius: 8px;
+    transition: all 0.15s;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    white-space: nowrap;
+    cursor: pointer;
+    border: 1px solid transparent;
+    background: transparent;
+    font-family: inherit;
+  }
+  .phase-tab:hover { background: var(--surface); color: var(--ink); }
+  .phase-tab .num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+  }
+  .phase-tab .swatch {
+    width: 10px;
+    height: 10px;
+    border-radius: 2px;
+  }
+
+  /* MAIN */
+  main {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 56px 32px 80px;
+  }
+
+  /* PHASE */
+  .phase {
+    margin-bottom: 80px;
+    scroll-margin-top: 80px;
+  }
+  .phase-header {
+    border-bottom: 2px solid var(--phase-color, var(--ink));
+    padding-bottom: 24px;
+    margin-bottom: 36px;
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: 28px;
+    align-items: end;
+  }
+  .phase-number {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 64px;
+    line-height: 1;
+    font-weight: 800;
+    color: var(--phase-color, var(--ink));
+    letter-spacing: -0.04em;
+  }
+  .phase-title-block .phase-eyebrow {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--phase-color, var(--ink));
+    margin-bottom: 6px;
+    font-weight: 700;
+  }
+  .phase-title-block h2 {
+    margin: 0 0 8px;
+    font-size: 36px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+  }
+  .phase-title-block .phase-desc {
+    color: var(--muted);
+    font-size: 15px;
+    max-width: 640px;
+    margin: 0;
+  }
+  .phase-stats {
+    text-align: right;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--muted);
+  }
+  .phase-stats .big {
+    font-size: 28px;
+    color: var(--phase-color, var(--ink));
+    font-weight: 700;
+  }
+
+  /* CARDS GRID */
+  .tools-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(420px, 1fr));
+    gap: 20px;
+  }
+
+  /* TOOL CARD */
+  .tool-card {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-left: 4px solid var(--phase-color, var(--ink));
+    border-radius: 10px;
+    padding: 22px 24px;
+    transition: box-shadow 0.18s, transform 0.18s;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+  .tool-card:hover {
+    box-shadow: 0 4px 20px rgba(15,23,42,0.06);
+  }
+  .tool-card.hidden { display: none; }
+
+  .tool-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 14px;
+  }
+  .tool-name {
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    margin: 0 0 4px;
+    line-height: 1.2;
+  }
+  .tool-vendor {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.04em;
+  }
+  .tool-badges {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    align-items: flex-end;
+  }
+
+  /* BADGES */
+  .badge {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 4px 8px;
+    border-radius: 4px;
+    border: 1px solid;
+    white-space: nowrap;
+  }
+  .badge.st-sota { background: #ECFDF5; color: var(--st-sota); border-color: #6EE7B7; }
+  .badge.st-active { background: #F1F5F9; color: var(--st-active); border-color: #CBD5E1; }
+  .badge.st-legacy { background: #FFFBEB; color: var(--st-legacy); border-color: #FCD34D; }
+  .badge.st-deprecated { background: #FEF2F2; color: var(--st-deprecated); border-color: #FCA5A5; text-decoration: line-through; }
+
+  .badge.lic-foss { background: #EFF6FF; color: var(--lic-foss); border-color: #93C5FD; }
+  .badge.lic-commercial { background: #FAF5FF; color: var(--lic-commercial); border-color: #D8B4FE; }
+  .badge.lic-cloud { background: #ECFEFF; color: var(--lic-cloud); border-color: #67E8F9; }
+  .badge.lic-freemium { background: #FFFBEB; color: var(--lic-freemium); border-color: #FCD34D; }
+  .badge.lic-enterprise { background: #F5F3FF; color: var(--lic-enterprise); border-color: #C4B5FD; }
+
+  .tool-summary {
+    font-size: 14px;
+    color: #334155;
+    margin: 0;
+    padding: 12px 14px;
+    background: #F8FAFC;
+    border-radius: 6px;
+    border-left: 3px solid var(--phase-color, var(--ink));
+  }
+
+  .tool-cost {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--muted);
+    padding: 6px 10px;
+    background: #F1F5F9;
+    border-radius: 4px;
+    display: inline-block;
+  }
+  .tool-cost strong { color: var(--ink); }
+
+  .tool-details {
+    display: grid;
+    gap: 10px;
+  }
+  .detail-row {
+    display: grid;
+    grid-template-columns: 110px 1fr;
+    gap: 14px;
+    font-size: 13px;
+    padding: 6px 0;
+    border-bottom: 1px dashed var(--line);
+  }
+  .detail-row:last-child { border-bottom: none; }
+  .detail-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    font-weight: 600;
+    padding-top: 2px;
+  }
+  .detail-value { color: #1E293B; }
+  .detail-value ul { margin: 0; padding-left: 16px; }
+  .detail-value ul li { margin-bottom: 3px; }
+
+  .pros-cons {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  .pc-block {
+    padding: 10px 12px;
+    border-radius: 6px;
+    font-size: 13px;
+  }
+  .pc-block.pros { background: #F0FDF4; border-left: 3px solid #22C55E; }
+  .pc-block.cons { background: #FEF2F2; border-left: 3px solid #EF4444; }
+  .pc-block h5 {
+    margin: 0 0 6px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    font-weight: 700;
+  }
+  .pc-block.pros h5 { color: #15803D; }
+  .pc-block.cons h5 { color: #B91C1C; }
+  .pc-block ul { margin: 0; padding-left: 16px; }
+  .pc-block ul li { margin-bottom: 3px; }
+
+  .when-blocks {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  .when-block {
+    padding: 10px 12px;
+    border-radius: 6px;
+    font-size: 13px;
+    background: #F8FAFC;
+    border: 1px solid var(--line);
+  }
+  .when-block h5 {
+    margin: 0 0 6px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    font-weight: 700;
+    color: var(--ink);
+  }
+  .when-block.do h5::before { content: '✓ '; color: #22C55E; }
+  .when-block.dont h5::before { content: '✗ '; color: #EF4444; }
+
+  /* EMPTY STATE */
+  .empty-state {
+    text-align: center;
+    padding: 60px 24px;
+    color: var(--muted);
+    font-size: 15px;
+  }
+  .empty-state.hidden { display: none; }
+
+  /* FOOTER */
+  footer {
+    background: #0F172A;
+    color: #94A3B8;
+    padding: 48px 32px;
+    border-top: 1px solid #1E293B;
+    text-align: center;
+  }
+  footer .footer-inner {
+    max-width: 1280px;
+    margin: 0 auto;
+  }
+  footer h3 { color: #F1F5F9; font-size: 18px; margin: 0 0 12px; }
+  footer p { margin: 0 0 8px; font-size: 13px; }
+  footer .small { font-size: 11px; color: #64748B; font-family: 'JetBrains Mono', monospace; margin-top: 20px; }
+
+  /* RESPONSIVE */
+  @media (max-width: 720px) {
+    .hero { padding: 40px 20px; }
+    .legend, .controls, .phase-nav { padding-left: 20px; padding-right: 20px; }
+    main { padding: 32px 20px 60px; }
+    .phase-header { grid-template-columns: 1fr; gap: 12px; }
+    .phase-number { font-size: 48px; }
+    .phase-title-block h2 { font-size: 28px; }
+    .phase-stats { text-align: left; }
+    .tools-grid { grid-template-columns: 1fr; }
+    .pros-cons, .when-blocks { grid-template-columns: 1fr; }
+    .detail-row { grid-template-columns: 1fr; gap: 4px; }
+  }
+
+  /* CDC BONUS SECTION */
+  #cdc {
+    background: linear-gradient(180deg, transparent 0%, #F8FAFC 30%, #F8FAFC 100%);
+    margin-top: 40px;
+    padding: 40px 24px;
+    border-radius: 16px;
+    border: 1px dashed #CBD5E1;
+    position: relative;
+  }
+  #cdc::before {
+    content: 'BONUS · TEMA TRANSVERSAL';
+    position: absolute;
+    top: -12px;
+    left: 24px;
+    background: #1E3A8A;
+    color: #fff;
+    padding: 4px 12px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    border-radius: 4px;
+    font-weight: 700;
+  }
+  #cdc .phase-number {
+    font-size: 56px;
+  }
+
+  /* PRINT */
+  @media print {
+    .controls, .phase-nav { display: none; }
+    .tool-card { break-inside: avoid; box-shadow: none; }
+    .phase { break-before: page; }
+  }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="hero-inner">
+    <div class="eyebrow">Atlas DataOps · Edición Junio 2026</div>
+    <h1>Herramientas para el flujo completo de <span class="accent">Data Engineering</span> &amp; DataOps</h1>
+    <p>Una referencia exhaustiva de las 7 fases del ciclo de vida del dato: ingesta, procesamiento, serving, visualización, orquestación, gobierno y veracidad. Más una sección bonus sobre Change Data Capture (CDC), el tema transversal que cruza todo el stack. Incluye herramientas open source, comerciales, servicios gestionados de AWS/Azure/GCP, líderes del estado del arte y soluciones legacy/deprecadas para contexto histórico.</p>
+    <div class="hero-meta">
+      <span><span class="dot"></span><strong>7</strong> fases + 1 tema transversal (CDC)</span>
+      <span><span class="dot"></span><strong>150+</strong> herramientas catalogadas</span>
+      <span><span class="dot"></span><strong>4</strong> estados (SOTA / Activo / Legacy / Deprecado)</span>
+      <span><span class="dot"></span><strong>5</strong> tipos de licenciamiento</span>
+    </div>
+  </div>
+</header>
+
+<section class="legend">
+  <div class="legend-inner">
+    <div class="legend-group">
+      <h4>Estado (madurez · adopción)</h4>
+      <div class="legend-items">
+        <span class="badge st-sota">SOTA 2026</span>
+        <span class="badge st-active">Activo</span>
+        <span class="badge st-legacy">Legacy</span>
+        <span class="badge st-deprecated">Deprecado</span>
+      </div>
+    </div>
+    <div class="legend-group">
+      <h4>Licenciamiento · modelo de negocio</h4>
+      <div class="legend-items">
+        <span class="badge lic-foss">Open Source</span>
+        <span class="badge lic-commercial">Comercial</span>
+        <span class="badge lic-cloud">Cloud Gestionado</span>
+        <span class="badge lic-freemium">Freemium</span>
+        <span class="badge lic-enterprise">Enterprise</span>
+      </div>
+    </div>
+    <div class="legend-group">
+      <h4>Cómo usar este atlas</h4>
+      <div style="font-size: 13px; color: var(--muted); line-height: 1.5;">
+        Navega por las 7 fases con las pestañas. Usa el buscador para encontrar herramientas por nombre. Filtra por estado o licencia para acotar el universo.
+      </div>
+    </div>
+  </div>
+</section>
+
+<nav class="controls">
+  <div class="controls-inner">
+    <input type="text" id="searchInput" class="search-input" placeholder="Buscar por nombre, vendor o tecnología…" autocomplete="off">
+    <div class="filter-group" id="statusFilters">
+      <button class="filter-btn active" data-filter="status" data-value="all">Todos estados</button>
+      <button class="filter-btn" data-filter="status" data-value="sota">SOTA</button>
+      <button class="filter-btn" data-filter="status" data-value="active">Activo</button>
+      <button class="filter-btn" data-filter="status" data-value="legacy">Legacy</button>
+      <button class="filter-btn" data-filter="status" data-value="deprecated">Deprecado</button>
+    </div>
+    <div class="filter-group" id="licenseFilters">
+      <button class="filter-btn active" data-filter="license" data-value="all">Todas licencias</button>
+      <button class="filter-btn" data-filter="license" data-value="foss">Open Source</button>
+      <button class="filter-btn" data-filter="license" data-value="cloud">Cloud</button>
+      <button class="filter-btn" data-filter="license" data-value="commercial">Comercial</button>
+    </div>
+  </div>
+</nav>
+
+<nav class="phase-nav">
+  <div class="phase-nav-inner" id="phaseTabs"></div>
+</nav>
+
+<main id="phases"></main>
+
+<div class="empty-state hidden" id="emptyState">
+  Sin resultados con los filtros actuales. Prueba a ampliar la búsqueda o resetear los filtros.
+</div>
+
+<footer>
+  <div class="footer-inner">
+    <h3>Atlas DataOps · Junio 2026</h3>
+    <p>Documento de referencia para arquitectos de datos, data engineers y equipos de plataforma de datos.</p>
+    <p>La clasificación de "estado" refleja la percepción del mercado a junio de 2026; las herramientas evolucionan rápidamente.</p>
+    <p class="small">Generado como guía técnica · Imprimible · Filtrable · Auto-contenido</p>
+  </div>
+</footer>
+
+<script>
+// ============================================================
+// ATLAS DATAOPS · DATA SET
+// ============================================================
+
+const PHASES_META = [
+  { id: 'ingestion',     num: '01', name: 'Data Ingestion',     desc: 'Mover datos desde sistemas origen (bases de datos, APIs, archivos, streams) hacia el lago, warehouse o pipeline. Incluye ETL/ELT, CDC y streaming.', color: 'var(--c-ingest)' },
+  { id: 'processing',    num: '02', name: 'Data Processing',    desc: 'Motores de cómputo distribuido y en memoria para transformar, enriquecer y agregar datos a escala (batch y streaming).', color: 'var(--c-process)' },
+  { id: 'serving',       num: '03', name: 'Data Serving',       desc: 'Warehouses, lakehouses, motores OLAP y bases analíticas que sirven datos consultables a aplicaciones, BI y APIs.', color: 'var(--c-serve)' },
+  { id: 'visualization', num: '04', name: 'Data Visualization', desc: 'Plataformas BI, dashboards, exploración visual y notebooks analíticos para que humanos consuman insights.', color: 'var(--c-viz)' },
+  { id: 'orchestration', num: '05', name: 'Data Orchestration', desc: 'Coordinación, scheduling y monitoreo de pipelines y workflows de datos con dependencias, reintentos y observabilidad.', color: 'var(--c-orchestrate)' },
+  { id: 'governance',    num: '06', name: 'Data Governance',    desc: 'Catálogos, linaje, control de acceso, gestión de metadatos, políticas de privacidad y cumplimiento normativo.', color: 'var(--c-govern)' },
+  { id: 'veracity',      num: '07', name: 'Data Veracity',      desc: 'Calidad de datos, validaciones, detección de anomalías y observabilidad del dato (freshness, volumen, schema, distribución).', color: 'var(--c-veracity)' },
+  { id: 'cdc',           num: '+',  name: 'Change Data Capture (CDC)', desc: 'Tema transversal, no una fase per se. CDC captura cambios (INSERT/UPDATE/DELETE) en bases de datos origen — leyendo logs de transacciones (WAL, binlog, redo logs) — y los propaga en tiempo real a destinos analíticos. Es la columna vertebral del data engineering moderno: cruza ingestion, processing y serving.', color: '#1E3A8A', eyebrow: 'Tema Transversal · Bonus' }
+];
+
+const TOOLS_DATA = {
+
+// ============================================================
+// 01 · DATA INGESTION
+// ============================================================
+ingestion: [
+  {
+    name: "Apache NiFi",
+    vendor: "Apache Software Foundation",
+    status: "active", license: "foss",
+    cost: "Gratis · Open source (Apache 2.0)",
+    summary: "Plataforma visual de flujos de datos basada en directed graphs, con back-pressure, linaje y procesadores plug-and-play.",
+    whatIs: "Herramienta de dataflow management con interfaz visual drag-and-drop, originada en la NSA y donada a Apache. Modela pipelines como grafos de procesadores conectados.",
+    whatDoes: "Mueve, transforma y enruta datos entre sistemas dispares (DBs, APIs, archivos, MQTT, Kafka). Gestiona back-pressure, priorización, linaje granular y reintentos.",
+    whatDoesnt: "No es un motor de procesamiento masivo (no compite con Spark). No es óptimo para transformaciones SQL complejas. La UI puede ser pesada en clústeres grandes.",
+    pros: ["GUI visual sin código", "Más de 300 procesadores built-in", "Linaje de datos automático", "Funciona on-prem, edge y cloud"],
+    cons: ["UI puede ralentizarse con flujos enormes", "Curva de aprendizaje para clustering", "Versionado de flujos limitado vs Git-first"],
+    whenUse: ["Movimiento de datos heterogéneo entre sistemas", "Edge computing y MiNiFi en IoT", "Compliance con linaje obligatorio (gobierno, banca)", "Equipos sin gran skill de programación"],
+    whenNotUse: ["Si necesitas transformaciones SQL complejas (mejor dbt)", "Pipelines analíticos puros (Airflow + Spark)", "Cuando todo cabe en un Snowflake/BigQuery (mejor ELT puro)"]
+  },
+  {
+    name: "Apache Kafka Connect",
+    vendor: "Apache Software Foundation",
+    status: "sota", license: "foss",
+    cost: "Gratis (open source) · Connectors comerciales en Confluent",
+    summary: "Framework de connectors para mover datos entre Kafka y otros sistemas. Estándar de facto para integración streaming.",
+    whatIs: "Componente de Apache Kafka especializado en source connectors (de origen → Kafka) y sink connectors (de Kafka → destino), escalable y distribuido.",
+    whatDoes: "Conecta cientos de fuentes (JDBC, S3, Salesforce, MongoDB, etc.) con Kafka sin escribir código. Soporta exactly-once, schema evolution con Schema Registry.",
+    whatDoesnt: "Solo conecta a/desde Kafka — no es ETL general. No transforma datos complejamente (solo SMTs ligeros). Requiere Kafka como pieza central.",
+    pros: ["Ecosistema enorme de connectors", "Escala horizontalmente", "Exactly-once con Kafka", "Estándar industria para streaming ingest"],
+    cons: ["Operacionalmente complejo", "Requiere Kafka", "Connectors de calidad variable", "Configuración tediosa (JSON/REST)"],
+    whenUse: ["Arquitecturas event-driven con Kafka", "CDC streaming (con Debezium)", "Replicación entre data centers", "Cuando ya tienes Kafka en producción"],
+    whenNotUse: ["Sin Kafka en el stack", "Pipelines batch puros", "Equipos pequeños sin SRE/Platform team", "Cargas low-throughput (overkill)"]
+  },
+  {
+    name: "Debezium",
+    vendor: "Red Hat (open source)",
+    status: "sota", license: "foss",
+    cost: "Gratis · Open source",
+    summary: "Plataforma CDC (Change Data Capture) sobre Kafka Connect. Líder open source para capturar cambios en tiempo real desde bases de datos.",
+    whatIs: "Connectors de Kafka Connect que leen logs de transacciones (WAL, binlog, redo logs) de MySQL, PostgreSQL, MongoDB, SQL Server, Oracle, etc., y publican cada cambio como evento.",
+    whatDoes: "Captura INSERT/UPDATE/DELETE sin tocar las tablas origen. Snapshots iniciales + streaming continuo. Soporta exactly-once con Kafka.",
+    whatDoesnt: "No transforma datos (solo replica eventos). No es una solución de migración one-shot. Requiere acceso a logs de DB (privilegios elevados).",
+    pros: ["CDC sin polling, baja latencia", "Open source maduro", "Soporta múltiples DBs", "Schema evolution automática"],
+    cons: ["Requiere Kafka + Kafka Connect", "Configuración de DB privilegiada", "Manejo de snapshots iniciales delicado", "Costo operacional"],
+    whenUse: ["Replicación real-time DB → warehouse", "Microservicios event-driven", "Sincronización entre sistemas operacionales y analíticos", "Cuando la latencia importa (< minutos)"],
+    whenNotUse: ["Si solo necesitas batch diario (overkill)", "Sin Kafka", "DBs sin soporte de logs accesibles", "Equipos sin experiencia en streaming"]
+  },
+  {
+    name: "Airbyte",
+    vendor: "Airbyte Inc.",
+    status: "sota", license: "foss",
+    cost: "Open source gratis · Airbyte Cloud desde ~$2.50/GB sincronizado",
+    summary: "Plataforma open source de ELT con 400+ connectors y modelo extensible. El 'Fivetran open source' que se volvió mainstream.",
+    whatIs: "Plataforma de data integration (EL en ELT) basada en el estándar Singer/Airbyte Protocol con connectors comunitarios y propios. Self-hosted o cloud.",
+    whatDoes: "Extrae datos de SaaS, DBs, APIs y los carga en warehouses/lakes. Sincronización incremental, schema discovery, normalización opcional.",
+    whatDoesnt: "No hace transformaciones complejas (delega en dbt). No es streaming real-time (mini-batches). Calidad de connectors varía.",
+    pros: ["400+ connectors", "Open source con cloud gestionado", "Custom connectors fáciles", "Pricing por volumen claro"],
+    cons: ["Connectors comunitarios inconsistentes en calidad", "Performance vs Fivetran a veces inferior", "Self-hosted requiere ops"],
+    whenUse: ["Reemplazar pipelines ETL custom legacy", "Cuando Fivetran es muy caro", "Necesidad de connectors custom", "Stack moderno con dbt + warehouse"],
+    whenNotUse: ["Mission-critical con SLA estrictos (Fivetran enterprise puede ser mejor)", "Streaming sub-segundo", "Equipos sin tiempo de operar"]
+  },
+  {
+    name: "Fivetran",
+    vendor: "Fivetran (HVR, acquired 2021)",
+    status: "sota", license: "commercial",
+    cost: "Pago por MAR (Monthly Active Rows) · desde ~$120/mes, escala rápido",
+    summary: "Líder SaaS de ELT 'fully managed'. Cero código, mantenimiento de connectors automático. El estándar enterprise.",
+    whatIs: "Servicio cloud que sincroniza datos de cientos de fuentes SaaS y DBs a tu warehouse de forma totalmente gestionada.",
+    whatDoes: "Mantiene connectors, gestiona schema drift, hace incremental sync, ofrece HVR para CDC enterprise. Integra con dbt.",
+    whatDoesnt: "No transforma datos (solo EL). No on-premise puro (cloud-first). Caro a escala.",
+    pros: ["Cero mantenimiento", "Connectors muy estables", "Compliance enterprise (SOC2, HIPAA)", "Schema drift automático"],
+    cons: ["Costos explotan con volumen alto", "Vendor lock-in", "Black box en lógica de sync", "Custom connectors limitados"],
+    whenUse: ["Empresas medianas/grandes con presupuesto", "Cuando el tiempo del equipo es más caro que la licencia", "Stack moderno warehouse + dbt", "Compliance strict"],
+    whenNotUse: ["Startups con poco presupuesto y mucho volumen", "Cuando necesitas connectors muy custom", "Real-time streaming sub-segundo", "On-prem only"]
+  },
+  {
+    name: "AWS Glue",
+    vendor: "Amazon Web Services",
+    status: "active", license: "cloud",
+    cost: "Pago por DPU-hora ($0.44/DPU-h) + Data Catalog ($1/100k objetos/mes)",
+    summary: "Servicio serverless de ETL y catálogo de datos en AWS. Apache Spark gestionado más data catalog integrado.",
+    whatIs: "Plataforma serverless que combina Glue ETL (Spark/Python managed), Glue Studio (visual), Glue Crawlers (descubrimiento de schema) y Glue Data Catalog.",
+    whatDoes: "Ejecuta jobs Spark/Python serverless, crawlea S3 para inferir schemas, sirve como Hive Metastore para Athena/Redshift Spectrum/EMR.",
+    whatDoesnt: "No es real-time streaming puro (Kinesis o MSK para eso). Cold starts notables. Limitado fuera de AWS.",
+    pros: ["Serverless: sin gestionar clúster", "Catálogo integrado con todo AWS", "Glue Studio visual amigable", "Crawlers automáticos"],
+    cons: ["Cold starts de 1-5 min", "Más caro que EMR autoadministrado", "Debugging difícil", "Lock-in AWS"],
+    whenUse: ["Stack AWS-first", "Cargas batch intermitentes (no quieres clúster fijo)", "Necesitas catálogo unificado para Athena/Redshift", "Equipos pequeños sin platform team"],
+    whenNotUse: ["Multi-cloud", "Jobs continuos 24/7 (mejor EMR)", "Streaming low-latency (Kinesis Analytics o MSK)", "Cuando el cold start es inaceptable"]
+  },
+  {
+    name: "Azure Data Factory",
+    vendor: "Microsoft",
+    status: "active", license: "cloud",
+    cost: "Pago por actividad y por DIU/hora · típicamente $200-2000/mes según escala",
+    summary: "Servicio de integración de datos cloud-native de Azure con UI visual, 100+ connectors y data flows visuales en Spark.",
+    whatIs: "Plataforma orquestada de pipelines de datos en Azure. Combina copy activities, data flows (Spark visual), triggers y monitoring.",
+    whatDoes: "Mueve datos entre 100+ servicios (Azure, on-prem vía IR, SaaS), ejecuta transformaciones visuales en Spark, orquesta pipelines complejos.",
+    whatDoesnt: "No es código-first (mejor experiencia con UI). Limitado en transformaciones avanzadas vs Databricks. Real-time limitado.",
+    pros: ["UI visual potente", "Integration runtime para híbrido/on-prem", "Conectividad Microsoft/Azure profunda", "Pricing predecible para batch"],
+    cons: ["Curva con expresiones de pipeline", "Debugging tedioso", "Source control con Git pero merge difícil", "Lock-in Azure"],
+    whenUse: ["Stack Microsoft/Azure-first", "Migraciones SQL Server → Synapse/Fabric", "Equipos sin gran skill code-first", "Híbrido on-prem + cloud"],
+    whenNotUse: ["Multi-cloud", "Pipelines code-first puros (Airflow + dbt mejor)", "Real-time streaming sub-segundo", "Cuando ya tienes Databricks (redundante)"]
+  },
+  {
+    name: "Google Cloud Dataflow",
+    vendor: "Google Cloud",
+    status: "active", license: "cloud",
+    cost: "Pago por vCPU/memoria/storage por hora · varía mucho según job",
+    summary: "Servicio serverless de procesamiento unificado batch + streaming basado en Apache Beam. La joya de GCP para data pipelines.",
+    whatIs: "Ejecución gestionada de pipelines Apache Beam en GCP. Auto-scaling, dynamic work rebalancing, exactly-once streaming.",
+    whatDoes: "Ejecuta pipelines Beam en Java/Python/Go con autoscaling. Excelente para streaming a escala (BigQuery streaming inserts, Pub/Sub).",
+    whatDoesnt: "Atado a Apache Beam (curva). No SQL-first (aunque tiene Dataflow SQL). Solo en GCP.",
+    pros: ["Streaming muy potente y maduro", "Autoscaling agresivo", "Unificación batch/stream real", "Exactly-once garantizado"],
+    cons: ["Beam tiene curva de aprendizaje", "Debugging streaming complejo", "Caro si no se afinaba", "Lock-in GCP"],
+    whenUse: ["Stack GCP con BigQuery", "Streaming a alta escala (millones de eventos/s)", "Pipelines unificados batch+stream", "Cuando ya conoces Beam"],
+    whenNotUse: ["Stack no-GCP", "Equipos sin experiencia Beam (curva alta)", "Pipelines simples batch (Composer + BigQuery basta)", "Presupuesto ajustado"]
+  },
+  {
+    name: "Talend",
+    vendor: "Qlik (acquired Talend 2023)",
+    status: "legacy", license: "commercial",
+    cost: "Enterprise: $5k-50k+/usuario/año · Open Studio (gratis, discontinuado para nuevos lanzamientos)",
+    summary: "Plataforma ETL enterprise tradicional con generación de código Java. Dominante en los 2010s, hoy en declive frente a stack moderno.",
+    whatIs: "Suite ETL/data integration con diseñador visual que genera código Java. Talend Open Studio (gratis) + Talend Cloud (comercial).",
+    whatDoes: "ETL clásico con 900+ componentes, data quality, MDM, data integration on-prem y cloud, jobs Spark con Talend Big Data.",
+    whatDoesnt: "No es cloud-native moderno. Open Studio en mantenimiento (sin nuevas versiones desde 2024). Versionado con Git tosco.",
+    pros: ["Madurez y catálogo enorme de componentes", "On-prem fuerte", "MDM y data quality integrados", "Conoce SAP/Mainframe legacy"],
+    cons: ["Stack pesado y legacy", "UI lenta", "Tecnología que el mercado abandona", "Licenciamiento opaco post-adquisición"],
+    whenUse: ["Solo si ya tienes inversión en Talend", "Migraciones complejas SAP/Mainframe", "Entornos muy regulados on-prem"],
+    whenNotUse: ["Greenfield (mejor Airbyte/Fivetran/dbt)", "Cloud-first moderno", "Equipos jóvenes sin querer Java legacy", "Cuando buscas comunidad activa"]
+  },
+  {
+    name: "Informatica PowerCenter / IDMC",
+    vendor: "Informatica",
+    status: "legacy", license: "enterprise",
+    cost: "Enterprise: $100k-1M+/año según deployment · IDMC (cloud) por consumo",
+    summary: "El abuelo enterprise del ETL. PowerCenter dominó on-prem 20+ años; IDMC es la apuesta cloud moderna pero pesada.",
+    whatIs: "Plataforma enterprise de integración con PowerCenter (on-prem) y IDMC/IICS (Intelligent Data Management Cloud).",
+    whatDoes: "ETL masivo, MDM, data quality, governance, B2B integration. Capacidades enormes pero complejas.",
+    whatDoesnt: "No es ágil ni cheap. Curva enorme. Mal fit para data engineering moderno code-first.",
+    pros: ["Capacidades enterprise extremas", "Soporte 24/7 corporativo", "Compliance y certificaciones", "Tradición en banca/seguros/gobierno"],
+    cons: ["Costos altísimos", "Stack pesado y lento de evolucionar", "Talento escaso (gente migra a moderno)", "UX dolorosa"],
+    whenUse: ["Bancos/aseguradoras con inversión histórica", "Migraciones enterprise con compliance estricto", "Cuando ya hay equipos Informatica internos"],
+    whenNotUse: ["Greenfield moderno", "Startups y mid-market", "Equipos cloud-native que quieren agilidad", "Cuando el precio importa"]
+  },
+  {
+    name: "Apache Sqoop",
+    vendor: "Apache Software Foundation",
+    status: "deprecated", license: "foss",
+    cost: "Gratis · pero retirado del Top-Level Apache",
+    summary: "Movía datos entre Hadoop/HDFS y bases relacionales. Movido al ático Apache en 2021. Reemplazado por NiFi, Spark, Airbyte.",
+    whatIs: "Herramienta CLI para importar/exportar datos entre Hadoop y RDBMS vía JDBC con jobs MapReduce paralelos.",
+    whatDoes: "Históricamente: importaba tablas masivas a HDFS/Hive con paralelización por particiones de columnas.",
+    whatDoesnt: "Ya no se mantiene. No soporta nubes modernas. Sin streaming. Sin actualizaciones de seguridad.",
+    pros: ["Histórico: rápido para bulk loads RDBMS → HDFS", "Simple para casos básicos"],
+    cons: ["DEPRECADO", "Sin soporte ni parches", "Reemplazado en todos los stacks modernos", "Atado a MapReduce"],
+    whenUse: ["Solo para mantener sistemas legacy on-prem heredados"],
+    whenNotUse: ["Cualquier nuevo proyecto · usa Spark JDBC, Airbyte, NiFi o connectors nativos"]
+  },
+  {
+    name: "Apache Flume",
+    vendor: "Apache Software Foundation",
+    status: "legacy", license: "foss",
+    cost: "Gratis · open source pero sin actualizaciones recientes",
+    summary: "Agregador de logs hacia HDFS. Estándar en la era Hadoop 2010-2018. Hoy reemplazado por Kafka + Fluentd/Vector/Logstash.",
+    whatIs: "Servicio distribuido para colectar, agregar y mover grandes volúmenes de logs a HDFS, con arquitectura source-channel-sink.",
+    whatDoes: "Recibía logs de servidores y los enviaba a HDFS/HBase con buffering, reintentos y configuración por archivo.",
+    whatDoesnt: "Sin desarrollo significativo desde 2019. No soporta cloud-native bien. Reemplazado por alternativas modernas.",
+    pros: ["Histórico: muy probado para log ingestion a HDFS", "Configuración declarativa"],
+    cons: ["Sin innovación reciente", "Comunidad estancada", "Reemplazado por Kafka + Fluentd/Vector/Logstash", "Mal fit para Kubernetes"],
+    whenUse: ["Solo manteniendo clústeres Hadoop legacy"],
+    whenNotUse: ["Cualquier proyecto nuevo · usa Vector, Fluentd, Filebeat o Kafka Connect"]
+  },
+  {
+    name: "Vector",
+    vendor: "Datadog (open source)",
+    status: "sota", license: "foss",
+    cost: "Gratis · open source MPL 2.0 (Datadog lo respalda)",
+    summary: "Agente ultra-rápido en Rust para logs, métricas y traces. Reemplazo moderno de Logstash/Fluentd con orden de magnitud mejor performance.",
+    whatIs: "Herramienta de observability data pipeline en Rust que actúa como agente (cliente) o aggregator (server) para logs/metrics/traces.",
+    whatDoes: "Colecta de archivos, sockets, K8s, Docker; transforma con VRL (Vector Remap Language); envía a 40+ sinks (Datadog, Elastic, S3, Kafka).",
+    whatDoesnt: "No es ETL general (centrado en observabilidad). Sin GUI. No reemplaza a Airbyte para datos de negocio.",
+    pros: ["Performance brutal en Rust", "Footprint mínimo", "VRL muy expresivo", "Buffer en disco confiable"],
+    cons: ["VRL tiene curva", "Sin GUI", "Ecosistema más reducido que Fluentd para enterprise raro"],
+    whenUse: ["Observability pipelines a escala", "Reemplazar Logstash pesados", "Edge agents low-footprint", "Cuando importa CPU/RAM"],
+    whenNotUse: ["Datos de negocio (mejor Airbyte/Fivetran)", "Equipos sin Rust mindset (aunque no hay que saber Rust)", "Cuando ya tienes Fluentd estable"]
+  },
+  {
+    name: "Fluentd / Fluent Bit",
+    vendor: "CNCF (Treasure Data origin)",
+    status: "active", license: "foss",
+    cost: "Gratis · open source Apache 2.0",
+    summary: "Colector de logs CNCF graduado. Fluent Bit (ligero, C) + Fluentd (extensible, Ruby) son el estándar de facto en Kubernetes.",
+    whatIs: "Unified logging layer con plugins en Ruby (Fluentd) o nativos (Fluent Bit). Estándar CNCF para observabilidad de logs.",
+    whatDoes: "Colecta logs de archivos, journald, K8s, Docker; parsea, enriquece, enruta a Elasticsearch, S3, Kafka, Loki, Datadog, etc.",
+    whatDoesnt: "No es ETL de negocio. Fluentd tradicional puede ser pesado (Ruby). Mejor combinar con Fluent Bit en edges.",
+    pros: ["CNCF Graduated, ecosystem enorme", "Fluent Bit ultra-ligero", "1000+ plugins", "Estándar de facto K8s"],
+    cons: ["Fluentd Ruby a veces lento", "Configuración con curva", "Múltiples productos a coordinar"],
+    whenUse: ["Cualquier stack Kubernetes con observabilidad", "Logs multi-destino", "Cuando ya estás en CNCF stack"],
+    whenNotUse: ["Si prefieres single-binary Rust (Vector)", "Para business data ETL"]
+  },
+  {
+    name: "Stitch",
+    vendor: "Talend (Qlik desde 2023)",
+    status: "legacy", license: "commercial",
+    cost: "Desde $100/mes hasta varios miles · pricing por filas",
+    summary: "ELT SaaS basado en Singer.io. Fue pionero pero quedó atrás vs Fivetran y Airbyte. Mantenimiento mínimo desde 2023.",
+    whatIs: "Servicio cloud de extracción y carga basado en taps/targets de Singer (open source spec). Adquirido por Talend, luego Qlik.",
+    whatDoes: "Sincroniza 130+ fuentes SaaS y DBs hacia warehouses con setup simple. Pricing por filas mensuales.",
+    whatDoesnt: "Roadmap estancado. Menos connectors que Fivetran/Airbyte. Singer.io taps de calidad variable.",
+    pros: ["Setup simple", "Pricing transparente por filas", "Singer.io extensible"],
+    cons: ["Innovación estancada", "Catálogo de connectors pequeño", "Soporte tibio post-adquisiciones"],
+    whenUse: ["Solo si ya tienes inversión", "Cargas simples sin requisitos avanzados"],
+    whenNotUse: ["Cualquier nuevo greenfield · prefiere Fivetran, Airbyte o Hevo"]
+  },
+  {
+    name: "Meltano",
+    vendor: "Meltano Inc (spin-off GitLab)",
+    status: "active", license: "foss",
+    cost: "Gratis open source · Meltano Cloud con pricing por uso",
+    summary: "Plataforma DataOps open source que orquesta taps/targets Singer + dbt + Airflow con CLI Git-first. Para equipos code-first.",
+    whatIs: "Framework code-first para construir pipelines ELT combinando Singer (extracción), dbt (transformación) y orquestación.",
+    whatDoes: "CLI Git-first, plugins Singer manejados, integración nativa con dbt y Airflow, ambientes y variables como código.",
+    whatDoesnt: "No es no-code. Connectors Singer pueden ser frágiles. Curva CLI alta para no técnicos.",
+    pros: ["Todo es código (Git)", "Reproducible y testeable", "Ecosistema Singer", "Filosofía DataOps coherente"],
+    cons: ["Para no-coders es duro", "Singer taps inconsistentes", "Comunidad menor que Airbyte"],
+    whenUse: ["Equipos data engineering code-first", "Pipelines reproducibles y versionados", "Filosofía 'everything-as-code'"],
+    whenNotUse: ["Equipos no técnicos", "Cuando UI visual es requisito", "Si la confiabilidad de connectors es crítica (Fivetran mejor)"]
+  },
+  {
+    name: "dlt (data load tool)",
+    vendor: "dltHub",
+    status: "sota", license: "foss",
+    cost: "Gratis librería open source · dltHub Cloud en beta",
+    summary: "Librería Python para construir pipelines de ingesta con autoschema, normalización y carga incremental en warehouses. El 'pandas para ELT'.",
+    whatIs: "Librería Python que convierte fuentes (APIs, DBs, archivos) en pipelines hacia destinos (warehouses, lakes) con schema inference y incremental.",
+    whatDoes: "Itera sobre datos Python (generadores), normaliza estructuras anidadas, gestiona estado incremental, carga a DuckDB, BigQuery, Snowflake, etc.",
+    whatDoesnt: "No es un servicio (es librería). No tiene UI. Requiere código Python.",
+    pros: ["Ultra ligero, sin servidores", "Schema evolution automática", "Pythonic y embebible", "Excelente para custom connectors"],
+    cons: ["Joven (sin track record largo)", "Sin GUI/marketplace masivo de connectors", "Requiere Python skill"],
+    whenUse: ["Custom connectors que no existen", "Embeber ingestión en aplicaciones", "Equipos Python-first ágiles", "Reemplazar scripts ETL artesanales"],
+    whenNotUse: ["Equipos sin Python", "Cuando un Fivetran/Airbyte ya cubre el caso", "Necesitas UI y dashboards de monitoreo built-in"]
+  },
+  {
+    name: "Hevo Data",
+    vendor: "Hevo Data",
+    status: "active", license: "commercial",
+    cost: "Desde $239/mes hasta enterprise · pricing por eventos",
+    summary: "Plataforma ELT SaaS con 150+ connectors, transformaciones in-flight con Python y replicación en near real-time.",
+    whatIs: "Servicio cloud de data integration con pricing por eventos, énfasis en facilidad de uso y connectors mantenidos por Hevo.",
+    whatDoes: "Sincroniza fuentes SaaS, DBs y eventos a warehouses; permite transformaciones Python in-flight; CDC near-realtime.",
+    whatDoesnt: "Menos connectors que Fivetran. No open source. Limitado en pipelines muy complejos.",
+    pros: ["Setup muy ágil", "Pricing más barato que Fivetran a veces", "Soporte responsivo", "Python transforms in-flight"],
+    cons: ["Catálogo más chico", "Menos enterprise compliance que Fivetran", "Vendor menos conocido en USA enterprise"],
+    whenUse: ["Mid-market con presupuesto medio", "Cuando Fivetran es muy caro", "Necesitas transforms Python ligeros antes de cargar"],
+    whenNotUse: ["Compliance regulado estricto (Fivetran mejor track)", "Connectors muy nicho (Airbyte custom mejor)", "Self-hosted (no soporta)"]
+  },
+  {
+    name: "AWS DMS (Database Migration Service)",
+    vendor: "Amazon Web Services",
+    status: "active", license: "cloud",
+    cost: "Pago por instance hora (~$0.05-2/h) + transferencia",
+    summary: "Servicio AWS para migrar bases relacionales y NoSQL con soporte de CDC continuo. Ideal para lift-and-shift y replicación a Redshift/S3.",
+    whatIs: "Servicio gestionado de replicación de bases de datos con tareas full-load + CDC entre engines heterogéneos.",
+    whatDoes: "Migra y replica de Oracle, SQL Server, MySQL, PostgreSQL, etc. hacia S3, Redshift, Aurora, Kinesis, OpenSearch.",
+    whatDoesnt: "No es ETL transformacional (poca capacidad de transform). Sin orquestación de pipelines. Mejor para migraciones que análisis continuo.",
+    pros: ["Migraciones complejas heterogéneas", "CDC continuo confiable", "Integrado al ecosistema AWS", "Soporte SCT (Schema Conversion Tool)"],
+    cons: ["Tareas mononolíticas (no es pipeline general)", "Tuning de instancias delicado", "Errors crípticos a veces", "Solo AWS"],
+    whenUse: ["Migraciones de on-prem a AWS", "Replicación continua DB → S3/Redshift", "Cambios de motor (Oracle → Aurora)"],
+    whenNotUse: ["ETL general analítico (mejor Glue)", "Multi-cloud", "Streaming de eventos no-DB (Kafka mejor)"]
+  }
+],
+
+// ============================================================
+// 02 · DATA PROCESSING
+// ============================================================
+processing: [
+  {
+    name: "Apache Spark",
+    vendor: "Apache Software Foundation",
+    status: "sota", license: "foss",
+    cost: "Gratis open source · Distros comerciales (Databricks, EMR) por uso",
+    summary: "El motor de procesamiento distribuido dominante desde 2014. Sigue siendo el estándar para batch a gran escala y streaming estructurado.",
+    whatIs: "Motor unificado de procesamiento de datos en memoria con APIs en Scala, Python (PySpark), Java, R y SQL. Spark 4.x (2024+) trae Connect, Pandas API y mejoras de performance.",
+    whatDoes: "Procesa TB-PB de datos en clústeres distribuidos. SQL, dataframes, ML (MLlib), streaming (Structured Streaming) y grafos (GraphFrames).",
+    whatDoesnt: "No es óptimo para datasets pequeños (overhead JVM). No es streaming sub-segundo (Flink mejor). Memoria-hungry.",
+    pros: ["Ecosistema masivo y maduro", "APIs ricas (SQL, DataFrames, ML)", "Talento abundante", "Optimizador Catalyst potente"],
+    cons: ["Overhead JVM en jobs chicos", "Tuning complejo a escala", "Streaming menos avanzado que Flink", "Memoria intensiva"],
+    whenUse: ["ETL/ELT batch de gran volumen", "Feature engineering ML a escala", "Procesamiento de logs/eventos histórico", "Migraciones desde MapReduce"],
+    whenNotUse: ["Datasets que caben en una máquina (Polars/DuckDB mejor)", "Streaming sub-segundo (Flink mejor)", "Equipos sin DevOps mínimo"]
+  },
+  {
+    name: "Apache Flink",
+    vendor: "Apache Software Foundation",
+    status: "sota", license: "foss",
+    cost: "Gratis open source · Confluent Cloud Flink y Ververica Platform comerciales",
+    summary: "El rey del streaming verdadero. Procesamiento de eventos en tiempo real con exactly-once, stateful processing y windowing avanzado.",
+    whatIs: "Framework de procesamiento de streams con arquitectura native streaming (no micro-batches). APIs DataStream, Table/SQL, CEP.",
+    whatDoes: "Procesa eventos uno a uno con baja latencia (ms), gestiona estado masivo, soporta event-time, watermarks, windowing complejo.",
+    whatDoesnt: "Más difícil que Spark para batch puro. Curva de aprendizaje pronunciada. Menos talento en mercado.",
+    pros: ["Streaming nativo verdadero", "Exactly-once con state checkpointing", "Latencias en milisegundos", "Event-time y CEP avanzados"],
+    cons: ["Curva pronunciada", "Operacionalmente complejo", "Comunidad más chica que Spark", "Tooling menos rico"],
+    whenUse: ["Streaming de baja latencia (fraud, alertas)", "Procesamiento stateful complejo", "Event-time crítico (orden, sesiones)", "Aplicaciones de eventos real-time"],
+    whenNotUse: ["Batch puro (Spark mejor)", "Equipos sin experiencia streaming", "Cuando un Spark Structured Streaming basta"]
+  },
+  {
+    name: "Apache Beam",
+    vendor: "Apache Software Foundation",
+    status: "active", license: "foss",
+    cost: "Gratis · ejecución en Dataflow (GCP) o Flink/Spark genera costos",
+    summary: "Modelo unificado batch + stream que se ejecuta en Spark, Flink, Dataflow. Portabilidad como su feature estrella.",
+    whatIs: "API unificada (Java, Python, Go) que abstrae el runtime; portas el mismo código entre Dataflow, Spark, Flink, Samza.",
+    whatDoes: "Define pipelines batch o streaming con un modelo único (PCollections, Transforms, Windowing).",
+    whatDoesnt: "El runtime ideal sigue siendo Dataflow (los runners en Spark/Flink tienen limitaciones). Curva alta.",
+    pros: ["Portabilidad multi-runner", "Modelo unificado batch+stream", "Bien diseñado conceptualmente"],
+    cons: ["Runners no-Dataflow limitados", "Curva alta", "Adopción menor que Spark/Flink solos"],
+    whenUse: ["Stack GCP con Dataflow", "Necesidad de portabilidad real entre engines", "Equipos ya familiarizados con Beam"],
+    whenNotUse: ["Si ya usas Spark o Flink puros (más simple)", "Equipos pequeños sin necesidad de portabilidad"]
+  },
+  {
+    name: "Apache Hadoop MapReduce",
+    vendor: "Apache Software Foundation",
+    status: "deprecated", license: "foss",
+    cost: "Gratis open source · pero nadie elige esto hoy",
+    summary: "El abuelo del big data. Inicialmente revolucionario (2006-2014), hoy reemplazado universalmente por Spark, Flink, Trino.",
+    whatIs: "Framework de procesamiento batch sobre HDFS basado en el paper de Google. Map + Shuffle + Reduce con persistencia a disco.",
+    whatDoes: "Procesa datos masivos en disco con paralelización por bloques. Históricamente, base de Hive, Pig, Sqoop.",
+    whatDoesnt: "Es lento por escritura a disco entre etapas. Casi nadie escribe MR jobs nuevos. Engine en mantenimiento mínimo.",
+    pros: ["Histórico: probado a escala extrema", "Recuperación de fallos robusta"],
+    cons: ["10-100x más lento que Spark", "API de bajo nivel dolorosa", "Sin innovación", "Ecosistema Hadoop colapsando"],
+    whenUse: ["Solo mantenimiento de clústeres legacy Hadoop"],
+    whenNotUse: ["Cualquier proyecto nuevo · Spark, Trino o motores cloud son mejores en todo"]
+  },
+  {
+    name: "Apache Storm",
+    vendor: "Apache Software Foundation",
+    status: "legacy", license: "foss",
+    cost: "Gratis · sin innovación significativa desde 2020",
+    summary: "Streaming framework pionero (BackType/Twitter, 2011). Reemplazado por Flink y Spark Streaming. Aún en mantenimiento en algunos legacy.",
+    whatIs: "Framework de procesamiento de streams con topologías de spouts (fuentes) y bolts (procesadores).",
+    whatDoes: "Procesa eventos en tiempo real con at-least-once o exactly-once (Trident). Bajo overhead.",
+    whatDoesnt: "Menos features que Flink (windowing, state). Comunidad menguante. APIs sienten antiguas.",
+    pros: ["Histórico: pionero streaming", "Baja latencia", "Probado en Twitter a escala"],
+    cons: ["Reemplazado en todos los frentes", "APIs viejas", "Comunidad menguando"],
+    whenUse: ["Solo mantenimiento de pipelines Storm existentes"],
+    whenNotUse: ["Cualquier nuevo proyecto · Flink, Spark Streaming o Kafka Streams son mejores"]
+  },
+  {
+    name: "Apache Tez",
+    vendor: "Apache Software Foundation",
+    status: "legacy", license: "foss",
+    cost: "Gratis",
+    summary: "Framework DAG que aceleraba Hive y Pig vs MapReduce. Hoy en declive con Hadoop; Spark y Flink dominan.",
+    whatIs: "Motor de ejecución basado en DAG para Hive y Pig, diseñado para reemplazar MapReduce con mejor performance.",
+    whatDoes: "Ejecuta queries Hive con DAG optimizado en memoria, mejorando latencias respecto a MapReduce.",
+    whatDoesnt: "Acoplado al ecosistema Hadoop que está en declive. No es directamente usado por usuarios finales.",
+    pros: ["Mejora Hive sobre MapReduce", "Maduro y estable en su nicho"],
+    cons: ["Acoplado a Hadoop legacy", "Reemplazado por Spark/Trino en queries", "Sin innovación"],
+    whenUse: ["Solo manteniendo Hive on-prem"],
+    whenNotUse: ["Cualquier proyecto nuevo"]
+  },
+  {
+    name: "Apache Pig",
+    vendor: "Apache Software Foundation",
+    status: "deprecated", license: "foss",
+    cost: "Gratis · pero sin desarrollo activo",
+    summary: "Lenguaje de scripting Pig Latin para flujos de datos sobre Hadoop. Movido al ático Apache. Reemplazado por Spark SQL/Hive.",
+    whatIs: "Lenguaje declarativo (Pig Latin) que compilaba a MapReduce/Tez para análisis ad-hoc sobre HDFS.",
+    whatDoes: "Históricamente: scripts de transformación dataflow más expresivos que MapReduce raw.",
+    whatDoesnt: "Casi nadie lo usa hoy. Sin innovación. Comunidad disuelta.",
+    pros: ["Histórico: facilitó análisis MR en su día"],
+    cons: ["DEPRECADO", "Reemplazado por Spark SQL y Hive QL", "Sin futuro"],
+    whenUse: ["Solo legacy"],
+    whenNotUse: ["Todo nuevo · usa Spark SQL, Trino o dbt"]
+  },
+  {
+    name: "Apache Hive",
+    vendor: "Apache Software Foundation",
+    status: "active", license: "foss",
+    cost: "Gratis · Apache 2.0",
+    summary: "El SQL para Hadoop. Sigue siendo relevante como metastore (estándar de facto) aunque su motor cede ante Trino/Spark.",
+    whatIs: "Data warehouse sobre HDFS con SQL (HiveQL) que compilaba a MapReduce/Tez/Spark. El Hive Metastore es referencia universal.",
+    whatDoes: "Queries SQL sobre data lakes Hadoop. Hoy se usa principalmente como Metastore para Spark, Trino, Presto.",
+    whatDoesnt: "El motor de ejecución Hive es lento vs Trino/Spark SQL. Mejor reemplazar el engine, mantener el catalog.",
+    pros: ["Metastore omnipresente", "Estándar SQL para data lakes", "Maduro"],
+    cons: ["Engine lento", "Hive-on-MR/Tez en declive", "Spark/Trino son mejor opción de ejecución"],
+    whenUse: ["Como Metastore para Spark/Trino", "Mantenimiento de pipelines Hive legacy", "Acceso SQL a data lakes Parquet/ORC"],
+    whenNotUse: ["Como engine principal nuevo (Spark SQL o Trino mejor)", "Workloads interactivos low-latency"]
+  },
+  {
+    name: "Databricks Runtime",
+    vendor: "Databricks",
+    status: "sota", license: "commercial",
+    cost: "Pago por DBU + infra cloud · típicamente $0.07-0.95/DBU según SKU",
+    summary: "Plataforma lakehouse #1 del mercado. Spark optimizado (Photon) + Delta Lake + Unity Catalog + ML + Streaming. La 'Snowflake con código'.",
+    whatIs: "Plataforma unificada de data engineering, analytics y ML basada en Spark optimizado (Photon engine en C++) sobre data lakes.",
+    whatDoes: "ETL, SQL Warehouse, MLflow, AutoML, Streaming, Notebooks colaborativos, Unity Catalog governance, Delta Live Tables (DLT).",
+    whatDoesnt: "No es barato. Lock-in fuerte (Photon, DLT son propietarios). Aprendizaje multinivel.",
+    pros: ["Photon 2-3x más rápido que Spark vanilla", "Lakehouse con Delta + Iceberg", "Ecosistema unificado", "ML + Data en una plataforma"],
+    cons: ["Costos pueden explotar", "Vendor lock-in", "Complejidad operacional", "Muchas funcionalidades superpuestas"],
+    whenUse: ["Workloads grandes que combinan ETL + ML + Streaming", "Lakehouse moderno (Delta/Iceberg)", "Equipos enterprise con presupuesto", "Compliance + governance"],
+    whenNotUse: ["Cargas SQL puras (Snowflake/BigQuery más simples)", "Presupuesto ajustado", "Equipos sin Spark expertise"]
+  },
+  {
+    name: "AWS EMR (Elastic MapReduce)",
+    vendor: "Amazon Web Services",
+    status: "active", license: "cloud",
+    cost: "EC2 + EMR markup (~25%) · EMR Serverless por uso real",
+    summary: "Servicio AWS para correr Spark/Hadoop/Hive/Trino/Flink en clusters gestionados. EMR Serverless es la versión moderna sin gestionar nodos.",
+    whatIs: "Plataforma de big data gestionada en AWS. EMR clásico (EC2), EMR on EKS (Kubernetes) y EMR Serverless.",
+    whatDoes: "Provisiona clústeres con Spark, Hive, HBase, Presto, Trino, Flink. Spot instances para abaratar costos.",
+    whatDoesnt: "Tuning manual de cluster (excepto Serverless). Lock-in AWS. EMR Serverless aún limitado en features.",
+    pros: ["Flexibilidad total de tooling", "Spot instances barato", "EMR Serverless elimina gestión", "Integración AWS profunda"],
+    cons: ["Tuning manual en EMR clásico", "Más complejo que Glue", "Cold starts en Serverless", "Lock-in AWS"],
+    whenUse: ["Stack AWS con cargas Spark continuas", "Cuando Glue es muy lento o limitado", "Multi-engine (Spark + Trino + Flink)", "Optimización de costo con Spot"],
+    whenNotUse: ["Multi-cloud", "Cargas pequeñas intermitentes (Glue mejor)", "Equipos sin SRE big data"]
+  },
+  {
+    name: "GCP Dataproc",
+    vendor: "Google Cloud",
+    status: "active", license: "cloud",
+    cost: "Compute + storage GCP + cargo Dataproc ~$0.01/vCPU/h",
+    summary: "Servicio gestionado de Hadoop/Spark en GCP. Más barato que EMR. Dataproc Serverless para Spark sin clúster.",
+    whatIs: "Servicio de clústeres Spark/Hadoop ephemeros o persistentes en GCP, con Serverless Spark moderno.",
+    whatDoes: "Ejecuta jobs Spark, Hive, Presto en clústeres gestionados o serverless. Integra con BigQuery, GCS, Pub/Sub.",
+    whatDoesnt: "Sin DLT-style declarative pipelines (vs Databricks). Menos ecosistema ML que Databricks.",
+    pros: ["Barato vs alternativas", "Serverless Spark estable", "Integración GCP nativa", "Ephemeros rápidos"],
+    cons: ["Menos features que Databricks", "Lock-in GCP", "Solo Spark/Hadoop ecosistema"],
+    whenUse: ["Stack GCP con cargas Spark", "Cuando BigQuery no basta y necesitas Spark", "Pipelines batch grandes en GCP"],
+    whenNotUse: ["Multi-cloud", "Cuando todo cabe en BigQuery (más simple)", "Si necesitas DLT/MLflow nativos (Databricks)"]
+  },
+  {
+    name: "Polars",
+    vendor: "Polars (open source + Polars Cloud)",
+    status: "sota", license: "foss",
+    cost: "Gratis librería · Polars Cloud en beta con pricing por uso",
+    summary: "DataFrame library en Rust, 10-100x más rápida que Pandas. La revolución 'single-machine' para datasets que ya no requieren cluster.",
+    whatIs: "Librería DataFrame en Rust con APIs en Python, R y bindings nativos. Lazy evaluation, query optimization, multi-core.",
+    whatDoes: "Procesa GB-cientos GB en una sola máquina, lazy plans optimizados, soporta Parquet, Arrow, JSON, CSV.",
+    whatDoesnt: "No es distribuido (todavía). No reemplaza Spark para TB-PB. Ecosistema menor que pandas.",
+    pros: ["Performance brutal", "Lazy + eager modes", "Memory efficient", "API moderna"],
+    cons: ["No distribuido (1 nodo)", "API diferente a pandas (curva)", "Ecosistema más chico"],
+    whenUse: ["Datasets GB-TB en una máquina", "Reemplazar pandas pesados", "ETL en VMs grandes baratas", "Pipelines locales reproducibles"],
+    whenNotUse: ["Datasets > 1TB (Spark mejor)", "Equipos atados a pandas legacy", "Necesitas computo distribuido"]
+  },
+  {
+    name: "DuckDB",
+    vendor: "DuckDB Foundation / DuckDB Labs",
+    status: "sota", license: "foss",
+    cost: "Gratis · MIT license · MotherDuck (cloud) pricing variable",
+    summary: "La 'SQLite analítica'. Base columnar embebida con SQL moderno y performance brutal en una sola máquina. La revolución 'small data'.",
+    whatIs: "Motor OLAP embebido in-process (como SQLite pero columnar), con SQL completo, sin servidor, archivos Parquet/CSV nativos.",
+    whatDoes: "Queries SQL analíticas sobre archivos locales o S3, joins masivos, UDFs Python, exporta Arrow zero-copy.",
+    whatDoesnt: "No es para OLTP. No es distribuido. Menos ecosistema que warehouses cloud.",
+    pros: ["Setup zero (un binario)", "Performance asombrosa single-node", "SQL completo y moderno", "Lee Parquet/CSV directo"],
+    cons: ["Single-node (escala vertical)", "Sin governance enterprise", "Sin alta concurrencia"],
+    whenUse: ["Análisis ad-hoc local", "ETL embebido en apps", "Data science notebooks", "Reemplazar pandas/Spark en datasets <500GB"],
+    whenNotUse: ["Multi-tenant warehouse (Snowflake/BigQuery)", "Datos > TB", "Necesitas governance enterprise"]
+  },
+  {
+    name: "Ray",
+    vendor: "Anyscale (open source)",
+    status: "sota", license: "foss",
+    cost: "Gratis open source · Anyscale Cloud comercial",
+    summary: "Framework Python para escalar cargas distribuidas más allá de ETL: ML, RL, hyperparameter tuning, serving. Spark de la era ML/IA.",
+    whatIs: "Framework de cómputo distribuido en Python con primitivas (Actors, Tasks) y libraries (Tune, Train, Serve, RLlib, Data).",
+    whatDoes: "Distribuye cargas Python a clústeres: ML training, hyperparameter search, RL, batch inference, data preprocessing.",
+    whatDoesnt: "No es un motor SQL. No reemplaza Spark para SQL/ETL puro. Ecosistema ETL menor.",
+    pros: ["Pythonic puro", "Excelente para ML/IA distribuido", "Ray Data competitivo en ETL", "Crece rápido"],
+    cons: ["Operacionalmente joven vs Spark", "Curva conceptual (actors)", "Comunidad ETL menor"],
+    whenUse: ["ML/IA distribuido a escala", "Hyperparameter tuning masivo", "Batch inference paralela", "Cargas Python intensivas"],
+    whenNotUse: ["SQL/ETL puro (Spark/Trino mejor)", "Equipos sin Python", "Cargas batch tradicionales"]
+  },
+  {
+    name: "Dask",
+    vendor: "Coiled (open source)",
+    status: "active", license: "foss",
+    cost: "Gratis · Coiled cloud comercial",
+    summary: "Paralelización Python distribuida con APIs familiares (NumPy, pandas, scikit-learn). Más débil que Ray/Spark en producción a gran escala.",
+    whatIs: "Biblioteca Python que paraleliza cargas con APIs DataFrame/Array similares a pandas/NumPy, ejecuta local o cluster.",
+    whatDoes: "Escala pandas/NumPy a múltiples cores y nodos, integra con Jupyter, scikit-learn, XGBoost.",
+    whatDoesnt: "Menos performante que Spark/Polars a TB. Operacionalmente frágil a escala.",
+    pros: ["APIs familiares pandas/NumPy", "Curva baja desde Python", "Gratis y open"],
+    cons: ["Performance limitada vs Spark/Polars", "Operacionalmente complejo a escala", "Menos adopción enterprise"],
+    whenUse: ["Pandas que ya no cabe en memoria", "Equipos científicos Python sin querer aprender Spark", "Prototyping rápido"],
+    whenNotUse: ["Producción a TB-PB (Spark mejor)", "Pipelines SQL (Snowflake/BigQuery mejor)"]
+  },
+  {
+    name: "Modin",
+    vendor: "Intel + open source",
+    status: "active", license: "foss",
+    cost: "Gratis open source",
+    summary: "Reemplazo drop-in de pandas que paraleliza con Ray o Dask. 'import modin.pandas as pd' y tu código va más rápido.",
+    whatIs: "Wrapper de pandas que delega ejecución a backends paralelos (Ray, Dask, Unidist).",
+    whatDoes: "Acelera pandas dramáticamente cambiando solo el import. Compatible con la API pandas en gran medida.",
+    whatDoesnt: "Cobertura de API pandas incompleta. Menos mature que pandas. Performance variable según operación.",
+    pros: ["Cambio mínimo de código", "Acelera pandas existente", "Apropiado para migración gradual"],
+    cons: ["API pandas incompleta", "Performance no siempre mejor", "Menos enterprise"],
+    whenUse: ["Acelerar código pandas existente sin reescribir", "Datasets que apenas caben en memoria"],
+    whenNotUse: ["Greenfield (Polars/Spark mejor)", "Producción exigente"]
+  },
+  {
+    name: "RAPIDS (cuDF / cuML)",
+    vendor: "NVIDIA",
+    status: "active", license: "foss",
+    cost: "Gratis · pero requiere GPUs NVIDIA",
+    summary: "Ecosistema NVIDIA para procesar dataframes y ML en GPU. cuDF imita pandas; cuML imita scikit-learn. 50-100x acceleración para cargas adecuadas.",
+    whatIs: "Suite open source de librerías GPU-accelerated en Python: cuDF (dataframes), cuML (ML), cuGraph (grafos), Spark RAPIDS.",
+    whatDoes: "Acelera ETL y ML en GPUs NVIDIA con APIs casi idénticas a pandas/scikit-learn/Spark.",
+    whatDoesnt: "Requiere GPUs (caras). No todo se beneficia (queries simples no). Limitado fuera de cargas numéricas.",
+    pros: ["Acceleraciones brutales en GPU", "APIs familiares", "Spark RAPIDS plugin transparente"],
+    cons: ["Costo GPU alto", "Lock-in NVIDIA CUDA", "Limitado en workloads no-numéricos"],
+    whenUse: ["Cargas ML/IA con GPUs ya disponibles", "ETL numérico masivo", "Cuando el costo GPU se justifica con tiempo"],
+    whenNotUse: ["Sin GPUs", "Workloads SQL/strings dominantes", "Equipos sin DevOps GPU"]
+  },
+  {
+    name: "Snowpark",
+    vendor: "Snowflake",
+    status: "active", license: "commercial",
+    cost: "Costo Snowflake warehouse + Snowpark-Optimized warehouses",
+    summary: "API DataFrame de Snowflake en Python/Scala/Java que ejecuta lógica dentro del warehouse. Bring compute to data.",
+    whatIs: "Framework que permite escribir lógica Python/Java/Scala que se ejecuta dentro del compute de Snowflake.",
+    whatDoes: "DataFrames estilo Spark, UDFs Python, stored procedures, ML directo en Snowflake con Snowpark ML.",
+    whatDoesnt: "Solo funciona en Snowflake. Performance UDFs Python no siempre óptima. No reemplaza Spark fuera de Snowflake.",
+    pros: ["No mover datos fuera de Snowflake", "Familiar a usuarios Spark", "Governance unificada", "Snowpark ML in-DB"],
+    cons: ["Lock-in Snowflake", "Costos compute Snowflake", "Limitado a libs aprobadas"],
+    whenUse: ["Stack Snowflake-first donde ya tienes datos", "ML in-warehouse (sin extraer)", "Reemplazar pipelines Spark externos"],
+    whenNotUse: ["Multi-warehouse", "Stack lakehouse (Databricks mejor)", "Equipos sin presupuesto Snowflake"]
+  }
+],
+};
+
+
+// Parte 2: Serving, Visualization, Orchestration
+
+const TOOLS_PART2 = {
+
+// ============================================================
+// 03 · DATA SERVING
+// ============================================================
+serving: [
+  {
+    name: "Snowflake",
+    vendor: "Snowflake Inc.",
+    status: "sota", license: "commercial",
+    cost: "Pago por compute (credits, $2-4/credit) + storage (~$23/TB/mes)",
+    summary: "El warehouse cloud que cambió la industria. Separación storage/compute, multi-cloud, marketplace de datos, SQL puro. El líder claro 2020-2026.",
+    whatIs: "Data warehouse cloud-native con arquitectura propietaria de tres capas (storage, compute, services), multi-cloud (AWS, Azure, GCP).",
+    whatDoes: "Almacena datos columnar comprimidos, ejecuta queries SQL con virtual warehouses elásticos, soporta semi-estructurado (VARIANT), data sharing, marketplace.",
+    whatDoesnt: "No es open source. Costos pueden disparar. ML/IA limitado vs Databricks (aunque Cortex AI lo está cerrando).",
+    pros: ["UX SQL pura excepcional", "Separación storage/compute real", "Data sharing sin copiar", "Marketplace masivo"],
+    cons: ["Costos compute pueden explotar", "Lock-in completo", "ML/IA detrás de Databricks", "Storage en su propio formato (aunque Iceberg llega)"],
+    whenUse: ["Empresas que priorizan SQL y BI", "Data sharing entre orgs", "Multi-cloud federation", "Cuando el time-to-value vale"],
+    whenNotUse: ["ML/IA-first (Databricks mejor)", "Presupuesto ajustado a escala", "Cuando todo es Parquet y quieres lakehouse abierto"]
+  },
+  {
+    name: "Google BigQuery",
+    vendor: "Google Cloud",
+    status: "sota", license: "cloud",
+    cost: "On-demand: $6.25/TB scaneado · Capacity: ~$0.04/slot-hour · Storage: $20-40/TB/mes",
+    summary: "Warehouse serverless de GCP basado en Dremel. Cero gestión, escala automática, BigQuery ML/Omni/Studio. El amor de los GCP-natives.",
+    whatIs: "Data warehouse serverless con arquitectura disaggregated storage (Colossus) y compute (Dremel) que ejecuta SQL distribuido sobre billones de filas.",
+    whatDoes: "SQL sobre PB de datos sin provisioning, BigQuery ML para training en SQL, BigQuery Omni para multi-cloud, integraciones nativas GCP.",
+    whatDoesnt: "On-demand pricing puede sorprender. Menos control granular que Snowflake. UX historicamente menos pulida (Studio mejora).",
+    pros: ["Serverless real (no clusters)", "Pricing on-demand atractivo", "BigQuery ML/AI", "Integración GCP nativa"],
+    cons: ["Costos de queries pesadas escalan rápido sin BI Engine", "Menos rich tooling para SWE que Snowflake", "Lock-in GCP"],
+    whenUse: ["Stack GCP", "Cargas muy variables (paga solo lo que usas)", "ML in-warehouse con BQ ML", "Datasets públicos masivos"],
+    whenNotUse: ["Multi-cloud (aunque Omni ayuda)", "Cargas continuas masivas (capacity slots pueden ser caras)", "Equipos no familiarizados con costing BQ"]
+  },
+  {
+    name: "Amazon Redshift",
+    vendor: "Amazon Web Services",
+    status: "active", license: "cloud",
+    cost: "RA3 nodes (~$1-13/h) · Serverless por RPU-hora · Storage ~$24/TB/mes",
+    summary: "El pionero de cloud warehousing (2013). Hoy reposicionado con RA3, Serverless, Spectrum y Zero-ETL. Defiende cuota frente a Snowflake/BigQuery.",
+    whatIs: "Data warehouse MPP basado originalmente en ParAccel; modernizado con arquitectura RA3 (compute + managed storage) y Redshift Serverless.",
+    whatDoes: "SQL analítico a escala, Spectrum para queries sobre S3, Zero-ETL con Aurora/DynamoDB, ML con SageMaker integration.",
+    whatDoesnt: "Históricamente atado a nodos (RA3 separó esto). Menos flexible que Snowflake. Tooling menos pulido.",
+    pros: ["Integración AWS profunda", "Zero-ETL con DBs operacionales", "Spectrum sobre S3", "Serverless option"],
+    cons: ["Performance variable vs Snowflake/BQ", "Tuning de distribución/sort keys aún relevante", "UX menos moderna"],
+    whenUse: ["Stack AWS-first", "Zero-ETL desde RDS/Aurora", "Cuando ya hay inversión en AWS analytics"],
+    whenNotUse: ["Multi-cloud", "Cargas con concurrencia masiva variable (Snowflake mejor)", "Equipos nuevos que valoran UX (Snowflake/BQ mejor)"]
+  },
+  {
+    name: "Azure Synapse Analytics / Microsoft Fabric",
+    vendor: "Microsoft",
+    status: "active", license: "cloud",
+    cost: "DWUs (~$1.5-3/h en Dedicated) · Serverless por TB · Fabric por Capacity Units",
+    summary: "Synapse fue la apuesta enterprise de Azure. Microsoft Fabric (2023+) lo reposiciona en una experiencia SaaS unificada con OneLake.",
+    whatIs: "Plataforma analítica Microsoft que combina SQL pools (dedicado y serverless), Spark pools y data integration. Fabric añade OneLake (lakehouse), notebooks, Power BI nativo.",
+    whatDoes: "Warehousing SQL (dedicated/serverless), Spark, Data Factory pipelines, integración Power BI; con Fabric, todo unificado en SaaS.",
+    whatDoesnt: "Sigue siendo complejo (muchos productos). Costos por Capacity Units en Fabric pueden ser opacos.",
+    pros: ["Integración Microsoft (Office, Power BI)", "OneLake (Delta unificado)", "Fabric simplifica para mid-market"],
+    cons: ["Sprawl de productos", "Pricing Fabric complejo", "Performance Dedicated SQL Pool detrás de Snowflake"],
+    whenUse: ["Shops Microsoft con Power BI dominante", "Cuando Fabric simplifica vs piezas separadas", "Compliance Microsoft enterprise"],
+    whenNotUse: ["Multi-cloud", "Equipos sin Microsoft footprint", "Cuando una herramienta especializada es mejor (Snowflake puro, etc)"]
+  },
+  {
+    name: "Databricks SQL Warehouse",
+    vendor: "Databricks",
+    status: "sota", license: "commercial",
+    cost: "DBUs por SQL Warehouse + cloud compute · típicamente $0.22-0.55/DBU",
+    summary: "El lakehouse de Databricks compitiendo de tú a tú con Snowflake/BQ. Photon engine + Delta Lake/Iceberg + Unity Catalog. La apuesta open lakehouse.",
+    whatIs: "Capa de SQL serving sobre Delta Lake / Iceberg corriendo Photon engine (C++ vectorizado), accesible vía JDBC/ODBC/REST.",
+    whatDoes: "Queries SQL interactivas y BI sobre data lake, governance con Unity Catalog, materialized views, streaming tables.",
+    whatDoesnt: "Aún menos pulido que Snowflake en UX SQL pura. Costos requieren tuning.",
+    pros: ["Lakehouse abierto (Delta/Iceberg)", "Photon muy rápido", "Unified governance con Unity Catalog", "Sin duplicar datos warehouse + lake"],
+    cons: ["Complejidad de plataforma", "Curva multi-componente", "Pricing puede ser opaco"],
+    whenUse: ["Lakehouse moderno donde datos en S3/ADLS importan", "Cuando ya usas Databricks para ETL/ML", "Compliance + governance"],
+    whenNotUse: ["SQL puro sin necesidad de lakehouse (Snowflake más simple)", "Equipos no Databricks-familiar"]
+  },
+  {
+    name: "ClickHouse",
+    vendor: "ClickHouse Inc.",
+    status: "sota", license: "foss",
+    cost: "Gratis open source · ClickHouse Cloud desde $200/mes y por consumo",
+    summary: "Base columnar OLAP open source brutalmente rápida para analytics en tiempo real. Originada en Yandex; hoy líder open en su nicho.",
+    whatIs: "Base columnar MPP especializada en OLAP de baja latencia con compresión extrema y vectorización SIMD.",
+    whatDoes: "Queries analíticas sub-segundo sobre billones de filas, ingesta en tiempo real, materialized views, replicación.",
+    whatDoesnt: "No es OLTP. Limitado en JOINs complejos vs warehouses tradicionales (mejora). No es transaccional.",
+    pros: ["Performance asombrosa", "Open source con cloud opcional", "Compresión excelente", "Real-time inserts"],
+    cons: ["JOINs complejos limitados", "Curva operacional self-hosted", "Sin ACID tradicional"],
+    whenUse: ["Analytics real-time (product analytics, observability)", "Dashboards con queries sub-segundo", "Time-series y eventos", "Reemplazar Druid/Pinot"],
+    whenNotUse: ["Workloads OLTP", "Modelado dimensional complejo con muchos JOINs (warehouse mejor)", "Cuando se requiere transacciones"]
+  },
+  {
+    name: "Apache Druid",
+    vendor: "Apache Software Foundation (Imply)",
+    status: "active", license: "foss",
+    cost: "Gratis open source · Imply Polaris cloud comercial",
+    summary: "Base OLAP real-time pionera (Metamarkets 2011) optimizada para eventos time-series y dashboards. Hoy compite con ClickHouse/Pinot.",
+    whatIs: "Base distribuida que combina columnar storage, índices invertidos y diseño orientado a queries time-series con segmentos.",
+    whatDoes: "Ingesta streaming (Kafka, Kinesis) y batch, queries OLAP sub-segundo, agregaciones rápidas, dashboards a escala.",
+    whatDoesnt: "Operacionalmente complejo (muchos servicios). Menos friendly que ClickHouse para empezar. JOINs limitados.",
+    pros: ["Real-time ingestion maduro", "Optimizado para time-series/eventos", "Probado a escala extrema"],
+    cons: ["Stack complejo (Brokers, Historicals, MMs, Coordinator)", "Más difícil que ClickHouse", "Curva alta"],
+    whenUse: ["Time-series y product analytics", "Dashboards real-time con datos masivos", "Cuando ya tienes inversión Druid"],
+    whenNotUse: ["Greenfield (ClickHouse más simple en muchos casos)", "Sin equipo de plataforma fuerte", "Workloads no-event"]
+  },
+  {
+    name: "Apache Pinot",
+    vendor: "Apache (StarTree)",
+    status: "active", license: "foss",
+    cost: "Gratis open source · StarTree Cloud comercial",
+    summary: "OLAP real-time creado en LinkedIn para sub-segundo en analytics user-facing. Compite con Druid y ClickHouse en su nicho.",
+    whatIs: "Base columnar OLAP con énfasis en queries de baja latencia (10-100ms) para casos user-facing (dashboards públicos, leaderboards).",
+    whatDoes: "Ingesta tiempo real (Kafka, Pulsar), índices avanzados (Star-Tree, Bloom, sorted), queries SQL con SLA estricto.",
+    whatDoesnt: "Operacionalmente complejo. JOINs limitados. Adopción menor que ClickHouse.",
+    pros: ["Latencias sub-100ms en user-facing", "Star-Tree índice innovador", "Bien para alto QPS"],
+    cons: ["Operacionalmente complejo", "Comunidad más chica", "Menos features que warehouses tradicionales"],
+    whenUse: ["Dashboards user-facing internos o productos SaaS", "Alto QPS con latencias estrictas", "Eventos real-time"],
+    whenNotUse: ["Analytics interno BI clásico (warehouse mejor)", "Sin equipo de plataforma fuerte", "Cargas batch puras"]
+  },
+  {
+    name: "Trino (antes PrestoSQL)",
+    vendor: "Trino Software Foundation (Starburst)",
+    status: "sota", license: "foss",
+    cost: "Gratis open source · Starburst Galaxy / Enterprise comercial",
+    summary: "Motor SQL federado distribuido para queries cross-engine sobre S3, Hive, PostgreSQL, MongoDB, etc. El estándar de federación analítica.",
+    whatIs: "Query engine MPP en memoria que ejecuta SQL ANSI sobre múltiples fuentes a través de connectors (40+).",
+    whatDoes: "Federated queries sobre data lakes y bases dispares, queries ad-hoc interactivas, soporte Iceberg/Delta/Hudi nativo.",
+    whatDoesnt: "No es storage (es solo engine). Sin cache propio (necesita Alluxio o nubes). Operacionalmente complejo.",
+    pros: ["Federation real cross-source", "Iceberg/Delta/Hudi nativos", "Performance sólida", "Open source con buen vendor"],
+    cons: ["Operación delicada a escala", "Sin caching nativo", "Comunidad fragmentada (Trino vs Presto)"],
+    whenUse: ["Federación analítica multi-source", "Data lake queries SQL sin moverlos", "Reemplazar Athena con más control"],
+    whenNotUse: ["Cuando un warehouse simple cubre el caso", "Sin SRE big data", "Workloads OLTP o streaming"]
+  },
+  {
+    name: "PrestoDB / Presto",
+    vendor: "Linux Foundation (Meta origin)",
+    status: "active", license: "foss",
+    cost: "Gratis open source · AWS Athena lo usa internamente",
+    summary: "Motor SQL federado original (Facebook 2012). Bifurcado en Trino (más comunidad) y PrestoDB (Meta-led). Ambos vivos pero Trino lidera adopción.",
+    whatIs: "Query engine SQL distribuido original que dio nacimiento a Trino, mantenido por Meta y la Linux Foundation.",
+    whatDoes: "Similar a Trino: SQL federado sobre múltiples sources, optimizado para queries ad-hoc.",
+    whatDoesnt: "Menos features modernas que Trino (Iceberg, fault-tolerance). Comunidad menor.",
+    pros: ["Probado en Meta a escala extrema", "Base tecnológica de Athena"],
+    cons: ["Trino tiene más momentum", "Innovación menos visible", "Confusión Trino vs Presto"],
+    whenUse: ["Solo si ya tienes inversión PrestoDB", "Cuando AWS Athena (que usa Presto) basta"],
+    whenNotUse: ["Greenfield · prefiere Trino"]
+  },
+  {
+    name: "AWS Athena",
+    vendor: "Amazon Web Services",
+    status: "active", license: "cloud",
+    cost: "$5/TB escaneado · Athena Iceberg/Lake Formation extra",
+    summary: "Servicio AWS de queries SQL serverless sobre S3, basado en Presto. Sin gestionar nada, paga solo por TB escaneado.",
+    whatIs: "Servicio serverless en AWS que ejecuta Presto/Trino sobre data en S3 con catálogo Glue.",
+    whatDoes: "SQL ad-hoc sobre S3 (Parquet, ORC, JSON), integración Glue Catalog, federation (Athena Federated Query), Iceberg.",
+    whatDoesnt: "No es para queries continuas masivas (Redshift mejor). Performance variable. Limitado para BI alto QPS.",
+    pros: ["Cero gestión", "Pricing simple por TB", "Bueno para exploración data lake"],
+    cons: ["Performance no garantizada", "Costos por queries mal optimizadas suben", "Concurrencia limitada"],
+    whenUse: ["Queries ad-hoc sobre S3", "Data lake exploration", "Audits y exploraciones eventuales"],
+    whenNotUse: ["BI continuo de alto QPS", "Cargas predecibles masivas (Redshift mejor)"]
+  },
+  {
+    name: "Dremio",
+    vendor: "Dremio",
+    status: "active", license: "freemium",
+    cost: "Community gratis · Enterprise/Cloud por core o por uso",
+    summary: "Plataforma lakehouse query engine con UI semantic layer y aceleración con reflections. Compite con Trino + capa semántica.",
+    whatIs: "Lakehouse platform que combina Trino-like SQL engine + Apache Arrow + reflections (vistas materializadas) + semantic layer.",
+    whatDoes: "Queries sub-segundo sobre data lakes con reflections, semantic layer, governance, Iceberg-first.",
+    whatDoesnt: "Engine menos potente que Snowflake puro. Lock-in moderado en reflections.",
+    pros: ["Semantic layer integrada", "Reflections aceleran queries", "Iceberg-first abierto", "UI amigable"],
+    cons: ["Performance no siempre top-tier", "Curva de reflections", "Menos adopción que Trino vanilla"],
+    whenUse: ["Lakehouse con BI directo (sin warehouse intermedio)", "Cuando semantic layer importa", "Reemplazo de warehouse con lake"],
+    whenNotUse: ["Workloads que requieren motor warehouse top (Snowflake)", "Equipos sin compromiso con lakehouse"]
+  },
+  {
+    name: "StarRocks",
+    vendor: "StarRocks (CelerData)",
+    status: "sota", license: "foss",
+    cost: "Gratis open source · CelerData Cloud comercial",
+    summary: "Base OLAP open source de alta performance, fork de Apache Doris. Competidor serio de ClickHouse/Druid/Pinot con énfasis en JOINs.",
+    whatIs: "Base columnar MPP open source diseñada para sub-segundo en queries OLAP complejas, incluso con JOINs.",
+    whatDoes: "Queries SQL OLAP rápidas con buen soporte de JOINs distribuidos, materialized views, ingesta real-time.",
+    whatDoesnt: "Comunidad más pequeña que ClickHouse (aunque crece). Menos integraciones que warehouses cloud.",
+    pros: ["JOINs distribuidos mejores que ClickHouse", "Performance top-tier", "Materialized views automáticas"],
+    cons: ["Comunidad menor", "Documentación en evolución", "Menos enterprise track record"],
+    whenUse: ["OLAP con muchos JOINs", "Reemplazar ClickHouse cuando JOINs duelen", "Open source serio para warehouse"],
+    whenNotUse: ["Sin equipo de plataforma", "Cuando la madurez enterprise es prioridad"]
+  },
+  {
+    name: "Apache Doris",
+    vendor: "Apache Software Foundation",
+    status: "active", license: "foss",
+    cost: "Gratis open source · SelectDB cloud comercial",
+    summary: "Base OLAP open source china (Baidu origin) graduated Apache. Hermana de StarRocks (mismo origen, ramas separadas).",
+    whatIs: "Base MPP columnar para queries OLAP sub-segundo con énfasis en JOINs y multi-tabla.",
+    whatDoes: "Queries analíticas rápidas, ingesta streaming, lakehouse con Iceberg, federación a Hive/Iceberg/Hudi.",
+    whatDoesnt: "Menos adopción global que ClickHouse (fuerte en Asia). Documentación primaria a veces en chino.",
+    pros: ["Performance competitiva", "JOINs buenos", "Lakehouse-ready"],
+    cons: ["Adopción global menor", "Documentación inconsistente", "Confusión con StarRocks"],
+    whenUse: ["Stacks asiáticos con uso establecido", "OLAP con JOINs sobre Iceberg"],
+    whenNotUse: ["Si requieres comunidad global enorme (ClickHouse mejor)"]
+  },
+  {
+    name: "Firebolt",
+    vendor: "Firebolt",
+    status: "active", license: "commercial",
+    cost: "Engines por hora (~$2-15/h según size) + storage",
+    summary: "Warehouse cloud orientado a performance brutal y data apps. Apuesta por queries sub-segundo a precios competitivos.",
+    whatIs: "Warehouse cloud-native con engines elásticos por workload, índices F3, F1, aggregating, optimizado para apps.",
+    whatDoes: "SQL warehouse con énfasis en latencias para data apps, índices avanzados, sparse data structures.",
+    whatDoesnt: "Adopción menor que Snowflake/BQ. Menos ecosistema integrado.",
+    pros: ["Performance asombrosa para data apps", "Pricing competitivo", "Engines aislados por workload"],
+    cons: ["Menos adopción", "Ecosistema más chico", "Sin marketplace de datos como Snowflake"],
+    whenUse: ["Data apps con latencias estrictas", "Productos SaaS data-driven", "Cuando Snowflake es muy caro"],
+    whenNotUse: ["Necesitas data sharing/marketplace (Snowflake mejor)", "Equipos no familiarizados (curva)"]
+  },
+  {
+    name: "Materialize",
+    vendor: "Materialize Inc.",
+    status: "sota", license: "commercial",
+    cost: "Pay-as-you-go por cluster · Free tier limitado",
+    summary: "Streaming SQL database que mantiene vistas materializadas siempre actualizadas en tiempo real. SQL incremental real.",
+    whatIs: "Base de datos streaming basada en differential dataflow que mantiene resultados de queries SQL siempre frescos con baja latencia.",
+    whatDoes: "Streaming SQL incremental, materialized views actualizadas en ms, connectors Kafka/Postgres CDC, exactly-once.",
+    whatDoesnt: "No es OLAP histórico (Snowflake/BQ mejor para eso). Joven en mercado.",
+    pros: ["SQL incremental real", "Latencias sub-segundo", "Postgres-wire protocol", "Casos imposibles antes"],
+    cons: ["Joven", "Pricing puede ser caro", "Curva para entender streaming SQL"],
+    whenUse: ["Real-time analytics con SQL", "Reemplazar pipelines Flink artesanales", "Casos event-driven con latencia"],
+    whenNotUse: ["Analytics histórico (warehouse)", "Sin necesidad real-time (overkill)"]
+  },
+  {
+    name: "RisingWave",
+    vendor: "RisingWave Labs",
+    status: "sota", license: "foss",
+    cost: "Open source Apache 2.0 · RisingWave Cloud comercial",
+    summary: "Alternativa open source a Materialize. Streaming SQL database en Rust. Crece rápido como opción FOSS para streaming SQL.",
+    whatIs: "Streaming database open source en Rust con SQL incremental similar a Materialize, separación storage/compute.",
+    whatDoes: "Materialized views streaming, exactly-once, connectors CDC/Kafka, Postgres-compatible wire protocol.",
+    whatDoesnt: "Menos maduro que Materialize. Ecosistema en crecimiento.",
+    pros: ["Open source", "Performance Rust", "Postgres-compatible"],
+    cons: ["Más joven", "Menos track record producción"],
+    whenUse: ["Streaming SQL con preferencia open source", "Self-hosted con control"],
+    whenNotUse: ["Cuando madurez enterprise importa (Materialize comercial)"]
+  },
+  {
+    name: "Apache Kylin",
+    vendor: "Apache Software Foundation",
+    status: "legacy", license: "foss",
+    cost: "Gratis · Kyligence comercial",
+    summary: "OLAP cube pre-computado sobre Hadoop, popular en Asia 2015-2020. Reemplazado por ClickHouse/Doris/StarRocks para mayoría de casos.",
+    whatIs: "Motor OLAP que pre-calcula cubos multidimensionales sobre HDFS/Hive para queries sub-segundo.",
+    whatDoes: "Pre-computa cubos para latencia mínima en BI tradicional.",
+    whatDoesnt: "Storage explota con cardinality alta. Difícil de mantener vs OLAP modernas.",
+    pros: ["Latencia minima con cubos pre-computados", "Tradición en BI dimensional"],
+    cons: ["Storage explota", "Mantenimiento alto", "Reemplazado en greenfield"],
+    whenUse: ["Mantenimiento legacy", "Cuando cubos pre-computados aún tienen sentido"],
+    whenNotUse: ["Cualquier nuevo proyecto · ClickHouse/Doris/StarRocks mejor"]
+  },
+  {
+    name: "Teradata",
+    vendor: "Teradata",
+    status: "legacy", license: "enterprise",
+    cost: "Enterprise on-prem o VantageCloud por consumo",
+    summary: "El gigante histórico del warehousing enterprise. Dominó 1990-2015 en banca/telco. Hoy moderniza con VantageCloud pero ha perdido cuota.",
+    whatIs: "Warehouse MPP enterprise con décadas de track record, ahora también en cloud (VantageCloud Lake).",
+    whatDoes: "Workloads analíticos enterprise masivos, mixed workload, ML in-DB, integraciones enterprise.",
+    whatDoesnt: "Caro. Modernización lenta. Ecosistema cloud menor que Snowflake/BQ.",
+    pros: ["Probado a escala extrema (telcos, bancos)", "Mixed workload management", "Enterprise compliance"],
+    cons: ["Costos altos", "Modernización lenta", "Talento escaso", "Cloud experience detrás de Snowflake"],
+    whenUse: ["Solo si ya hay gran inversión histórica", "Migraciones graduales enterprise"],
+    whenNotUse: ["Greenfield (Snowflake/BQ/Databricks mejor)", "Cuando costo importa"]
+  }
+],
+
+// ============================================================
+// 04 · DATA VISUALIZATION
+// ============================================================
+visualization: [
+  {
+    name: "Tableau",
+    vendor: "Salesforce (acquired 2019)",
+    status: "active", license: "commercial",
+    cost: "Creator $75/u/mes · Explorer $42/u/mes · Viewer $15/u/mes (Cloud)",
+    summary: "El líder histórico de BI (2003+). Excelencia en exploración visual y dashboards. Hoy compite duro contra Power BI y herramientas modernas.",
+    whatIs: "Plataforma BI con énfasis en exploración visual drag-and-drop, dashboards interactivos y storytelling de datos.",
+    whatDoes: "Conexión a 100+ sources, viz library rica, Tableau Prep para data prep, embedding, Tableau Server/Cloud.",
+    whatDoesnt: "Caro per-user. Modelado menos potente que Power BI (sin DAX equivalente). Performance con big data variable.",
+    pros: ["Excelencia visual", "Comunidad masiva (Tableau Public)", "Drag-and-drop intuitivo", "Storytelling potente"],
+    cons: ["Caro a escala", "Modelado limitado", "Lock-in Salesforce post-adquisición", "Performance vs Power BI mixed"],
+    whenUse: ["Analistas avanzados con creatividad visual", "Empresas con cultura Tableau ya establecida", "Storytelling premium"],
+    whenNotUse: ["Equipos en stack Microsoft (Power BI mejor TCO)", "Presupuesto ajustado", "Necesitas semantic layer fuerte"]
+  },
+  {
+    name: "Microsoft Power BI",
+    vendor: "Microsoft",
+    status: "sota", license: "commercial",
+    cost: "Pro $14/u/mes · PPU $24/u/mes · Premium por capacity desde $5k/mes",
+    summary: "El líder del mercado 2026 por adopción. Integrado con Office, Fabric, Excel. DAX como lenguaje de modelado potente.",
+    whatIs: "Plataforma BI Microsoft que combina Power BI Desktop (autoría), Service (web), Embedded, mobile y Premium Capacity.",
+    whatDoes: "Dashboards y reportes, modelado DAX, AI Insights, Power Query (M), embedding, Copilot generativo (2024+).",
+    whatDoesnt: "Power BI Desktop solo Windows. UX visual menos pulida que Tableau en algunos casos. Lock-in Microsoft.",
+    pros: ["TCO bajísimo en stack Microsoft", "DAX muy potente", "Copilot AI nativo", "Integración Excel/Teams"],
+    cons: ["Desktop solo Windows", "Premium pricing complejo", "Visualización menos versátil que Tableau"],
+    whenUse: ["Cualquier empresa Microsoft", "Cuando el precio importa", "Modelado tabular avanzado (DAX)", "Cultura Office"],
+    whenNotUse: ["Stacks Mac/Linux puros", "Cuando visualización extrema importa más que costo (Tableau)"]
+  },
+  {
+    name: "Looker (Google Cloud)",
+    vendor: "Google Cloud (acquired 2019)",
+    status: "active", license: "commercial",
+    cost: "Plataforma + usuarios · típicamente $5k-50k+/mes según tamaño",
+    summary: "BI moderna con semantic layer (LookML) como diferencial. Adquirida por Google, integrada en Looker Studio Pro.",
+    whatIs: "Plataforma BI basada en LookML, un lenguaje de modelado declarativo que centraliza la definición de métricas.",
+    whatDoes: "Dashboards, modelado LookML reutilizable, embedded analytics, API-first, governance unificada.",
+    whatDoesnt: "Costoso. Curva LookML alta. Menos flexible visualmente que Tableau.",
+    pros: ["Semantic layer LookML (single source of truth)", "API-first y embed bueno", "Governance centralizada"],
+    cons: ["Caro", "LookML tiene curva", "Menos visualizaciones avanzadas"],
+    whenUse: ["Empresas mid-large que valoran governance", "Cuando 'una definición' de métricas es crítica", "Embedded analytics", "Stack GCP"],
+    whenNotUse: ["Equipos pequeños o presupuesto ajustado", "Cuando flexibilidad visual extrema importa"]
+  },
+  {
+    name: "Looker Studio (antes Data Studio)",
+    vendor: "Google",
+    status: "active", license: "freemium",
+    cost: "Gratis · Looker Studio Pro desde $9/u/mes",
+    summary: "BI gratis de Google muy adoptado para reporting básico (Google Ads, GA4, BigQuery). Pro añade governance y embedding.",
+    whatIs: "Herramienta de reporting gratis que se conecta a Google services (Sheets, Ads, GA, BigQuery) y otras fuentes.",
+    whatDoes: "Dashboards simples, conexiones nativas Google, gratis para reportes ad-hoc.",
+    whatDoesnt: "Limitado en modelado avanzado. No es enterprise BI completo. Performance limitada.",
+    pros: ["Gratis para básico", "Setup inmediato", "Excelente con Google data"],
+    cons: ["Limitado en features avanzadas", "Sin semantic layer fuerte", "Visualización básica"],
+    whenUse: ["Reporting marketing (Ads, GA)", "Equipos pequeños", "Dashboards públicos simples", "POC rápidos"],
+    whenNotUse: ["BI enterprise serio", "Modelado complejo", "Compliance estricto"]
+  },
+  {
+    name: "Qlik Sense / QlikView",
+    vendor: "Qlik (Thoma Bravo)",
+    status: "active", license: "commercial",
+    cost: "Qlik Sense Business $30/u/mes · Enterprise por capacity",
+    summary: "Pionero del BI in-memory asociativo. QlikView (legacy clásico) + Qlik Sense (moderno). Fuerte en Europa, IT-heavy.",
+    whatIs: "Plataforma BI con motor asociativo in-memory que indexa todas las relaciones, permitiendo exploración no-lineal.",
+    whatDoes: "Dashboards, exploración asociativa, AutoML (Qlik AutoML), integración data integration (Talend tras adquisición).",
+    whatDoesnt: "QlikView en mantenimiento (no nuevo). Curva propia (Qlik scripting). Menos comunidad que Tableau/Power BI.",
+    pros: ["Motor asociativo único", "Self-service exploration", "Talend integrado (post-merge)"],
+    cons: ["Curva propia (no SQL/DAX)", "QlikView legacy", "Mercado se mueve a Power BI/Tableau"],
+    whenUse: ["Solo si ya hay inversión Qlik", "Empresas europeas con tradición Qlik"],
+    whenNotUse: ["Greenfield (Power BI o Tableau mejor)"]
+  },
+  {
+    name: "Apache Superset",
+    vendor: "Apache (Preset)",
+    status: "sota", license: "foss",
+    cost: "Gratis open source · Preset Cloud comercial",
+    summary: "BI open source más popular. Originado en Airbnb. Rich viz library, SQL Lab, dashboards. Líder open source claro.",
+    whatIs: "Plataforma BI open source completa con SQL Lab, exploración visual y dashboards, conectada a cualquier DB SQL.",
+    whatDoes: "Dashboards interactivos, exploración con 50+ viz types, SQL editor, RBAC, alerting.",
+    whatDoesnt: "Sin semantic layer fuerte (aunque mejora). Operación self-hosted demanda esfuerzo. UX menos pulida que Tableau.",
+    pros: ["Open source maduro", "Rich viz library", "Customizable con plugins", "Buena comunidad"],
+    cons: ["Sin semantic layer robusta", "Operación self-hosted", "UX menos pulida"],
+    whenUse: ["Empresas que valoran open source", "Cuando hay equipo de plataforma", "Reemplazar BI carísimo", "Stack data engineer-friendly"],
+    whenNotUse: ["Equipos sin DevOps", "Cuando UX/soporte enterprise importan más"]
+  },
+  {
+    name: "Metabase",
+    vendor: "Metabase",
+    status: "sota", license: "foss",
+    cost: "Open source gratis · Cloud desde $85/mes · Enterprise por usuario",
+    summary: "BI open source enfocado en simplicidad: cualquier no-técnico crea queries y dashboards. Excelente para mid-market.",
+    whatIs: "BI open source con foco en usabilidad para no-técnicos: query builder visual, dashboards, alerting.",
+    whatDoes: "Question builder, dashboards, models (semantic layer ligero), embed, alerts, public sharing.",
+    whatDoesnt: "Menos potente que Looker/Tableau para complex modeling. Performance con queries pesadas variable.",
+    pros: ["Ultra fácil de usar", "Open source robusto", "Modelos para semantic ligero", "Setup rápido"],
+    cons: ["Modelado limitado vs Looker", "Performance con grandes datasets variable"],
+    whenUse: ["Startups y mid-market", "Equipos donde no técnicos crean reports", "Reemplazar Excel ad-hoc"],
+    whenNotUse: ["Enterprise con governance estricta", "Modelado dimensional avanzado (Looker mejor)"]
+  },
+  {
+    name: "Grafana",
+    vendor: "Grafana Labs",
+    status: "sota", license: "foss",
+    cost: "Open source gratis · Grafana Cloud free tier + paid",
+    summary: "Estándar observabilidad. También adoptado para BI sobre time-series y bases analíticas. Esencial en stacks Kubernetes/SRE.",
+    whatIs: "Plataforma de visualización open source con énfasis en time-series, métricas, logs y traces (observability stack).",
+    whatDoes: "Dashboards para Prometheus, Loki, Tempo, Influx, ClickHouse, Postgres, MySQL, etc. Alerting, anomaly detection.",
+    whatDoesnt: "No es BI tradicional con drag-and-drop tipo Tableau. Modelado dimensional no es su fuerte.",
+    pros: ["Estándar observability", "Rich datasource library", "Open source enterprise", "Alerting potente"],
+    cons: ["Para BI tradicional no es ideal", "Curva propia", "Más orientado a métricas que dimensiones"],
+    whenUse: ["Observability (siempre)", "BI sobre time-series (eventos, IoT, finanzas)", "Cuando hay alerting crítico"],
+    whenNotUse: ["BI dimensional clásico (Power BI/Tableau mejor)", "Equipos no-técnicos"]
+  },
+  {
+    name: "Hex",
+    vendor: "Hex Technologies",
+    status: "sota", license: "commercial",
+    cost: "Free tier · Team $24/u/mes · Enterprise custom",
+    summary: "Notebooks colaborativos modernos para data science + dashboards interactivos. La fusión perfecta Jupyter + BI moderno.",
+    whatIs: "Plataforma 'workspace' que combina notebooks SQL/Python, dashboards, apps y AI assistant para data teams.",
+    whatDoes: "Análisis colaborativo en notebooks, dashboards publicados, AI assistant (Magic), Python + SQL mixto.",
+    whatDoesnt: "No es BI tradicional para no-técnicos. Curva moderada.",
+    pros: ["Colaboración real-time", "SQL + Python en un sitio", "AI assistant potente", "Bueno para data science → consumo"],
+    cons: ["Caro para equipos grandes", "No 100% reemplazo BI tradicional", "Joven en enterprise"],
+    whenUse: ["Equipos data science que también publican dashboards", "Reportes ad-hoc analíticos", "Colaboración técnica"],
+    whenNotUse: ["BI puro masivo para no-técnicos (Power BI mejor)", "Compliance enterprise muy estricto"]
+  },
+  {
+    name: "Streamlit",
+    vendor: "Snowflake (acquired 2022)",
+    status: "sota", license: "foss",
+    cost: "Open source gratis · Streamlit Cloud free + paid · Snowflake Native Apps",
+    summary: "Framework Python para construir data apps en minutos. El estándar para 'apps internas' analíticas de equipos Python.",
+    whatIs: "Librería open source que convierte scripts Python en apps web interactivas con widgets sin saber web dev.",
+    whatDoes: "Apps de visualización, interactivas con sliders/inputs, ML demos, dashboards Python-centric, Snowflake Native Apps.",
+    whatDoesnt: "No es BI para no-técnicos. Modelado limitado. Concurrencia variable.",
+    pros: ["Python puro, sin frontend", "Rapidísimo para prototipos", "Open source", "Snowflake nativo (sin sacar datos)"],
+    cons: ["No para no-técnicos", "Concurrencia limitada", "Estilizado limitado"],
+    whenUse: ["Data scientists publicando apps", "Demos ML/IA", "Apps internas Python-driven", "Snowflake Native Apps"],
+    whenNotUse: ["BI masivo para usuarios finales (Power BI/Tableau)", "Producción multi-tenant pesada"]
+  },
+  {
+    name: "Plotly Dash",
+    vendor: "Plotly",
+    status: "active", license: "freemium",
+    cost: "Open source gratis · Dash Enterprise comercial",
+    summary: "Framework Python/R para apps de visualización productivas. Más control que Streamlit, más curva. Comunidad fuerte en ciencia/ingeniería.",
+    whatIs: "Framework de apps web basado en Flask + React + Plotly.js para construir aplicaciones analíticas en Python/R.",
+    whatDoes: "Apps complejas con callbacks, layouts ricos, integraciones, Dash Enterprise para deployment empresarial.",
+    whatDoesnt: "Más complejo que Streamlit. Requiere entender callbacks Dash.",
+    pros: ["Control completo sobre UI", "Producción-ready con Dash Enterprise", "Plotly viz library brutal", "R y Python"],
+    cons: ["Curva pronunciada", "Más código que Streamlit", "Comunidad menor que Streamlit"],
+    whenUse: ["Apps complejas que Streamlit no cubre", "Empresas en ciencia/ingeniería", "Cuando viz Plotly es clave"],
+    whenNotUse: ["Prototipos rápidos (Streamlit mejor)", "No técnicos crean reports"]
+  },
+  {
+    name: "Mode Analytics",
+    vendor: "ThoughtSpot (acquired 2023)",
+    status: "active", license: "commercial",
+    cost: "Free tier · Pro $9-12k/año · Business custom",
+    summary: "BI SQL-first para analistas técnicos. Notebooks SQL + Python + R. Tras adquisición por ThoughtSpot, foco menos claro.",
+    whatIs: "Plataforma BI orientada a analistas SQL/Python con notebooks, reports, dashboards y SQL editor potente.",
+    whatDoes: "SQL exploration, Python notebooks, reports parametrizables, alerts, embed.",
+    whatDoesnt: "No es para no-técnicos. Post-adquisición, roadmap incierto.",
+    pros: ["SQL editor potente", "Python/R notebooks integrados", "Bueno para teams técnicos"],
+    cons: ["No para no-técnicos", "Roadmap incierto post-acquisition"],
+    whenUse: ["Equipos analytics SQL-heavy", "Cuando dashboards parametrizables importan"],
+    whenNotUse: ["BI para todo el negocio (Power BI/Tableau mejor)", "Greenfield 2026 (incertidumbre vendor)"]
+  },
+  {
+    name: "ThoughtSpot",
+    vendor: "ThoughtSpot",
+    status: "active", license: "commercial",
+    cost: "Enterprise pricing, típicamente $50k+/año",
+    summary: "BI 'search-first' donde escribes preguntas en lenguaje natural y obtienes visualizaciones. Hoy con Sage AI generativa.",
+    whatIs: "Plataforma BI con motor de búsqueda en lenguaje natural sobre datos, generativa con Sage AI.",
+    whatDoes: "Preguntas en lenguaje natural sobre warehouses, dashboards generativos, SpotIQ AI insights.",
+    whatDoesnt: "Caro. Curva en el modelado de datos para que NLQ funcione bien. No reemplaza BI tradicional para todo.",
+    pros: ["Pioneer en NLQ que funciona", "Sage AI moderna", "Para business users no SQL"],
+    cons: ["Caro", "Setup de modelo crítico", "Adopción menor"],
+    whenUse: ["Empresas que apuestan por NLQ/AI BI", "Cuando exec quieren preguntar y obtener resp", "Self-service BI premium"],
+    whenNotUse: ["Equipos técnicos que prefieren SQL puro", "Presupuesto ajustado"]
+  },
+  {
+    name: "Evidence",
+    vendor: "Evidence.dev",
+    status: "sota", license: "foss",
+    cost: "Open source gratis · Evidence Cloud comercial",
+    summary: "BI-as-code con Markdown + SQL. La revolución 'Git-first' para reportes versionables, perfecto para dbt teams.",
+    whatIs: "Framework open source que combina Markdown + SQL para generar reportes y dashboards versionados en Git.",
+    whatDoes: "Reportes Markdown con SQL embebido, plots, deployment estático o cloud, integración dbt.",
+    whatDoesnt: "No es interactivo tipo dashboard tradicional. Para no-técnicos es duro.",
+    pros: ["Versionado Git", "Reportes como código", "Diff-friendly", "Excelente con dbt"],
+    cons: ["No es drag-and-drop", "Para no-técnicos es difícil", "Comunidad emergente"],
+    whenUse: ["Equipos dbt code-first", "Reportes embebidos en docs", "Versionado de análisis importante"],
+    whenNotUse: ["BI para no-técnicos masivo", "Cuando interactividad rica importa"]
+  },
+  {
+    name: "Lightdash",
+    vendor: "Lightdash",
+    status: "active", license: "foss",
+    cost: "Open source gratis · Lightdash Cloud comercial",
+    summary: "BI open source pegada a dbt. Define métricas en dbt YAML, Lightdash las consume. Alternativa Looker open source.",
+    whatIs: "BI open source que lee definiciones de métricas y dimensiones desde modelos dbt, generando un Looker-like.",
+    whatDoes: "Dashboards, exploración, métricas semánticas desde dbt, alerts, embed.",
+    whatDoesnt: "Atado a dbt (feature o limitación). Menos viz library que Superset.",
+    pros: ["Semantic layer = dbt metrics", "Open source", "Filosofía 'metrics as code'"],
+    cons: ["Atado a dbt", "Comunidad emergente", "Menos viz vs Superset"],
+    whenUse: ["Stack dbt-first", "Cuando 'metrics in dbt' es la filosofía", "Alternativa open source a Looker"],
+    whenNotUse: ["Sin dbt", "Cuando rich viz importa más que semantic layer"]
+  },
+  {
+    name: "Cube",
+    vendor: "Cube Dev",
+    status: "active", license: "freemium",
+    cost: "Open source gratis · Cube Cloud comercial",
+    summary: "Semantic layer + API headless BI. No es un BI, sino la capa que sirve a tus BIs, apps y data products.",
+    whatIs: "Capa semántica universal que sirve datos vía SQL, REST, GraphQL a cualquier frontend (BI, app, AI).",
+    whatDoes: "Define métricas/dimensiones una vez, sirve a Tableau, Superset, app custom; cache inteligente; pre-aggregations.",
+    whatDoesnt: "No es BI (no tiene UI propia). Solo capa.",
+    pros: ["Una definición, múltiples consumidores", "Pre-aggs aceleran queries", "API headless"],
+    cons: ["No es BI completo", "Capa adicional en stack"],
+    whenUse: ["Múltiples consumidores que comparten métricas", "Data products embebidos", "Cuando 'una verdad' importa"],
+    whenNotUse: ["Caso BI simple end-user (Metabase/Looker bastan)", "Equipos pequeños sin múltiples consumidores"]
+  },
+  {
+    name: "Sisense",
+    vendor: "Sisense",
+    status: "active", license: "commercial",
+    cost: "Enterprise pricing custom · típicamente $25-100k+/año",
+    summary: "BI con énfasis en embedded analytics y AI generativa. Compass AI 2024+. Fuerte en SaaS embebido.",
+    whatIs: "Plataforma BI con motor In-Chip Analytics y énfasis en embed, white-label y AI.",
+    whatDoes: "Dashboards, embed white-label, AI insights, data prep (ElastiCube), pricing por consumo.",
+    whatDoesnt: "Menos comunidad que Tableau/Power BI. Curva propia (ElastiCube).",
+    pros: ["Embedded analytics fuerte", "White-label", "AI conversational"],
+    cons: ["Menos comunidad", "Curva proprietaria", "Caro"],
+    whenUse: ["SaaS con BI embebido", "White-label necesario", "Cuando AI generativa importa"],
+    whenNotUse: ["BI interno enterprise tradicional (Power BI/Tableau mejor TCO)"]
+  },
+  {
+    name: "MicroStrategy",
+    vendor: "MicroStrategy (Strategy)",
+    status: "legacy", license: "enterprise",
+    cost: "Enterprise pricing alto",
+    summary: "BI enterprise histórico (1989+), fuerte en gov/banca. Hoy compite con dificultad vs Power BI/Tableau. Movió a Strategy AI.",
+    whatIs: "Plataforma enterprise BI con semantic layer fuerte, modelado dimensional clásico, scaling masivo.",
+    whatDoes: "Dashboards, mobile, embedded, HyperIntelligence (overlays contextuales), AI/ML integration.",
+    whatDoesnt: "UX dated. Mercado se mueve a cloud-native. Cuota declina.",
+    pros: ["Probado a escala extrema", "Semantic layer enterprise", "Compliance maduro"],
+    cons: ["UX legacy", "Talento escaso", "Mercado en declive"],
+    whenUse: ["Solo legacy enterprise heavy"],
+    whenNotUse: ["Greenfield"]
+  },
+  {
+    name: "SAP BusinessObjects",
+    vendor: "SAP",
+    status: "legacy", license: "enterprise",
+    cost: "Enterprise SAP licensing",
+    summary: "BI enterprise histórico SAP. Sigue en muchas grandes empresas SAP. SAP empuja SAC (SAP Analytics Cloud) como sucesor.",
+    whatIs: "Suite BI tradicional con Web Intelligence, Crystal Reports, Universes (semantic layer).",
+    whatDoes: "Reportes pixel-perfect, dashboards, integración profunda SAP ECC/S4HANA.",
+    whatDoesnt: "UX muy dated. Cloud experience pobre.",
+    pros: ["Integración SAP nativa", "Reportes pixel-perfect"],
+    cons: ["Legacy", "UX dated", "SAP mueve a SAC"],
+    whenUse: ["Solo cuando ya hay inversión SAP profunda"],
+    whenNotUse: ["Greenfield · incluso empresas SAP miran Power BI"]
+  },
+  {
+    name: "IBM Cognos Analytics",
+    vendor: "IBM",
+    status: "legacy", license: "enterprise",
+    cost: "Enterprise licensing IBM",
+    summary: "BI enterprise IBM histórico. Aún vivo con Cognos 12, Watson AI integrada. Mercado share decreciente.",
+    whatIs: "Plataforma BI enterprise con Cognos Analytics moderno, Watson AI, reporting + dashboards.",
+    whatDoes: "Reportes enterprise, dashboards, Watson NLQ, integración IBM stack.",
+    whatDoesnt: "Mercado en declive frente a Power BI/Tableau.",
+    pros: ["IBM enterprise compliance", "Watson AI"],
+    cons: ["Cuota decreciente", "UX legacy", "Talento escaso"],
+    whenUse: ["Solo cuando IBM stack es el norte"],
+    whenNotUse: ["Greenfield"]
+  }
+],
+
+// ============================================================
+// 05 · DATA ORCHESTRATION
+// ============================================================
+orchestration: [
+  {
+    name: "Apache Airflow",
+    vendor: "Apache (Astronomer driving)",
+    status: "sota", license: "foss",
+    cost: "Gratis open source · Astronomer/Composer/MWAA por gestión",
+    summary: "El estándar de facto en orquestación de datos desde 2016. Python-first, masiva comunidad. Airflow 3.0 (2025) trae mejoras de escala y UX.",
+    whatIs: "Plataforma open source de workflow management que define pipelines como DAGs en Python, con scheduler, executor y rich UI.",
+    whatDoes: "Schedule, monitor y ejecuta DAGs Python con miles de operators, sensors, hooks. Soporta CeleryExecutor, KubernetesExecutor.",
+    whatDoesnt: "Estado limitado entre tasks (mejora con Datasets/Asset). Streaming limitado (Airflow es batch-first). Operación delicada.",
+    pros: ["Comunidad enorme", "Ecosistema masivo de providers", "Python familiar", "Maduro y probado"],
+    cons: ["Operacionalmente delicado (Postgres, scheduler, workers)", "Streaming débil", "Estado/contexto entre tasks limitado"],
+    whenUse: ["Batch ETL workflows", "Cuando comunidad y talento importan", "Pipelines complejos con dependencias", "Cualquier stack data engineering"],
+    whenNotUse: ["Pipelines event-driven sub-segundo (Temporal/Flink mejor)", "Equipos sin platform team", "Workflows simples (cron basta)"]
+  },
+  {
+    name: "Astronomer Astro",
+    vendor: "Astronomer",
+    status: "sota", license: "commercial",
+    cost: "Astro Cloud por consumption · Astro Hybrid por nodo",
+    summary: "El Airflow comercial. Astronomer mantiene Airflow open source y vende plataforma gestionada con CLI, deployments y CI/CD.",
+    whatIs: "Plataforma comercial alrededor de Airflow con UI mejorada, deployments multi-environment, CLI moderna, SaaS o BYOC.",
+    whatDoes: "Airflow gestionado en cloud, CLI para CI/CD, observability, soporte enterprise.",
+    whatDoesnt: "No reemplaza Airflow conceptualmente (lo envuelve). Costoso vs self-hosted.",
+    pros: ["Astronomer es el principal mantenedor Airflow", "CLI excelente", "SOC2 + soporte"],
+    cons: ["Caro vs self-hosted", "Lock-in moderado"],
+    whenUse: ["Empresas que adoptan Airflow pero no quieren operarlo", "Cuando soporte enterprise importa"],
+    whenNotUse: ["Self-hosted con platform team", "Presupuesto ajustado"]
+  },
+  {
+    name: "Prefect",
+    vendor: "Prefect",
+    status: "sota", license: "freemium",
+    cost: "Open source gratis · Prefect Cloud free tier + paid",
+    summary: "Alternativa moderna a Airflow con énfasis en developer experience. Prefect 3 (2024) trae dynamic workflows y mejor UX.",
+    whatIs: "Framework Python open source de orquestación con foco DX: flows decorados, dynamic mapping, async-first.",
+    whatDoes: "Flows Python decorados, sub-flows, retries, scheduling, Prefect Cloud para SaaS, deploy local + cloud.",
+    whatDoesnt: "Comunidad menor que Airflow. Talento más escaso.",
+    pros: ["DX moderno", "Dynamic mapping potente", "Async-first", "Migración desde Airflow factible"],
+    cons: ["Comunidad menor", "Menos providers que Airflow", "Pricing cloud escalado"],
+    whenUse: ["Equipos Python modernos que valoran DX", "Cuando Airflow se siente legacy", "Flows dinámicos complejos"],
+    whenNotUse: ["Cuando talento Airflow abunda y prefieres seguir el estándar"]
+  },
+  {
+    name: "Dagster",
+    vendor: "Dagster Labs",
+    status: "sota", license: "freemium",
+    cost: "Open source gratis · Dagster+ cloud comercial",
+    summary: "Orquestación 'asset-first' que modela datos como assets, no solo tasks. Excelente en data lineage, testing, software engineering rigor.",
+    whatIs: "Framework Python open source con paradigma Software-Defined Assets: defines outputs (datasets) y Dagster orquesta cómo materializarlos.",
+    whatDoes: "Asset graph, materialization, sensors, schedules, lineage automático, testing, Dagster+ con compute, branching, alerts.",
+    whatDoesnt: "Curva conceptual (assets vs tasks). Comunidad menor que Airflow.",
+    pros: ["Asset-first innovador", "Lineage automático", "Testing rigoroso", "Excelente con dbt"],
+    cons: ["Curva conceptual", "Comunidad menor", "Migrar de Airflow no trivial"],
+    whenUse: ["Equipos data engineering modernos", "Cuando 'data assets' es la filosofía", "Integración fuerte con dbt", "Lineage como first-class"],
+    whenNotUse: ["Equipos pequeños sin tiempo de aprender", "Cuando Airflow legacy ya funciona"]
+  },
+  {
+    name: "Apache Oozie",
+    vendor: "Apache Software Foundation",
+    status: "deprecated", license: "foss",
+    cost: "Gratis · pero sin mantenimiento activo",
+    summary: "Scheduler de workflows para Hadoop. Estándar 2010-2017. Hoy deprecado en favor de Airflow. XML workflows hostiles a debugging.",
+    whatIs: "Scheduler de workflows XML para Hadoop con bundles, coordinators y workflows acoplados a HDFS/Hive/Pig.",
+    whatDoes: "Históricamente: orquestó pipelines MapReduce/Hive/Pig con dependencias y triggers temporales.",
+    whatDoesnt: "Sin desarrollo. XML es doloroso. No cloud-native. Mal fit con stack moderno.",
+    pros: ["Histórico: maduro en Hadoop tradicional"],
+    cons: ["DEPRECADO/LEGACY", "XML workflows", "Sin innovación", "Stack Hadoop colapsando"],
+    whenUse: ["Solo mantenimiento Hadoop legacy"],
+    whenNotUse: ["Cualquier nuevo proyecto · Airflow, Prefect, Dagster son mejores"]
+  },
+  {
+    name: "Luigi",
+    vendor: "Spotify (open source)",
+    status: "legacy", license: "foss",
+    cost: "Gratis open source",
+    summary: "Predecesor conceptual de Airflow (Spotify 2012). Aún usado en algunos shops, pero mercado migró a Airflow.",
+    whatIs: "Framework Python para construir pipelines complejos con dependencias entre tasks, conectado a HDFS, S3, DBs.",
+    whatDoes: "Pipelines con dependencias declarativas en Python, retries básicos, scheduler manual.",
+    whatDoesnt: "Sin scheduler nativo robusto (depende de cron). UI básica. Sin features modernas.",
+    pros: ["Simple conceptualmente", "Python puro"],
+    cons: ["Sin scheduler propio robusto", "Comunidad menguante", "Reemplazado por Airflow"],
+    whenUse: ["Solo mantenimiento legacy"],
+    whenNotUse: ["Cualquier nuevo proyecto"]
+  },
+  {
+    name: "Azkaban",
+    vendor: "LinkedIn (open source)",
+    status: "legacy", license: "foss",
+    cost: "Gratis",
+    summary: "Scheduler de Hadoop creado en LinkedIn (~2009). Similar a Oozie pero más amigable. Hoy reemplazado por Airflow.",
+    whatIs: "Scheduler batch para Hadoop con UI web y workflows zip-based.",
+    whatDoes: "Schedule jobs Hadoop con dependencias y alertas.",
+    whatDoesnt: "Sin innovación. Comunidad menguante.",
+    pros: ["UI web mejor que Oozie en su época"],
+    cons: ["Legacy", "Reemplazado por Airflow"],
+    whenUse: ["Solo mantenimiento"],
+    whenNotUse: ["Cualquier nuevo proyecto"]
+  },
+  {
+    name: "AWS Step Functions",
+    vendor: "Amazon Web Services",
+    status: "active", license: "cloud",
+    cost: "$0.025/1000 state transitions (Standard) · Express por uso",
+    summary: "Orquestación serverless AWS basada en máquinas de estado JSON. Excelente para workflows con servicios AWS, no para ETL data-heavy.",
+    whatIs: "Servicio serverless de orquestación con state machines (Amazon States Language) que coordinan servicios AWS y custom.",
+    whatDoes: "Workflows event-driven y batch que llaman Lambda, ECS, Glue, SageMaker; manejo de errors, retries, parallel.",
+    whatDoesnt: "ASL JSON puede ser tosco. No es Python. Mal fit para ETL data pipelines complejos.",
+    pros: ["Serverless puro", "Integración profunda AWS", "Visual workflows", "Pricing por transitions"],
+    cons: ["JSON ASL tosco", "Lock-in AWS", "No ideal para data engineers Python-first"],
+    whenUse: ["Workflows event-driven AWS", "Coordinar microservicios AWS", "Workflows simples sin Python"],
+    whenNotUse: ["Pipelines data engineering complejos (Airflow/Dagster mejor)", "Multi-cloud"]
+  },
+  {
+    name: "Azure Data Factory Pipelines",
+    vendor: "Microsoft Azure",
+    status: "active", license: "cloud",
+    cost: "Pago por actividad/run",
+    summary: "Capa de orquestación dentro de ADF (también ingestión). UI visual amigable, integrada con Azure stack.",
+    whatIs: "Componente de Azure Data Factory para orquestar pipelines de copy + transform + ML con triggers temporales/event-driven.",
+    whatDoes: "Orquesta ADF copy activities, data flows, Databricks notebooks, Synapse, custom; integración Azure.",
+    whatDoesnt: "Menos code-first que Airflow/Dagster. Limitado para workflows complejos custom.",
+    pros: ["Visual UI", "Integración Azure profunda", "Bueno para ETL + orchestration en un sitio"],
+    cons: ["Lock-in Azure", "Menos potente que Airflow para complex DAGs"],
+    whenUse: ["Stack Azure end-to-end", "Cuando ETL visual + orquestación basta"],
+    whenNotUse: ["Multi-cloud", "Pipelines code-first complejos"]
+  },
+  {
+    name: "GCP Cloud Composer",
+    vendor: "Google Cloud",
+    status: "active", license: "cloud",
+    cost: "Composer 2/3 desde ~$300-1000+/mes según size",
+    summary: "Airflow gestionado en GCP. Permite usar Airflow sin operar Postgres, scheduler, workers tú mismo.",
+    whatIs: "Servicio GCP que ejecuta Apache Airflow gestionado con autoscaling y monitoring integrado.",
+    whatDoes: "Orquesta DAGs Airflow en GCP con integración nativa Dataflow, BigQuery, Dataproc.",
+    whatDoesnt: "Sigue siendo Airflow (con sus limitaciones). Cost minimum mensual relevante incluso ocioso.",
+    pros: ["Airflow gestionado", "Integración GCP", "Sin operar infra"],
+    cons: ["Min mensual ~$300+", "Lock-in GCP", "Updates de Airflow tardan"],
+    whenUse: ["Stack GCP con Airflow", "Cuando no quieres operar Airflow"],
+    whenNotUse: ["Multi-cloud", "Cargas muy intermitentes (caro idle)"]
+  },
+  {
+    name: "AWS MWAA",
+    vendor: "Amazon Web Services",
+    status: "active", license: "cloud",
+    cost: "Por environment + workers · desde ~$400/mes",
+    summary: "Airflow gestionado en AWS. Análogo a Composer en GCP.",
+    whatIs: "Managed Workflows for Apache Airflow: servicio AWS para Airflow gestionado con scaling automatic.",
+    whatDoes: "DAGs Airflow gestionados en AWS, integración nativa con S3, Glue, EMR, SageMaker.",
+    whatDoesnt: "Similar caveats a Composer. Versiones a veces atrasadas.",
+    pros: ["Airflow gestionado en AWS", "Sin operar infra", "Integración AWS"],
+    cons: ["Cost minimum ~$400/mes", "Lock-in AWS"],
+    whenUse: ["Stack AWS con Airflow"],
+    whenNotUse: ["Self-hosted preferible si tienes platform team"]
+  },
+  {
+    name: "Argo Workflows",
+    vendor: "CNCF / Intuit",
+    status: "active", license: "foss",
+    cost: "Gratis open source",
+    summary: "Workflow engine Kubernetes-native. Cada step es un Pod. Excelente para ML/CI/CD y batch K8s. Compite con Airflow en stacks K8s.",
+    whatIs: "Engine CNCF para workflows declarados en YAML que corren como Pods en Kubernetes.",
+    whatDoes: "DAG y step-based workflows en K8s, scaling natural con K8s, Argo Events para event-driven.",
+    whatDoesnt: "YAML puede ser verboso. Menos data engineering features que Airflow.",
+    pros: ["K8s-native real", "Escala con cluster", "Ecosistema CNCF (Argo CD, Argo Events)"],
+    cons: ["YAML denso", "Menos data engineering específico", "Curva K8s"],
+    whenUse: ["Stack Kubernetes-first", "ML pipelines + CI/CD", "Cuando K8s ya es la plataforma"],
+    whenNotUse: ["Sin Kubernetes", "Equipos no cómodos con K8s"]
+  },
+  {
+    name: "Kubeflow Pipelines",
+    vendor: "Open source (Google origin)",
+    status: "active", license: "foss",
+    cost: "Gratis · Vertex AI Pipelines (GCP) versión gestionada",
+    summary: "Pipelines ML en K8s con foco MLOps. Basado en Argo. Estándar para pipelines ML cloud-agnostic.",
+    whatIs: "Sistema de pipelines ML sobre Kubernetes con componentes reutilizables y SDK Python.",
+    whatDoes: "ML pipelines con experiments, runs, hyperparameter tuning, model serving (KServe), integración con Vertex AI.",
+    whatDoesnt: "Sobre-engineered para ETL simple. Curva ML-Ops.",
+    pros: ["Estándar MLOps K8s", "Vertex AI Pipelines lo soporta", "Components reutilizables"],
+    cons: ["Operacionalmente complejo", "Para data engineering puro es overkill"],
+    whenUse: ["ML/MLOps en K8s", "Cuando ML pipelines son crítico", "Stack Vertex AI"],
+    whenNotUse: ["ETL puro (Airflow/Dagster mejor)", "Sin necesidad ML"]
+  },
+  {
+    name: "Mage",
+    vendor: "Mage AI",
+    status: "active", license: "foss",
+    cost: "Open source gratis · Mage Pro cloud comercial",
+    summary: "Orquestación moderna con notebooks-first y SQL/Python mixed. Apunta a 'Airflow para la nueva generación'.",
+    whatIs: "Plataforma open source de pipelines con UI notebook-first donde cada bloque es una tarea Python/SQL/R.",
+    whatDoes: "Pipelines visuales + código, transformaciones, ingesta, schedule, monitor, integraciones modernas.",
+    whatDoesnt: "Comunidad menor. Menos providers que Airflow.",
+    pros: ["UX moderna notebook-first", "Open source", "Reutiliza patrones modernos"],
+    cons: ["Comunidad pequeña", "Talento escaso", "Menos integraciones"],
+    whenUse: ["Equipos pequeños que valoran UX", "Cuando Airflow se siente legacy"],
+    whenNotUse: ["Enterprise con tradición Airflow", "Cuando talento del mercado importa"]
+  },
+  {
+    name: "Temporal",
+    vendor: "Temporal Technologies",
+    status: "sota", license: "foss",
+    cost: "Open source gratis · Temporal Cloud comercial",
+    summary: "Workflow engine durable de propósito general (no solo data). Excelente para microservices orchestration y workflows long-running.",
+    whatIs: "Engine de workflows duraderos con SDKs (Go, Java, Python, TS, .NET, PHP, Ruby) y persistencia de estado.",
+    whatDoes: "Workflows durables, retries automáticos, timers, signals, sagas; servicio core para microservices.",
+    whatDoesnt: "No es data engineering específico (más general). Curva conceptual.",
+    pros: ["Workflows duraderos reales", "Multi-lenguaje", "Engine separado del worker code", "Reliability extrema"],
+    cons: ["Curva conceptual (Activities, Workflows, Signals)", "Operacionalmente complejo self-host"],
+    whenUse: ["Workflows long-running (saga patterns, billing, onboarding)", "Microservices orchestration", "Cuando reliability es crítica"],
+    whenNotUse: ["Pipelines ETL puros (Airflow/Dagster mejor)", "Equipos sin SRE"]
+  },
+  {
+    name: "Flyte",
+    vendor: "LF AI & Data (Lyft/Union AI)",
+    status: "active", license: "foss",
+    cost: "Open source gratis · Union AI managed comercial",
+    summary: "Orquestación K8s-native para ML y data pipelines. Type-safe, reproducible, originada en Lyft.",
+    whatIs: "Plataforma open source para workflows K8s-native con énfasis en tipos, versionado y reproducibilidad ML.",
+    whatDoes: "Workflows Python con tipos estrictos, caching, versionado, K8s-native, MLOps + data engineering.",
+    whatDoesnt: "Curva alta. Operación K8s.",
+    pros: ["Type-safe", "K8s-native", "Excelente para ML/data combined", "Caching potente"],
+    cons: ["Curva alta", "Operación K8s"],
+    whenUse: ["ML + data pipelines combined en K8s", "Cuando reproducibilidad estricta importa"],
+    whenNotUse: ["Sin K8s", "ETL simple"]
+  },
+  {
+    name: "Apache DolphinScheduler",
+    vendor: "Apache Software Foundation",
+    status: "active", license: "foss",
+    cost: "Gratis open source",
+    summary: "Workflow scheduler open source con UI visual fuerte. Popular en Asia, crece en Occidente.",
+    whatIs: "Workflow scheduler distribuido con DAGs visuales en UI, plugins para Spark/Flink/Python/Shell.",
+    whatDoes: "Workflows visuales con HA, multi-tenant, scheduling potente, lineage básico.",
+    whatDoesnt: "Menos adopción occidental. Documentación variable.",
+    pros: ["UI visual potente", "HA built-in", "Apache top-level"],
+    cons: ["Adopción occidental menor", "Talento escaso fuera Asia"],
+    whenUse: ["Cuando UI visual importa más que código", "Empresas con políticas anti-vendor"],
+    whenNotUse: ["Cuando talento Airflow abunda", "Stacks code-first puros"]
+  },
+  {
+    name: "Kestra",
+    vendor: "Kestra",
+    status: "active", license: "foss",
+    cost: "Open source gratis · Kestra Cloud comercial",
+    summary: "Orquestador moderno YAML-first multi-lenguaje. Crece rápido como alternativa moderna a Airflow para teams polyglot.",
+    whatIs: "Plataforma de orquestación con workflows declarativos YAML, plugins multi-lenguaje, UI moderna.",
+    whatDoes: "YAML workflows, 600+ plugins, integraciones cloud, event-driven, namespaces.",
+    whatDoesnt: "YAML para muchos pythonistas se siente menos natural. Comunidad emergente.",
+    pros: ["YAML declarativo", "Multi-lenguaje", "Plugins extensos", "Moderno"],
+    cons: ["Comunidad menor que Airflow", "YAML para complex flows puede crecer"],
+    whenUse: ["Teams polyglot (no solo Python)", "Cuando YAML-first ayuda", "Greenfield moderno"],
+    whenNotUse: ["Equipos Python-puro con Airflow funcionando"]
+  },
+  {
+    name: "Control-M (BMC)",
+    vendor: "BMC Software",
+    status: "legacy", license: "enterprise",
+    cost: "Enterprise licensing high",
+    summary: "Orquestador batch enterprise tradicional desde 1985. Aún en bancos y aseguradoras grandes. Migración a cloud lenta.",
+    whatIs: "Suite enterprise para workload automation: batch jobs, file transfer, application workflows.",
+    whatDoes: "Schedule jobs cross-system (mainframe, Windows, Unix, cloud), SLA management, calendar.",
+    whatDoesnt: "Cloud-native experience pobre. Caro. UX dated.",
+    pros: ["Probado enterprise extreme", "Multi-platform", "SLAs corporativos"],
+    cons: ["Costos altos", "UX legacy", "Mercado se mueve a cloud-native"],
+    whenUse: ["Solo mantenimiento enterprise legacy"],
+    whenNotUse: ["Greenfield modern · Airflow/Dagster mejor"]
+  },
+  {
+    name: "AutoSys (CA / Broadcom)",
+    vendor: "Broadcom (CA)",
+    status: "legacy", license: "enterprise",
+    cost: "Enterprise licensing",
+    summary: "Workload automation legacy (1990s+). Similar a Control-M. Aún en mainframe shops.",
+    whatIs: "Workload automation cross-platform enterprise.",
+    whatDoes: "Schedule jobs en mainframe, Unix, Windows.",
+    whatDoesnt: "Modernización lenta.",
+    pros: ["Enterprise probado"],
+    cons: ["Legacy", "Costoso"],
+    whenUse: ["Solo legacy"],
+    whenNotUse: ["Greenfield"]
+  }
+],
+
+};
+
+
+// Parte 3: Governance, Veracity
+
+const TOOLS_PART3 = {
+
+// ============================================================
+// 06 · DATA GOVERNANCE
+// ============================================================
+governance: [
+  {
+    name: "Collibra",
+    vendor: "Collibra",
+    status: "active", license: "enterprise",
+    cost: "Enterprise pricing $100k-1M+/año según escala",
+    summary: "Líder enterprise en governance, catálogo y data quality. El estándar en grandes corporaciones reguladas (banca, salud, gobierno).",
+    whatIs: "Plataforma enterprise de Data Intelligence que combina data catalog, governance, privacy, lineage y quality.",
+    whatDoes: "Catalog crowdsourced, glosario de negocio, lineage end-to-end, workflows de governance, integración con stack.",
+    whatDoesnt: "Caro. Setup complejo. Curva pronunciada.",
+    pros: ["Líder enterprise probado", "Workflows governance robustos", "Compliance certifications maduras"],
+    cons: ["Carísimo", "Implementación de meses", "Difícil para mid-market"],
+    whenUse: ["Grandes corporaciones reguladas", "Cuando governance es directriz C-level", "Compliance estricto multi-país"],
+    whenNotUse: ["Startups/mid-market (overkill)", "Cuando flexibilidad y agilidad importan más"]
+  },
+  {
+    name: "Alation",
+    vendor: "Alation",
+    status: "active", license: "enterprise",
+    cost: "Enterprise pricing $50k-500k+/año",
+    summary: "Data catalog pionero con énfasis en discovery, behavior intelligence y self-service. Compite head-to-head con Collibra.",
+    whatIs: "Data Intelligence Platform centrada en catalog + governance + búsqueda inteligente.",
+    whatDoes: "Discovery automático, lineage, glosario, recomendaciones AI, data marketplace interno, alianza profunda con Snowflake.",
+    whatDoesnt: "Caro. Menos workflows governance que Collibra. Setup no trivial.",
+    pros: ["UX más amigable que Collibra", "Behavior intelligence (recomendaciones)", "Bueno para self-service"],
+    cons: ["Costoso", "Workflows governance menos profundos", "Talento escaso"],
+    whenUse: ["Empresas que valoran discovery + UX sobre governance estricto", "Stack moderno cloud DW"],
+    whenNotUse: ["Compliance regulado extremo (Collibra mejor)", "Mid-market sin presupuesto"]
+  },
+  {
+    name: "Atlan",
+    vendor: "Atlan",
+    status: "sota", license: "commercial",
+    cost: "Enterprise pricing por consumo · típicamente $30-200k+/año",
+    summary: "Catálogo moderno 'third generation' SaaS con énfasis en developer experience, OpenLineage e integración profunda con stack moderno (dbt, Snowflake, Databricks).",
+    whatIs: "Plataforma SaaS de active metadata que combina catalog, lineage, governance, monitoring y access management.",
+    whatDoes: "Auto-discovery, lineage column-level, integración dbt/Fivetran/Looker, AI copilot, action workflows.",
+    whatDoesnt: "SaaS only (sin self-hosted). Más caro que open source. Joven en compliance enterprise extremo.",
+    pros: ["UX moderna excelente", "Lineage column-level", "Integraciones nativas modern stack", "AI copilot maduro"],
+    cons: ["Solo SaaS", "Pricing escalado", "Sin presencia legacy on-prem"],
+    whenUse: ["Stack moderno (dbt + Snowflake/Databricks)", "Cuando UX y agilidad importan", "Mid-large companies cloud-native"],
+    whenNotUse: ["On-prem strict", "Compliance que requiere self-hosted total"]
+  },
+  {
+    name: "Informatica Axon / IDMC Data Governance",
+    vendor: "Informatica",
+    status: "active", license: "enterprise",
+    cost: "Enterprise high-end · típicamente $100k-1M+",
+    summary: "Suite governance histórica de Informatica, integrada en IDMC. Profunda en compliance, MDM, privacy.",
+    whatIs: "Suite governance enterprise con Axon (governance), EDC (catalog), AXP (privacy), MDM.",
+    whatDoes: "Governance end-to-end, glosario negocio, lineage, MDM, privacy management, CLAIRE AI.",
+    whatDoesnt: "Pesado. Caro. Modernización lenta.",
+    pros: ["Suite completa enterprise", "MDM integrado", "Compliance maduro"],
+    cons: ["Pesado y caro", "UX legacy", "Modernización gradual"],
+    whenUse: ["Enterprises con inversión Informatica histórica", "Cuando MDM + governance + DI van juntos"],
+    whenNotUse: ["Greenfield moderno", "Mid-market"]
+  },
+  {
+    name: "AWS Glue Data Catalog",
+    vendor: "Amazon Web Services",
+    status: "active", license: "cloud",
+    cost: "$1/100k objetos/mes + $1/M requests",
+    summary: "Catálogo de metadatos de AWS, sustituto de Hive Metastore. Base de Athena, Redshift Spectrum, EMR. No es governance completo.",
+    whatIs: "Servicio AWS de metastore compatible con Hive, integrado con Glue Crawlers, IAM, Lake Formation.",
+    whatDoes: "Almacena schemas, partitions, ubicaciones. Sirve a Athena/Redshift/EMR.",
+    whatDoesnt: "No es catálogo end-user (sin UI rica de búsqueda). No tiene glosario ni workflows. Solo metadatos técnicos.",
+    pros: ["Integrado en todo AWS analytics", "Barato", "Maduro"],
+    cons: ["No es catálogo de governance completo", "Solo AWS"],
+    whenUse: ["Como metastore para AWS analytics", "Base para Athena/Redshift/EMR"],
+    whenNotUse: ["Como solución de governance end-to-end (necesitas más)"]
+  },
+  {
+    name: "AWS Lake Formation",
+    vendor: "Amazon Web Services",
+    status: "active", license: "cloud",
+    cost: "Sin cargo adicional (paga servicios subyacentes)",
+    summary: "Capa de governance fine-grained sobre Glue Catalog y S3. Permite control de acceso por fila/columna en data lake AWS.",
+    whatIs: "Servicio AWS que extiende Glue Catalog con permissions fine-grained, row/column-level security y data filters.",
+    whatDoes: "Permissions fine-grained sobre tablas S3, integración con Athena/Redshift/EMR, cross-account sharing.",
+    whatDoesnt: "Lock-in AWS. Setup tedioso. No reemplaza un catálogo de búsqueda end-user.",
+    pros: ["Fine-grained access en data lake", "Sin cargo extra (paga storage/compute)", "Integración AWS"],
+    cons: ["Setup tedioso", "Solo AWS", "No tiene UI tipo Atlan"],
+    whenUse: ["Data lake AWS con permissions estrictas", "Compliance en S3"],
+    whenNotUse: ["Multi-cloud", "Para catálogo end-user (combina con Atlan/DataHub)"]
+  },
+  {
+    name: "Microsoft Purview",
+    vendor: "Microsoft",
+    status: "sota", license: "cloud",
+    cost: "Capacity Units por consumo · típicamente $1-5k/mes mid-size",
+    summary: "Plataforma unificada Microsoft de governance: catalog, lineage, classification, DLP. Resultado de fusión Azure Purview + M365 compliance.",
+    whatIs: "Suite governance Microsoft que combina catalog, scanning, classification, DLP, info protection cross-cloud.",
+    whatDoes: "Scan automático multi-cloud, classification AI, lineage, sensitive labels, integration con Fabric/Power BI.",
+    whatDoesnt: "Mejor en stack Microsoft. Curva relevante. Pricing puede ser confuso.",
+    pros: ["Integración Microsoft profunda", "Multi-cloud capabilities", "AI classification potente", "Incluido en E5 a veces"],
+    cons: ["Curva alta", "Mejor en stack Microsoft", "Pricing CU complejo"],
+    whenUse: ["Stack Microsoft/Azure-first", "Cuando ya tienes M365 E5/E3", "Governance unificada con info protection"],
+    whenNotUse: ["Multi-cloud sin Microsoft", "Mid-market sin inversión Microsoft"]
+  },
+  {
+    name: "Google Dataplex",
+    vendor: "Google Cloud",
+    status: "active", license: "cloud",
+    cost: "Por discovery + scan + quality charges",
+    summary: "Plataforma GCP de data fabric: governance, calidad, lineage y security unificados. Integra con BigQuery, GCS, Dataproc.",
+    whatIs: "Servicio GCP que organiza data lakes y warehouses con zones, governance, lineage, data quality scans.",
+    whatDoes: "Catalog, scans calidad, classification, lineage cross-service GCP, policy management.",
+    whatDoesnt: "GCP-only. Menos rich que Atlan en UX. Joven en governance enterprise extremo.",
+    pros: ["Integración GCP nativa", "Lineage BigQuery/Dataflow", "Data quality integrado"],
+    cons: ["Solo GCP", "Comunidad menor", "UX menos pulida que Atlan"],
+    whenUse: ["Stack GCP-first", "Cuando governance + quality van juntos"],
+    whenNotUse: ["Multi-cloud", "Necesitas UI consumer-facing pulida (Atlan mejor)"]
+  },
+  {
+    name: "DataHub",
+    vendor: "Acryl Data (open source, LinkedIn origin)",
+    status: "sota", license: "foss",
+    cost: "Open source gratis · Acryl Cloud comercial",
+    summary: "Catálogo open source moderno con foco en active metadata, lineage column-level y extensibilidad. Líder open en su segmento.",
+    whatIs: "Catálogo open source de metadatos creado por LinkedIn con arquitectura event-driven y model muy extensible.",
+    whatDoes: "Discovery, lineage column-level, governance, data quality integration, glosario, OpenLineage compatible.",
+    whatDoesnt: "Operacionalmente complejo self-host (Kafka, Elastic, Postgres). UI mejora pero menos pulida que Atlan.",
+    pros: ["Open source serio", "Modelo extensible", "Active metadata (event-driven)", "Acryl da managed option"],
+    cons: ["Self-host pesado", "Curva operacional", "UX en evolución"],
+    whenUse: ["Empresas que quieren open source sin lock-in", "Cuando hay platform team", "Integración custom profunda"],
+    whenNotUse: ["Sin platform team", "Cuando UX out-of-the-box es prioridad (Atlan mejor)"]
+  },
+  {
+    name: "OpenMetadata",
+    vendor: "Collate (open source)",
+    status: "sota", license: "foss",
+    cost: "Open source gratis · Collate Cloud comercial",
+    summary: "Catálogo open source moderno con énfasis en simplicidad y all-in-one (catalog + quality + lineage + observability).",
+    whatIs: "Plataforma open source de metadata management con catalog, governance, quality y lineage unificados.",
+    whatDoes: "Discovery, quality tests, lineage, governance, ownership, glosario, integraciones 75+.",
+    whatDoesnt: "Más joven que DataHub. Self-host requiere esfuerzo.",
+    pros: ["All-in-one (catalog + quality + lineage)", "Setup más simple que DataHub", "Open source serio"],
+    cons: ["Comunidad menor que DataHub", "Menos casos enterprise extreme"],
+    whenUse: ["Mid-market y startups buscando open source todo-en-uno", "Cuando catalog + quality + lineage van juntos"],
+    whenNotUse: ["Enterprise extreme compliance (Collibra mejor)", "Sin platform team"]
+  },
+  {
+    name: "Marquez / OpenLineage",
+    vendor: "LF AI & Data",
+    status: "active", license: "foss",
+    cost: "Gratis open source",
+    summary: "Marquez es el servidor open source de lineage; OpenLineage es la spec estándar de eventos de lineage. Base técnica de muchas plataformas modernas.",
+    whatIs: "OpenLineage es spec abierta para emitir eventos de lineage. Marquez es servidor de referencia que los recibe y expone.",
+    whatDoes: "Captura lineage automático desde Airflow, dbt, Spark, Flink vía OpenLineage; Marquez sirve UI y API.",
+    whatDoesnt: "Marquez por sí solo no es catálogo completo. Es un componente.",
+    pros: ["Estándar abierto (OpenLineage adopted por DataHub, Atlan, Collibra)", "Integraciones built-in"],
+    cons: ["Marquez UI básica", "Solo lineage (no catalog completo)"],
+    whenUse: ["Como componente de stack open source", "Cuando OpenLineage estándar importa"],
+    whenNotUse: ["Como solución governance completa standalone"]
+  },
+  {
+    name: "Amundsen",
+    vendor: "Lyft (open source)",
+    status: "legacy", license: "foss",
+    cost: "Gratis",
+    summary: "Data discovery tool creada en Lyft (2019). Pionero del catálogo open source moderno. Hoy en declive vs DataHub/OpenMetadata.",
+    whatIs: "Catalog open source originado en Lyft con énfasis en discovery con UX tipo Google search.",
+    whatDoes: "Search interno de tablas/dashboards/users, descripción, ownership.",
+    whatDoesnt: "Desarrollo lento. Comunidad migra a DataHub/OpenMetadata.",
+    pros: ["Pionero del catálogo open", "Search UX limpia"],
+    cons: ["Innovación detenida", "Comunidad menguante"],
+    whenUse: ["Solo manteniendo instalaciones existentes"],
+    whenNotUse: ["Cualquier greenfield · DataHub/OpenMetadata mejor"]
+  },
+  {
+    name: "Apache Atlas",
+    vendor: "Apache Software Foundation",
+    status: "legacy", license: "foss",
+    cost: "Gratis",
+    summary: "Catálogo y governance para Hadoop. Estándar de la era Hadoop. Hoy desplazado por DataHub/OpenMetadata en stacks modernos.",
+    whatIs: "Catálogo open source con metadata management, classification y lineage integrado con Hadoop/Ranger.",
+    whatDoes: "Catalog Hive, lineage, tags, integración Ranger para policy enforcement.",
+    whatDoesnt: "Sin innovación significativa. Atado a Hadoop ecosystem.",
+    pros: ["Maduro en Hadoop", "Integración Ranger"],
+    cons: ["Hadoop ecosystem decreciente", "Innovación lenta"],
+    whenUse: ["Solo mantenimiento Hadoop"],
+    whenNotUse: ["Greenfield moderno"]
+  },
+  {
+    name: "Apache Ranger",
+    vendor: "Apache Software Foundation",
+    status: "active", license: "foss",
+    cost: "Gratis",
+    summary: "Framework de control de acceso fine-grained para Hadoop/Trino/Hive. Estándar para policy enforcement en stacks open source.",
+    whatIs: "Plataforma central de policy management con plugins para Hive, HDFS, Trino, Kafka, etc.",
+    whatDoes: "Define políticas centralmente, aplica fine-grained en cada engine, auditoría.",
+    whatDoesnt: "Sin UI catálogo. Solo policy enforcement. Atado a Hadoop/big data.",
+    pros: ["Estándar de facto policy enforcement open source", "Multi-engine"],
+    cons: ["Solo policies (no catalog)", "Hadoop-leaning"],
+    whenUse: ["Stack open source con Hive/Trino/Kafka que necesita policies", "Compliance fine-grained sin pagar"],
+    whenNotUse: ["Cloud-first sin Hadoop", "Cuando un Lake Formation o Unity Catalog basta"]
+  },
+  {
+    name: "Privacera",
+    vendor: "Privacera",
+    status: "active", license: "commercial",
+    cost: "Enterprise pricing por uso",
+    summary: "Comercialización enterprise de Ranger + capabilities propias. Privacy y access control fine-grained multi-cloud.",
+    whatIs: "Plataforma SaaS de data access governance basada en Ranger con énfasis en privacy, masking y policies cross-cloud.",
+    whatDoes: "Policy enforcement multi-cloud, masking, encryption, audit, certifications compliance.",
+    whatDoesnt: "Caro. Mejor con stack Ranger ya conocido.",
+    pros: ["Ranger comercial", "Multi-cloud", "Privacy + access en uno"],
+    cons: ["Caro", "Adopción menor que Immuta"],
+    whenUse: ["Empresas que ya conocen Ranger", "Compliance privacy multi-cloud"],
+    whenNotUse: ["Sin necesidad masking/privacy fuerte"]
+  },
+  {
+    name: "Immuta",
+    vendor: "Immuta",
+    status: "sota", license: "commercial",
+    cost: "Enterprise pricing $50-300k+/año",
+    summary: "Líder en access control automatizado para warehouses cloud. Policies as code, masking dinámico, audit. Excelente en stack moderno.",
+    whatIs: "Plataforma de policy-based access control que aplica policies dinámicamente sobre Snowflake, Databricks, Redshift, BigQuery.",
+    whatDoes: "ABAC (attribute-based), masking dinámico, audit, policy as code, integración con catalogs.",
+    whatDoesnt: "Caro. Vendor lock-in en policies.",
+    pros: ["Líder en stack cloud moderno", "Policy as code", "Masking dinámico potente"],
+    cons: ["Caro", "Lock-in en sintaxis policies"],
+    whenUse: ["Stack moderno Snowflake/Databricks/BQ", "Compliance estricto con policies complejas", "Empresas reguladas modernas"],
+    whenNotUse: ["Stacks legacy", "Mid-market sin presupuesto"]
+  },
+  {
+    name: "BigID",
+    vendor: "BigID",
+    status: "active", license: "commercial",
+    cost: "Enterprise pricing",
+    summary: "Líder en data privacy, classification y descubrimiento de PII. Más privacy-centric que governance general.",
+    whatIs: "Plataforma de data intelligence centrada en privacy, classification, PII discovery, DSAR automation.",
+    whatDoes: "Scanning automático para PII, classification ML, DSAR (GDPR/CCPA requests), data minimization.",
+    whatDoesnt: "No es catálogo de discovery analítico (es privacy-first).",
+    pros: ["Líder en privacy/PII discovery", "Compliance GDPR/CCPA", "ML classification"],
+    cons: ["Privacy-centric (no general purpose)", "Caro"],
+    whenUse: ["Compliance privacy estricto (banca, salud, retail)", "DSAR automation", "PII discovery"],
+    whenNotUse: ["Solo necesitas catálogo analítico (Atlan/DataHub mejor)"]
+  },
+  {
+    name: "Unity Catalog (Databricks)",
+    vendor: "Databricks (open source desde 2024)",
+    status: "sota", license: "foss",
+    cost: "Incluido en Databricks · OSS standalone gratis",
+    summary: "Catálogo unificado de Databricks con governance, lineage, search. Open-sourced en 2024 con apoyo de major vendors.",
+    whatIs: "Catálogo de Databricks (también open source desde 2024) que unifica governance de tablas Delta/Iceberg, ML models, files.",
+    whatDoes: "Three-level namespace, fine-grained access, lineage, AI/BI Genie, federation, attribute tags.",
+    whatDoesnt: "Mejor experiencia integrada en Databricks. OSS standalone aún emergente.",
+    pros: ["Unificación data + AI assets", "Open source desde 2024", "Lineage automático en Databricks", "Federation con Snowflake/Postgres"],
+    cons: ["Mejor experiencia en Databricks", "OSS adoption emergente"],
+    whenUse: ["Stack Databricks", "Cuando data + ML governance es uno", "Lakehouse moderno"],
+    whenNotUse: ["Sin Databricks (OSS aún joven)", "Multi-vendor extremo"]
+  }
+],
+
+// ============================================================
+// 07 · DATA VERACITY (Calidad y Observabilidad)
+// ============================================================
+veracity: [
+  {
+    name: "Great Expectations",
+    vendor: "Great Expectations / Superconductive",
+    status: "active", license: "foss",
+    cost: "Open source gratis · GX Cloud comercial",
+    summary: "El framework open source clásico de data quality. Define expectations declarativas para validar datasets. Estándar de facto desde 2018.",
+    whatIs: "Librería Python open source para data validation con expectations declarativas, docs auto-generadas y profiling.",
+    whatDoes: "Expectations sobre datasets (Pandas, Spark, SQL), docs como sitio estático, integración Airflow/Prefect/dbt.",
+    whatDoesnt: "GX es de batch checks (no observability real-time). Configuración v3 puede ser verbosa.",
+    pros: ["Estándar de facto", "Comunidad grande", "Open source maduro", "Docs auto-generadas (data docs)"],
+    cons: ["Configuración tediosa", "No es observability real-time", "Curva con expectation suites"],
+    whenUse: ["Pipelines batch que necesitan tests", "Cuando 'tests as code' importa", "Stack con Airflow/dbt"],
+    whenNotUse: ["Observability real-time (Monte Carlo mejor)", "Equipos sin Python skill"]
+  },
+  {
+    name: "Soda Core / Soda Cloud",
+    vendor: "Soda",
+    status: "sota", license: "freemium",
+    cost: "Soda Core open source · Cloud por consumo",
+    summary: "Plataforma moderna de data quality con SodaCL (lenguaje declarativo), tests SQL y data observability. Alternativa moderna a Great Expectations.",
+    whatIs: "Suite con Soda Core (CLI open source) y Soda Cloud (SaaS) para data quality y observability.",
+    whatDoes: "Checks SodaCL (YAML), anomaly detection (Cloud), incident management, integración Airflow/dbt.",
+    whatDoesnt: "Soda Cloud propietario. Comunidad menor que GX.",
+    pros: ["SodaCL declarativo limpio", "Anomaly detection en Cloud", "Mejor UX que GX", "Modern stack"],
+    cons: ["Cloud paid", "Comunidad menor que GX"],
+    whenUse: ["Stack moderno donde UX importa", "Cuando GX se siente pesado", "Quality + observability combinado"],
+    whenNotUse: ["Equipos sin presupuesto cloud", "Cuando GX comunidad importa más"]
+  },
+  {
+    name: "Monte Carlo",
+    vendor: "Monte Carlo",
+    status: "sota", license: "commercial",
+    cost: "Enterprise pricing $50-500k+/año",
+    summary: "Líder en Data Observability. ML-based anomaly detection (freshness, volume, schema, distribution) sin escribir tests. La 'Datadog de los datos'.",
+    whatIs: "Plataforma SaaS de data observability que monitorea automáticamente warehouses/lakes detectando anomalías sin reglas manuales.",
+    whatDoes: "Detección automática de freshness, volume, schema drift, distribution. Lineage. Root cause analysis. Integraciones con BI/orchestration.",
+    whatDoesnt: "Caro. Es SaaS (sin self-host). Black-box ML para algunos.",
+    pros: ["Setup minimal (no reglas)", "ML detection probada", "Lineage end-to-end", "RCA potente"],
+    cons: ["Caro", "Solo SaaS", "Lock-in"],
+    whenUse: ["Cuando equipo no escala escribiendo tests", "Stack moderno con presupuesto", "RCA crítico de incidents"],
+    whenNotUse: ["Presupuesto ajustado", "Compliance requiere self-host", "Equipos pequeños con pocos datos"]
+  },
+  {
+    name: "Bigeye",
+    vendor: "Bigeye",
+    status: "active", license: "commercial",
+    cost: "Enterprise pricing",
+    summary: "Data observability con énfasis en SLAs y deltas. Más control que Monte Carlo, también ML-based detection. Founders ex-Uber.",
+    whatIs: "Plataforma de observability con metric monitoring, SLAs, anomaly detection, lineage.",
+    whatDoes: "Auto-metrics sobre tablas, SLAs definidos, alerting, lineage, ML detection.",
+    whatDoesnt: "Caro. Adopción menor que Monte Carlo.",
+    pros: ["SLAs explícitos potentes", "Control sobre métricas", "ML detection"],
+    cons: ["Adopción menor", "Caro"],
+    whenUse: ["Cuando SLAs explícitos importan", "Alternativa a Monte Carlo"],
+    whenNotUse: ["Cuando Monte Carlo cubre todo y tiene más adopción"]
+  },
+  {
+    name: "Datafold",
+    vendor: "Datafold",
+    status: "sota", license: "commercial",
+    cost: "Free tier · Paid desde $10k+/año",
+    summary: "Pioneros del 'data diff': comparar versiones de datasets antes/después de cambios. Esencial en stack dbt + CI/CD.",
+    whatIs: "Plataforma para data diff: comparación filas/columnas entre versiones de tablas o entre DBs heterogéneas.",
+    whatDoes: "Data diff cross-DB (Postgres → Snowflake), CI/CD para dbt, lineage, column-level impact analysis.",
+    whatDoesnt: "No es observability completo (más diff/testing).",
+    pros: ["Data diff único en mercado", "Excelente para CI dbt", "Cross-DB migration validation"],
+    cons: ["No es observability completo", "Caro"],
+    whenUse: ["Equipos dbt con CI/CD serio", "Migraciones DB → DW (validar)", "Cuando 'qué cambió en el dato' importa"],
+    whenNotUse: ["Observability general (Monte Carlo mejor)", "Sin dbt/CI/CD culture"]
+  },
+  {
+    name: "Anomalo",
+    vendor: "Anomalo",
+    status: "sota", license: "commercial",
+    cost: "Enterprise pricing",
+    summary: "Data quality 'no-code' con ML auto-detection. Setup en minutos, sin escribir reglas. Compite con Monte Carlo en autopilot data quality.",
+    whatIs: "Plataforma SaaS de DQ automatizado con ML que aprende patrones de tus tablas y alerta anomalías sin configuración.",
+    whatDoes: "Connect → monitor automático, anomaly detection sin reglas, alerting, root cause.",
+    whatDoesnt: "Black box (ML), no tan rich en lineage como Monte Carlo.",
+    pros: ["Setup ultra rápido", "Sin escribir reglas", "ML detection probado", "UX limpia"],
+    cons: ["Black box ML para algunos", "Lineage menos profundo"],
+    whenUse: ["Equipos que no escalan escribiendo tests", "Cuando rapidez de adopción importa", "Mid-market sin platform team"],
+    whenNotUse: ["Cuando lineage profundo importa más (Monte Carlo)", "Compliance que requiere reglas explícitas"]
+  },
+  {
+    name: "Acceldata",
+    vendor: "Acceldata",
+    status: "active", license: "commercial",
+    cost: "Enterprise pricing",
+    summary: "Data observability con énfasis en infraestructura + compute + pipelines (no solo datos). Holístico para data ops enterprise.",
+    whatIs: "Plataforma observability multi-layer: data, pipeline, compute, costo. Originada en Hadoop, hoy multi-cloud.",
+    whatDoes: "Monitor compute (Spark, Snowflake costs), pipelines, data quality, FinOps integrada.",
+    whatDoesnt: "Curva alta. Caro.",
+    pros: ["Holístico (data + pipeline + costo)", "FinOps integrado", "Multi-layer único"],
+    cons: ["Complejo", "Caro", "Adopción menor"],
+    whenUse: ["Enterprises con stack complejo multi-cloud", "Cuando FinOps + DQ van juntos"],
+    whenNotUse: ["Equipos que solo quieren DQ simple"]
+  },
+  {
+    name: "dbt tests",
+    vendor: "dbt Labs",
+    status: "active", license: "foss",
+    cost: "Gratis con dbt Core · dbt Cloud comercial",
+    summary: "Tests built-in de dbt (unique, not_null, accepted_values, relationships) + tests genéricos custom. La base de quality en stack moderno.",
+    whatIs: "Framework de tests de dbt: schema tests declarativos en YAML + data tests SQL custom. Ejecuta como parte de dbt run.",
+    whatDoes: "Tests declarativos en YAML, generic tests reutilizables, dbt test ejecuta en pipeline.",
+    whatDoesnt: "No es observability (tests al ejecutar dbt). Sin alerting nativo (necesita Elementary o similar).",
+    pros: ["Built-in en dbt", "Declarativo YAML", "Reutilizable", "Gratis"],
+    cons: ["No es observability continua", "Sin alerting nativo", "Solo aplica en dbt runs"],
+    whenUse: ["Cualquier stack dbt", "Tests de pipeline transformación", "Quality básica gratis"],
+    whenNotUse: ["Necesitas observability continua (combina con Elementary o Monte Carlo)"]
+  },
+  {
+    name: "Elementary Data",
+    vendor: "Elementary",
+    status: "sota", license: "foss",
+    cost: "Open source gratis · Elementary Cloud comercial",
+    summary: "Observability open source nativa para dbt. Anomaly detection, alerts, reports, lineage column-level específico de stack dbt.",
+    whatIs: "Paquete dbt open source que añade observability: anomaly detection, dbt artifacts collection, lineage, reports, Slack alerts.",
+    whatDoes: "Anomaly tests on top de dbt tests, dbt artifacts capture, alerting, observability portal.",
+    whatDoesnt: "Solo para stack dbt. No reemplaza Monte Carlo en stacks no-dbt.",
+    pros: ["Open source", "Nativo dbt", "Anomaly detection sin Monte Carlo", "Lineage column-level"],
+    cons: ["Solo dbt", "Comunidad emergente"],
+    whenUse: ["Stack dbt-first que quiere observability open source", "Cuando Monte Carlo es caro"],
+    whenNotUse: ["Sin dbt", "Necesitas observability cross-stack más amplio"]
+  },
+  {
+    name: "Deequ",
+    vendor: "AWS Labs (open source)",
+    status: "active", license: "foss",
+    cost: "Gratis open source",
+    summary: "Librería Spark/Scala de AWS Labs para data quality. Profiling y constraint suggestion automática. PyDeequ para Python.",
+    whatIs: "Librería para definir y verificar constraints de calidad sobre DataFrames Spark con sugerencias automáticas.",
+    whatDoes: "Profile datasets, suggest constraints, verify, anomaly detection sobre métricas históricas.",
+    whatDoesnt: "Atado a Spark. Sin UI/cloud. Mantenimiento bajo (no abandonado pero discreto).",
+    pros: ["Profile + suggest automático", "Excelente con Spark masivo", "Open source AWS"],
+    cons: ["Solo Spark", "Sin UI", "Comunidad pequeña"],
+    whenUse: ["Stack Spark con DQ a escala", "Cuando profile/suggest acelera arranque"],
+    whenNotUse: ["Stack no-Spark", "Cuando UX/observability importan"]
+  },
+  {
+    name: "Apache Griffin",
+    vendor: "Apache Software Foundation",
+    status: "legacy", license: "foss",
+    cost: "Gratis",
+    summary: "Data quality framework de eBay donado a Apache. Movido al ático Apache en 2023. Reemplazado por alternativas modernas.",
+    whatIs: "Framework de data quality con measurements batch y streaming sobre Hadoop/Spark.",
+    whatDoes: "DQ measures sobre big data, dashboards básicos.",
+    whatDoesnt: "Sin desarrollo activo. Movido al Apache Attic.",
+    pros: ["Histórico open source para Hadoop"],
+    cons: ["DEPRECADO", "Sin innovación"],
+    whenUse: ["Solo legacy"],
+    whenNotUse: ["Cualquier proyecto nuevo · Great Expectations, Soda o Elementary mejor"]
+  },
+  {
+    name: "Metaplane",
+    vendor: "Datadog (acquired 2024)",
+    status: "active", license: "commercial",
+    cost: "Por uso · Free tier limitado",
+    summary: "Data observability mid-market. Adquirida por Datadog en 2024 e integrada en suite Datadog. Buen fit para stack Datadog.",
+    whatIs: "Plataforma SaaS de data observability con auto-monitoring, lineage y alerting. Ahora parte de Datadog.",
+    whatDoes: "Monitor warehouse tables, freshness/volume/distribution, alerts Slack, lineage.",
+    whatDoesnt: "Post-adquisición pivota a integración Datadog. Adopción menor que Monte Carlo standalone.",
+    pros: ["Asequible vs Monte Carlo", "Setup rápido", "Sinergia Datadog"],
+    cons: ["Roadmap post-acquisition incierto", "Adopción standalone declinante"],
+    whenUse: ["Stack Datadog ya establecido", "Mid-market sin presupuesto Monte Carlo"],
+    whenNotUse: ["Sin Datadog (Monte Carlo o Anomalo standalone)"]
+  },
+  {
+    name: "Validio",
+    vendor: "Validio",
+    status: "active", license: "commercial",
+    cost: "Enterprise pricing",
+    summary: "Data observability con énfasis en deep monitoring (row-level, no solo agregaciones). Strong en streaming + warehouse.",
+    whatIs: "Plataforma observability que monitorea data quality a nivel granular incluyendo streaming.",
+    whatDoes: "Monitoring row-level, streaming + batch, anomaly detection ML, integraciones modern stack.",
+    whatDoesnt: "Adopción menor. Pricing enterprise.",
+    pros: ["Monitoring row-level único", "Streaming + batch", "ML detection"],
+    cons: ["Adopción menor", "Caro"],
+    whenUse: ["Cuando granularidad row-level importa", "Streaming + warehouse combinado"],
+    whenNotUse: ["Mid-market con observability simple"]
+  },
+  {
+    name: "Synq",
+    vendor: "Synq",
+    status: "active", license: "commercial",
+    cost: "Por uso · pricing modular",
+    summary: "Data reliability platform europea, énfasis en governance de incidents y on-call para data teams. Modern y opinionada.",
+    whatIs: "Plataforma de data reliability con incident management, ownership, on-call, lineage.",
+    whatDoes: "Incident tracking, ownership de assets, on-call rotations, integraciones modern stack.",
+    whatDoesnt: "Más sobre 'reliability ops' que detection raw.",
+    pros: ["Incident management único", "Ownership clara", "On-call data-aware"],
+    cons: ["Adopción emergente", "Foco distinto a Monte Carlo"],
+    whenUse: ["Equipos data que adoptan SRE culture", "Cuando ownership/on-call importan"],
+    whenNotUse: ["Equipos pequeños sin necesidad de incident process"]
+  },
+  {
+    name: "Sifflet",
+    vendor: "Sifflet",
+    status: "active", license: "commercial",
+    cost: "Enterprise pricing",
+    summary: "Data observability europea con énfasis en lineage y collaboration. Fuerte en mercado EU.",
+    whatIs: "Plataforma full-stack observability con lineage, monitoring, governance ligero.",
+    whatDoes: "Auto-monitoring, lineage profundo, anomaly detection, dashboards.",
+    whatDoesnt: "Adopción menor en USA.",
+    pros: ["Lineage fuerte", "Mercado EU sólido", "Compliance GDPR-aware"],
+    cons: ["Menos conocido en USA", "Adopción menor que Monte Carlo"],
+    whenUse: ["Empresas europeas con compliance GDPR estricto", "Cuando lineage importa especialmente"],
+    whenNotUse: ["USA-first sin requisitos EU"]
+  },
+  {
+    name: "Telmai",
+    vendor: "Telmai",
+    status: "active", license: "commercial",
+    cost: "Enterprise pricing",
+    summary: "Data observability ML-driven para data lakes (no solo warehouses). Strong en data ingestion validation.",
+    whatIs: "Plataforma observability ML-first para data en cualquier formato (lake, warehouse, streaming).",
+    whatDoes: "ML anomaly detection sin reglas, source-to-target validation, lineage.",
+    whatDoesnt: "Adopción menor.",
+    pros: ["ML-first sin reglas", "Lake-friendly (no solo warehouse)", "Source validation"],
+    cons: ["Adopción menor"],
+    whenUse: ["Stacks con data lake fuerte (Iceberg/Delta)", "Validation entre fuentes y destinos"],
+    whenNotUse: ["Stack warehouse simple (Monte Carlo mejor)"]
+  },
+  {
+    name: "Pandera",
+    vendor: "Open source (Union AI)",
+    status: "active", license: "foss",
+    cost: "Gratis open source",
+    summary: "Validación schema + estadística para DataFrames Python (Pandas, Polars, Spark, Dask). El 'Pydantic para data'.",
+    whatIs: "Librería Python para validar DataFrames con schemas declarativos (statistical, structural), checks custom.",
+    whatDoes: "Schema validation, checks estadísticos, integración con Pandas/Polars/Spark/Dask, lazy validation.",
+    whatDoesnt: "No es observability cross-system. Solo in-pipeline.",
+    pros: ["Pythonic, embebible", "Multi-DataFrame backends", "Statistical checks"],
+    cons: ["Solo en-pipeline", "Sin UI"],
+    whenUse: ["Validación in-line en pipelines Python", "Equipos data science con DataFrames", "Substitute para GX más ligero"],
+    whenNotUse: ["Observability cross-stack", "Sin Python"]
+  },
+  {
+    name: "WhyLabs",
+    vendor: "WhyLabs",
+    status: "active", license: "freemium",
+    cost: "Free tier · Pro/Enterprise",
+    summary: "Observability para ML/IA + data (data drift, model drift). El más fuerte para teams ML/MLOps. Open source whylogs.",
+    whatIs: "Plataforma de ML observability con whylogs (open source profiler) y plataforma SaaS.",
+    whatDoes: "Data drift detection, model drift, feature distributions, integraciones MLflow/SageMaker.",
+    whatDoesnt: "Más ML-focus que pure data quality.",
+    pros: ["ML observability líder", "whylogs open source", "Data + model drift"],
+    cons: ["Más ML-leaning", "Para data engineering puro Monte Carlo mejor"],
+    whenUse: ["Stacks ML/MLOps", "Cuando data + model drift importan", "Productización ML"],
+    whenNotUse: ["Solo data engineering (Monte Carlo/Anomalo mejor)"]
+  },
+  {
+    name: "Evidently AI",
+    vendor: "Evidently AI",
+    status: "active", license: "foss",
+    cost: "Open source gratis · Cloud comercial",
+    summary: "Observability ML open source para data + model monitoring. Reports detallados y alerting. Excelente para ML in production.",
+    whatIs: "Librería + SaaS open source para evaluar y monitorear modelos ML y datos en producción.",
+    whatDoes: "Data drift, model performance, target drift, reports HTML, integración Grafana/Prometheus.",
+    whatDoesnt: "ML-centric (no data engineering puro).",
+    pros: ["Open source potente", "Reports HTML detallados", "Active community"],
+    cons: ["ML-leaning"],
+    whenUse: ["Monitoring ML in production", "Equipos ML con código existente"],
+    whenNotUse: ["Pure data engineering observability"]
+  }
+],
+
+};
+
+
+// ============================================================
+// CONSOLIDATION + RENDERING
+// ============================================================
+
+// Merge all three parts into single TOOLS_DATA
+Object.assign(TOOLS_DATA, TOOLS_PART2);
+Object.assign(TOOLS_DATA, TOOLS_PART3);
+
+// Add CDC bonus section
+const TOOLS_CDC = {
+cdc: [
+  {
+    name: "Debezium",
+    vendor: "Red Hat (open source)",
+    status: "sota", license: "foss",
+    cost: "Gratis · Open source Apache 2.0",
+    summary: "El estándar de facto open source para CDC log-based. Lee WAL/binlog/redo de Postgres, MySQL, MongoDB, SQL Server, Oracle, Cassandra y los publica en Kafka. Base técnica de muchos productos comerciales.",
+    whatIs: "Plataforma open source de Change Data Capture construida sobre Kafka Connect que captura cambios desde transaction logs y los emite como eventos a Kafka topics.",
+    whatDoes: "Snapshot inicial + streaming continuo. Soporta exactly-once con Kafka. Schema evolution. Tombstone records para deletes. Outbox pattern. Compatible con OpenLineage.",
+    whatDoesnt: "Requiere Kafka + Kafka Connect (operacionalmente complejo). No es 'install and go'. Sin UI propia para no-técnicos. Necesita privilegios elevados en la DB origen.",
+    pros: ["Estándar de facto open source", "Latencia sub-segundo", "Multi-database maduro", "Base de muchas soluciones comerciales (Streamkap, Confluent, Aiven)"],
+    cons: ["Stack pesado (Kafka + Connect + Zookeeper/KRaft)", "Curva operacional pronunciada", "Sin GUI nativa", "Configuración JSON tediosa"],
+    whenUse: ["Cuando ya tienes Kafka en producción", "Replicación DB → warehouse con baja latencia (< 1 seg)", "Fan-out: un cambio, muchos consumidores", "Cuando quieres control total y open source"],
+    whenNotUse: ["Sin Kafka en stack (overkill)", "Equipos pequeños sin SRE/platform team", "Cargas que toleran batch diario (Fivetran/Airbyte mejor)"]
+  },
+  {
+    name: "Databricks Lakeflow Connect",
+    vendor: "Databricks (ex-Arcion, adquirida 2023 por $100M)",
+    status: "sota", license: "commercial",
+    cost: "Incluido en Databricks · costo por DBU + serverless compute",
+    summary: "El nuevo CDC nativo de Databricks, resultado de la adquisición de Arcion. Conectores managed para SQL Server, MySQL, Postgres, Salesforce, Workday con ingest serverless directo a Delta + Unity Catalog.",
+    whatIs: "Capa de ingestion managed dentro de Lakeflow (Databricks) que captura cambios incrementales y los aplica como tablas Delta governed por Unity Catalog. Basado en Arcion + Spark Declarative Pipelines.",
+    whatDoes: "CDC log-based desde SQL Server (CT/CDC), MySQL (binlog), Postgres (WAL); ingestion gateway en tu VPC; aplica cambios incrementales a Delta; serverless; CDC + initial snapshot; integración Unity Catalog.",
+    whatDoesnt: "Solo destino Databricks (no es CDC universal). Connector list aún en expansión. Lock-in Databricks fuerte.",
+    pros: ["Sin operar Kafka/Debezium", "Unity Catalog governance automática", "Serverless compute con cold start rápido", "Integración nativa con Lakeflow Pipelines + Jobs"],
+    cons: ["Solo a Databricks", "Lock-in plataforma", "Catálogo de connectors aún creciendo", "Costo DBU + gateway compute"],
+    whenUse: ["Stack Databricks/Lakehouse", "Cuando ya pagas Databricks y quieres consolidar", "Eliminar middleware CDC de terceros", "Compliance + Unity Catalog estricto"],
+    whenNotUse: ["Sin Databricks", "Multi-destination CDC (Debezium + Kafka mejor)", "Cuando connector que necesitas aún no está GA"]
+  },
+  {
+    name: "Estuary Flow",
+    vendor: "Estuary",
+    status: "sota", license: "commercial",
+    cost: "Free tier · Pricing por GB procesado, ~$0.75/GB",
+    summary: "Plataforma SaaS streaming-first con CDC sub-100ms. Diferencia clave: en lugar de batch-oriented, todo es streaming desde el ground up. 200+ connectors. La opción 'sin operar Kafka' más moderna.",
+    whatIs: "Plataforma cloud unificada ETL/ELT/CDC con arquitectura streaming-first, captura WAL/binlog y entrega cambios en milisegundos.",
+    whatDoes: "Log-based CDC desde Postgres/MySQL/Mongo/SQL Server. Streaming-native con exactly-once. Backfills paralelos. Schema evolution automática. Dekaf (Kafka-compatible) para sinks tipo ClickHouse/Pinot.",
+    whatDoesnt: "Solo SaaS (no self-hosted real). Comunidad menor que Debezium. Pricing escalado con GB.",
+    pros: ["Sub-100ms latencia real", "Sin operar Kafka", "Backfill + streaming en un sistema", "Multi-destination fan-out fácil"],
+    cons: ["SaaS only", "Pricing por GB escalado", "Menos plataforma que Fivetran (no es ELT completo)"],
+    whenUse: ["CDC real-time sin operar Kafka", "Stacks streaming-first modernos", "Cuando latencia importa más que precio", "Migraciones DB → warehouse low-latency"],
+    whenNotUse: ["Self-host strict", "Cargas batch diarias (Fivetran/Airbyte más simple)", "Presupuesto ajustado a volumen alto"]
+  },
+  {
+    name: "Streamkap",
+    vendor: "Streamkap",
+    status: "sota", license: "commercial",
+    cost: "Pricing por GB · desde free tier hasta enterprise",
+    summary: "Managed Debezium + Kafka como servicio. Te da el poder de Debezium sin operar Kafka. Crece rápido como alternativa SaaS a montar tu propio stack streaming.",
+    whatIs: "Plataforma SaaS que opera Debezium + Kafka Connect por ti, con UI moderna y transformaciones in-flight con Flink.",
+    whatDoes: "CDC log-based con Debezium gestionado, transformaciones Flink/SQL in-flight, destinos warehouses/lakes, exactly-once.",
+    whatDoesnt: "Atado a su plataforma. Comunidad menor que Debezium puro.",
+    pros: ["Debezium sin operar Kafka", "Flink transforms incluidos", "Latencia sub-segundo", "Setup en minutos"],
+    cons: ["Adopción menor (joven)", "SaaS only", "Lock-in"],
+    whenUse: ["Quieres Debezium pero no operarlo", "Streaming + transform en un sitio", "Reemplazo de Fivetran cuando latencia importa"],
+    whenNotUse: ["Self-host preferido", "Cuando Fivetran/Airbyte cubre con su batch latency"]
+  },
+  {
+    name: "PeerDB (ClickHouse)",
+    vendor: "ClickHouse Inc. (adquirió PeerDB en julio 2024)",
+    status: "sota", license: "foss",
+    cost: "Open source ELv2 · PeerDB Cloud / ClickPipes (en ClickHouse Cloud)",
+    summary: "Especialista en Postgres CDC, ahora parte de ClickHouse. Brutal performance: snapshots iniciales TB en horas (vs días). El estándar emergente para Postgres → ClickHouse/Snowflake/BQ.",
+    whatIs: "Plataforma open source especializada en Postgres CDC con paralelización agresiva de snapshots y replicación lógica WAL. Adquirida por ClickHouse, integrándose en ClickPipes.",
+    whatDoes: "CDC Postgres → ClickHouse/Snowflake/BigQuery con parallel snapshotting, sync intervals configurables (10s+), schema mapping automático, no requiere Kafka.",
+    whatDoesnt: "Solo origen Postgres (de momento). Destinos limitados a warehouses analíticos. Aún no cubre todos los tipos avanzados (JSON/HSTORE mapean a string).",
+    pros: ["Snapshots paralelos (10x faster)", "Sin Kafka/Debezium operacional", "Open source con managed cloud", "Postgres-Native"],
+    cons: ["Solo Postgres origen", "Destinos analíticos (no fan-out general)", "Adquisición reciente (roadmap evoluciona)"],
+    whenUse: ["Postgres → ClickHouse (best-in-class)", "Postgres → Snowflake/BQ con baja latencia", "Migraciones masivas Postgres con snapshots rápidos"],
+    whenNotUse: ["Orígenes no-Postgres", "Multi-source CDC (Debezium mejor)", "Sin destinos warehouse"]
+  },
+  {
+    name: "Fivetran HVR",
+    vendor: "Fivetran (adquirió HVR en 2021 por $700M)",
+    status: "sota", license: "commercial",
+    cost: "Enterprise pricing por uso · típicamente $100k+/año",
+    summary: "El motor CDC enterprise de Fivetran tras adquirir HVR. Optimizado para grandes volúmenes y bases legacy (Oracle, DB2, SAP HANA). Lo que Fivetran usa cuando los connectors estándar no bastan.",
+    whatIs: "Tecnología CDC enterprise heredada de HVR (High Volume Replicator), integrada en Fivetran para casos de alta volumen y bases complejas (Oracle, DB2, SAP).",
+    whatDoes: "Log-based CDC para Oracle (con LogMiner/redo logs), DB2, SAP HANA, SQL Server con compresión inteligente, multi-destino, low latency.",
+    whatDoesnt: "Caro. Solo dentro del paraguas Fivetran. Setup más complejo que connectors estándar Fivetran.",
+    pros: ["CDC enterprise probado (HVR es de los 90s)", "Oracle/DB2/SAP-fuerte", "Integrado con resto de Fivetran", "Suporte enterprise sólido"],
+    cons: ["Carísimo", "Setup más complejo que Fivetran estándar", "Lock-in fuerte"],
+    whenUse: ["Migraciones Oracle/DB2/SAP a warehouse moderno", "Bancos/aseguradoras con mainframe + Oracle", "Cuando Fivetran estándar no escala"],
+    whenNotUse: ["Greenfield Postgres/MySQL (Debezium/PeerDB mejor)", "Mid-market", "Cuando presupuesto es restricción"]
+  },
+  {
+    name: "Confluent Cloud CDC Connectors",
+    vendor: "Confluent",
+    status: "sota", license: "commercial",
+    cost: "Pricing Confluent Cloud + connector hours",
+    summary: "Debezium y otros CDC connectors gestionados por Confluent (creadores de Kafka). Premium connectors con SLA enterprise para Oracle, SQL Server, DB2, MongoDB.",
+    whatIs: "Suite de connectors gestionados (mayoría basados en Debezium) corriendo sobre Confluent Cloud Kafka, con soporte premium y SLA.",
+    whatDoes: "CDC managed para Postgres, MySQL, Oracle, SQL Server, MongoDB, DB2; integración nativa con Schema Registry; ksqlDB/Flink para transforms.",
+    whatDoesnt: "Atado a Confluent Cloud (lock-in). Más caro que self-host Debezium + Kafka.",
+    pros: ["Connectors premium con soporte enterprise", "Kafka + Schema Registry + ksqlDB en un sitio", "Sin operar Kafka", "SLA enterprise"],
+    cons: ["Caro vs self-host", "Lock-in Confluent", "Pricing puede ser opaco"],
+    whenUse: ["Empresas que ya pagan Confluent Cloud", "Cuando soporte enterprise Kafka importa", "Stack event-driven completo"],
+    whenNotUse: ["Self-host preferido", "Sin Kafka en stack (overkill)"]
+  },
+  {
+    name: "AWS DMS (con CDC)",
+    vendor: "Amazon Web Services",
+    status: "active", license: "cloud",
+    cost: "Por instance-hour (~$0.05-2/h) + transferencia",
+    summary: "Database Migration Service de AWS en modo CDC continuo. Excelente para replicación heterogénea hacia S3, Redshift, Kinesis. Estándar para migraciones a AWS.",
+    whatIs: "Servicio AWS de replicación de bases con tareas full-load + CDC ongoing entre engines heterogéneos.",
+    whatDoes: "CDC desde Oracle (LogMiner/Binary Reader), SQL Server, MySQL, Postgres, Mongo hacia S3, Redshift, Kinesis, Aurora, OpenSearch. Latencia segundos a minutos.",
+    whatDoesnt: "Lock-in AWS. Tuning de instancias delicado. Errores crípticos. Latencia no sub-segundo.",
+    pros: ["Migraciones heterogéneas complejas", "Integrado en AWS", "Pricing por instancia predecible", "CDC + full-load combinados"],
+    cons: ["Solo AWS", "Tuning manual instancias", "Latencia segundos (no sub-segundo)", "UX dolorosa en errores"],
+    whenUse: ["Migraciones on-prem → AWS", "Replicación continua DB → S3/Redshift", "Cambios de engine (Oracle → Aurora)"],
+    whenNotUse: ["Multi-cloud", "Latencia sub-segundo requerida (Debezium/Estuary)", "Fan-out a múltiples destinos"]
+  },
+  {
+    name: "GCP Datastream",
+    vendor: "Google Cloud",
+    status: "active", license: "cloud",
+    cost: "Pago por GB procesado · ~$0.05/GB",
+    summary: "Servicio serverless de CDC de Google. Replicación de Oracle/MySQL/Postgres/SQL Server hacia BigQuery, GCS, Spanner. La respuesta de GCP al AWS DMS.",
+    whatIs: "Servicio serverless CDC de GCP para replicación incremental log-based hacia BigQuery (con BigQuery Datastream integration), GCS, Spanner.",
+    whatDoes: "CDC desde Oracle, MySQL, Postgres, SQL Server con latencia segundos; sin instancias que gestionar; integración nativa con BigQuery (continuous replication).",
+    whatDoesnt: "Solo GCP. Connectors limitados vs DMS. Sin transforms in-flight.",
+    pros: ["Serverless (sin instancias)", "Integración BigQuery directa", "Pricing por GB simple", "Setup rápido"],
+    cons: ["Solo GCP", "Connectors limitados", "Sin transformaciones"],
+    whenUse: ["Stack GCP con BigQuery", "Replicación DB → BigQuery continuous", "Cuando GCP es el destino"],
+    whenNotUse: ["Multi-cloud", "Destinos no-GCP", "Transformaciones complejas necesarias"]
+  },
+  {
+    name: "Azure Synapse Link + ADF CDC",
+    vendor: "Microsoft",
+    status: "active", license: "cloud",
+    cost: "Pago por DIU/hora + storage Synapse",
+    summary: "Combinación Microsoft: Synapse Link para CDC near-real-time desde Cosmos/Dataverse/SQL hacia Synapse, y ADF CDC para Azure SQL/SQL Server. Stack Microsoft end-to-end.",
+    whatIs: "Conjunto de servicios CDC en Azure: Synapse Link para CDC native sin ETL hacia Synapse Analytics + Azure Data Factory con copy activities CDC.",
+    whatDoes: "CDC desde Cosmos DB, Dataverse, SQL Server, Azure SQL hacia Synapse/Fabric; integración OneLake; near real-time replication.",
+    whatDoesnt: "Atado a stack Microsoft. Connectors fuera de MS limitados. Synapse Link específicamente acoplado a Synapse.",
+    pros: ["Integración Microsoft profunda", "Synapse Link sin código", "Fabric/OneLake unificado"],
+    cons: ["Lock-in Azure/Microsoft", "Performance variable", "Fuera de stack MS débil"],
+    whenUse: ["Stack Microsoft (Dynamics, Dataverse, SQL Server, Synapse)", "Cuando ya tienes Fabric/Synapse", "Compliance Microsoft enterprise"],
+    whenNotUse: ["Multi-cloud", "Sin Azure footprint", "Cuando flexibilidad importa más que integración"]
+  },
+  {
+    name: "Striim",
+    vendor: "Striim",
+    status: "active", license: "commercial",
+    cost: "Enterprise pricing · típicamente $50-300k/año",
+    summary: "Plataforma streaming integration con CDC + transforms in-flight + delivery a 100+ destinos. Más maduro que Estuary/Streamkap, menos moderno. Fuerte en bancos.",
+    whatIs: "Plataforma comercial unificada de streaming integration con CDC log-based de Oracle/SQL Server/MySQL/Postgres/MongoDB + transformaciones SQL/JS en stream + 100+ targets.",
+    whatDoes: "CDC + stream processing + analytics + alerting en una plataforma. SQL para transforms. Cloud/on-prem/hybrid.",
+    whatDoesnt: "Caro. UX no tan moderna como Estuary. Adopción menor.",
+    pros: ["Plataforma todo-en-uno", "Transforms SQL in-stream maduros", "On-prem fuerte", "Bancos/finanzas lo eligen"],
+    cons: ["Caro", "UX no top-tier", "Adopción menor"],
+    whenUse: ["Enterprise con on-prem + cloud", "Cuando CDC + transforms van juntos", "Bancos/finanzas compliance"],
+    whenNotUse: ["Greenfield SaaS-first (Estuary/Streamkap mejor)", "Mid-market"]
+  },
+  {
+    name: "Sequin",
+    vendor: "Sequin",
+    status: "active", license: "freemium",
+    cost: "Free tier · Paid pricing por throughput",
+    summary: "CDC moderno especializado en streaming de Postgres → mensajería (Kafka, NATS, SQS, HTTP, Redis Streams). Para microservicios event-driven, no analytics.",
+    whatIs: "Plataforma CDC moderna que convierte tablas Postgres en streams de eventos hacia message brokers, ideal para event-driven architectures.",
+    whatDoes: "Postgres CDC → Kafka/NATS/SQS/HTTP/Redis Streams; transformaciones; filtering; exactly-once; UI moderna.",
+    whatDoesnt: "Solo Postgres origen. Destinos son brokers (no warehouses). No es ETL analytics.",
+    pros: ["Pythonic moderno", "Multi-destination brokers", "DX excelente para developers", "Ideal microservices"],
+    cons: ["Solo Postgres", "No para analytics directo", "Comunidad emergente"],
+    whenUse: ["Postgres → eventos para microservicios", "Reemplazo de outbox pattern artesanal", "Event-driven architectures"],
+    whenNotUse: ["Destino warehouse analytics (PeerDB mejor)", "Orígenes no-Postgres"]
+  },
+  {
+    name: "Decodable",
+    vendor: "Decodable",
+    status: "active", license: "commercial",
+    cost: "Pricing por consumption · free tier limitado",
+    summary: "Plataforma streaming SQL gestionada (basada en Flink) con CDC connectors integrados. La 'Snowflake del streaming': SQL sobre data en movimiento.",
+    whatIs: "Plataforma SaaS de streaming data engineering basada en Apache Flink, con CDC connectors (Debezium-based) integrados y SQL streaming.",
+    whatDoes: "CDC + streaming transforms con SQL Flink + delivery a múltiples destinos en una sola plataforma.",
+    whatDoesnt: "Adopción menor. Solo SaaS.",
+    pros: ["Flink SQL gestionado", "CDC + transform + sink en uno", "DX moderna"],
+    cons: ["Adopción menor", "SaaS only", "Precio variable"],
+    whenUse: ["Streaming SQL + CDC en uno", "Cuando Flink sin operar es valioso", "Pipelines event-driven complejos"],
+    whenNotUse: ["Solo necesitas CDC sin transforms (Estuary más simple)", "Self-host preferido"]
+  },
+  {
+    name: "Maxwell's Daemon",
+    vendor: "Zendesk (open source)",
+    status: "active", license: "foss",
+    cost: "Gratis · Apache 2.0",
+    summary: "CDC específico para MySQL que lee binlog y emite JSON a Kafka/Kinesis/SQS/Pub-Sub. Más ligero que Debezium para MySQL puro. Activo pero nicho.",
+    whatIs: "Daemon Java open source que lee MySQL binlog y publica eventos JSON a Kafka, Kinesis, SQS, Google Pub/Sub, RabbitMQ.",
+    whatDoes: "MySQL binlog → JSON events a múltiples sinks, sin Kafka Connect, sin Debezium overhead.",
+    whatDoesnt: "Solo MySQL. Menos features que Debezium (schema evolution menos rica).",
+    pros: ["Ultra ligero (un proceso)", "Sin Kafka Connect required", "MySQL-focused y simple", "Maduro"],
+    cons: ["Solo MySQL", "Menos features que Debezium", "Comunidad pequeña"],
+    whenUse: ["MySQL CDC simple sin querer Kafka Connect", "Setup minimal", "Cuando Debezium es overkill"],
+    whenNotUse: ["Multi-DB origen", "Cuando schema evolution rica importa (Debezium mejor)"]
+  },
+  {
+    name: "Canal (Alibaba)",
+    vendor: "Alibaba (open source)",
+    status: "active", license: "foss",
+    cost: "Gratis",
+    summary: "CDC para MySQL creado por Alibaba (2014). Dominante en China, presente en stacks asiáticos. Lee binlog y emite a Kafka/RocketMQ/cliente.",
+    whatIs: "Sistema open source de CDC para MySQL desarrollado por Alibaba que simula un slave MySQL y consume binlog.",
+    whatDoes: "MySQL binlog parsing → eventos a Kafka, RocketMQ, RabbitMQ, cliente directo Java.",
+    whatDoesnt: "Solo MySQL. Documentación primaria en chino. Comunidad fuera de Asia limitada.",
+    pros: ["Probado a escala Alibaba", "Maduro para MySQL", "Múltiples sinks"],
+    cons: ["Solo MySQL", "Documentación en chino", "Adopción global menor"],
+    whenUse: ["Stacks asiáticos (especialmente China)", "MySQL CDC en alta escala con RocketMQ"],
+    whenNotUse: ["Stacks occidentales (Debezium mejor)", "Multi-DB origen"]
+  },
+  {
+    name: "Oracle GoldenGate",
+    vendor: "Oracle",
+    status: "active", license: "enterprise",
+    cost: "Enterprise licensing $30k-500k+/año",
+    summary: "El estándar enterprise de CDC desde 1995 (Oracle adquirió en 2009). El gold standard para Oracle ↔ Oracle/heterogéneo en banca, telco, gobierno. Caro pero probado en mainframes.",
+    whatIs: "Plataforma enterprise de replicación heterogénea con CDC log-based, soporte para 20+ bases (Oracle, DB2, SQL Server, MySQL, etc.).",
+    whatDoes: "CDC bidireccional, sub-segundo, multi-destino, conflict resolution, transforms, encryption, soporte de mainframes (DB2 z/OS).",
+    whatDoesnt: "Carísimo. Setup complejo. Lock-in Oracle. UX dated.",
+    pros: ["El más probado enterprise (30+ años)", "Soporta mainframes/DB2 z/OS", "Bidireccional + conflict resolution", "SLA enterprise extremo"],
+    cons: ["Carísimo", "Setup complejo (requiere expertos)", "UX legacy", "Lock-in Oracle"],
+    whenUse: ["Bancos/telcos/gobierno con Oracle/mainframe", "Replicación bidireccional crítica", "Cuando 'nadie fue despedido por elegir Oracle'", "Cumplimiento regulatorio extremo"],
+    whenNotUse: ["Greenfield modern (Debezium/Fivetran HVR mejor)", "Mid-market", "Sin presupuesto enterprise"]
+  },
+  {
+    name: "Qlik Replicate (ex-Attunity)",
+    vendor: "Qlik (Attunity adquirida 2019)",
+    status: "active", license: "enterprise",
+    cost: "Enterprise pricing $50-500k/año",
+    summary: "Replicación CDC enterprise heredada de Attunity. Conocido por agentless approach y soporte de bases legacy (Oracle, DB2, SAP, mainframe). Competidor histórico de GoldenGate.",
+    whatIs: "Plataforma enterprise CDC con énfasis en setup sin agentes y soporte amplio de fuentes legacy.",
+    whatDoes: "CDC log-based sin agents en source, 30+ fuentes, multi-target (cloud DWs, lakes, Kafka), automation extensa.",
+    whatDoesnt: "Caro. Menos cloud-native que GoldenGate Cloud Service. Post-merge con Talend pierde foco.",
+    pros: ["Agentless approach", "Amplio soporte legacy (mainframe, SAP)", "UI más moderna que GoldenGate", "Probado enterprise"],
+    cons: ["Caro", "Post-Qlik foco menos claro", "Talent escaso"],
+    whenUse: ["Empresas con Attunity histórico", "Cuando agentless es requisito", "Replicación enterprise sin GoldenGate"],
+    whenNotUse: ["Greenfield modern", "Mid-market sin presupuesto"]
+  },
+  {
+    name: "IBM InfoSphere Data Replication (CDC)",
+    vendor: "IBM",
+    status: "legacy", license: "enterprise",
+    cost: "Enterprise IBM licensing alto",
+    summary: "Suite CDC de IBM (ex DataMirror Transformation Server). Foco en DB2, IMS, VSAM y mainframe. Para shops IBM, sigue siendo opción; fuera, poca tracción.",
+    whatIs: "Suite IBM de replicación con CDC para DB2 (z/OS, LUW, i), Oracle, SQL Server, Informix, IMS, VSAM, Sybase.",
+    whatDoes: "CDC log-based con soporte fuerte mainframe (z/OS), bi-direccional, transforms, integración con DataStage.",
+    whatDoesnt: "Innovación lenta. Mercado se mueve a cloud-native.",
+    pros: ["Soporte mainframe sin rival", "IBM enterprise compliance", "DB2 nativo"],
+    cons: ["UX legacy", "Modernización lenta", "Mercado en declive fuera IBM shops"],
+    whenUse: ["IBM mainframe shops (z/OS, AS/400)", "Cuando ya hay inversión IBM", "DB2 ↔ DB2 a escala"],
+    whenNotUse: ["Greenfield cloud", "Stacks no-IBM"]
+  },
+  {
+    name: "Informatica PowerExchange CDC",
+    vendor: "Informatica",
+    status: "legacy", license: "enterprise",
+    cost: "Parte de Informatica enterprise licensing",
+    summary: "El módulo CDC de Informatica PowerCenter / IDMC. Histórico en banca y seguros. Hoy reposicionado en IDMC cloud pero pesado.",
+    whatIs: "Componente CDC del stack Informatica para PowerCenter y luego IDMC, con soporte de DB2, Oracle, SQL Server, mainframe.",
+    whatDoes: "CDC integrado con resto del stack Informatica (PowerCenter, MDM, governance).",
+    whatDoesnt: "Cloud-native experience tibia. Caro. Talento escaso.",
+    pros: ["Integrado con suite Informatica", "Mainframe soportado", "Probado enterprise"],
+    cons: ["Stack pesado", "UX legacy", "Costoso"],
+    whenUse: ["Solo empresas con inversión Informatica histórica"],
+    whenNotUse: ["Greenfield · Debezium/HVR/GoldenGate son mejores opciones según contexto"]
+  },
+  {
+    name: "SharePlex (Quest Software)",
+    vendor: "Quest Software",
+    status: "legacy", license: "enterprise",
+    cost: "Enterprise licensing",
+    summary: "Replicación CDC para Oracle desde los 90s. Alternativa más barata a GoldenGate en su día. Hoy en declive pero aún en muchos bancos/telcos.",
+    whatIs: "Herramienta CDC enterprise especializada en replicación Oracle ↔ Oracle (también a otros destinos), con bi-direccional y conflict resolution.",
+    whatDoes: "CDC Oracle log-based, multi-target, replicación bidireccional, monitoring extenso.",
+    whatDoesnt: "Innovación lenta. Foco Oracle. Mercado movido a cloud.",
+    pros: ["Alternativa Oracle más barata que GoldenGate", "Probado en banca"],
+    cons: ["Legacy", "Foco Oracle-only", "Mercado declinante"],
+    whenUse: ["Solo legacy Oracle shops"],
+    whenNotUse: ["Greenfield · cualquier alternativa moderna es mejor"]
+  }
+]
+};
+Object.assign(TOOLS_DATA, TOOLS_CDC);
+
+// --- LABEL MAPS ---
+const STATUS_LABEL = {
+  sota: 'SOTA 2026',
+  active: 'Activo',
+  legacy: 'Legacy',
+  deprecated: 'Deprecado'
+};
+const LICENSE_LABEL = {
+  foss: 'Open Source',
+  commercial: 'Comercial',
+  cloud: 'Cloud Gestionado',
+  freemium: 'Freemium',
+  enterprise: 'Enterprise'
+};
+
+// --- HELPERS ---
+function el(tag, attrs = {}, ...children) {
+  const node = document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs)) {
+    if (k === 'class') node.className = v;
+    else if (k === 'style') node.style.cssText = v;
+    else if (k.startsWith('data-')) node.setAttribute(k, v);
+    else node[k] = v;
+  }
+  for (const child of children) {
+    if (child == null) continue;
+    if (typeof child === 'string') node.appendChild(document.createTextNode(child));
+    else node.appendChild(child);
+  }
+  return node;
+}
+
+function bulletList(items) {
+  if (!items || !items.length) return null;
+  const ul = document.createElement('ul');
+  items.forEach(i => { const li = document.createElement('li'); li.textContent = i; ul.appendChild(li); });
+  return ul;
+}
+
+// --- RENDER PHASE NAV ---
+function renderPhaseNav() {
+  const nav = document.getElementById('phaseTabs');
+  PHASES_META.forEach(phase => {
+    const tab = el('button', {
+      class: 'phase-tab',
+      'data-target': phase.id,
+      type: 'button'
+    });
+    tab.appendChild(el('span', { class: 'num' }, phase.num));
+    tab.appendChild(el('span', { class: 'swatch', style: `background:${phase.color}` }));
+    tab.appendChild(document.createTextNode(phase.name));
+    tab.addEventListener('click', () => {
+      const target = document.getElementById(phase.id);
+      if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+    nav.appendChild(tab);
+  });
+}
+
+// --- RENDER A TOOL CARD ---
+function renderToolCard(tool) {
+  const card = el('div', {
+    class: 'tool-card',
+    'data-status': tool.status,
+    'data-license': tool.license,
+    'data-search': (tool.name + ' ' + tool.vendor + ' ' + tool.summary).toLowerCase()
+  });
+
+  // HEAD
+  const head = el('div', { class: 'tool-head' });
+  const titleBlock = el('div', {});
+  titleBlock.appendChild(el('h3', { class: 'tool-name' }, tool.name));
+  titleBlock.appendChild(el('div', { class: 'tool-vendor' }, tool.vendor));
+  head.appendChild(titleBlock);
+
+  const badges = el('div', { class: 'tool-badges' });
+  badges.appendChild(el('span', { class: `badge st-${tool.status}` }, STATUS_LABEL[tool.status]));
+  badges.appendChild(el('span', { class: `badge lic-${tool.license}` }, LICENSE_LABEL[tool.license]));
+  head.appendChild(badges);
+
+  card.appendChild(head);
+
+  // SUMMARY
+  card.appendChild(el('p', { class: 'tool-summary' }, tool.summary));
+
+  // COST
+  const costEl = el('div', { class: 'tool-cost' });
+  costEl.innerHTML = `💰 <strong>Pricing:</strong> ${tool.cost}`;
+  card.appendChild(costEl);
+
+  // DETAILS
+  const details = el('div', { class: 'tool-details' });
+
+  const addRow = (label, content) => {
+    if (!content) return;
+    const row = el('div', { class: 'detail-row' });
+    row.appendChild(el('div', { class: 'detail-label' }, label));
+    const val = el('div', { class: 'detail-value' });
+    if (typeof content === 'string') val.textContent = content;
+    else val.appendChild(content);
+    row.appendChild(val);
+    details.appendChild(row);
+  };
+
+  addRow('¿Qué es?', tool.whatIs);
+  addRow('¿Qué hace?', tool.whatDoes);
+  addRow('¿Qué NO hace?', tool.whatDoesnt);
+
+  card.appendChild(details);
+
+  // PROS / CONS
+  const pc = el('div', { class: 'pros-cons' });
+  const pros = el('div', { class: 'pc-block pros' });
+  pros.appendChild(el('h5', {}, '✓ Ventajas'));
+  if (tool.pros) pros.appendChild(bulletList(tool.pros));
+  pc.appendChild(pros);
+
+  const cons = el('div', { class: 'pc-block cons' });
+  cons.appendChild(el('h5', {}, '✗ Desventajas'));
+  if (tool.cons) cons.appendChild(bulletList(tool.cons));
+  pc.appendChild(cons);
+  card.appendChild(pc);
+
+  // WHEN USE / NOT USE
+  const wb = el('div', { class: 'when-blocks' });
+  const wDo = el('div', { class: 'when-block do' });
+  wDo.appendChild(el('h5', {}, 'Cuándo usar'));
+  if (tool.whenUse) wDo.appendChild(bulletList(tool.whenUse));
+  wb.appendChild(wDo);
+
+  const wDont = el('div', { class: 'when-block dont' });
+  wDont.appendChild(el('h5', {}, 'Cuándo NO usar'));
+  if (tool.whenNotUse) wDont.appendChild(bulletList(tool.whenNotUse));
+  wb.appendChild(wDont);
+  card.appendChild(wb);
+
+  return card;
+}
+
+// --- RENDER PHASES ---
+function renderPhases() {
+  const root = document.getElementById('phases');
+  PHASES_META.forEach(phase => {
+    const tools = TOOLS_DATA[phase.id] || [];
+    const section = el('section', {
+      class: 'phase',
+      id: phase.id,
+      style: `--phase-color:${phase.color}`
+    });
+
+    // HEADER
+    const header = el('div', { class: 'phase-header' });
+    header.appendChild(el('div', { class: 'phase-number' }, phase.num));
+
+    const titleBlock = el('div', { class: 'phase-title-block' });
+    titleBlock.appendChild(el('div', { class: 'phase-eyebrow' }, phase.eyebrow || `Fase ${phase.num}`));
+    titleBlock.appendChild(el('h2', {}, phase.name));
+    titleBlock.appendChild(el('p', { class: 'phase-desc' }, phase.desc));
+    header.appendChild(titleBlock);
+
+    const stats = el('div', { class: 'phase-stats' });
+    stats.innerHTML = `<div class="big">${tools.length}</div>herramientas`;
+    header.appendChild(stats);
+
+    section.appendChild(header);
+
+    // TOOLS GRID
+    const grid = el('div', { class: 'tools-grid' });
+    tools.forEach(t => grid.appendChild(renderToolCard(t)));
+    section.appendChild(grid);
+
+    root.appendChild(section);
+  });
+}
+
+// --- FILTERS & SEARCH ---
+const filterState = { status: 'all', license: 'all', query: '' };
+
+function applyFilters() {
+  const cards = document.querySelectorAll('.tool-card');
+  let visible = 0;
+  cards.forEach(c => {
+    const matchStatus = filterState.status === 'all' || c.dataset.status === filterState.status;
+    const matchLicense = filterState.license === 'all' || c.dataset.license === filterState.license;
+    const matchQuery = !filterState.query || c.dataset.search.includes(filterState.query);
+    const show = matchStatus && matchLicense && matchQuery;
+    c.classList.toggle('hidden', !show);
+    if (show) visible++;
+  });
+  document.getElementById('emptyState').classList.toggle('hidden', visible > 0);
+}
+
+function setupControls() {
+  document.querySelectorAll('[data-filter="status"]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('[data-filter="status"]').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      filterState.status = btn.dataset.value;
+      applyFilters();
+    });
+  });
+  document.querySelectorAll('[data-filter="license"]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('[data-filter="license"]').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      filterState.license = btn.dataset.value;
+      applyFilters();
+    });
+  });
+  document.getElementById('searchInput').addEventListener('input', (e) => {
+    filterState.query = e.target.value.toLowerCase().trim();
+    applyFilters();
+  });
+}
+
+// --- INIT ---
+renderPhaseNav();
+renderPhases();
+setupControls();
+
+</script>
+</body>
+</html>

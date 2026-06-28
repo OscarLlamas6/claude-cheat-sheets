@@ -33,6 +33,7 @@ Cuadros comparativos y guías de referencia generados con Claude, centralizados 
 | Comparativo de Certificaciones Profesionales 2026 | IT |
 | Herramientas para Monorepos — Comparativa 2026 | Dev Tools |
 | Seguridad en Nube — Cuadro Comparativo | IT, Seguridad, Cloud |
+| Atlas DataOps — Herramientas del flujo completo de Data Engineering | DevOps, Data |
 
 ## Activar GitHub Pages
 

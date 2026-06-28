@@ -1,0 +1,1072 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Seguridad en Nube — Cuadro Comparativo</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #0f1117; color: #e2e8f0; min-height: 100vh; }
+header { background: #111827; border-bottom: 1px solid #1f2937; padding: 1.5rem 2rem 1rem; position: sticky; top: 0; z-index: 100; }
+header h1 { font-size: 1.3rem; font-weight: 700; color: #f9fafb; margin-bottom: 0.15rem; }
+header p { font-size: 0.75rem; color: #6b7280; margin-bottom: 0.75rem; }
+.nav-tabs { display: flex; gap: 0.25rem; flex-wrap: wrap; }
+.tab-btn { background: transparent; border: 1px solid #374151; color: #9ca3af; padding: 0.35rem 0.8rem; border-radius: 6px; font-size: 0.72rem; font-weight: 600; cursor: pointer; transition: all 0.15s; }
+.tab-btn:hover { background: #1f2937; color: #e5e7eb; }
+.tab-btn.active { background: #1d4ed8; border-color: #3b82f6; color: #fff; }
+.ref-wrap { padding: 1.25rem 2rem; border-bottom: 1px solid #1f2937; background: #0d1117; }
+.ref-label { font-size: 0.65rem; font-weight: 700; letter-spacing: 0.8px; text-transform: uppercase; color: #4b5563; margin-bottom: 0.6rem; }
+.ref-table-wrap { overflow-x: auto; }
+table.ref { width: 100%; border-collapse: collapse; font-size: 0.7rem; min-width: 700px; }
+table.ref th { padding: 0.45rem 0.75rem; text-align: left; font-weight: 700; font-size: 0.65rem; letter-spacing: 0.5px; text-transform: uppercase; border-bottom: 1px solid #1f2937; }
+th.cat { color: #9ca3af; background: #111827; }
+th.aws { color: #fb923c; background: #1c0f07; border-left: 2px solid #7c2d12; }
+th.az  { color: #38bdf8; background: #071929; border-left: 2px solid #075985; }
+th.gcp { color: #4ade80; background: #071a0f; border-left: 2px solid #14532d; }
+th.oci { color: #c084fc; background: #130d1f; border-left: 2px solid #5b21b6; }
+table.ref td { padding: 0.4rem 0.75rem; border-bottom: 1px solid #111827; vertical-align: top; line-height: 1.45; color: #9ca3af; }
+table.ref td.cat-cell { color: #e2e8f0; font-weight: 700; font-size: 0.72rem; white-space: nowrap; }
+table.ref td ul { list-style: none; padding: 0; }
+table.ref td ul li::before { content: "• "; color: #4b5563; }
+table.ref td ul li { margin-bottom: 0.1rem; }
+table.ref tr:hover td { background: #111827; }
+table.ref td.aws-cell { border-left: 2px solid #431407; }
+table.ref td.az-cell  { border-left: 2px solid #0c2a3e; }
+table.ref td.gcp-cell { border-left: 2px solid #052e16; }
+table.ref td.oci-cell { border-left: 2px solid #1e0a3c; }
+.legend { display: flex; gap: 1rem; flex-wrap: wrap; padding: 0.55rem 2rem; background: #0d1117; border-bottom: 1px solid #111827; font-size: 0.65rem; align-items: center; }
+.legend-item { display: flex; align-items: center; gap: 0.35rem; color: #6b7280; }
+main { padding: 1.25rem 2rem 3rem; }
+.section { display: none; }
+.section.visible { display: block; }
+.section-header { display: flex; align-items: flex-start; gap: 0.75rem; margin-bottom: 0.85rem; padding-bottom: 0.65rem; border-bottom: 1px solid #1f2937; }
+.acronym-tag { background: #1e3a5f; color: #60a5fa; font-size: 0.85rem; font-weight: 800; padding: 0.25rem 0.65rem; border-radius: 6px; border: 1px solid #1e40af; white-space: nowrap; letter-spacing: 0.5px; flex-shrink: 0; }
+.section-header div h2 { font-size: 0.95rem; font-weight: 600; color: #e2e8f0; margin-bottom: 0.15rem; }
+.section-header div p { font-size: 0.73rem; color: #6b7280; line-height: 1.5; max-width: 860px; }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(330px, 1fr)); gap: 0.85rem; margin-bottom: 1.25rem; }
+.tool-card { background: #141922; border: 1px solid #1f2937; border-radius: 10px; overflow: hidden; transition: border-color 0.15s; }
+.tool-card:hover { border-color: #374151; }
+.card-header { padding: 0.75rem 0.9rem 0.6rem; border-bottom: 1px solid #1f2937; display: flex; align-items: center; gap: 0.55rem; }
+.pdot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+.d-aws{background:#f97316}.d-az{background:#0ea5e9}.d-gcp{background:#22c55e}.d-oci{background:#a78bfa}.d-multi{background:#f59e0b}.d-oss{background:#fb7185}
+.card-header h3 { font-size: 0.82rem; font-weight: 700; color: #f1f5f9; flex: 1; }
+.plabel { font-size: 0.6rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; padding: 0.12rem 0.4rem; border-radius: 4px; flex-shrink: 0; }
+.l-aws{background:#431407;color:#fb923c;border:1px solid #7c2d12}
+.l-az{background:#0c2a3e;color:#38bdf8;border:1px solid #075985}
+.l-gcp{background:#052e16;color:#4ade80;border:1px solid #14532d}
+.l-oci{background:#2e1065;color:#c4b5fd;border:1px solid #5b21b6}
+.l-multi{background:#422006;color:#fbbf24;border:1px solid #92400e}
+.l-oss{background:#3b0764;color:#e879f9;border:1px solid #6b21a8}
+.card-body { padding: 0.75rem 0.9rem; }
+.irow { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; margin-bottom: 0.5rem; }
+.ibox { background: #0f141d; border: 1px solid #1a2235; border-radius: 5px; padding: 0.45rem 0.55rem; }
+.ibox.full { grid-column: 1/-1; }
+.ilabel { font-size: 0.58rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px; color: #374151; margin-bottom: 0.2rem; }
+.itext { font-size: 0.7rem; color: #9ca3af; line-height: 1.4; }
+.itext.pro{color:#6ee7b7}.itext.con{color:#fca5a5}
+.chips { display: flex; flex-wrap: wrap; gap: 0.25rem; margin-top: 0.3rem; }
+.chip { font-size: 0.6rem; padding: 0.1rem 0.4rem; border-radius: 3px; font-weight: 600; border: 1px solid; }
+.c-aws{background:#1c0f07;color:#fb923c;border-color:#431407}
+.c-az{background:#071929;color:#38bdf8;border-color:#075985}
+.c-gcp{background:#071a0f;color:#4ade80;border-color:#14532d}
+.c-oci{background:#130d1f;color:#c084fc;border-color:#4c1d95}
+.c-oss{background:#1a0628;color:#e879f9;border-color:#6b21a8}
+.urow { display: grid; grid-template-columns: 1fr 1fr; gap: 0.4rem; margin-top: 0.45rem; }
+.ubox { background: #0a1628; border-left: 2px solid #1d4ed8; padding: 0.35rem 0.5rem; border-radius: 0 4px 4px 0; }
+.ubox.no { background: #1a0a0a; border-left-color: #7f1d1d; }
+.ulabel { font-size: 0.56rem; text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px; color: #1d4ed8; margin-bottom: 0.1rem; }
+.ubox.no .ulabel { color: #7f1d1d; }
+.utext { font-size: 0.68rem; color: #94a3b8; line-height: 1.35; }
+.prow { display: flex; gap: 0.35rem; flex-wrap: wrap; margin-top: 0.45rem; }
+.badge { display: inline-flex; align-items: center; padding: 0.12rem 0.45rem; border-radius: 4px; font-size: 0.6rem; font-weight: 700; letter-spacing: 0.4px; text-transform: uppercase; }
+.b-free{background:#064e3b;color:#34d399;border:1px solid #065f46}
+.b-paid{background:#1e1b4b;color:#818cf8;border:1px solid #312e81}
+.b-oss{background:#3b0764;color:#e879f9;border:1px solid #6b21a8}
+.b-partial{background:#1c1917;color:#a8a29e;border:1px solid #44403c}
+.sdiv { height: 1px; background: linear-gradient(to right, #1f2937, transparent); margin: 1.5rem 0 1.25rem; }
+.cnote { background: #1a1635; border: 1px solid #312e81; border-radius: 8px; padding: 0.75rem 0.9rem; margin-bottom: 1rem; font-size: 0.74rem; color: #c4b5fd; display: flex; gap: 0.5rem; align-items: flex-start; }
+.foot { padding: 1.5rem 0 1rem; border-top: 1px solid #1f2937; margin-top: 1rem; font-size: 0.68rem; color: #374151; text-align: center; }
+@media(max-width:768px){header,main,.ref-wrap,.legend{padding-left:1rem;padding-right:1rem}.grid,.irow,.urow{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header>
+  <h1>🛡️ Seguridad en Nube — Cuadro Comparativo</h1>
+  <p>CSPM · CWPP · CIEM · DSPM · CVM · KSPM · CNAPP — AWS, Azure, GCP, Oracle Cloud y herramientas OSS / On-Premise</p>
+  <div class="nav-tabs">
+    <button class="tab-btn active" onclick="go('all',this)">Todas</button>
+    <button class="tab-btn" onclick="go('ref',this)">📋 Tabla rápida (slide del profesor)</button>
+    <button class="tab-btn" onclick="go('cspm',this)">CSPM</button>
+    <button class="tab-btn" onclick="go('cwpp',this)">CWPP</button>
+    <button class="tab-btn" onclick="go('ciem',this)">CIEM</button>
+    <button class="tab-btn" onclick="go('dspm',this)">DSPM</button>
+    <button class="tab-btn" onclick="go('cvm',this)">CVM</button>
+    <button class="tab-btn" onclick="go('kspm',this)">KSPM</button>
+    <button class="tab-btn" onclick="go('cnapp',this)">CNAPP</button>
+  </div>
+</header>
+
+<div class="legend">
+  <span class="legend-item"><span class="badge b-free">FREE</span> Gratis/freemium</span>
+  <span class="legend-item"><span class="badge b-paid">PAID</span> De paga</span>
+  <span class="legend-item"><span class="badge b-oss">OSS</span> Open source</span>
+  <span class="legend-item"><span class="badge b-partial">PARTIAL</span> Free tier limitado</span>
+  <span style="margin-left:auto;display:flex;gap:.75rem;flex-wrap:wrap;align-items:center">
+    <span class="legend-item"><span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:#f97316"></span>AWS</span>
+    <span class="legend-item"><span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:#0ea5e9"></span>Azure</span>
+    <span class="legend-item"><span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:#22c55e"></span>GCP</span>
+    <span class="legend-item"><span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:#a78bfa"></span>Oracle Cloud</span>
+    <span class="legend-item"><span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:#f59e0b"></span>Multi-cloud</span>
+    <span class="legend-item"><span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:#fb7185"></span>OSS/On-Premise</span>
+  </span>
+</div>
+
+<!-- REFERENCE TABLE -->
+<div class="ref-wrap" id="section-ref" style="display:block">
+  <div class="ref-label">📋 Tabla de referencia rápida — slide del profesor Dario Goldfarb</div>
+  <div class="ref-table-wrap">
+    <table class="ref">
+      <thead>
+        <tr><th class="cat">Categoría</th><th class="aws">AWS</th><th class="az">Azure</th><th class="gcp">GCP</th><th class="oci">Oracle Cloud / Otros</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="cat-cell">CSPM<br><span style="font-weight:400;font-size:.65rem;color:#6b7280">Cloud Security Posture Mgmt</span></td>
+          <td class="aws-cell"><ul><li>AWS Security Hub CSPM</li><li>AWS Config</li><li>AWS Trusted Advisor</li></ul></td>
+          <td class="az-cell"><ul><li>Microsoft Defender for Cloud</li></ul></td>
+          <td class="gcp-cell"><ul><li>Security Command Center (SCC)</li></ul></td>
+          <td class="oci-cell"><ul><li>Cloud Guard (OCI)</li></ul></td>
+        </tr>
+        <tr>
+          <td class="cat-cell">CWPP<br><span style="font-weight:400;font-size:.65rem;color:#6b7280">Cloud Workload Protection</span></td>
+          <td class="aws-cell"><ul><li>Amazon GuardDuty</li></ul></td>
+          <td class="az-cell"><ul><li>Defender for Servers</li><li>Defender for Containers</li><li>Defender for App Service</li></ul></td>
+          <td class="gcp-cell"><ul><li>SCC Event Threat Detection</li><li>Container Threat Detection</li><li>VM Threat Detection</li></ul></td>
+          <td class="oci-cell"><ul><li>Cloud Guard (Threat Detector)</li><li>OS Management Hub</li></ul></td>
+        </tr>
+        <tr>
+          <td class="cat-cell">CIEM<br><span style="font-weight:400;font-size:.65rem;color:#6b7280">Cloud Infrastructure Entitlement</span></td>
+          <td class="aws-cell"><ul><li>IAM Access Analyzer</li><li>IAM Credential Report</li><li>AWS CloudTrail (Audit)</li></ul></td>
+          <td class="az-cell"><ul><li>Microsoft Entra Permissions Management</li></ul></td>
+          <td class="gcp-cell"><ul><li>IAM Recommender</li><li>Policy Troubleshooter</li><li>Cloud Audit Logs</li></ul></td>
+          <td class="oci-cell"><ul><li>IAM Policy Analyzer</li><li>Audit Service</li></ul></td>
+        </tr>
+        <tr>
+          <td class="cat-cell">DSPM<br><span style="font-weight:400;font-size:.65rem;color:#6b7280">Data Security Posture Mgmt</span></td>
+          <td class="aws-cell"><ul><li>Amazon Macie (Discovery &amp; Classification)</li><li>KMS (Encryption)</li><li>SecHub Extended → Cyera</li></ul></td>
+          <td class="az-cell"><ul><li>Microsoft Purview (Data Map)</li></ul></td>
+          <td class="gcp-cell"><ul><li>SCC Sensitive Data Protection (ex Cloud DLP)</li></ul></td>
+          <td class="oci-cell"><ul><li>Oracle Data Safe</li></ul></td>
+        </tr>
+        <tr>
+          <td class="cat-cell">CVM<br><span style="font-weight:400;font-size:.65rem;color:#6b7280">Cloud Vulnerability Mgmt</span></td>
+          <td class="aws-cell"><ul><li>Amazon Inspector</li><li>SSM Patch Manager</li><li>AWS Security Agent</li></ul></td>
+          <td class="az-cell"><ul><li>Microsoft Defender Vulnerability Management</li></ul></td>
+          <td class="gcp-cell"><ul><li>SCC Vulnerability Scanning</li><li>Artifact Analysis</li><li>VM Manager (Patch)</li></ul></td>
+          <td class="oci-cell"><ul><li>Vulnerability Scanning Service (VSS)</li></ul></td>
+        </tr>
+        <tr>
+          <td class="cat-cell">KSPM<br><span style="font-weight:400;font-size:.65rem;color:#6b7280">Kubernetes Security Posture</span></td>
+          <td class="aws-cell"><ul><li>GuardDuty for EKS</li><li>GuardDuty Runtime Monitoring</li><li>Amazon Inspector (Image Scan)</li></ul></td>
+          <td class="az-cell"><ul><li>Microsoft Defender for Containers</li></ul></td>
+          <td class="gcp-cell"><ul><li>GKE Security Posture Dashboard</li><li>Container Threat Detection (SCC)</li></ul></td>
+          <td class="oci-cell"><ul><li>Cloud Guard (OKE Detectors)</li></ul></td>
+        </tr>
+        <tr>
+          <td class="cat-cell">CNAPP<br><span style="font-weight:400;font-size:.65rem;color:#6b7280">Cloud Native App Protection</span></td>
+          <td class="aws-cell"><ul><li>AWS Security Hub (v2)</li><li style="padding-left:.75rem;color:#6b7280">+ GuardDuty + Inspector + Macie</li></ul></td>
+          <td class="az-cell"><ul><li>Microsoft Defender for Cloud (con add-ons activos)</li></ul></td>
+          <td class="gcp-cell"><ul><li>Security Command Center Enterprise</li></ul></td>
+          <td class="oci-cell"><ul><li>Cloud Guard (OCI)</li></ul></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<main>
+
+<!-- Helper macros via repeated structure -->
+
+<!-- ===== CSPM ===== -->
+<div class="section visible" id="section-cspm">
+<div class="section-header">
+  <div class="acronym-tag">CSPM</div>
+  <div><h2>Cloud Security Posture Management</h2>
+  <p>Monitorea y evalúa configuraciones de recursos cloud para detectar malas configuraciones, incumplimientos regulatorios y riesgos de exposición. Actúa sobre el <em>plano de control</em>, no sobre el runtime. Pregunta clave: ¿está bien configurado mi entorno?</p></div>
+</div>
+<div class="grid">
+
+<div class="tool-card">
+  <div class="card-header"><span class="pdot d-aws"></span><h3>AWS Security Hub + Config + Trusted Advisor</h3><span class="plabel l-aws">AWS</span></div>
+  <div class="card-body">
+    <div class="irow"><div class="ibox full"><div class="ilabel">Servicios nativos AWS para CSPM</div><div class="chips"><span class="chip c-aws">Security Hub CSPM</span><span class="chip c-aws">AWS Config</span><span class="chip c-aws">Trusted Advisor</span></div></div></div>
+    <div class="irow">
+      <div class="ibox"><div class="ilabel">¿Qué hace?</div><div class="itext">Security Hub agrega hallazgos y evalúa contra CIS, NIST, PCI-DSS, AWS FSBP. Config registra historial de cambios de configuración y evalúa reglas de compliance. Trusted Advisor detecta desviaciones de best practices en seguridad, costo y disponibilidad.</div></div>
+      <div class="ibox"><div class="ilabel">¿Qué NO hace?</div><div class="itext">No cubre Azure/GCP. Sin remediación automática nativa completa. Config escala en costo con muchos recursos. Sin Security Graph ni correlación de rutas de ataque. Trusted Advisor básico es limitado.</div></div>
+    </div>
+    <div class="irow">
+      <div class="ibox"><div class="ilabel">✅ Ventajas</div><div class="itext pro">Integración nativa AWS perfecta. Panel unificado. FSBP out-of-the-box. Config da historial de cambios. Trusted Advisor incluido en Basic sin costo.</div></div>
+      <div class="ibox"><div class="ilabel">❌ Desventajas</div><div class="itext con">Solo AWS. Costo escala con findings y Config rules. Sin correlación de rutas de ataque. Hallazgos requieren integración (EventBridge+Lambda) para accionar.</div></div>
+    </div>
+    <div class="urow">
+      <div class="ubox"><div class="ulabel">Úsalo cuando</div><div class="utext">Tu infra es mayormente AWS y necesitas compliance centralizado con mínimo esfuerzo operativo.</div></div>
+      <div class="ubox no"><div class="ulabel">No lo uses cuando</div><div class="utext">Tienes entorno multi-cloud o necesitas remediación automática avanzada y correlación de rutas de ataque.</div></div>
+    </div>
+    <div class="prow"><span class="badge b-partial">PARTIAL FREE</span><span class="badge b-paid">PAID por finding/config rule</span></div>
+  </div>
+</div>
+
+<div class="tool-card">
+  <div class="card-header"><span class="pdot d-az"></span><h3>Microsoft Defender for Cloud</h3><span class="plabel l-az">Azure</span></div>
+  <div class="card-body">
+    <div class="irow"><div class="ibox full"><div class="ilabel">Servicios nativos Azure para CSPM</div><div class="chips"><span class="chip c-az">Defender for Cloud</span><span class="chip c-az">Azure Policy</span><span class="chip c-az">Secure Score</span></div></div></div>
+    <div class="irow">
+      <div class="ibox"><div class="ilabel">¿Qué hace?</div><div class="itext">CSPM nativo de Azure con Secure Score visual y accionable. Evalúa contra CIS, NIST, ISO 27001, PCI-DSS. Plan básico gratuito. Defender CSPM agrega Attack Path Analysis, CIEM, y cobertura multi-cloud (AWS/GCP via conectores).</div></div>
+      <div class="ibox"><div class="ilabel">¿Qué NO hace?</div><div class="itext">CSPM avanzado (Defender CSPM) es de pago. Cobertura AWS/GCP requiere conectores que tienen costo adicional. Sin Security Graph tan maduro como Wiz.</div></div>
+    </div>
+    <div class="irow">
+      <div class="ibox"><div class="ilabel">✅ Ventajas</div><div class="itext pro">Secure Score claro. Free tier útil. Soporte multi-cloud. Bien integrado con Sentinel. Attack Path Analysis en Defender CSPM. El más completo de los 3 grandes nativos.</div></div>
+      <div class="ibox"><div class="ilabel">❌ Desventajas</div><div class="itext con">Planes avanzados costosos. Mejor en ecosistema Microsoft. Curva de aprendizaje alta en orgs grandes. Conectores multi-cloud tienen límites.</div></div>
+    </div>
+    <div class="urow">
+      <div class="ubox"><div class="ulabel">Úsalo cuando</div><div class="utext">Eres Azure-first o entorno híbrido Microsoft. Free tier es buen punto de partida.</div></div>
+      <div class="ubox no"><div class="ulabel">No lo uses cuando</div><div class="utext">Tu entorno es 100% AWS/GCP sin Azure o el costo del plan avanzado no se justifica.</div></div>
+    </div>
+    <div class="prow"><span class="badge b-free">FREE (básico)</span><span class="badge b-paid">PAID (Defender CSPM)</span></div>
+  </div>
+</div>
+
+<div class="tool-card">
+  <div class="card-header"><span class="pdot d-gcp"></span><h3>Google Security Command Center (SCC)</h3><span class="plabel l-gcp">GCP</span></div>
+  <div class="card-body">
+    <div class="irow"><div class="ibox full"><div class="ilabel">Tiers de SCC</div><div class="chips"><span class="chip c-gcp">SCC Standard (básico)</span><span class="chip c-gcp">SCC Premium</span><span class="chip c-gcp">SCC Enterprise (CNAPP completo)</span></div></div></div>
+    <div class="irow">
+      <div class="ibox"><div class="ilabel">¿Qué hace?</div><div class="itext">CSPM nativo de GCP. Detecta malas configuraciones, activos públicos, vulnerabilidades GKE/VMs. Standard gratuito pero limitado. Premium agrega compliance y threat detection. Enterprise incluye Chronicle SIEM y Gemini AI.</div></div>
+      <div class="ibox"><div class="ilabel">¿Qué NO hace?</div><div class="itext">Standard muy limitado. Premium y Enterprise muy costosos. Sin cobertura AWS/Azure nativa. Sin remediación automática integrada. Multi-cloud limitado sin Enterprise.</div></div>
+    </div>
+    <div class="irow">
+      <div class="ibox"><div class="ilabel">✅ Ventajas</div><div class="itext pro">Integración nativa con todos los servicios GCP. Grafo de activos. Enterprise = CNAPP completo con Chronicle. Gemini AI para análisis.</div></div>
+      <div class="ibox"><div class="ilabel">❌ Desventajas</div><div class="itext con">Standard muy limitado. Premium/Enterprise muy caros. Fragmentado en tiers. Multi-cloud requiere Enterprise.</div></div>
+    </div>
+    <div class="urow">
+      <div class="ubox"><div class="ulabel">Úsalo cuando</div><div class="utext">Eres GCP-first. SCC Enterprise si quieres CNAPP completo en GCP con Chronicle SIEM.</div></div>
+      <div class="ubox no"><div class="ulabel">No lo uses cuando</div><div class="utext">Presupuesto limitado o entorno multi-cloud AWS/Azure dominante.</div></div>
+    </div>
+    <div class="prow"><span class="badge b-free">FREE (Standard)</span><span class="badge b-paid">PAID (Premium/Enterprise)</span></div>
+  </div>
+</div>
+
+<div class="tool-card">
+  <div class="card-header"><span class="pdot d-oci"></span><h3>Oracle Cloud Guard</h3><span class="plabel l-oci">Oracle Cloud (OCI)</span></div>
+  <div class="card-body">
+    <div class="irow"><div class="ibox full"><div class="ilabel">Servicios nativos OCI</div><div class="chips"><span class="chip c-oci">Cloud Guard</span><span class="chip c-oci">Security Zones</span><span class="chip c-oci">Cloud Guard Responders</span></div></div></div>
+    <div class="irow">
+      <div class="ibox"><div class="ilabel">¿Qué hace?</div><div class="itext">CSPM nativo de OCI. Detecta malas configuraciones en compute, storage, redes OCI. Security Zones previene configuraciones inseguras. Responders ofrecen remediación automática nativa. Incluido en OCI sin costo adicional.</div></div>
+      <div class="ibox"><div class="ilabel">¿Qué NO hace?</div><div class="itext">Solo OCI. Sin cobertura AWS/Azure/GCP. Menos maduro que Security Hub o Defender for Cloud. Ecosistema de integraciones más pequeño.</div></div>
+    </div>
+    <div class="irow">
+      <div class="ibox"><div class="ilabel">✅ Ventajas</div><div class="itext pro">Incluido sin costo adicional en OCI. Remediación automática nativa vía Responders. Security Zones previene errores antes de que ocurran.</div></div>
+      <div class="ibox"><div class="ilabel">❌ Desventajas</div><div class="itext con">Solo OCI. Comunidad más pequeña. Menos frameworks de compliance. Sin presencia fuerte en Gartner para CSPM.</div></div>
+    </div>
+    <div class="urow">
+      <div class="ubox"><div class="ulabel">Úsalo cuando</div><div class="utext">Tu infra principal es OCI y quieres CSPM gratuito con remediación automática.</div></div>
+      <div class="ubox no"><div class="ulabel">No lo uses cuando</div><div class="utext">Tienes entorno multi-cloud o necesitas compliance frameworks avanzados con cobertura profunda.</div></div>
+    </div>
+    <div class="prow"><span class="badge b-free">FREE (incluido en OCI)</span></div>
+  </div>
+</div>
+
+<div class="tool-card">
+  <div class="card-header"><span class="pdot d-oss"></span><h3>Prowler</h3><span class="plabel l-oss">OSS / Multi-cloud</span></div>
+  <div class="card-body">
+    <div class="irow">
+      <div class="ibox"><div class="ilabel">¿Qué hace?</div><div class="itext">Auditoría de seguridad open source para AWS, Azure y GCP. 500+ checks contra CIS, PCI, HIPAA, GDPR, NIST. Se corre localmente o en CI/CD. El CSPM open source más completo del mercado.</div></div>
+      <div class="ibox"><div class="ilabel">¿Qué NO hace?</div><div class="itext">Sin dashboard nativo propio. Sin monitoreo continuo SaaS. Sin remediación automática. Solo auditoría bajo demanda. Prowler Cloud SaaS es de pago.</div></div>
+    </div>
+    <div class="irow">
+      <div class="ibox"><div class="ilabel">✅ Ventajas</div><div class="itext pro">100% gratuito y open source. Multi-cloud real (AWS/Azure/GCP). Sin vendor lock-in. Integrable en pipelines CI/CD. Comunidad activa.</div></div>
+      <div class="ibox"><div class="ilabel">❌ Desventajas</div><div class="itext con">Requiere expertise técnico. Sin UI propia. Solo auditoría puntual. Sin correlación de rutas de ataque automática.</div></div>
+    </div>
+    <div class="urow">
+      <div class="ubox"><div class="ulabel">Úsalo cuando</div><div class="utext">Quieres auditorías multi-cloud gratuitas o integrarlas en DevSecOps pipelines con cero costo de licencia.</div></div>
+      <div class="ubox no"><div class="ulabel">No lo uses cuando</div><div class="utext">Necesitas monitoreo continuo con alertas en tiempo real o dashboard ejecutivo sin esfuerzo técnico.</div></div>
+    </div>
+    <div class="prow"><span class="badge b-oss">OSS</span><span class="badge b-free">FREE</span></div>
+  </div>
+</div>
+
+<div class="tool-card">
+  <div class="card-header"><span class="pdot d-multi"></span><h3>Wiz</h3><span class="plabel l-multi">Multi-cloud (CNAPP líder)</span></div>
+  <div class="card-body">
+    <div class="irow">
+      <div class="ibox"><div class="ilabel">¿Qué hace?</div><div class="itext">CNAPP líder con Security Graph único. Correlaciona malas configuraciones + CVEs + identidades + rutas de ataque + datos sensibles. Sin agente. AWS, Azure, GCP, OCI. Mejor CSPM del mercado en correlación contextual. Lider Gartner CNAPP 2024.</div></div>
+      <div class="ibox"><div class="ilabel">¿Qué NO hace?</div><div class="itext">Sin versión gratuita ni POC sin contrato. No cubre on-premise. Precio muy alto (>$100K/año). CWPP/runtime menos profundo que Prisma Cloud.</div></div>
+    </div>
+    <div class="irow">
+      <div class="ibox"><div class="ilabel">✅ Ventajas</div><div class="itext pro">Security Graph único en mercado. Sin agente. Correlación de riesgos excepcional. Implementación en horas. Multi-cloud completo.</div></div>
+      <div class="ibox"><div class="ilabel">❌ Desventajas</div><div class="itext con">Precio >$100K/año. Sin POC gratuito. Sin on-premise. CWPP runtime básico comparado con Prisma.</div></div>
+    </div>
+    <div class="urow">
+      <div class="ubox"><div class="ulabel">Úsalo cuando</div><div class="utext">Empresa mediana/grande, multi-cloud, que prioriza posture y correlación de riesgos sobre runtime/EDR.</div></div>
+      <div class="ubox no"><div class="ulabel">No lo uses cuando</div><div class="utext">Presupuesto limitado, on-premise significativo, o eres startup pequeña.</div></div>
+    </div>
+    <div class="prow"><span class="badge b-paid">PAID (Enterprise, >$100K/año)</span></div>
+  </div>
+</div>
+
+</div>
+</div>
+
+
+<!-- ===== CWPP ===== -->
+<div class="section visible" id="section-cwpp">
+<div class="sdiv"></div>
+<div class="section-header">
+  <div class="acronym-tag">CWPP</div>
+  <div><h2>Cloud Workload Protection Platform</h2>
+  <p>Protege cargas de trabajo (VMs, contenedores, serverless) en runtime. Detecta amenazas activas, malware y comportamientos anómalos mientras corren. Complementa al CSPM: si CSPM dice "¿está bien configurado?", CWPP dice "¿está siendo atacado ahora?"</p></div>
+</div>
+<div class="grid">
+
+<div class="tool-card">
+  <div class="card-header"><span class="pdot d-aws"></span><h3>Amazon GuardDuty</h3><span class="plabel l-aws">AWS</span></div>
+  <div class="card-body">
+    <div class="irow"><div class="ibox full"><div class="ilabel">Servicios nativos AWS para CWPP</div><div class="chips"><span class="chip c-aws">GuardDuty</span><span class="chip c-aws">Runtime Monitoring (EKS/ECS/Lambda)</span><span class="chip c-aws">Detective</span></div></div></div>
+    <div class="irow">
+      <div class="ibox"><div class="ilabel">¿Qué hace?</div><div class="itext">Detección de amenazas con ML y threat intelligence. Analiza CloudTrail, VPC Flow Logs, DNS. Detecta crypto-mining, exfiltración, accesos anómalos. GuardDuty Runtime para EKS/ECS/Lambda detecta comportamiento en contenedores en tiempo real.</div></div>
+      <div class="ibox"><div class="ilabel">¿Qué NO hace?</div><div class="itext">Solo detecta, no previene activamente. Sin remediación automática nativa. No cubre Azure/GCP. Sin EDR/AV tradicional. Runtime Monitoring requiere agente adicional en EKS.</div></div>
+    </div>
+    <div class="irow">
+      <div class="ibox"><div class="ilabel">✅ Ventajas</div><div class="itext pro">Sin agente en la mayoría de casos. ML avanzado. Bajo mantenimiento. Integración con Security Hub y EventBridge para respuesta automatizada.</div></div>
+      <div class="ibox"><div class="ilabel">❌ Desventajas</div><div class="itext con">Solo AWS. Solo detección. Costo escala con volumen de logs. Runtime Monitoring adicional en precio.</div></div>
+    </div>
+    <div class="urow">
+      <div class="ubox"><div class="ulabel">Úsalo cuando</div><div class="utext">Eres AWS-native y quieres CWPP de detección con mínimo esfuerzo operativo.</div></div>
+      <div class="ubox no"><div class="ulabel">No lo uses cuando</div><div class="utext">Necesitas prevención activa, multi-cloud o EDR real en workloads.</div></div>
+    </div>
+    <div class="prow"><span class="badge b-partial">FREE 30 días</span><span class="badge b-paid">PAID</span></div>
+  </div>
+</div>
+
+<div class="tool-card">
+  <div class="card-header"><span class="pdot d-az"></span><h3>Defender for Servers / Containers / App Service</h3><span class="plabel l-az">Azure</span></div>
+  <div class="card-body">
+    <div class="irow"><div class="ibox full"><div class="ilabel">Servicios nativos Azure para CWPP</div><div class="chips"><span class="chip c-az">Defender for Servers (P1/P2)</span><span class="chip c-az">Defender for Containers</span><span class="chip c-az">Defender for App Service</span><span class="chip c-az">MDE integrado</span></div></div></div>
+    <div class="irow">
+      <div class="ibox"><div class="ilabel">¿Qué hace?</div><div class="itext">EDR real vía Microsoft Defender for Endpoint en VMs (P1/P2). Protección de AKS, App Service. Detección runtime, análisis de archivos, JIT VM Access, Adaptive Application Controls. Funciona también en AWS/GCP servers vía Azure Arc.</div></div>
+      <div class="ibox"><div class="ilabel">¿Qué NO hace?</div><div class="itext">Plan P2 costoso (~$15/server/mes). Mejor en Azure que en AWS/GCP. Requiere agente MDE en VMs. Sin cobertura serverless completa fuera de Azure.</div></div>
+    </div>
+    <div class="irow">
+      <div class="ibox"><div class="ilabel">✅ Ventajas</div><div class="itext pro">EDR real integrado (MDE). Muy completo en Azure. JIT VM Access. Funciona en multi-cloud via Arc. El CWPP más maduro de los cloud nativos.</div></div>
+      <div class="ibox"><div class="ilabel">❌ Desventajas</div><div class="itext con">Costoso a escala. Agente MDE requerido en VMs. Mejor en Azure, menos en otras nubes.</div></div>
+    </div>
+    <div class="urow">
+      <div class="ubox"><div class="ulabel">Úsalo cuando</div><div class="utext">Tienes VMs Azure y quieres CWPP con EDR real incluido sin herramienta adicional.</div></div>
+      <div class="ubox no"><div class="ulabel">No lo uses cuando</div><div class="utext">Tu entorno es mayormente AWS/GCP o buscas CWPP multi-cloud económico.</div></div>
+    </div>
+    <div class="prow"><span class="badge b-paid">PAID (~$15/server/mes)</span></div>
+  </div>
+</div>
+
+<div class="tool-card">
+  <div class="card-header"><span class="pdot d-gcp"></span><h3>SCC Event / Container / VM Threat Detection</h3><span class="plabel l-gcp">GCP</span></div>
+  <div class="card-body">
+    <div class="irow"><div class="ibox full"><div class="ilabel">Servicios nativos GCP para CWPP</div><div class="chips"><span class="chip c-gcp">Event Threat Detection</span><span class="chip c-gcp">Container Threat Detection</span><span class="chip c-gcp">VM Threat Detection</span><span class="chip c-gcp">Chronicle SIEM</span></div></div></div>
+    <div class="irow">
+      <div class="ibox"><div class="ilabel">¿Qué hace?</div><div class="itext">Event Threat Detection (ETD) detecta amenazas en logs GCP. Container Threat Detection protege GKE. VM Threat Detection escanea memoria de VMs desde el hypervisor sin agente. Chronicle para correlación SIEM con IA Gemini.</div></div>
+      <div class="ibox"><div class="ilabel">¿Qué NO hace?</div><div class="itext">ETD y CTD requieren SCC Premium. Chronicle es producto separado y costoso. Sin EDR completo. No cubre AWS/Azure workloads.</div></div>
+    </div>
+    <div class="irow">
+      <div class="ibox"><div class="ilabel">✅ Ventajas</div><div class="itext pro">VM Threat Detection sin agente (hypervisor) — único en su clase. Chronicle muy potente. Gemini AI para detección avanzada. Nativo GCP.</div></div>
+      <div class="ibox"><div class="ilabel">❌ Desventajas</div><div class="itext con">Requiere SCC Premium. Chronicle es costoso y separado. Sin EDR tradicional. Ecosistema fragmentado.</div></div>
+    </div>
+    <div class="urow">
+      <div class="ubox"><div class="ulabel">Úsalo cuando</div><div class="utext">Eres GCP-first con presupuesto para SCC Premium. VMTD es único en detectar malware en memoria sin agente.</div></div>
+      <div class="ubox no"><div class="ulabel">No lo uses cuando</div><div class="utext">Buscas CWPP completo sin depender de múltiples productos GCP o presupuesto limitado.</div></div>
+    </div>
+    <div class="prow"><span class="badge b-paid">PAID (SCC Premium)</span></div>
+  </div>
+</div>
+
+<div class="tool-card">
+  <div class="card-header"><span class="pdot d-oci"></span><h3>Cloud Guard Threat Detector + OS Management Hub</h3><span class="plabel l-oci">Oracle Cloud</span></div>
+  <div class="card-body">
+    <div class="irow"><div class="ibox full"><div class="ilabel">Servicios nativos OCI para CWPP</div><div class="chips"><span class="chip c-oci">Cloud Guard Threat Detector</span><span class="chip c-oci">OS Management Hub</span><span class="chip c-oci">OCI Logging Analytics</span></div></div></div>
+    <div class="irow">
+      <div class="ibox"><div class="ilabel">¿Qué hace?</div><div class="itext">Cloud Guard Threat Detector detecta actividad maliciosa en recursos OCI. OS Management Hub gestiona parches y configuración de SO en instancias OCI. Logging Analytics para correlación y análisis de logs. Integrado con los Responders de Cloud Guard.</div></div>
+      <div class="ibox"><div class="ilabel">¿Qué NO hace?</div><div class="itext">Sin EDR avanzado como MDE. Solo OCI. Detección menos sofisticada que GuardDuty o GCP ETD. Sin protección de contenedores madura. Sin runtime protection profunda.</div></div>
+    </div>
+    <div class="irow">
+      <div class="ibox"><div class="ilabel">✅ Ventajas</div><div class="itext pro">Incluido en OCI sin costo adicional. OS Management Hub gratuito para OCI. Remediación automática vía Responders.</div></div>
+      <div class="ibox"><div class="ilabel">❌ Desventajas</div><div class="itext con">Solo OCI. Sin EDR real. Detección menos madura. Ecosistema de integraciones pequeño.</div></div>
+    </div>
+    <div class="urow">
+      <div class="ubox"><div class="ulabel">Úsalo cuando</div><div class="utext">Tu infra principal es OCI y quieres protección básica incluida sin costo adicional.</div></div>
+      <div class="ubox no"><div class="ulabel">No lo uses cuando</div><div class="utext">Necesitas EDR real, detección avanzada o protección multi-cloud.</div></div>
+    </div>
+    <div class="prow"><span class="badge b-free">FREE (incluido OCI)</span></div>
+  </div>
+</div>
+
+<div class="tool-card">
+  <div class="card-header"><span class="pdot d-oss"></span><h3>Falco</h3><span class="plabel l-oss">OSS / K8s / On-Premise</span></div>
+  <div class="card-body">
+    <div class="irow">
+      <div class="ibox"><div class="ilabel">¿Qué hace?</div><div class="itext">Runtime security open source para Linux/contenedores/K8s via eBPF. Detecta comportamientos anómalos en syscalls: accesos a archivos sensibles, conexiones inesperadas, escalada de privilegios en tiempo real. CNCF graduated project.</div></div>
+      <div class="ibox"><div class="ilabel">¿Qué NO hace?</div><div class="itext">Solo detección, no prevención activa. Sin UI propia. Sin gestión centralizada SaaS out-of-the-box. Muchos falsos positivos si mal configurado. Requiere expertise para operar bien.</div></div>
+    </div>
+    <div class="irow">
+      <div class="ibox"><div class="ilabel">✅ Ventajas</div><div class="itext pro">Gratuito. CNCF graduated. eBPF moderno. Reglas personalizables. Funciona on-premise y en cualquier nube. Sin vendor lock-in.</div></div>
+      <div class="ibox"><div class="ilabel">❌ Desventajas</div><div class="itext con">Requiere expertise K8s. Falsos positivos sin afinación. Sin UI incluida. Solo detección (combinar con Tracee para blocking).</div></div>
+    </div>
+    <div class="urow">
+      <div class="ubox"><div class="ulabel">Úsalo cuando</div><div class="utext">Tienes K8s on-premise o en nube y quieres runtime security gratuito y potente con control total.</div></div>
+      <div class="ubox no"><div class="ulabel">No lo uses cuando</div><div class="utext">No tienes expertise en K8s o necesitas solución out-of-the-box con soporte comercial.</div></div>
+    </div>
+    <div class="prow"><span class="badge b-oss">OSS</span><span class="badge b-free">FREE</span></div>
+  </div>
+</div>
+
+<div class="tool-card">
+  <div class="card-header"><span class="pdot d-oss"></span><h3>Trivy (Aqua OSS)</h3><span class="plabel l-oss">OSS / Shift-left</span></div>
+  <div class="card-body">
+    <div class="irow">
+      <div class="ibox"><div class="ilabel">¿Qué hace?</div><div class="itext">Scanner de vulnerabilidades open source para imágenes de contenedores, filesystems, repos Git, IaC (Terraform, Helm, K8s manifests). Genera SBOMs. El estándar de facto en CI/CD pipelines a nivel mundial.</div></div>
+      <div class="ibox"><div class="ilabel">¿Qué NO hace?</div><div class="itext">No es runtime protection. Solo escaneo estático (shift-left). Sin dashboard centralizado propio. Sin detección de amenazas en tiempo real. No es CWPP completo.</div></div>
+    </div>
+    <div class="irow">
+      <div class="ibox"><div class="ilabel">✅ Ventajas</div><div class="itext pro">Gratuito. Estándar de facto para escaneo de contenedores. Muy rápido. Multi-target. Integración nativa GitHub/GitLab CI/Jenkins.</div></div>
+      <div class="ibox"><div class="ilabel">❌ Desventajas</div><div class="itext con">Solo shift-left, no runtime. Sin UI centralizada. No es CWPP completo por sí solo. Necesita complemento (Falco) para runtime.</div></div>
+    </div>
+    <div class="urow">
+      <div class="ubox"><div class="ulabel">Úsalo cuando</div><div class="utext">Quieres escaneo gratuito de imágenes y código en CI/CD. Punto de partida mínimo en cualquier pipeline seguro.</div></div>
+      <div class="ubox no"><div class="ulabel">No lo uses cuando</div><div class="utext">Necesitas protección en runtime o una plataforma centralizada de seguridad.</div></div>
+    </div>
+    <div class="prow"><span class="badge b-oss">OSS</span><span class="badge b-free">FREE</span></div>
+  </div>
+</div>
+
+</div>
+</div>
+
+
+<!-- ===== CIEM ===== -->
+<div class="section visible" id="section-ciem">
+<div class="sdiv"></div>
+<div class="section-header">
+  <div class="acronym-tag">CIEM</div>
+  <div><h2>Cloud Infrastructure Entitlement Management</h2>
+  <p>Gestión de identidades y permisos en la nube. Detecta permisos excesivos (over-provisioning), genera políticas de privilegio mínimo y monitorea uso real vs. permisos otorgados. Pregunta clave: ¿quién puede hacer qué, y realmente lo usa?</p></div>
+</div>
+<div class="grid">
+
+<div class="tool-card">
+  <div class="card-header"><span class="pdot d-aws"></span><h3>IAM Access Analyzer + Credential Report + CloudTrail</h3><span class="plabel l-aws">AWS</span></div>
+  <div class="card-body">
+    <div class="irow"><div class="ibox full"><div class="ilabel">Servicios nativos AWS para CIEM</div><div class="chips"><span class="chip c-aws">IAM Access Analyzer</span><span class="chip c-aws">IAM Credential Report</span><span class="chip c-aws">AWS CloudTrail</span><span class="chip c-aws">IAM Last Access Info</span></div></div></div>
+    <div class="irow">
+      <div class="ibox"><div class="ilabel">¿Qué hace?</div><div class="itext">IAM Access Analyzer detecta acceso no intencionado desde fuera de la cuenta y genera políticas least-privilege basadas en actividad real (últimos 90 días). Credential Report lista todas las credenciales y su última actividad. CloudTrail audita toda acción en la cuenta.</div></div>
+      <div class="ibox"><div class="ilabel">¿Qué NO hace?</div><div class="itext">Sin análisis de blast radius ni rutas de escalada complejas. Solo AWS. Análisis limitado a 90 días de actividad. Sin visualización de grafo de identidades. CIEM básico comparado con herramientas especializadas.</div></div>
+    </div>
+    <div class="irow">
+      <div class="ibox"><div class="ilabel">✅ Ventajas</div><div class="itext pro">Gratuito (Access Analyzer + Credential Report). Recomendaciones basadas en uso real. CloudTrail básico gratuito. Fácil activación. Detecta recursos expuestos a internet vía políticas.</div></div>
+      <div class="ibox"><div class="ilabel">❌ Desventajas</div><div class="itext con">Solo AWS. Sin análisis de escalada de privilegios complejo. CloudTrail avanzado (Lake) es de pago. 90 días de historial son insuficientes para algunas auditorías.</div></div>
+    </div>
+    <div class="urow">
+      <div class="ubox"><div class="ulabel">Úsalo cuando</div><div class="utext">Eres AWS-only y quieres CIEM básico gratuito para detectar permisos excesivos y recursos expuestos.</div></div>
+      <div class="ubox no"><div class="ulabel">No lo uses cuando</div><div class="utext">Necesitas análisis avanzado de rutas de escalada de privilegios o entornos multi-cloud.</div></div>
+    </div>
+    <div class="prow"><span class="badge b-free">FREE (Access Analyzer + Credential Report)</span><span class="badge b-paid">PAID (CloudTrail Lake)</span></div>
+  </div>
+</div>
+
+<div class="tool-card">
+  <div class="card-header"><span class="pdot d-az"></span><h3>Microsoft Entra Permissions Management</h3><span class="plabel l-az">Azure</span></div>
+  <div class="card-body">
+    <div class="irow"><div class="ibox full"><div class="ilabel">Servicios nativos Azure para CIEM</div><div class="chips"><span class="chip c-az">Entra Permissions Management</span><span class="chip c-az">Entra PIM</span><span class="chip c-az">Azure AD Access Reviews</span><span class="chip c-az">Azure Monitor (Audit)</span></div></div></div>
+    <div class="irow">
+      <div class="ibox"><div class="ilabel">¿Qué hace?</div><div class="itext">Entra Permissions Management (ex-CloudKnox): CIEM multi-cloud real (AWS, Azure, GCP). Analiza permisos efectivos, detecta over-provisioning, genera políticas least-privilege. PIM para JIT en roles Azure. Access Reviews para recertificación periódica automatizada.</div></div>
+      <div class="ibox"><div class="ilabel">¿Qué NO hace?</div><div class="itext">Entra Permissions Management es de pago adicional. PIM requiere licencia P2. Sin análisis de rutas de escalada tan profundo como herramientas especializadas (Wiz CIEM, Ermetic).</div></div>
+    </div>
+    <div class="irow">
+      <div class="ibox"><div class="ilabel">✅ Ventajas</div><div class="itext pro">Entra Permissions Mgmt = CIEM multi-cloud real (único de los cloud nativos big 3 en ofrecerlo). PIM muy maduro para JIT. Access Reviews automatizados.</div></div>
+      <div class="ibox"><div class="ilabel">❌ Desventajas</div><div class="itext con">Licencias P2 y Permissions Mgmt costosas. Complejidad de implementación. Sin grafo visual tan potente como Wiz.</div></div>
+    </div>
+    <div class="urow">
+      <div class="ubox"><div class="ulabel">Úsalo cuando</div><div class="utext">Tienes ecosistema Microsoft y necesitas JIT nativo + CIEM multi-cloud sin herramienta de terceros.</div></div>
+      <div class="ubox no"><div class="ulabel">No lo uses cuando</div><div class="utext">Tu CIEM principal es AWS/GCP sin Azure, o el presupuesto de licencias P2 no está disponible.</div></div>
+    </div>
+    <div class="prow"><span class="badge b-paid">PAID (P2 + Permissions Mgmt)</span></div>
+  </div>
+</div>
+
+<div class="tool-card">
+  <div class="card-header"><span class="pdot d-gcp"></span><h3>IAM Recommender + Policy Troubleshooter + Cloud Audit Logs</h3><span class="plabel l-gcp">GCP</span></div>
+  <div class="card-body">
+    <div class="irow"><div class="ibox full"><div class="ilabel">Servicios nativos GCP para CIEM</div><div class="chips"><span class="chip c-gcp">IAM Recommender</span><span class="chip c-gcp">Policy Troubleshooter</span><span class="chip c-gcp">Cloud Audit Logs</span><span class="chip c-gcp">Access Transparency</span></div></div></div>
+    <div class="irow">
+      <div class="ibox"><div class="ilabel">¿Qué hace?</div><div class="itext">IAM Recommender sugiere eliminación de permisos no usados basado en actividad real (90 días). Policy Troubleshooter explica por qué una identidad tiene o no acceso a un recurso. Cloud Audit Logs registra todas las acciones. Access Transparency registra accesos de Google.</div></div>
+      <div class="ibox"><div class="ilabel">¿Qué NO hace?</div><div class="itext">Sin JIT nativo (requiere herramienta externa). Sin análisis de escalada de privilegios complejo. Cloud Audit Logs retención limitada sin pagar. Solo GCP. Sin grafo de identidades.</div></div>
+    </div>
+    <div class="irow">
+      <div class="ibox"><div class="ilabel">✅ Ventajas</div><div class="itext pro">IAM Recommender gratuito y muy útil. Policy Troubleshooter indispensable para debugging de permisos. Audit Logs muy detallados. Integrado en consola GCP.</div></div>
+      <div class="ibox"><div class="ilabel">❌ Desventajas</div><div class="itext con">Sin JIT nativo. Solo GCP. CIEM básico. Sin automatización de least-privilege completa. Sin grafo de identidades.</div></div>
+    </div>
+    <div class="urow">
+      <div class="ubox"><div class="ulabel">Úsalo cuando</div><div class="utext">Eres GCP-first y quieres reducir over-provisioning con recomendaciones gratuitas de IAM.</div></div>
+      <div class="ubox no"><div class="ulabel">No lo uses cuando</div><div class="utext">Necesitas JIT, análisis multi-cloud de permisos o detección de rutas de escalada avanzadas.</div></div>
+    </div>
+    <div class="prow"><span class="badge b-free">FREE (Recommender + Troubleshooter)</span><span class="badge b-paid">PAID (Audit Logs retención extendida)</span></div>
+  </div>
+</div>
+
+<div class="tool-card">
+  <div class="card-header"><span class="pdot d-oci"></span><h3>IAM Policy Analyzer + Audit Service</h3><span class="plabel l-oci">Oracle Cloud</span></div>
+  <div class="card-body">
+    <div class="irow">
+      <div class="ibox"><div class="ilabel">¿Qué hace?</div><div class="itext">IAM Policy Analyzer de OCI analiza políticas y determina qué recursos y acciones tiene cada identidad. Audit Service registra toda actividad en la tenancy OCI. Permite detectar políticas excesivamente permisivas en el ecosistema OCI.</div></div>
+      <div class="ibox"><div class="ilabel">¿Qué NO hace?</div><div class="itext">Sin JIT nativo. Sin recomendaciones automáticas de least-privilege. Solo OCI. Sin análisis de rutas de escalada. CIEM básico comparado con herramientas especializadas.</div></div>
+    </div>
+    <div class="irow">
+      <div class="ibox"><div class="ilabel">✅ Ventajas</div><div class="itext pro">Incluido en OCI. Policy Analyzer muy útil para entender permisos complejos OCI. Audit Service muy detallado. Sin costo adicional.</div></div>
+      <div class="ibox"><div class="ilabel">❌ Desventajas</div><div class="itext con">Solo OCI. Sin automatización de least-privilege. CIEM muy básico. Sin grafo de identidades.</div></div>
+    </div>
+    <div class="urow">
+      <div class="ubox"><div class="ulabel">Úsalo cuando</div><div class="utext">Tu infra es OCI y necesitas entender y auditar políticas IAM sin costo adicional.</div></div>
+      <div class="ubox no"><div class="ulabel">No lo uses cuando</div><div class="utext">Necesitas CIEM avanzado con JIT, rutas de escalada o cobertura multi-cloud.</div></div>
+    </div>
+    <div class="prow"><span class="badge b-free">FREE (incluido OCI)</span></div>
+  </div>
+</div>
+
+<div class="tool-card">
+  <div class="card-header"><span class="pdot d-oss"></span><h3>CloudSplaining + PMapper</h3><span class="plabel l-oss">OSS / AWS</span></div>
+  <div class="card-body">
+    <div class="irow">
+      <div class="ibox"><div class="ilabel">¿Qué hace?</div><div class="itext">CloudSplaining: analiza políticas IAM AWS y genera reporte HTML con permisos excesivos (privilege escalation, data exfiltration, resource exposure). PMapper: grafo de rutas de escalada de privilegios en AWS. Herramientas de red team y auditoría.</div></div>
+      <div class="ibox"><div class="ilabel">¿Qué NO hace?</div><div class="itext">Solo AWS. Sin monitoreo continuo ni UI viva. Solo auditoría puntual. Sin soporte comercial. No multi-cloud. No son soluciones CIEM operacionales.</div></div>
+    </div>
+    <div class="irow">
+      <div class="ibox"><div class="ilabel">✅ Ventajas</div><div class="itext pro">Gratuito y open source. Muy útiles para red teams y auditorías. Detectan rutas de escalada que herramientas nativas no muestran fácilmente.</div></div>
+      <div class="ibox"><div class="ilabel">❌ Desventajas</div><div class="itext con">Solo auditoría puntual. Sin monitoreo continuo. Requieren expertise en IAM. Solo AWS.</div></div>
+    </div>
+    <div class="urow">
+      <div class="ubox"><div class="ulabel">Úsalo cuando</div><div class="utext">Haces pentesting o auditorías de IAM en AWS y quieres herramientas gratuitas para escalada de privilegios.</div></div>
+      <div class="ubox no"><div class="ulabel">No lo uses cuando</div><div class="utext">Necesitas CIEM operacional continuo o cobertura multi-cloud.</div></div>
+    </div>
+    <div class="prow"><span class="badge b-oss">OSS</span><span class="badge b-free">FREE</span></div>
+  </div>
+</div>
+
+</div>
+</div>
+
+<!-- ===== DSPM ===== -->
+<div class="section visible" id="section-dspm">
+<div class="sdiv"></div>
+<div class="section-header">
+  <div class="acronym-tag">DSPM</div>
+  <div><h2>Data Security Posture Management</h2>
+  <p>Descubre, clasifica y protege datos sensibles en la nube (PII, PHI, PCI, secretos, IP). Evalúa quién tiene acceso a qué datos y si están protegidos. Foco en el dato. Pregunta clave: ¿dónde están mis datos sensibles y quién puede verlos?</p></div>
+</div>
+<div class="grid">
+
+<div class="tool-card">
+  <div class="card-header"><span class="pdot d-aws"></span><h3>Amazon Macie + KMS (+ Cyera via SecHub)</h3><span class="plabel l-aws">AWS</span></div>
+  <div class="card-body">
+    <div class="irow"><div class="ibox full"><div class="ilabel">Servicios nativos AWS para DSPM</div><div class="chips"><span class="chip c-aws">Amazon Macie</span><span class="chip c-aws">AWS KMS</span><span class="chip c-aws">S3 Object Lock</span><span class="chip c-aws">SecHub → Cyera (partner)</span></div></div></div>
+    <div class="irow">
+      <div class="ibox"><div class="ilabel">¿Qué hace?</div><div class="itext">Macie descubre y clasifica datos sensibles en S3 usando ML (PII, credenciales, datos de salud). Evalúa configuración de buckets (público, cifrado). KMS gestiona claves. Para DSPM completo, AWS recomienda integrar Cyera vía Security Hub Extended.</div></div>
+      <div class="ibox"><div class="ilabel">¿Qué NO hace?</div><div class="itext">Macie solo S3. No cubre RDS, DynamoDB, Redshift, SaaS nativamente. Sin análisis de flujo de datos. DSPM muy limitado sin integración de terceros (Cyera, BigID).</div></div>
+    </div>
+    <div class="irow">
+      <div class="ibox"><div class="ilabel">✅ Ventajas</div><div class="itext pro">Macie: ML muy preciso para PII en S3. Integración con Security Hub. KMS: gestión de claves robusta. Cyera: DSPM más completo del mercado.</div></div>
+      <div class="ibox"><div class="ilabel">❌ Desventajas</div><div class="itext con">Macie solo S3. Precio escala con datos. DSPM nativo muy limitado. Cyera costoso. Sin análisis de acceso efectivo a datos.</div></div>
+    </div>
+    <div class="urow">
+      <div class="ubox"><div class="ulabel">Úsalo cuando</div><div class="utext">Datos sensibles en S3 y necesitas clasificación básica para compliance. Para DSPM completo, integra Cyera.</div></div>
+      <div class="ubox no"><div class="ulabel">No lo uses cuando</div><div class="utext">Datos en RDS/DynamoDB/SaaS o necesitas DSPM multi-datastore completo.</div></div>
+    </div>
+    <div class="prow"><span class="badge b-partial">FREE 30 días (Macie)</span><span class="badge b-paid">PAID</span></div>
+  </div>
+</div>
+
+<div class="tool-card">
+  <div class="card-header"><span class="pdot d-az"></span><h3>Microsoft Purview (Data Map)</h3><span class="plabel l-az">Azure</span></div>
+  <div class="card-body">
+    <div class="irow"><div class="ibox full"><div class="ilabel">Servicios nativos Azure para DSPM</div><div class="chips"><span class="chip c-az">Microsoft Purview</span><span class="chip c-az">Sensitivity Labels</span><span class="chip c-az">DLP Policies</span><span class="chip c-az">Purview Data Map</span></div></div></div>
+    <div class="irow">
+      <div class="ibox"><div class="ilabel">¿Qué hace?</div><div class="itext">Gobernanza de datos completa. Descubre y clasifica datos en Azure, M365, AWS S3, on-premise. Sensitivity Labels para etiquetado. DLP integrado. Data Map para visualización del linaje de datos. El DSPM nativo más completo de los big 3.</div></div>
+      <div class="ibox"><div class="ilabel">¿Qué NO hace?</div><div class="itext">Licencias complejas y costosas. Mejor en M365/Azure. GCP limitado. Implementación puede tomar meses. No es CSPM. Sin análisis de permisos efectivos sobre datos.</div></div>
+    </div>
+    <div class="irow">
+      <div class="ibox"><div class="ilabel">✅ Ventajas</div><div class="itext pro">El más completo para M365+Azure. Clasificación automática avanzada. DLP integrado. Cubre datos on-premise. Cumplimiento GDPR/HIPAA robusto.</div></div>
+      <div class="ibox"><div class="ilabel">❌ Desventajas</div><div class="itext con">Muy costoso y complejo de implementar. Licencias confusas. Requiere expertise dedicado. Limitado en GCP.</div></div>
+    </div>
+    <div class="urow">
+      <div class="ubox"><div class="ulabel">Úsalo cuando</div><div class="utext">Eres Microsoft-first con M365 y necesitas gobernanza de datos completa con DLP y clasificación centralizada.</div></div>
+      <div class="ubox no"><div class="ulabel">No lo uses cuando</div><div class="utext">Buscas DSPM multi-cloud puro sin ecosistema Microsoft o tienes presupuesto e implementación limitados.</div></div>
+    </div>
+    <div class="prow"><span class="badge b-paid">PAID (licencias complejas)</span></div>
+  </div>
+</div>
+
+<div class="tool-card">
+  <div class="card-header"><span class="pdot d-gcp"></span><h3>SCC Sensitive Data Protection (ex Cloud DLP)</h3><span class="plabel l-gcp">GCP</span></div>
+  <div class="card-body">
+    <div class="irow"><div class="ibox full"><div class="ilabel">Servicios nativos GCP para DSPM</div><div class="chips"><span class="chip c-gcp">Sensitive Data Protection</span><span class="chip c-gcp">Cloud DLP (legacy)</span><span class="chip c-gcp">Cloud KMS</span><span class="chip c-gcp">SCC Data Risk Dashboard</span></div></div></div>
+    <div class="irow">
+      <div class="ibox"><div class="ilabel">¿Qué hace?</div><div class="itext">Descubrimiento y clasificación de datos sensibles en GCS, BigQuery, Datastore, Cloud SQL. 150+ infoTypes predefinidos (PII, PHI, PCI). Integra con SCC para risk dashboard. Puede desidentificar/tokenizar datos. API programable para integrar en pipelines.</div></div>
+      <div class="ibox"><div class="ilabel">¿Qué NO hace?</div><div class="itext">Solo GCP. Sin cobertura de SaaS o on-premise. Sin análisis de acceso efectivo a datos (quién puede ver qué). DSPM parcial. Precio por volumen de datos procesados.</div></div>
+    </div>
+    <div class="irow">
+      <div class="ibox"><div class="ilabel">✅ Ventajas</div><div class="itext pro">Muy potente para BigQuery/GCS. 150+ tipos de datos. Desidentificación integrada. API programable. Integrado con SCC para visibilidad de riesgo.</div></div>
+      <div class="ibox"><div class="ilabel">❌ Desventajas</div><div class="itext con">Solo GCP. Precio por volumen. Sin análisis de permisos efectivos sobre datos. DSPM no completo.</div></div>
+    </div>
+    <div class="urow">
+      <div class="ubox"><div class="ulabel">Úsalo cuando</div><div class="utext">Tienes grandes volúmenes en BigQuery/GCS y necesitas clasificación automática y desidentificación.</div></div>
+      <div class="ubox no"><div class="ulabel">No lo uses cuando</div><div class="utext">Necesitas DSPM completo con análisis de acceso efectivo o cobertura multi-cloud.</div></div>
+    </div>
+    <div class="prow"><span class="badge b-paid">PAID (por volumen procesado)</span></div>
+  </div>
+</div>
+
+<div class="tool-card">
+  <div class="card-header"><span class="pdot d-oci"></span><h3>Oracle Data Safe</h3><span class="plabel l-oci">Oracle Cloud</span></div>
+  <div class="card-body">
+    <div class="irow">
+      <div class="ibox"><div class="ilabel">¿Qué hace?</div><div class="itext">DSPM nativo para bases de datos Oracle (Autonomous DB, Base DB, on-premise Oracle DB). Descubrimiento y clasificación de datos sensibles, evaluación de seguridad de BD, auditoría de actividad de usuarios, enmascaramiento de datos. Cubre Oracle on-premise también.</div></div>
+      <div class="ibox"><div class="ilabel">¿Qué NO hace?</div><div class="itext">Principalmente bases de datos Oracle. Sin cobertura de object storage, SaaS u otras bases de datos (PostgreSQL, MySQL). No es DSPM multi-datastore. Muy específico al ecosistema Oracle.</div></div>
+    </div>
+    <div class="irow">
+      <div class="ibox"><div class="ilabel">✅ Ventajas</div><div class="itext pro">Gratuito para bases de datos OCI. Muy completo para Oracle DB (on-premise también). Enmascaramiento integrado. Bueno para compliance de BD Oracle.</div></div>
+      <div class="ibox"><div class="ilabel">❌ Desventajas</div><div class="itext con">Solo bases de datos Oracle. No multi-datastore. Limitado si tu stack de datos no es Oracle-centric.</div></div>
+    </div>
+    <div class="urow">
+      <div class="ubox"><div class="ulabel">Úsalo cuando</div><div class="utext">Tu stack principal es Oracle DB (OCI o on-premise) y necesitas DSPM de bases de datos sin costo.</div></div>
+      <div class="ubox no"><div class="ulabel">No lo uses cuando</div><div class="utext">Tus datos están en PostgreSQL, MySQL, S3, BigQuery o SaaS. No cubre otros datastores.</div></div>
+    </div>
+    <div class="prow"><span class="badge b-free">FREE (OCI)</span><span class="badge b-paid">PAID (on-premise)</span></div>
+  </div>
+</div>
+
+</div>
+</div>
+
+
+<!-- ===== CVM ===== -->
+<div class="section visible" id="section-cvm">
+<div class="sdiv"></div>
+<div class="section-header">
+  <div class="acronym-tag">CVM</div>
+  <div><h2>Cloud Vulnerability Management</h2>
+  <p>Descubre, prioriza y gestiona CVEs en workloads cloud. Va más allá del escaneo clásico correlacionando vulnerabilidades con contexto cloud (exposición a internet, criticidad del activo) para priorización inteligente. Incluye gestión de parches.</p></div>
+</div>
+<div class="grid">
+
+<div class="tool-card">
+  <div class="card-header"><span class="pdot d-aws"></span><h3>Amazon Inspector + SSM Patch Manager + Security Agent</h3><span class="plabel l-aws">AWS</span></div>
+  <div class="card-body">
+    <div class="irow"><div class="ibox full"><div class="ilabel">Servicios nativos AWS para CVM</div><div class="chips"><span class="chip c-aws">Amazon Inspector v2</span><span class="chip c-aws">SSM Patch Manager</span><span class="chip c-aws">AWS Security Agent</span><span class="chip c-aws">ECR Image Scanning</span></div></div></div>
+    <div class="irow">
+      <div class="ibox"><div class="ilabel">¿Qué hace?</div><div class="itext">Inspector v2: escaneo continuo de CVEs en EC2, ECR e imágenes Lambda. Inspector Score contextual (exposición + severidad). Agentless via SSM. SSM Patch Manager automatiza aplicación de parches en EC2 con ventanas de mantenimiento.</div></div>
+      <div class="ibox"><div class="ilabel">¿Qué NO hace?</div><div class="itext">Solo AWS. Sin escaneo de código (SAST). Sin cobertura de contenedores en runtime, solo imágenes ECR. SSM Patch Manager requiere SSM Agent instalado en instancias.</div></div>
+    </div>
+    <div class="irow">
+      <div class="ibox"><div class="ilabel">✅ Ventajas</div><div class="itext pro">Sin agente extra (via SSM). Continuo y automático. Inspector Score prioriza por exposición real. SSM Patch Manager automatiza parches. Bajo overhead operativo.</div></div>
+      <div class="ibox"><div class="ilabel">❌ Desventajas</div><div class="itext con">Solo AWS. Costo por instancia. Sin SAST. SSM debe estar habilitado. Sin correlación de rutas de ataque.</div></div>
+    </div>
+    <div class="urow">
+      <div class="ubox"><div class="ulabel">Úsalo cuando</div><div class="utext">Tienes EC2/ECR/Lambda en AWS y necesitas CVM continuo + parches automatizados sin agentes adicionales.</div></div>
+      <div class="ubox no"><div class="ulabel">No lo uses cuando</div><div class="utext">Necesitas CVM multi-cloud o vulnerabilidades en código fuente.</div></div>
+    </div>
+    <div class="prow"><span class="badge b-partial">FREE 15 días</span><span class="badge b-paid">PAID</span></div>
+  </div>
+</div>
+
+<div class="tool-card">
+  <div class="card-header"><span class="pdot d-az"></span><h3>Microsoft Defender Vulnerability Management</h3><span class="plabel l-az">Azure</span></div>
+  <div class="card-body">
+    <div class="irow"><div class="ibox full"><div class="ilabel">Servicios nativos Azure para CVM</div><div class="chips"><span class="chip c-az">Defender Vulnerability Management</span><span class="chip c-az">Update Manager</span><span class="chip c-az">Intune (Patch)</span></div></div></div>
+    <div class="irow">
+      <div class="ibox"><div class="ilabel">¿Qué hace?</div><div class="itext">CVM integrado con MDE. Descubrimiento de activos, inventario de software, detección de CVEs y configuraciones inseguras. Risk-based prioritization. Update Manager para parches en Azure VMs. Funciona en multi-cloud (AWS/GCP) via Azure Arc.</div></div>
+      <div class="ibox"><div class="ilabel">¿Qué NO hace?</div><div class="itext">Requiere MDE (agente). Sin escaneo profundo de imágenes de contenedor agentless. Mejor en Windows que Linux en algunos casos. Costo elevado.</div></div>
+    </div>
+    <div class="irow">
+      <div class="ibox"><div class="ilabel">✅ Ventajas</div><div class="itext pro">Integrado con MDE y Defender for Cloud. Risk-based prioritization. Multi-cloud via Arc. Sin scanner adicional si ya tienes MDE.</div></div>
+      <div class="ibox"><div class="ilabel">❌ Desventajas</div><div class="itext con">Requiere MDE. Costoso. Mejor en entorno Microsoft. Sin escaneo agentless de contenedores.</div></div>
+    </div>
+    <div class="urow">
+      <div class="ubox"><div class="ulabel">Úsalo cuando</div><div class="utext">Ya tienes MDE en tus servers y quieres CVM integrado sin herramienta adicional.</div></div>
+      <div class="ubox no"><div class="ulabel">No lo uses cuando</div><div class="utext">Eres Linux-first sin MDE o buscas CVM agentless multi-cloud económico.</div></div>
+    </div>
+    <div class="prow"><span class="badge b-paid">PAID (incluido en Defender for Servers P2)</span></div>
+  </div>
+</div>
+
+<div class="tool-card">
+  <div class="card-header"><span class="pdot d-gcp"></span><h3>SCC Vulnerability Scanning + Artifact Analysis + VM Manager</h3><span class="plabel l-gcp">GCP</span></div>
+  <div class="card-body">
+    <div class="irow"><div class="ibox full"><div class="ilabel">Servicios nativos GCP para CVM</div><div class="chips"><span class="chip c-gcp">SCC Vulnerability Scanning</span><span class="chip c-gcp">Artifact Analysis</span><span class="chip c-gcp">VM Manager (Patch)</span><span class="chip c-gcp">OS Inventory</span></div></div></div>
+    <div class="irow">
+      <div class="ibox"><div class="ilabel">¿Qué hace?</div><div class="itext">SCC Vulnerability Scanning detecta CVEs en VMs y GKE. Artifact Analysis escanea imágenes de contenedor en Artifact Registry automáticamente. VM Manager gestiona parches, inventario de OS y configuraciones en Compute Engine.</div></div>
+      <div class="ibox"><div class="ilabel">¿Qué NO hace?</div><div class="itext">SCC Premium para vulnerability scanning completo. Sin correlación de rutas de ataque. VM Manager requiere OS Config agent. Solo GCP.</div></div>
+    </div>
+    <div class="irow">
+      <div class="ibox"><div class="ilabel">✅ Ventajas</div><div class="itext pro">VM Manager gratuito para Compute Engine. Artifact Analysis en Artifact Registry sin costo extra. Bien integrado con GKE. OS inventory completo.</div></div>
+      <div class="ibox"><div class="ilabel">❌ Desventajas</div><div class="itext con">SCC Premium para scanning completo. VM Manager requiere agente OS Config. Solo GCP.</div></div>
+    </div>
+    <div class="urow">
+      <div class="ubox"><div class="ulabel">Úsalo cuando</div><div class="utext">Eres GCP-first. VM Manager es gratuito y muy útil para gestión de parches en Compute Engine.</div></div>
+      <div class="ubox no"><div class="ulabel">No lo uses cuando</div><div class="utext">Necesitas CVM multi-cloud o correlación de rutas de ataque. SCC Premium puede ser costoso.</div></div>
+    </div>
+    <div class="prow"><span class="badge b-free">FREE (VM Manager)</span><span class="badge b-paid">PAID (SCC Premium completo)</span></div>
+  </div>
+</div>
+
+<div class="tool-card">
+  <div class="card-header"><span class="pdot d-oci"></span><h3>Vulnerability Scanning Service (VSS)</h3><span class="plabel l-oci">Oracle Cloud</span></div>
+  <div class="card-body">
+    <div class="irow">
+      <div class="ibox"><div class="ilabel">¿Qué hace?</div><div class="itext">Escaneo de vulnerabilidades nativo OCI. Detecta CVEs en instancias Compute y imágenes en OCI Registry. Integrado con Cloud Guard para correlación. Escaneo de puertos y configuraciones de red. Incluido en OCI sin costo adicional.</div></div>
+      <div class="ibox"><div class="ilabel">¿Qué NO hace?</div><div class="itext">Solo OCI. Sin gestión de parches integrada comparable a SSM. Sin análisis de rutas de ataque. Sin priorización contextual. CVM básico comparado con Inspector o Defender VM.</div></div>
+    </div>
+    <div class="irow">
+      <div class="ibox"><div class="ilabel">✅ Ventajas</div><div class="itext pro">Incluido en OCI sin costo. Sin agente requerido para muchos escaneos. Integrado con Cloud Guard. Fácil activación.</div></div>
+      <div class="ibox"><div class="ilabel">❌ Desventajas</div><div class="itext con">Solo OCI. Sin gestión de parches avanzada. Sin correlación contextual de riesgo. CVM menos maduro que los big 3.</div></div>
+    </div>
+    <div class="urow">
+      <div class="ubox"><div class="ulabel">Úsalo cuando</div><div class="utext">Tu infra es OCI y necesitas CVM básico gratuito sin agentes adicionales.</div></div>
+      <div class="ubox no"><div class="ulabel">No lo uses cuando</div><div class="utext">Necesitas CVM avanzado con priorización contextual, gestión de parches robusta o multi-cloud.</div></div>
+    </div>
+    <div class="prow"><span class="badge b-free">FREE (incluido OCI)</span></div>
+  </div>
+</div>
+
+<div class="tool-card">
+  <div class="card-header"><span class="pdot d-oss"></span><h3>OpenVAS / Greenbone Community</h3><span class="plabel l-oss">OSS / On-Premise</span></div>
+  <div class="card-body">
+    <div class="irow">
+      <div class="ibox"><div class="ilabel">¿Qué hace?</div><div class="itext">Scanner de vulnerabilidades open source más completo para on-premise. Escanea redes, VMs, servicios expuestos. Base de datos NVTs muy extensa. Greenbone Community Edition gratuita. Estándar en entornos corporativos on-premise durante décadas.</div></div>
+      <div class="ibox"><div class="ilabel">¿Qué NO hace?</div><div class="itext">No diseñado para contenedores/imágenes Docker. Sin escaneo de IaC. Requiere infraestructura propia. Sin integración nativa con APIs de nube. Sin gestión de parches integrada.</div></div>
+    </div>
+    <div class="irow">
+      <div class="ibox"><div class="ilabel">✅ Ventajas</div><div class="itext pro">Gratuito (Community). Muy maduro para VMs y redes on-premise. Sin vendor lock-in. Miles de NVTs activos y actualizados.</div></div>
+      <div class="ibox"><div class="ilabel">❌ Desventajas</div><div class="itext con">No nativo para nube ni contenedores. Requiere expertise para operar. Sin gestión de parches integrada. UI no tan moderna.</div></div>
+    </div>
+    <div class="urow">
+      <div class="ubox"><div class="ulabel">Úsalo cuando</div><div class="utext">Tienes infra on-premise (VMs, servers físicos, redes) y necesitas CVM gratuito y potente.</div></div>
+      <div class="ubox no"><div class="ulabel">No lo uses cuando</div><div class="utext">Tu entorno es principalmente contenedores, K8s o necesitas integración nativa cloud.</div></div>
+    </div>
+    <div class="prow"><span class="badge b-oss">OSS</span><span class="badge b-free">FREE (Community)</span><span class="badge b-paid">PAID (Enterprise)</span></div>
+  </div>
+</div>
+
+</div>
+</div>
+
+<!-- ===== KSPM ===== -->
+<div class="section visible" id="section-kspm">
+<div class="sdiv"></div>
+<div class="section-header">
+  <div class="acronym-tag">KSPM</div>
+  <div><h2>Kubernetes Security Posture Management</h2>
+  <p>CSPM específico para Kubernetes. Evalúa configuración de clústeres, manifests, RBAC, network policies, pod security y secretos. Aplica tanto a managed K8s (EKS/AKS/GKE/OKE) como a K8s on-premise. Pregunta clave: ¿está bien configurado mi clúster y sus workloads?</p></div>
+</div>
+<div class="grid">
+
+<div class="tool-card">
+  <div class="card-header"><span class="pdot d-aws"></span><h3>GuardDuty for EKS + Runtime Monitoring + Inspector Image Scan</h3><span class="plabel l-aws">AWS</span></div>
+  <div class="card-body">
+    <div class="irow"><div class="ibox full"><div class="ilabel">Servicios nativos AWS para KSPM</div><div class="chips"><span class="chip c-aws">GuardDuty for EKS</span><span class="chip c-aws">GuardDuty Runtime Monitoring</span><span class="chip c-aws">Amazon Inspector (ECR Image Scan)</span><span class="chip c-aws">EKS Audit Logs</span></div></div></div>
+    <div class="irow">
+      <div class="ibox"><div class="ilabel">¿Qué hace?</div><div class="itext">GuardDuty for EKS analiza audit logs del control plane EKS para detectar actividad maliciosa. Runtime Monitoring con eBPF detecta comportamientos anómalos en contenedores. Inspector escanea imágenes ECR buscando CVEs antes del deploy.</div></div>
+      <div class="ibox"><div class="ilabel">¿Qué NO hace?</div><div class="itext">Sin análisis de RBAC excesivo nativo. Sin evaluación de manifests shift-left profunda. Solo EKS (no K8s on-premise). Runtime Monitoring requiere agente. Sin posture completo.</div></div>
+    </div>
+    <div class="irow">
+      <div class="ibox"><div class="ilabel">✅ Ventajas</div><div class="itext pro">Integración nativa EKS. GuardDuty entrenado en amenazas K8s reales. Inspector ECR scanning preciso. Bajo overhead operativo.</div></div>
+      <div class="ibox"><div class="ilabel">❌ Desventajas</div><div class="itext con">Sin análisis RBAC ni manifests shift-left. Solo EKS. Más detección que posture. Sin KSPM completo.</div></div>
+    </div>
+    <div class="urow">
+      <div class="ubox"><div class="ulabel">Úsalo cuando</div><div class="utext">Tienes EKS y quieres detección de amenazas + escaneo de imágenes nativo sin herramientas adicionales.</div></div>
+      <div class="ubox no"><div class="ulabel">No lo uses cuando</div><div class="utext">Necesitas KSPM completo con análisis RBAC, shift-left de manifests o K8s on-premise.</div></div>
+    </div>
+    <div class="prow"><span class="badge b-paid">PAID (por clúster + datos analizados)</span></div>
+  </div>
+</div>
+
+<div class="tool-card">
+  <div class="card-header"><span class="pdot d-az"></span><h3>Microsoft Defender for Containers</h3><span class="plabel l-az">Azure</span></div>
+  <div class="card-body">
+    <div class="irow"><div class="ibox full"><div class="ilabel">Servicios nativos Azure para KSPM</div><div class="chips"><span class="chip c-az">Defender for Containers</span><span class="chip c-az">AKS Security Profile</span><span class="chip c-az">ACR Image Scanning</span></div></div></div>
+    <div class="irow">
+      <div class="ibox"><div class="ilabel">¿Qué hace?</div><div class="itext">KSPM + CWPP para contenedores en AKS. Evalúa configuración del clúster, detecta malas prácticas de RBAC, escanea imágenes en ACR, runtime threat detection en contenedores. Cubre también K8s fuera de Azure vía Arc.</div></div>
+      <div class="ibox"><div class="ilabel">¿Qué NO hace?</div><div class="itext">De pago. Sin análisis de manifests shift-left profundo. Runtime con agente Defender sensor. Mejor en AKS que en K8s on-premise con Arc.</div></div>
+    </div>
+    <div class="irow">
+      <div class="ibox"><div class="ilabel">✅ Ventajas</div><div class="itext pro">KSPM + CWPP en un solo servicio para AKS. Escaneo ACR integrado. Cubre multi-K8s via Arc. Integrado con Defender for Cloud.</div></div>
+      <div class="ibox"><div class="ilabel">❌ Desventajas</div><div class="itext con">Costoso. Requiere agente Defender sensor. Sin shift-left de manifests. Mejor en AKS.</div></div>
+    </div>
+    <div class="urow">
+      <div class="ubox"><div class="ulabel">Úsalo cuando</div><div class="utext">Tienes AKS y quieres KSPM + CWPP integrado en el ecosistema Defender for Cloud.</div></div>
+      <div class="ubox no"><div class="ulabel">No lo uses cuando</div><div class="utext">Tienes K8s on-premise mayoritariamente o buscas análisis profundo de manifests en CI/CD.</div></div>
+    </div>
+    <div class="prow"><span class="badge b-paid">PAID</span></div>
+  </div>
+</div>
+
+<div class="tool-card">
+  <div class="card-header"><span class="pdot d-gcp"></span><h3>GKE Security Posture Dashboard + Container Threat Detection</h3><span class="plabel l-gcp">GCP</span></div>
+  <div class="card-body">
+    <div class="irow"><div class="ibox full"><div class="ilabel">Servicios nativos GCP para KSPM</div><div class="chips"><span class="chip c-gcp">GKE Security Posture Dashboard</span><span class="chip c-gcp">Container Threat Detection (SCC)</span><span class="chip c-gcp">Binary Authorization</span><span class="chip c-gcp">Artifact Analysis</span></div></div></div>
+    <div class="irow">
+      <div class="ibox"><div class="ilabel">¿Qué hace?</div><div class="itext">GKE Security Posture Dashboard nativo en GKE: evalúa configuración de workloads, RBAC, secrets, network policies con score de seguridad. Container Threat Detection (SCC Premium) para runtime. Binary Authorization controla qué imágenes pueden ejecutarse en el clúster.</div></div>
+      <div class="ibox"><div class="ilabel">¿Qué NO hace?</div><div class="itext">Solo GKE (no K8s on-premise). Container Threat Detection requiere SCC Premium. Sin análisis profundo de shift-left de manifests. Sin cobertura de K8s fuera de GKE.</div></div>
+    </div>
+    <div class="irow">
+      <div class="ibox"><div class="ilabel">✅ Ventajas</div><div class="itext pro">Dashboard visual e integrado en GKE. Binary Authorization único para controlar imágenes. Artifact Analysis automático. Security Posture básico parcialmente gratuito.</div></div>
+      <div class="ibox"><div class="ilabel">❌ Desventajas</div><div class="itext con">Solo GKE. CTD requiere SCC Premium costoso. Sin K8s on-premise. Sin shift-left profundo de manifests.</div></div>
+    </div>
+    <div class="urow">
+      <div class="ubox"><div class="ulabel">Úsalo cuando</div><div class="utext">Tienes GKE y quieres KSPM nativo con dashboard visual. Binary Authorization si necesitas control estricto de imágenes.</div></div>
+      <div class="ubox no"><div class="ulabel">No lo uses cuando</div><div class="utext">K8s on-premise o CTD runtime muy costoso con SCC Premium.</div></div>
+    </div>
+    <div class="prow"><span class="badge b-partial">PARTIAL FREE (GKE Security Posture básico)</span><span class="badge b-paid">PAID (CTD - SCC Premium)</span></div>
+  </div>
+</div>
+
+<div class="tool-card">
+  <div class="card-header"><span class="pdot d-oci"></span><h3>Cloud Guard OKE Detectors</h3><span class="plabel l-oci">Oracle Cloud</span></div>
+  <div class="card-body">
+    <div class="irow">
+      <div class="ibox"><div class="ilabel">¿Qué hace?</div><div class="itext">Cloud Guard con detectores para Oracle Container Engine for Kubernetes (OKE). Detecta malas configuraciones en nodos y workloads OKE. Integrado con el framework de Cloud Guard para alertas y remediación automática vía Responders.</div></div>
+      <div class="ibox"><div class="ilabel">¿Qué NO hace?</div><div class="itext">Solo OKE (K8s de OCI). Sin análisis profundo de RBAC/manifests. Sin runtime threat detection avanzado. KSPM básico. Sin cobertura de K8s fuera de OCI.</div></div>
+    </div>
+    <div class="irow">
+      <div class="ibox"><div class="ilabel">✅ Ventajas</div><div class="itext pro">Incluido en OCI sin costo. Remediación automática vía Responders. Integrado en el ecosistema Cloud Guard. Sin agente adicional.</div></div>
+      <div class="ibox"><div class="ilabel">❌ Desventajas</div><div class="itext con">Solo OKE. KSPM básico. Sin análisis shift-left. Sin runtime protection comparable a Falco.</div></div>
+    </div>
+    <div class="urow">
+      <div class="ubox"><div class="ulabel">Úsalo cuando</div><div class="utext">Tienes OKE en OCI y quieres KSPM básico gratuito integrado con Cloud Guard.</div></div>
+      <div class="ubox no"><div class="ulabel">No lo uses cuando</div><div class="utext">Necesitas KSPM profundo, runtime protection seria o K8s fuera de OCI.</div></div>
+    </div>
+    <div class="prow"><span class="badge b-free">FREE (incluido OCI)</span></div>
+  </div>
+</div>
+
+<div class="tool-card">
+  <div class="card-header"><span class="pdot d-oss"></span><h3>Kubescape</h3><span class="plabel l-oss">OSS / Multi-K8s</span></div>
+  <div class="card-body">
+    <div class="irow">
+      <div class="ibox"><div class="ilabel">¿Qué hace?</div><div class="itext">KSPM open source más completo del mercado. Escanea clústeres K8s contra NSA/CISA, MITRE ATT&CK, CIS Benchmarks. Analiza RBAC, network policies, manifests y configuración del clúster. Modo CLI y in-cluster. CNCF Sandbox.</div></div>
+      <div class="ibox"><div class="ilabel">¿Qué NO hace?</div><div class="itext">Sin runtime protection (complementar con Falco). Sin UI/dashboard muy madura en OSS. Features avanzados en ARMO Platform (pago).</div></div>
+    </div>
+    <div class="irow">
+      <div class="ibox"><div class="ilabel">✅ Ventajas</div><div class="itext pro">Gratuito. El mejor KSPM OSS. NSA + MITRE + CIS frameworks. CLI + in-cluster. Funciona en cualquier K8s (EKS, AKS, GKE, on-prem). Muy activo.</div></div>
+      <div class="ibox"><div class="ilabel">❌ Desventajas</div><div class="itext con">Sin runtime. Features avanzados en ARMO (pago). UI OSS limitada. Relativamente joven.</div></div>
+    </div>
+    <div class="urow">
+      <div class="ubox"><div class="ulabel">Úsalo cuando</div><div class="utext">Quieres el mejor KSPM OSS gratuito para cualquier K8s, multi-cloud o on-premise.</div></div>
+      <div class="ubox no"><div class="ulabel">No lo uses cuando</div><div class="utext">Necesitas CWPP runtime (añade Falco) o solución comercial con soporte dedicado.</div></div>
+    </div>
+    <div class="prow"><span class="badge b-oss">OSS</span><span class="badge b-free">FREE</span><span class="badge b-paid">PAID (ARMO Platform)</span></div>
+  </div>
+</div>
+
+<div class="tool-card">
+  <div class="card-header"><span class="pdot d-oss"></span><h3>kube-bench + Checkov / KICS</h3><span class="plabel l-oss">OSS / Shift-left</span></div>
+  <div class="card-body">
+    <div class="irow">
+      <div class="ibox"><div class="ilabel">¿Qué hace?</div><div class="itext">kube-bench: verifica clústeres K8s contra CIS Benchmarks (apiserver, etcd, kubelet, etc). Checkov/KICS: escáneres de IaC que analizan manifests K8s, Helm charts, Terraform antes del deploy. Shift-left puro para K8s en CI/CD.</div></div>
+      <div class="ibox"><div class="ilabel">¿Qué NO hace?</div><div class="itext">kube-bench solo CIS, no analiza manifests de aplicaciones. Checkov/KICS solo estático. Ninguno hace runtime. Son complemento de Kubescape + Falco, no reemplazo.</div></div>
+    </div>
+    <div class="irow">
+      <div class="ibox"><div class="ilabel">✅ Ventajas</div><div class="itext pro">Gratuitos. Estándar industria. kube-bench = el check CIS de facto. Checkov/KICS = estándar en CI/CD pipelines. Multi-IaC framework.</div></div>
+      <div class="ibox"><div class="ilabel">❌ Desventajas</div><div class="itext con">Solo auditoría/shift-left. Sin runtime. Sin UI. No reemplazan KSPM completo en producción.</div></div>
+    </div>
+    <div class="urow">
+      <div class="ubox"><div class="ulabel">Úsalo cuando</div><div class="utext">Quieres el piso mínimo: kube-bench para CIS y Checkov para detectar malas configs antes de producción.</div></div>
+      <div class="ubox no"><div class="ulabel">No lo uses cuando</div><div class="utext">Necesitas KSPM en producción. Son complemento, no sustituto de Kubescape o Falco.</div></div>
+    </div>
+    <div class="prow"><span class="badge b-oss">OSS</span><span class="badge b-free">FREE</span></div>
+  </div>
+</div>
+
+</div>
+</div>
+
+
+<!-- ===== CNAPP ===== -->
+<div class="section visible" id="section-cnapp">
+<div class="sdiv"></div>
+<div class="section-header">
+  <div class="acronym-tag">CNAPP</div>
+  <div><h2>Cloud Native Application Protection Platform</h2>
+  <p>La convergencia de CSPM + CWPP + CIEM + KSPM + DSPM + CVM en una sola plataforma. Elimina el tool sprawl y correlaciona hallazgos cross-dominio para priorización más inteligente. Como dijo el profesor: <strong>CNAPP = CSPM + CWPP + los agregados que varían por vendor.</strong></p></div>
+</div>
+
+<div class="cnote">
+  <span>💡</span>
+  <div>Cada vendor tiene diferente fortaleza: AWS Security Hub v2 = agregador nativo; Defender for Cloud = mejor en ecosistema Microsoft; SCC Enterprise = mejor en GCP con Chronicle; Cloud Guard OCI = básico e incluido. Los vendors 3rd party (Wiz, Prisma, CrowdStrike) son los CNAPPs "puros" más completos del mercado.</div>
+</div>
+
+<div class="grid">
+
+<div class="tool-card">
+  <div class="card-header"><span class="pdot d-aws"></span><h3>AWS Security Hub v2</h3><span class="plabel l-aws">AWS</span></div>
+  <div class="card-body">
+    <div class="irow"><div class="ibox full"><div class="ilabel">Incluye (según slide del profesor)</div><div class="chips"><span class="chip c-aws">Security Hub</span><span class="chip c-aws">GuardDuty</span><span class="chip c-aws">Inspector</span><span class="chip c-aws">Macie</span><span class="chip c-aws">Config</span><span class="chip c-aws">IAM Access Analyzer</span></div></div></div>
+    <div class="irow">
+      <div class="ibox"><div class="ilabel">Como CNAPP cubre</div><div class="itext pro">✅ CSPM (Config + Security Hub) · ✅ CWPP detección (GuardDuty) · ✅ CVM (Inspector) · ⚠️ CIEM básico (IAM AA) · ⚠️ DSPM parcial S3 (Macie) · ⚠️ KSPM EKS</div></div>
+      <div class="ibox"><div class="ilabel">Limitaciones CNAPP</div><div class="itext con">Sin Security Graph. Sin correlación de rutas de ataque. Solo AWS. CIEM y DSPM básicos. Sin plataforma unificada real: son servicios coordinados, no un CNAPP diseñado como tal.</div></div>
+    </div>
+    <div class="urow">
+      <div class="ubox"><div class="ulabel">Úsalo cuando</div><div class="utext">Eres AWS-native y quieres CNAPP sin vendor externo. Suficiente para la mayoría de casos AWS.</div></div>
+      <div class="ubox no"><div class="ulabel">Agrega 3rd party cuando</div><div class="utext">Necesitas multi-cloud, Security Graph, rutas de ataque visuales, o CIEM/DSPM profundos: evalúa Wiz.</div></div>
+    </div>
+    <div class="prow"><span class="badge b-partial">PARTIAL FREE</span><span class="badge b-paid">PAID (por servicio)</span></div>
+  </div>
+</div>
+
+<div class="tool-card">
+  <div class="card-header"><span class="pdot d-az"></span><h3>Microsoft Defender for Cloud (con add-ons activos)</h3><span class="plabel l-az">Azure</span></div>
+  <div class="card-body">
+    <div class="irow"><div class="ibox full"><div class="ilabel">Add-ons para CNAPP completo</div><div class="chips"><span class="chip c-az">Defender CSPM</span><span class="chip c-az">Defender Servers P2</span><span class="chip c-az">Defender for Containers</span><span class="chip c-az">Entra Permissions Mgmt</span><span class="chip c-az">Purview</span></div></div></div>
+    <div class="irow">
+      <div class="ibox"><div class="ilabel">Como CNAPP cubre</div><div class="itext pro">✅ CSPM (Attack Path) · ✅ CWPP EDR real (MDE) · ✅ CIEM (Entra Permissions) · ✅ CVM (Defender VM) · ✅ KSPM (Defender Containers) · ⚠️ DSPM (requiere Purview)</div></div>
+      <div class="ibox"><div class="ilabel">Limitaciones CNAPP</div><div class="itext con">Costo total de add-ons puede ser muy elevado. Attack Path menos maduro que Wiz. Mejor en Azure que en AWS/GCP. Implementación compleja.</div></div>
+    </div>
+    <div class="urow">
+      <div class="ubox"><div class="ulabel">Úsalo cuando</div><div class="utext">Eres Azure-first o Microsoft-first con presupuesto para los add-ons. El CNAPP nativo más completo de los big 3.</div></div>
+      <div class="ubox no"><div class="ulabel">Agrega 3rd party cuando</div><div class="utext">Multi-cloud AWS/GCP dominante, o el costo de todos los add-ons es prohibitivo.</div></div>
+    </div>
+    <div class="prow"><span class="badge b-free">FREE (básico)</span><span class="badge b-paid">PAID (add-ons, puede ser muy costoso)</span></div>
+  </div>
+</div>
+
+<div class="tool-card">
+  <div class="card-header"><span class="pdot d-gcp"></span><h3>Security Command Center Enterprise</h3><span class="plabel l-gcp">GCP</span></div>
+  <div class="card-body">
+    <div class="irow"><div class="ibox full"><div class="ilabel">Incluye en tier Enterprise</div><div class="chips"><span class="chip c-gcp">SCC Enterprise</span><span class="chip c-gcp">Chronicle SIEM</span><span class="chip c-gcp">Gemini AI</span><span class="chip c-gcp">ETD + CTD + VMTD</span><span class="chip c-gcp">Sensitive Data Protection</span></div></div></div>
+    <div class="irow">
+      <div class="ibox"><div class="ilabel">Como CNAPP cubre</div><div class="itext pro">✅ CSPM · ✅ CWPP (ETD/CTD/VMTD) · ✅ CVM · ✅ KSPM (GKE) · ⚠️ CIEM básico · ⚠️ DSPM parcial · ✅ SIEM Chronicle + Gemini AI</div></div>
+      <div class="ibox"><div class="ilabel">Limitaciones CNAPP</div><div class="itext con">Precio muy elevado. Sin Security Graph comparable a Wiz. CIEM no tan maduro. Conectores multi-cloud limitados. Chronicle requiere expertise SIEM.</div></div>
+    </div>
+    <div class="urow">
+      <div class="ubox"><div class="ulabel">Úsalo cuando</div><div class="utext">Eres GCP-first y quieres CNAPP completo con el mejor SIEM del mercado (Chronicle). Gemini AI diferenciador.</div></div>
+      <div class="ubox no"><div class="ulabel">Agrega 3rd party cuando</div><div class="utext">Multi-cloud no-GCP dominante, o el precio Enterprise no se justifica.</div></div>
+    </div>
+    <div class="prow"><span class="badge b-paid">PAID (Enterprise, precio elevado)</span></div>
+  </div>
+</div>
+
+<div class="tool-card">
+  <div class="card-header"><span class="pdot d-oci"></span><h3>Oracle Cloud Guard</h3><span class="plabel l-oci">Oracle Cloud</span></div>
+  <div class="card-body">
+    <div class="irow">
+      <div class="ibox"><div class="ilabel">Como CNAPP cubre</div><div class="itext pro">✅ CSPM · ⚠️ CWPP básico (Threat Detector) · ⚠️ KSPM básico (OKE) · ⚠️ CVM básico (VSS) · ⚠️ CIEM básico · ❌ DSPM incompleto (solo BD Oracle via Data Safe)</div></div>
+      <div class="ibox"><div class="ilabel">Limitaciones CNAPP</div><div class="itext con">El CNAPP más básico de los big 4. Sin CIEM avanzado ni DSPM completo. Sin runtime protection seria. Sin grafo de ataque. Solo OCI.</div></div>
+    </div>
+    <div class="urow">
+      <div class="ubox"><div class="ulabel">Úsalo cuando</div><div class="utext">Tu infra es OCI. Es el punto de partida gratuito e incluido. Para cargas críticas, complementar con Wiz o Prisma.</div></div>
+      <div class="ubox no"><div class="ulabel">No lo uses cuando</div><div class="utext">Necesitas CNAPP completo para cargas críticas en OCI: agregar Wiz o Prisma Cloud encima.</div></div>
+    </div>
+    <div class="prow"><span class="badge b-free">FREE (incluido OCI)</span></div>
+  </div>
+</div>
+
+<div class="tool-card">
+  <div class="card-header"><span class="pdot d-multi"></span><h3>Wiz</h3><span class="plabel l-multi">Multi-cloud · Líder Gartner CNAPP 2024</span></div>
+  <div class="card-body">
+    <div class="irow">
+      <div class="ibox"><div class="ilabel">CNAPP — fortalezas</div><div class="itext">Security Graph único: correlaciona CSPM + CVM + CIEM + DSPM + KSPM para mostrar rutas de ataque reales. Sin agente. Implementación en horas. AWS, Azure, GCP, OCI, Alibaba. El CNAPP que más rápido creció en la historia del mercado.</div></div>
+      <div class="ibox"><div class="ilabel">CNAPP — debilidades</div><div class="itext">CWPP/runtime menos profundo que Prisma/CrowdStrike. Sin on-premise. Precio muy alto. Sin versión SMB ni POC gratuito. Sin EDR/AV. No apto para pequeñas empresas.</div></div>
+    </div>
+    <div class="irow">
+      <div class="ibox"><div class="ilabel">Cubre</div><div class="itext pro">✅ CSPM ✅ CIEM ✅ CVM ✅ KSPM ✅ DSPM ✅ Attack Path · ⚠️ CWPP básico sin EDR</div></div>
+      <div class="ibox"><div class="ilabel">Mejor para</div><div class="itext">Empresa mediana/grande, cloud-native, multi-cloud, que prioriza posture y correlación de riesgos. El estándar de facto en startups Series C+.</div></div>
+    </div>
+    <div class="prow"><span class="badge b-paid">PAID (Enterprise, >$100K/año)</span></div>
+  </div>
+</div>
+
+<div class="tool-card">
+  <div class="card-header"><span class="pdot d-multi"></span><h3>Prisma Cloud (Palo Alto Networks)</h3><span class="plabel l-multi">Multi-cloud · CWPP-first</span></div>
+  <div class="card-body">
+    <div class="irow">
+      <div class="ibox"><div class="ilabel">CNAPP — fortalezas</div><div class="itext">El CNAPP con más features del mercado. Muy fuerte en CWPP (herencia Twistlock). Shift-left muy maduro: code security, IaC, secrets scanning. Soporta on-premise parcialmente. Multi-cloud: AWS/Azure/GCP/OCI/Alibaba.</div></div>
+      <div class="ibox"><div class="ilabel">CNAPP — debilidades</div><div class="itext">Producto muy complejo con UI fragmentada (herencia de múltiples adquisiciones). Precio muy alto. Implementación puede tomar meses. Requiere agente para CWPP completo.</div></div>
+    </div>
+    <div class="irow">
+      <div class="ibox"><div class="ilabel">Cubre</div><div class="itext pro">✅ CSPM ✅ CWPP (líder) ✅ CIEM ✅ CVM ✅ KSPM ✅ DSPM ✅ Shift-left ✅ Code Security</div></div>
+      <div class="ibox"><div class="ilabel">Mejor para</div><div class="itext">Enterprise que necesita el CNAPP más completo del mercado y tiene recursos para implementación y operación complejas.</div></div>
+    </div>
+    <div class="prow"><span class="badge b-paid">PAID (Enterprise, muy costoso)</span></div>
+  </div>
+</div>
+
+<div class="tool-card">
+  <div class="card-header"><span class="pdot d-multi"></span><h3>CrowdStrike Falcon Cloud Security</h3><span class="plabel l-multi">Multi-cloud · EDR-first</span></div>
+  <div class="card-body">
+    <div class="irow">
+      <div class="ibox"><div class="ilabel">CNAPP — fortalezas</div><div class="itext">El mejor CWPP/EDR del mercado (Falcon sensor) integrado en CNAPP. Runtime protection excepcional. Threat intelligence superior. Ideal si ya usas Falcon en endpoints: misma plataforma para todo. IA/ML avanzado.</div></div>
+      <div class="ibox"><div class="ilabel">CNAPP — debilidades</div><div class="itext">CSPM menos maduro que Wiz. Sin Security Graph tan potente. Precio elevado. Requiere agente Falcon. Mejor con ecosistema CrowdStrike completo para aprovechar inteligencia correlacionada.</div></div>
+    </div>
+    <div class="irow">
+      <div class="ibox"><div class="ilabel">Cubre</div><div class="itext pro">✅ CWPP (líder) ✅ CSPM ✅ CIEM ✅ CVM · ⚠️ KSPM básico · ⚠️ DSPM básico</div></div>
+      <div class="ibox"><div class="ilabel">Mejor para</div><div class="itext">Orgs que ya usan CrowdStrike Falcon para endpoints y quieren extender protección a la nube con el mismo vendor y la misma inteligencia.</div></div>
+    </div>
+    <div class="prow"><span class="badge b-paid">PAID</span></div>
+  </div>
+</div>
+
+<div class="tool-card">
+  <div class="card-header"><span class="pdot d-oss"></span><h3>Stack OSS: Prowler + Falco + Trivy + Kubescape</h3><span class="plabel l-oss">DIY CNAPP / OSS</span></div>
+  <div class="card-body">
+    <div class="irow"><div class="ibox full"><div class="ilabel">Componentes</div><div class="chips"><span class="chip c-oss">Prowler (CSPM)</span><span class="chip c-oss">Falco (CWPP runtime)</span><span class="chip c-oss">Trivy (CVM imágenes)</span><span class="chip c-oss">Kubescape (KSPM)</span><span class="chip c-oss">CloudSplaining (CIEM)</span><span class="chip c-oss">OpenVAS (VMs)</span></div></div></div>
+    <div class="irow">
+      <div class="ibox"><div class="ilabel">CNAPP OSS — lo que hace</div><div class="itext">Stack completo OSS que cubre todos los dominios CNAPP. Prowler (CSPM multi-cloud) + Falco (CWPP/runtime K8s) + Trivy (CVM imágenes + IaC) + Kubescape (KSPM) + CloudSplaining (CIEM AWS). Dashboard via Grafana/ELK.</div></div>
+      <div class="ibox"><div class="ilabel">CNAPP OSS — lo que no puede</div><div class="itext">Sin correlación automática entre dominios (ese es el valor del CNAPP comercial). Alto costo operativo en personas. Sin soporte 24/7. Sin Security Graph automático. Escala difícil en entornos muy grandes.</div></div>
+    </div>
+    <div class="irow">
+      <div class="ibox"><div class="ilabel">✅ Ventajas</div><div class="itext pro">Costo de licencia: $0. Control total. Sin vendor lock-in. On-premise + multi-cloud. Ideal para aprender y equipos técnicos con presupuesto limitado.</div></div>
+      <div class="ibox"><div class="ilabel">❌ Desventajas</div><div class="itext con">Alto TCO en personas (DevSecOps dedicados). Sin correlación automática. Sin soporte. No escala fácil en enterprises.</div></div>
+    </div>
+    <div class="urow">
+      <div class="ubox"><div class="ulabel">Úsalo cuando</div><div class="utext">Presupuesto de licencias limitado, equipo técnico fuerte, o quieres construir capacidad interna antes de invertir en plataforma comercial.</div></div>
+      <div class="ubox no"><div class="ulabel">No lo uses cuando</div><div class="utext">No tienes DevSecOps internos, necesitas correlación automática de riesgos o SLA de soporte comercial.</div></div>
+    </div>
+    <div class="prow"><span class="badge b-oss">OSS</span><span class="badge b-free">FREE (licencias)</span></div>
+  </div>
+</div>
+
+</div>
+</div>
+
+<div class="foot">Basado en el slide del profesor Dario Goldfarb — Sesión de Cloud Security. Información actualizada 2024–2025. Precios y características pueden variar. Verificar con vendors antes de tomar decisiones de compra.</div>
+
+</main>
+
+<script>
+function go(id, btn) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  const ref = document.getElementById('section-ref');
+  const sections = document.querySelectorAll('main .section');
+  if (id === 'all') {
+    ref.style.display = 'block';
+    sections.forEach(s => s.classList.add('visible'));
+  } else if (id === 'ref') {
+    ref.style.display = 'block';
+    sections.forEach(s => s.classList.remove('visible'));
+  } else {
+    ref.style.display = 'none';
+    sections.forEach(s => {
+      s.classList.toggle('visible', s.id === 'section-' + id);
+    });
+  }
+}
+</script>
+</body>
+</html>

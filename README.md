@@ -32,6 +32,7 @@ Cuadros comparativos y guías de referencia generados con Claude, centralizados 
 | VPN Comparativa 2026 — Estado del Arte | IT, Seguridad |
 | Comparativo de Certificaciones Profesionales 2026 | IT |
 | Herramientas para Monorepos — Comparativa 2026 | Dev Tools |
+| Seguridad en Nube — Cuadro Comparativo | IT, Seguridad, Cloud |
 
 ## Activar GitHub Pages
 

@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>schema_history — Comparativa de herramientas de migración de BD</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700;800&display=swap');
+
+  :root{
+    --bg: #0a0e14;
+    --bg-raised: #10151d;
+    --bg-row: #0d1218;
+    --bg-row-alt: #0f141b;
+    --line: #1d2733;
+    --line-soft: #161e28;
+    --text: #cdd6e0;
+    --text-dim: #76879c;
+    --text-faint: #4a5868;
+    --accent-green: #3fb950;
+    --accent-amber: #d29922;
+    --accent-red: #f85149;
+    --accent-blue: #58a6ff;
+    --accent-purple: #bc8cff;
+    --mono: 'JetBrains Mono', monospace;
+    --sans: 'Inter', sans-serif;
+  }
+
+  *{box-sizing:border-box; margin:0; padding:0;}
+
+  body{
+    background:
+      radial-gradient(ellipse 1200px 600px at 15% -10%, rgba(63,185,80,.06), transparent),
+      radial-gradient(ellipse 1000px 500px at 100% 0%, rgba(88,166,255,.05), transparent),
+      var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    line-height: 1.5;
+    padding-bottom: 80px;
+  }
+
+  /* ===== HERO ===== */
+  .hero{
+    border-bottom: 1px solid var(--line);
+    padding: 56px 32px 36px;
+    max-width: 1400px;
+    margin: 0 auto;
+    position: relative;
+  }
+  .hero-eyebrow{
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--accent-green);
+    letter-spacing: .08em;
+    display:flex;
+    align-items:center;
+    gap:10px;
+    margin-bottom: 18px;
+  }
+  .hero-eyebrow .dot{width:7px;height:7px;border-radius:50%;background:var(--accent-green); box-shadow:0 0 8px var(--accent-green); animation: pulse 2s ease-in-out infinite;}
+  @keyframes pulse{0%,100%{opacity:1} 50%{opacity:.35}}
+
+  h1{
+    font-size: clamp(28px, 4vw, 46px);
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    color: #f0f4f8;
+    max-width: 820px;
+  }
+  h1 .accent{
+    background: linear-gradient(90deg, var(--accent-green), var(--accent-blue));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .hero p.lead{
+    margin-top: 14px;
+    color: var(--text-dim);
+    font-size: 15.5px;
+    max-width: 680px;
+  }
+  .hero-meta{
+    margin-top: 26px;
+    display:flex;
+    gap: 26px;
+    flex-wrap: wrap;
+    font-family: var(--mono);
+    font-size: 12.5px;
+    color: var(--text-faint);
+  }
+  .hero-meta b{color: var(--text-dim); font-weight:600;}
+
+  .diff-strip{
+    margin-top: 28px;
+    border: 1px solid var(--line);
+    background: var(--bg-raised);
+    border-radius: 8px;
+    overflow: hidden;
+    font-family: var(--mono);
+    font-size: 12.5px;
+    max-width: 620px;
+  }
+  .diff-strip .line{padding: 5px 14px; border-bottom: 1px solid var(--line-soft); display:flex; gap:10px;}
+  .diff-strip .line:last-child{border-bottom:none;}
+  .diff-strip .line span.tag{color: var(--text-faint); width: 130px; flex-shrink:0;}
+  .diff-strip .add{color: var(--accent-green);}
+  .diff-strip .rm{color: var(--accent-red);}
+
+  /* ===== CONTROLS ===== */
+  .controls{
+    max-width: 1400px;
+    margin: 28px auto 0;
+    padding: 0 32px;
+    display:flex;
+    flex-wrap: wrap;
+    gap: 14px;
+    align-items: center;
+  }
+  .search-box{
+    position: relative;
+    flex: 1 1 260px;
+  }
+  .search-box input{
+    width: 100%;
+    background: var(--bg-raised);
+    border: 1px solid var(--line);
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 13.5px;
+    padding: 11px 14px 11px 36px;
+    border-radius: 7px;
+    outline: none;
+    transition: border-color .15s;
+  }
+  .search-box input:focus{border-color: var(--accent-blue);}
+  .search-box::before{
+    content: '>';
+    position: absolute;
+    left: 14px; top: 50%; transform: translateY(-50%);
+    color: var(--accent-green);
+    font-family: var(--mono);
+    font-weight: 700;
+  }
+  .filter-group{display:flex; gap:7px; flex-wrap:wrap;}
+  .chip{
+    font-family: var(--mono);
+    font-size: 12px;
+    padding: 7px 13px;
+    border-radius: 20px;
+    border: 1px solid var(--line);
+    background: var(--bg-raised);
+    color: var(--text-dim);
+    cursor: pointer;
+    transition: all .15s;
+    white-space: nowrap;
+  }
+  .chip:hover{border-color: var(--text-faint); color: var(--text);}
+  .chip.active{
+    background: rgba(63,185,80,.12);
+    border-color: var(--accent-green);
+    color: var(--accent-green);
+  }
+  .filter-label{font-family: var(--mono); font-size: 11px; color: var(--text-faint); margin-right:2px; text-transform:uppercase; letter-spacing:.05em;}
+  .results-count{font-family: var(--mono); font-size: 12px; color: var(--text-faint); margin-left:auto; padding-top:4px;}
+
+  /* ===== TABLE ===== */
+  .table-wrap{
+    max-width: 1400px;
+    margin: 24px auto 0;
+    padding: 0 32px;
+  }
+  .scroll-hint{
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text-faint);
+    margin-bottom: 8px;
+    display:none;
+  }
+  table{
+    width: 100%;
+    border-collapse: collapse;
+    background: var(--bg-raised);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    overflow: hidden;
+    table-layout: fixed;
+  }
+  thead th{
+    text-align: left;
+    font-family: var(--mono);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    color: var(--text-faint);
+    padding: 13px 16px;
+    border-bottom: 1px solid var(--line);
+    background: #0c1016;
+    position: sticky;
+    top: 0;
+  }
+  col.col-tool{width: 180px;}
+  col.col-cat{width: 110px;}
+  col.col-meta{width: 150px;}
+  col.col-text{width: auto;}
+
+  tbody tr{border-bottom: 1px solid var(--line-soft);}
+  tbody tr:last-child{border-bottom:none;}
+  tbody tr.hidden{display:none;}
+  tbody tr:hover{background: rgba(88,166,255,.035);}
+
+  td{padding: 16px; vertical-align: top; font-size: 13.5px; color: var(--text);}
+  td.tool-cell{
+    font-family: var(--mono);
+  }
+  .tool-name{font-weight:700; color:#f0f4f8; font-size:14.5px; display:block;}
+  .tool-creator{color: var(--text-faint); font-size:11px; margin-top:4px; display:block;}
+  .tool-lang{
+    display:inline-block;
+    margin-top:8px;
+    font-size: 10.5px;
+    color: var(--accent-purple);
+    border: 1px solid rgba(188,140,255,.3);
+    background: rgba(188,140,255,.07);
+    padding: 2px 7px;
+    border-radius: 4px;
+  }
+
+  .badge{
+    display:inline-block;
+    font-family: var(--mono);
+    font-size: 10.5px;
+    font-weight:600;
+    padding: 3px 9px;
+    border-radius: 4px;
+    letter-spacing:.02em;
+    white-space:nowrap;
+  }
+  .badge-legacy{background: rgba(248,81,73,.1); color: var(--accent-red); border:1px solid rgba(248,81,73,.3);}
+  .badge-current{background: rgba(63,185,80,.1); color: var(--accent-green); border:1px solid rgba(63,185,80,.3);}
+  .badge-emerging{background: rgba(88,166,255,.1); color: var(--accent-blue); border:1px solid rgba(88,166,255,.3);}
+
+  .price{
+    margin-top:10px;
+    font-family: var(--mono);
+    font-size: 10.5px;
+    padding: 3px 8px;
+    border-radius: 4px;
+    display:inline-block;
+  }
+  .price-free{background: rgba(63,185,80,.1); color: var(--accent-green);}
+  .price-freemium{background: rgba(210,153,34,.1); color: var(--accent-amber);}
+  .price-paid{background: rgba(248,81,73,.1); color: var(--accent-red);}
+
+  .field-label{
+    font-family: var(--mono);
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing:.05em;
+    margin-bottom: 3px;
+    display:flex;
+    align-items:center;
+    gap:5px;
+  }
+  .field-label.ok{color: var(--accent-green);}
+  .field-label.no{color: var(--accent-red);}
+  .field-label.when{color: var(--accent-blue);}
+  .field-label.skip{color: var(--text-faint);}
+  .field-block{margin-bottom: 12px;}
+  .field-block:last-child{margin-bottom:0;}
+  .field-block p{color: var(--text-dim); font-size: 12.8px; line-height:1.5;}
+
+  /* empty state */
+  .empty-state{
+    text-align:center;
+    padding: 60px 20px;
+    font-family: var(--mono);
+    color: var(--text-faint);
+    display:none;
+  }
+
+  /* legend footer */
+  .legend{
+    max-width: 1400px;
+    margin: 28px auto 0;
+    padding: 0 32px;
+    display:flex;
+    gap: 22px;
+    flex-wrap:wrap;
+    font-family: var(--mono);
+    font-size: 11.5px;
+    color: var(--text-faint);
+  }
+  .legend span{display:flex; align-items:center; gap:6px;}
+  .legend .sw{width:9px;height:9px;border-radius:2px;}
+
+  footer{
+    max-width:1400px;
+    margin: 46px auto 0;
+    padding: 20px 32px 0;
+    border-top: 1px solid var(--line);
+    font-family: var(--mono);
+    font-size: 11.5px;
+    color: var(--text-faint);
+  }
+
+  @media (max-width: 900px){
+    table{table-layout:auto;}
+    col{width:auto !important;}
+    .scroll-hint{display:block;}
+    .table-wrap{overflow-x:auto;}
+    table{min-width: 1100px;}
+    .hero{padding: 40px 18px 28px;}
+    .controls, .legend, footer{padding-left:18px; padding-right:18px;}
+    .table-wrap{padding: 0 18px;}
+  }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="hero-eyebrow"><span class="dot"></span>SCHEMA_HISTORY · COMPARATIVA 2026</div>
+  <h1>Herramientas para <span class="accent">migrar y versionar</span> bases de datos</h1>
+  <p class="lead">Una tabla comparativa de 14 herramientas — desde las clásicas que definieron la categoría hasta el enfoque declarativo "schema-as-code" que está ganando terreno en 2026. Filtra por estado, licencia o busca por nombre.</p>
+
+  <div class="hero-meta">
+    <div><b>14</b> herramientas</div>
+    <div><b>3</b> generaciones: legacy → actual → emergente</div>
+    <div>Actualizado <b>junio 2026</b></div>
+  </div>
+
+  <div class="diff-strip">
+    <div class="line"><span class="tag">V001__init.sql</span><span class="add">+ applied · 2026-06-30</span></div>
+    <div class="line"><span class="tag">V002__legacy.sql</span><span class="rm">- deprecated approach</span></div>
+    <div class="line"><span class="tag">V003__declarative.hcl</span><span class="add">+ desired state</span></div>
+  </div>
+</div>
+
+<div class="controls">
+  <div class="search-box">
+    <input type="text" id="searchInput" placeholder="buscar por nombre, lenguaje, creador...">
+  </div>
+  <div class="filter-group" id="catFilters">
+    <span class="filter-label">Estado:</span>
+    <button class="chip active" data-filter-type="cat" data-value="all">Todas</button>
+    <button class="chip" data-filter-type="cat" data-value="legacy">Legacy</button>
+    <button class="chip" data-filter-type="cat" data-value="current">Actual</button>
+    <button class="chip" data-filter-type="cat" data-value="emerging">Emergente</button>
+  </div>
+  <div class="filter-group" id="priceFilters">
+    <span class="filter-label">Precio:</span>
+    <button class="chip active" data-filter-type="price" data-value="all">Todas</button>
+    <button class="chip" data-filter-type="price" data-value="free">Free / OSS</button>
+    <button class="chip" data-filter-type="price" data-value="freemium">Freemium</button>
+    <button class="chip" data-filter-type="price" data-value="paid">Pago</button>
+  </div>
+  <div class="results-count" id="resultsCount"></div>
+</div>
+
+<div class="table-wrap">
+  <div class="scroll-hint">⟷ desliza horizontalmente para ver la tabla completa</div>
+  <table id="toolsTable">
+    <colgroup>
+      <col class="col-tool"><col class="col-cat"><col class="col-text"><col class="col-text"><col class="col-text"><col class="col-meta">
+    </colgroup>
+    <thead>
+      <tr>
+        <th>Herramienta</th>
+        <th>Estado</th>
+        <th>Qué es / qué hace</th>
+        <th>Qué NO hace</th>
+        <th>Cuándo usarla / cuándo no</th>
+        <th>Licencia · Origen</th>
+      </tr>
+    </thead>
+    <tbody id="tableBody"></tbody>
+  </table>
+  <div class="empty-state" id="emptyState">// sin resultados — prueba otro término o quita filtros</div>
+</div>
+
+<div class="legend">
+  <span><span class="sw" style="background:var(--accent-red)"></span> Legacy — sigue funcionando, ya no es la opción por defecto</span>
+  <span><span class="sw" style="background:var(--accent-green)"></span> Actual — estado del arte, uso recomendado hoy</span>
+  <span><span class="sw" style="background:var(--accent-blue)"></span> Emergente — nueva generación, adopción creciente</span>
+</div>
+
+<footer>
+  schema_history.sql — comparativa generada para referencia técnica. Precios y posicionamiento pueden cambiar; verifica siempre la documentación oficial de cada proveedor antes de decidir.
+</footer>
+
+<script>
+const TOOLS = [
+  {
+    name: "Sqitch",
+    creator: "David E. Wheeler (independiente, 2012)",
+    lang: "Perl · agnóstico de BD",
+    cat: "legacy",
+    price: "free",
+    priceLabel: "Free / OSS (MIT)",
+    es: "Herramienta de control de cambios de base de datos sin framework de migraciones automáticas. No genera SQL: tú escribes cada script deploy/revert/verify y Sqitch orquesta el orden mediante un \"plan\" explícito (sin numeración de archivos).",
+    hace: "Gestiona dependencias entre cambios con --requires, soporta tags y bundles para releases, separa deploy/revert/verify como pasos independientes, y trabaja con PostgreSQL, MySQL, SQLite, Oracle, Snowflake y más.",
+    noHace: "No autogenera migraciones a partir de un ORM, no tiene GUI, no hace diff de esquemas, y no calcula automáticamente qué cambió entre dos estados.",
+    cuando: "Cuando quieres control total y explícito sobre el orden de cambios y separar claramente deploy/rollback/verificación, típico en equipos disciplinados con SQL nativo.",
+    cuandoNo: "Si buscas algo más simple y convencional (numeración automática) o integración nativa con un ORM moderno — la curva de aprendizaje de Sqitch no compensa en proyectos pequeños."
+  },
+  {
+    name: "Rails Active Record Migrations",
+    creator: "David Heinemeier Hansson / Rails Core (2004)",
+    lang: "Ruby · Ruby on Rails",
+    cat: "legacy",
+    price: "free",
+    priceLabel: "Free / OSS (MIT)",
+    es: "El sistema de migraciones embebido en Ruby on Rails desde sus inicios. Define cambios de esquema como clases Ruby versionadas por timestamp, que se traducen a SQL según el adaptador de BD configurado.",
+    hace: "Genera y mantiene schema.rb (o structure.sql) como fuente de verdad, soporta rollback por pasos, se integra con generadores de modelos (rails generate migration), y abstrae diferencias entre PostgreSQL, MySQL y SQLite.",
+    noHace: "No es independiente del framework — no se usa sin Rails. No ofrece revisión/aprobación de cambios, ni linting de migraciones destructivas, ni soporte multi-BD heterogéneo en el mismo proyecto.",
+    cuando: "Si tu stack ya es Rails: es la opción nativa, simple y bien integrada con todo el ciclo de vida de la app.",
+    cuandoNo: "Fuera del ecosistema Rails no tiene sentido adoptarla; tampoco es ideal si necesitas gobernanza centralizada de cambios entre múltiples equipos/servicios."
+  },
+  {
+    name: "Django Migrations",
+    creator: "Django Software Foundation (introducidas en Django 1.7, 2014)",
+    lang: "Python · Django ORM",
+    cat: "legacy",
+    price: "free",
+    priceLabel: "Free / OSS (BSD)",
+    es: "Sistema de migraciones integrado en el ORM de Django. Detecta cambios en los modelos Python y genera automáticamente archivos de migración versionados (makemigrations / migrate).",
+    hace: "Autogenera migraciones por diff de modelos, resuelve dependencias entre apps, soporta migraciones de datos además de esquema, y permite migraciones reversibles cuando es posible.",
+    noHace: "Fuera de Django no funciona. La autogeneración falla en cambios complejos (renombrados ambiguos, varias operaciones simultáneas) y requiere revisión manual; no detecta drift entre entornos.",
+    cuando: "Para cualquier proyecto Django: es la opción por defecto, madura y bien documentada.",
+    cuandoNo: "Si tu equipo no usa Django, o necesitas gestionar el mismo esquema desde múltiples lenguajes/servicios — ahí conviene una herramienta agnóstica del framework."
+  },
+  {
+    name: "Flyway",
+    creator: "Axel Fontaine (2010); adquirida por Redgate en 2019",
+    lang: "Java/JVM · 30+ motores de BD",
+    cat: "current",
+    price: "freemium",
+    priceLabel: "Community free · Teams descontinuado · Enterprise (cotización)",
+    es: "El migrador \"SQL-first\" más extendido en el mundo Java. Numeras archivos SQL (V1__crear_usuarios.sql, V2__...), Flyway los ejecuta en orden y guarda el historial en una tabla de metadatos.",
+    hace: "Migraciones versionadas y repetibles (prefijo R__ para vistas/procedimientos), validación e info para dry-runs, plugins nativos de Maven/Gradle, imágenes Docker para CI, y desde 2025 detección de drift (flyway check -drift) en ediciones de pago.",
+    noHace: "La Community no incluye rollback automático (hay que escribirlo a mano); no detecta conflictos de merge entre ramas; soporte limitado fuera de bases relacionales clásicas. En 2025 Redgate eliminó el tier Teams para nuevos clientes, empujando a Enterprise.",
+    cuando: "Equipos Java/JVM con cambios de esquema relativamente directos (crear, alterar, borrar) que quieren simplicidad y SQL nativo, integrado a CI/CD.",
+    cuandoNo: "Si necesitas rollback automático robusto, gobernanza de aprobaciones, o trabajas con ramas de migración que compiten frecuentemente — ahí Liquibase, Atlas o Bytebase encajan mejor."
+  },
+  {
+    name: "Liquibase",
+    creator: "Nathan Voxland (2006); empresa antes llamada Datical",
+    lang: "Java/JVM · 50+ motores de BD",
+    cat: "current",
+    price: "freemium",
+    priceLabel: "OSS free (FSL desde v5.0) · Pro desde ~$1,259/target/año",
+    es: "Herramienta de migración basada en \"changelogs\" en XML, YAML, JSON o SQL, en vez de scripts SQL puros. Un mismo changelog puede teóricamente aplicarse a distintos motores de BD.",
+    hace: "Rollback granular (rollback-one-changeset), diff de esquemas y generación de changelog deployable, preconditions para bloquear cambios riesgosos, reportes de drift mejorados, y orquestación avanzada vía \"Flow\" (con condicionales en 2025).",
+    noHace: "La capa de abstracción no elimina del todo el SQL específico de cada motor en casos complejos; desde la versión 5.0 requiere Java 17+ y cambió a la Functional Source License, lo que limita algunas funciones en la edición libre.",
+    cuando: "Entornos enterprise/regulados con múltiples motores de BD, donde rollback formal, trazabilidad y políticas de cambio son requisito.",
+    cuandoNo: "Para un equipo pequeño con una sola BD y cambios simples, la flexibilidad de Liquibase es sobre-ingeniería — Flyway o un migrador ligero del lenguaje son más rápidos de adoptar."
+  },
+  {
+    name: "Alembic",
+    creator: "Mike Bayer, creador de SQLAlchemy (2011)",
+    lang: "Python · SQLAlchemy",
+    cat: "current",
+    price: "free",
+    priceLabel: "Free / OSS (MIT)",
+    es: "El migrador de facto del ecosistema Python/SQLAlchemy. Genera scripts de migración en Python autogenerados por diff entre los modelos SQLAlchemy y el estado real de la BD.",
+    hace: "Autogeneración de migraciones (alembic revision --autogenerate), soporta upgrade/downgrade explícitos, ramas y merges de migraciones, y se integra con cualquier backend soportado por SQLAlchemy.",
+    noHace: "No es independiente de SQLAlchemy; la autogeneración no detecta todo (renombrados, algunos cambios de tipo) y exige revisión manual; no ofrece GUI ni gobernanza de aprobaciones.",
+    cuando: "Cualquier proyecto Python que use SQLAlchemy (con o sin framework web) — es la opción estándar y bien mantenida.",
+    cuandoNo: "Si no usas SQLAlchemy como capa de acceso a datos, o necesitas un flujo declarativo multi-lenguaje, conviene mirar Atlas o un migrador agnóstico."
+  },
+  {
+    name: "golang-migrate",
+    creator: "Comunidad open source (golang-migrate/migrate)",
+    lang: "Go · agnóstico de BD",
+    cat: "current",
+    price: "free",
+    priceLabel: "Free / OSS (MIT)",
+    es: "Librería y CLI minimalista para migraciones versionadas en Go. Archivos *.up.sql / *.down.sql numerados, sin magia ni autogeneración — solo aplica lo que escribiste.",
+    hace: "Soporta decenas de bases de datos y \"sources\" (archivos locales, S3, GitHub, etc.), se puede usar como librería embebida en binarios Go, y es muy ligero para pipelines de CI simples.",
+    noHace: "No detecta drift, no autogenera migraciones, no tiene linting de cambios destructivos, no ofrece GUI ni gestión de aprobaciones.",
+    cuando: "Microservicios o binarios Go que necesitan migrar su propia BD al arrancar, con cambios simples y equipos pequeños.",
+    cuandoNo: "Para gobernanza multi-equipo, rollback complejo o BDs muy heterogéneas — su simplicidad se vuelve limitante."
+  },
+  {
+    name: "Skeema",
+    creator: "Evan Elias / Skeema LLC",
+    lang: "Go · enfocado en MySQL/MariaDB",
+    cat: "current",
+    price: "freemium",
+    priceLabel: "Community free (OSS) · Premium con soporte y CI avanzado",
+    es: "Herramienta declarativa especializada en MySQL y MariaDB: defines el esquema deseado como archivos .sql por tabla (como si fuera código fuente) y Skeema calcula el DDL necesario para llegar a ese estado.",
+    hace: "Workflow tipo \"esquema como código\" con diff automático, integración con linters de CI, soporte para online schema change (gh-ost/pt-osc) en tablas grandes, y gestión de múltiples entornos (dev/staging/prod).",
+    noHace: "No soporta otros motores fuera de MySQL/MariaDB; no es un migrador versionado tradicional (no genera historial de scripts incrementales), por lo que no encaja si necesitas un changelog auditable paso a paso.",
+    cuando: "Equipos centrados 100% en MySQL/MariaDB que quieren tratar el esquema como código fuente versionado en Git, con diffs automáticos.",
+    cuandoNo: "Si usas PostgreSQL, SQL Server u otros motores, o si necesitas changelogs incrementales explícitos por auditoría — no es la herramienta."
+  },
+  {
+    name: "dbmate",
+    creator: "Adrian Macneil (comunidad amacneil/dbmate)",
+    lang: "Go (binario) · agnóstico de BD",
+    cat: "current",
+    price: "free",
+    priceLabel: "Free / OSS (MIT)",
+    es: "CLI ultraligero, independiente de lenguaje, para migraciones SQL versionadas. Pensado como alternativa simple a herramientas pesadas basadas en JVM, sin dependencias de runtime.",
+    hace: "Migraciones up/down en SQL plano, soporta PostgreSQL, MySQL, SQLite y ClickHouse, genera dump del esquema (schema.sql) tras cada migración, y se distribuye como binario único o imagen Docker.",
+    noHace: "No autogenera migraciones, no detecta drift, no tiene linting de cambios destructivos ni GUI — deliberadamente minimalista.",
+    cuando: "Proyectos polyglot o equipos que solo quieren un CLI simple sin instalar JVM ni acoplarse a un framework específico.",
+    cuandoNo: "Si necesitas funciones avanzadas (drift detection, aprobaciones, declarativo) — dbmate no las tiene por diseño."
+  },
+  {
+    name: "Atlas",
+    creator: "Ariga (2021)",
+    lang: "Go · HCL/SQL/ORMs · 20+ motores",
+    cat: "emerging",
+    price: "freemium",
+    priceLabel: "CLI OSS free · Atlas Cloud con planes pagos",
+    es: "Se autodenomina \"Terraform para bases de datos\": defines el esquema deseado (en HCL propio, SQL o desde un ORM) y Atlas calcula automáticamente el plan de migración para llegar a ese estado — enfoque \"schema-as-code\" declarativo, no basado en scripts manuales.",
+    hace: "Migration Linting con 50+ checks automáticos para detectar cambios riesgosos, pre-migration checks (ej. exigir columna vacía antes de un DROP), integración nativa en GitHub Actions/GitLab posteando planes como comentarios en el PR, y soporte tanto declarativo como versionado.",
+    noHace: "La curva de adopción es mayor que un migrador SQL simple; el ecosistema HCL propio implica aprender una sintaxis nueva; funciones avanzadas de equipo (aprobaciones, auditoría centralizada) viven en Atlas Cloud, no en el CLI gratuito.",
+    cuando: "Equipos que quieren dejar de escribir SQL de migración a mano y prefieren describir el estado deseado del esquema, con linting automático integrado al PR.",
+    cuandoNo: "Si tu equipo prefiere control explícito sobre cada sentencia SQL (auditoría línea por línea) o ya tiene un flujo Flyway/Liquibase maduro sin fricción, migrar tiene un costo de cambio que hay que justificar."
+  },
+  {
+    name: "Bytebase",
+    creator: "Bytebase team (2021)",
+    lang: "Go · GUI web · multi-BD",
+    cat: "emerging",
+    price: "freemium",
+    priceLabel: "Community free (hasta 20 usuarios) · Pro $20/usuario/mes · Enterprise a medida",
+    es: "Plataforma de \"Database DevSecOps\": no es solo un motor de migración, sino una capa completa de colaboración — UI web tipo Jira/GitLab donde developers proponen cambios y DBAs los revisan antes de desplegarlos.",
+    hace: "SQL review automático, flujos de aprobación con control de acceso, enmascaramiento de datos a nivel de columna, auditoría completa de cambios, integración GitOps, proveedor Terraform, y online schema change específico por motor.",
+    noHace: "No es un simple binario CLI para incrustar en un script — requiere desplegar y mantener un servicio (Docker/Kubernetes); para un solo desarrollador es más infraestructura de la necesaria.",
+    cuando: "Organizaciones con DBAs y developers separados, que necesitan gobernanza, aprobaciones y trazabilidad de quién cambió qué y cuándo.",
+    cuandoNo: "Para un proyecto pequeño o un solo equipo sin necesidad de aprobaciones formales, es más plataforma de la que necesitas — un CLI como Flyway o Atlas es más liviano."
+  },
+  {
+    name: "Prisma Migrate",
+    creator: "Prisma (empresa, ~2019)",
+    lang: "TypeScript/JavaScript · Node.js",
+    cat: "current",
+    price: "freemium",
+    priceLabel: "ORM y Migrate OSS free · Prisma Data Platform con planes pagos",
+    es: "Parte del toolkit de Prisma ORM: defines el modelo de datos en un DSL propio (schema.prisma) de forma declarativa, y Prisma Migrate genera y aplica el SQL necesario para sincronizar la BD con ese modelo.",
+    hace: "prisma migrate dev para desarrollo iterativo con \"shadow database\" que detecta pérdida de datos antes de aplicar, prisma migrate diff para ver cambios pendientes sin aplicarlos, y prisma migrate deploy para producción (solo aplica, no genera).",
+    noHace: "Está pensado para proyectos que ya usan Prisma ORM como capa de datos; fuera de ese ecosistema no tiene sentido. El forward-only en producción significa que revertir requiere escribir una migración nueva, no un rollback automático.",
+    cuando: "Proyectos Node.js/TypeScript que ya usan (o quieren usar) Prisma como ORM, valorando un flujo declarativo y type-safe de extremo a extremo.",
+    cuandoNo: "Si no usas TypeScript/Prisma o necesitas máximo control SQL explícito sin capa de abstracción del ORM."
+  },
+  {
+    name: "SchemaHero",
+    creator: "Replicated",
+    lang: "Go · Kubernetes (CRDs)",
+    cat: "emerging",
+    price: "free",
+    priceLabel: "Free / OSS (Apache 2.0)",
+    es: "Migrador \"Kubernetes-native\": define el esquema deseado como Custom Resources (CRDs) de Kubernetes en vez de archivos SQL sueltos. Un operador dentro del clúster detecta cambios y genera/aplica las migraciones.",
+    hace: "Se integra con el flujo GitOps de Kubernetes (ej. ArgoCD/Flux aplicando manifiestos), genera migraciones automáticamente a partir del CRD declarado, y soporta PostgreSQL, MySQL, CockroachDB, Cassandra, RQLite y TimescaleDB.",
+    noHace: "Fuera de un entorno Kubernetes no aporta nada — depende totalmente del operador y los CRDs; el ecosistema y comunidad son más pequeños que los de Flyway/Liquibase, con menos recursos y tooling de terceros.",
+    cuando: "Equipos que ya operan completamente en Kubernetes y quieren que el esquema de BD se gestione con el mismo modelo declarativo que el resto de su infraestructura.",
+    cuandoNo: "Si tu despliegue no vive en Kubernetes, o si el equipo no está familiarizado con CRDs/operadores — la complejidad operativa no se justifica."
+  },
+  {
+    name: "Drizzle Kit",
+    creator: "Drizzle Team (ecosistema Drizzle ORM)",
+    lang: "TypeScript · Node/Bun/Deno",
+    cat: "emerging",
+    price: "free",
+    priceLabel: "Free / OSS (Apache 2.0)",
+    es: "El CLI de migraciones del ORM ligero Drizzle, pensado como alternativa \"sin runtime pesado\" a Prisma. Define el esquema en TypeScript puro (sin DSL propio) y genera SQL mediante introspección y diff.",
+    hace: "drizzle-kit generate crea migraciones SQL legibles a partir del schema TypeScript, drizzle-kit push aplica cambios directamente en desarrollo (modo declarativo rápido), y drizzle-kit studio ofrece una mini-GUI local para explorar datos.",
+    noHace: "El ecosistema es más joven que Prisma/Flyway: menos integraciones de terceros, comunidad más pequeña, y funciones de gobernanza/aprobación para equipos grandes aún limitadas o inexistentes.",
+    cuando: "Proyectos TypeScript que priorizan rendimiento y SQL transparente sobre la abstracción más pesada de un ORM tradicional, especialmente en entornos serverless/edge.",
+    cuandoNo: "Si tu equipo ya depende de Prisma o necesita la madurez/soporte enterprise de herramientas más establecidas, el menor tamaño del ecosistema de Drizzle puede ser un riesgo."
+  }
+];
+
+const tableBody = document.getElementById('tableBody');
+const resultsCount = document.getElementById('resultsCount');
+const emptyState = document.getElementById('emptyState');
+const searchInput = document.getElementById('searchInput');
+
+let state = { cat: 'all', price: 'all', q: '' };
+
+const catLabel = { legacy: 'Legacy', current: 'Actual', emerging: 'Emergente' };
+
+function render(){
+  tableBody.innerHTML = '';
+  const q = state.q.trim().toLowerCase();
+  let visible = 0;
+
+  TOOLS.forEach(t => {
+    const matchCat = state.cat === 'all' || t.cat === state.cat;
+    const matchPrice = state.price === 'all' || t.price === state.price;
+    const haystack = (t.name + ' ' + t.creator + ' ' + t.lang + ' ' + t.es).toLowerCase();
+    const matchQ = q === '' || haystack.includes(q);
+    const show = matchCat && matchPrice && matchQ;
+    if(show) visible++;
+
+    const tr = document.createElement('tr');
+    if(!show) tr.classList.add('hidden');
+
+    tr.innerHTML = `
+      <td class="tool-cell">
+        <span class="tool-name">${t.name}</span>
+        <span class="tool-lang">${t.lang}</span>
+        <div><span class="price price-${t.price}">${t.priceLabel}</span></div>
+      </td>
+      <td><span class="badge badge-${t.cat}">${catLabel[t.cat]}</span></td>
+      <td>
+        <div class="field-block">
+          <p>${t.es}</p>
+        </div>
+        <div class="field-block">
+          <div class="field-label ok">✓ Hace</div>
+          <p>${t.hace}</p>
+        </div>
+      </td>
+      <td>
+        <div class="field-block">
+          <div class="field-label no">✕ No hace</div>
+          <p>${t.noHace}</p>
+        </div>
+      </td>
+      <td>
+        <div class="field-block">
+          <div class="field-label when">→ Úsala si</div>
+          <p>${t.cuando}</p>
+        </div>
+        <div class="field-block">
+          <div class="field-label skip">⊘ Evítala si</div>
+          <p>${t.cuandoNo}</p>
+        </div>
+      </td>
+      <td class="tool-cell">${t.creator}</td>
+    `;
+    tableBody.appendChild(tr);
+  });
+
+  resultsCount.textContent = `${visible} / ${TOOLS.length} herramientas`;
+  emptyState.style.display = visible === 0 ? 'block' : 'none';
+  document.getElementById('toolsTable').style.display = visible === 0 ? 'none' : 'table';
+}
+
+document.querySelectorAll('.chip[data-filter-type]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const type = btn.dataset.filterType;
+    const value = btn.dataset.value;
+    document.querySelectorAll(`.chip[data-filter-type="${type}"]`).forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    state[type] = value;
+    render();
+  });
+});
+
+searchInput.addEventListener('input', (e) => {
+  state.q = e.target.value;
+  render();
+});
+
+render();
+</script>
+
+</body>
+</html>

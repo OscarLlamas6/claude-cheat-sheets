@@ -34,6 +34,8 @@ Cuadros comparativos y guías de referencia generados con Claude, centralizados 
 | Herramientas para Monorepos — Comparativa 2026 | Dev Tools |
 | Seguridad en Nube — Cuadro Comparativo | IT, Seguridad, Cloud |
 | Atlas DataOps — Herramientas del flujo completo de Data Engineering | DevOps, Data |
+| Comparativa de Herramientas de Migración de BD — schema_history | DevOps, Bases de Datos |
+| DevSecOps Pipeline Toolkit — Comparativa de Herramientas | DevOps, CI/CD, Seguridad |
 
 ## Activar GitHub Pages
 

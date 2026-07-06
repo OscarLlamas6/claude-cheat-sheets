@@ -36,6 +36,7 @@ Cuadros comparativos y guías de referencia generados con Claude, centralizados 
 | Atlas DataOps — Herramientas del flujo completo de Data Engineering | DevOps, Data |
 | Comparativa de Herramientas de Migración de BD — schema_history | DevOps, Bases de Datos |
 | DevSecOps Pipeline Toolkit — Comparativa de Herramientas | DevOps, CI/CD, Seguridad |
+| registry://open* — Catálogo comparativo de tecnologías "Open*" | Open Source, DevOps, Seguridad |
 
 ## Activar GitHub Pages
 

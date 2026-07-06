@@ -1,0 +1,854 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>registry://open — Catálogo comparativo de tecnologías "Open*"</title>
+<style>
+  :root{
+    --bg: #0a0e14;
+    --surface: #10141d;
+    --surface-2: #161c28;
+    --line: #232a38;
+    --text: #dce1e8;
+    --text-dim: #7c8797;
+    --text-faint: #4c5666;
+    --teal: #45d9c3;
+    --teal-dim: #1f4f49;
+    --amber: #f0ac4e;
+    --amber-dim: #4a3a1c;
+    --red: #ef5c6e;
+    --red-dim: #4a1f26;
+    --violet: #9d8cff;
+    --mono: 'JetBrains Mono', 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+    --sans: 'IBM Plex Sans', 'Inter', -apple-system, sans-serif;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      radial-gradient(ellipse 900px 500px at 15% -10%, rgba(69,217,195,0.07), transparent),
+      radial-gradient(ellipse 700px 500px at 100% 10%, rgba(157,140,255,0.06), transparent),
+      var(--bg);
+    color:var(--text);
+    font-family:var(--sans);
+    line-height:1.5;
+    min-height:100vh;
+  }
+  a{color:var(--teal);}
+
+  /* ---------- HERO ---------- */
+  .hero{
+    max-width:1180px;
+    margin:0 auto;
+    padding:56px 28px 28px;
+  }
+  .prompt-line{
+    font-family:var(--mono);
+    font-size:13px;
+    color:var(--text-faint);
+    margin-bottom:18px;
+    letter-spacing:0.02em;
+  }
+  .prompt-line .caret{
+    display:inline-block;
+    width:8px; height:15px;
+    background:var(--teal);
+    margin-left:4px;
+    vertical-align:-2px;
+    animation:blink 1.1s steps(1) infinite;
+  }
+  @keyframes blink{50%{opacity:0;}}
+  h1{
+    font-family:var(--mono);
+    font-size:clamp(28px,4.6vw,50px);
+    font-weight:700;
+    letter-spacing:-0.02em;
+    margin:0 0 14px;
+    color:#f2f4f7;
+  }
+  h1 .slash{color:var(--text-faint); font-weight:400;}
+  h1 .star{color:var(--teal);}
+  .sub{
+    max-width:720px;
+    color:var(--text-dim);
+    font-size:15.5px;
+    margin:0 0 30px;
+  }
+  .sub strong{color:var(--text);}
+
+  .legend{
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px;
+    margin-bottom:8px;
+  }
+  .chip{
+    font-family:var(--mono);
+    font-size:11.5px;
+    padding:5px 10px;
+    border-radius:5px;
+    border:1px solid var(--line);
+    color:var(--text-dim);
+    display:flex;
+    align-items:center;
+    gap:6px;
+    white-space:nowrap;
+  }
+  .dot{width:7px;height:7px;border-radius:50%;flex:none;}
+  .dot.osi{background:var(--teal);}
+  .dot.core{background:var(--amber);}
+  .dot.brand{background:var(--violet);}
+  .dot.notopen{background:var(--red);}
+
+  /* ---------- CONTROLS ---------- */
+  .controls{
+    position:sticky;
+    top:0;
+    z-index:20;
+    background:rgba(10,14,20,0.92);
+    backdrop-filter:blur(10px);
+    border-bottom:1px solid var(--line);
+    padding:16px 28px;
+  }
+  .controls-inner{
+    max-width:1180px;
+    margin:0 auto;
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px;
+    align-items:center;
+  }
+  #search{
+    flex:1 1 240px;
+    background:var(--surface);
+    border:1px solid var(--line);
+    color:var(--text);
+    font-family:var(--mono);
+    font-size:13.5px;
+    padding:10px 14px;
+    border-radius:7px;
+    outline:none;
+  }
+  #search::placeholder{color:var(--text-faint);}
+  #search:focus{border-color:var(--teal);}
+  select{
+    background:var(--surface);
+    border:1px solid var(--line);
+    color:var(--text);
+    font-family:var(--sans);
+    font-size:13px;
+    padding:9px 12px;
+    border-radius:7px;
+    outline:none;
+    cursor:pointer;
+  }
+  .count{
+    font-family:var(--mono);
+    font-size:12px;
+    color:var(--text-faint);
+    margin-left:auto;
+    white-space:nowrap;
+  }
+
+  /* ---------- GRID / CARDS ---------- */
+  .wrap{max-width:1180px; margin:0 auto; padding:26px 28px 80px;}
+  .grid{display:flex; flex-direction:column; gap:12px;}
+
+  .card{
+    background:var(--surface);
+    border:1px solid var(--line);
+    border-radius:10px;
+    overflow:hidden;
+    transition:border-color .15s ease;
+  }
+  .card:hover{border-color:#2e3648;}
+
+  .card-head{
+    display:flex;
+    align-items:center;
+    gap:14px;
+    padding:16px 18px;
+    cursor:pointer;
+    user-select:none;
+  }
+  .status-bar{
+    width:4px;
+    align-self:stretch;
+    border-radius:2px;
+    flex:none;
+  }
+  .status-bar.osi{background:var(--teal);}
+  .status-bar.core{background:var(--amber);}
+  .status-bar.brand{background:var(--violet);}
+  .status-bar.notopen{background:var(--red);}
+
+  .card-name{
+    font-family:var(--mono);
+    font-size:16.5px;
+    font-weight:700;
+    color:#f2f4f7;
+    white-space:nowrap;
+  }
+  .card-tagline{
+    color:var(--text-dim);
+    font-size:13.5px;
+    flex:1;
+    min-width:120px;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+  }
+  .tag{
+    font-family:var(--mono);
+    font-size:10.5px;
+    padding:3px 8px;
+    border-radius:20px;
+    border:1px solid var(--line);
+    color:var(--text-dim);
+    white-space:nowrap;
+    flex:none;
+  }
+  .lic-badge{
+    font-family:var(--mono);
+    font-size:10.5px;
+    padding:3px 9px;
+    border-radius:20px;
+    white-space:nowrap;
+    flex:none;
+    font-weight:600;
+  }
+  .lic-badge.osi{background:var(--teal-dim); color:var(--teal);}
+  .lic-badge.core{background:var(--amber-dim); color:var(--amber);}
+  .lic-badge.brand{background:rgba(157,140,255,0.14); color:var(--violet);}
+  .lic-badge.notopen{background:var(--red-dim); color:var(--red);}
+
+  .chevron{
+    font-family:var(--mono);
+    color:var(--text-faint);
+    transition:transform .18s ease;
+    flex:none;
+    font-size:13px;
+  }
+  .card.open .chevron{transform:rotate(90deg); color:var(--teal);}
+
+  .card-body{
+    max-height:0;
+    overflow:hidden;
+    transition:max-height .25s ease;
+    border-top:1px solid transparent;
+  }
+  .card.open .card-body{
+    border-top:1px solid var(--line);
+  }
+  .body-inner{
+    padding:20px 22px 24px;
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:18px 28px;
+  }
+  @media (max-width:720px){
+    .body-inner{grid-template-columns:1fr;}
+    .card-tagline{display:none;}
+  }
+  .field label{
+    display:block;
+    font-family:var(--mono);
+    font-size:10.5px;
+    text-transform:uppercase;
+    letter-spacing:0.08em;
+    color:var(--text-faint);
+    margin-bottom:6px;
+  }
+  .field p{margin:0; font-size:14px; color:var(--text);}
+  .field.full{grid-column:1 / -1;}
+  .field.yes label{color:var(--teal);}
+  .field.no label{color:var(--red);}
+  .meta-row{
+    grid-column:1/-1;
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px 22px;
+    padding-bottom:6px;
+    border-bottom:1px solid var(--line);
+    margin-bottom:2px;
+    font-family:var(--mono);
+    font-size:12px;
+    color:var(--text-dim);
+  }
+  .meta-row b{color:var(--text);}
+
+  .empty-state{
+    text-align:center;
+    padding:60px 20px;
+    color:var(--text-faint);
+    font-family:var(--mono);
+    font-size:13.5px;
+  }
+
+  footer{
+    max-width:1180px;
+    margin:0 auto;
+    padding:0 28px 60px;
+    color:var(--text-faint);
+    font-size:12px;
+    font-family:var(--mono);
+  }
+  footer a{color:var(--text-dim);}
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="prompt-line">visitante@localhost:~$ open --list-all --year 2026<span class="caret"></span></div>
+  <h1>registry<span class="slash">://</span>open<span class="star">*</span></h1>
+  <p class="sub">Un catálogo comparativo de <strong>32 proyectos</strong> que empiezan por "Open" en el mundo open source — de OpenAPI a OpenTofu, de OpenSSL a Open WebUI. Qué son, qué hacen, qué NO hacen, quién los creó, qué tan usados están hoy y cuándo (no) conviene usarlos. Incluye un par de casos donde el nombre "Open" es más marketing que licencia real.</p>
+  <div class="legend">
+    <span class="chip"><span class="dot osi"></span> Open source real (licencia OSI)</span>
+    <span class="chip"><span class="dot core"></span> Open-core / parcialmente abierto</span>
+    <span class="chip"><span class="dot brand"></span> Abierto con cláusula de marca / no-OSI</span>
+    <span class="chip"><span class="dot notopen"></span> No es open source (a pesar del nombre)</span>
+  </div>
+</div>
+
+<div class="controls">
+  <div class="controls-inner">
+    <input id="search" type="text" placeholder="buscar por nombre, categoría, creador o palabra clave…">
+    <select id="catFilter"></select>
+    <select id="licFilter">
+      <option value="">Toda licencia</option>
+      <option value="osi">Open source (OSI)</option>
+      <option value="core">Open-core</option>
+      <option value="brand">Marca restringida</option>
+      <option value="notopen">No es open source</option>
+    </select>
+    <span class="count" id="count"></span>
+  </div>
+</div>
+
+<div class="wrap">
+  <div class="grid" id="grid"></div>
+  <div class="empty-state" id="emptyState" style="display:none;">— sin resultados. probá otro término o filtro —</div>
+</div>
+
+<footer>
+  Datos recopilados y sintetizados en julio de 2026 a partir de documentación oficial y cobertura reciente de cada proyecto. Los estados "state of the art", licencia y adopción cambian con frecuencia — verificá siempre la fuente oficial antes de decisiones de arquitectura o compliance. · Generado como documento descargable, sin tracking ni dependencias externas.
+</footer>
+
+<script>
+const DATA = [
+{
+  name:"OpenAPI Specification",
+  tagline:"Estándar para describir APIs REST de forma legible por máquinas",
+  cat:"Estándares & specs",
+  lic:"osi", licLabel:"CC0 / Apache-2.0 (spec)",
+  creador:"SmartBear (ex Swagger) → OpenAPI Initiative, 2015",
+  adopcion:"Altísima — de facto estándar universal para documentar APIs REST",
+  que_es:"Un formato (YAML/JSON) para describir de forma declarativa los endpoints, parámetros, esquemas de datos y respuestas de una API REST, gobernado por la OpenAPI Initiative bajo la Linux Foundation.",
+  que_hace:"Permite generar documentación interactiva, clientes/SDKs, mocks, tests de contrato y validación automática a partir de una única fuente de verdad.",
+  que_no_hace:"No es un framework ni un runtime: no ejecuta la API, no reemplaza GraphQL/gRPC para otros paradigmas, y no impone gobernanza de versionado por sí sola.",
+  estado:"OpenAPI 3.1 (alineado con JSON Schema) es el estándar dominante en 2026; la 4.0 (Moonwalk) sigue en discusión activa sin fecha firme de lanzamiento.",
+  cuando_si:"Cualquier API REST pública o interna que necesite documentación, generación de clientes o testing de contrato automatizado.",
+  cuando_no:"APIs internas muy simples de vida corta, o cuando el paradigma real es RPC/eventos donde AsyncAPI o gRPC/protobuf encajan mejor."
+},
+{
+  name:"OpenTelemetry (OTel)",
+  tagline:"Framework de observabilidad vendor-neutral: trazas, métricas y logs",
+  cat:"Observabilidad",
+  lic:"osi", licLabel:"Apache-2.0",
+  creador:"CNCF — fusión de OpenTracing + OpenCensus, 2019",
+  adopcion:"Muy alta y creciente; graduado en CNCF en mayo 2026, soportado por 90+ proveedores de observabilidad",
+  que_es:"Un conjunto de APIs, SDKs y un Collector estándar para instrumentar aplicaciones y generar/recolectar/exportar telemetría (trazas, métricas, logs) de forma neutral respecto al backend.",
+  que_hace:"Instrumentación automática y manual multi-lenguaje, un pipeline de procesamiento (el Collector) y exportación a cualquier backend compatible (Datadog, Grafana, New Relic, etc.).",
+  que_no_hace:"No es un backend de almacenamiento ni un dashboard: no guarda ni visualiza los datos por sí mismo, eso lo hace el vendor o herramienta que recibe los datos.",
+  estado:"En 2026 el foco está en logs estructurados maduros, profiling continuo (eBPF) y soporte nativo emergente en runtimes como Node.js.",
+  cuando_si:"Cualquier sistema distribuido donde quieras evitar lock-in de vendor de observabilidad y tener instrumentación reutilizable.",
+  cuando_no:"Prototipos pequeños de un solo servicio donde el logging nativo del proveedor cloud ya es suficiente y la sobrecarga de instrumentación no se justifica."
+},
+{
+  name:"OpenStack",
+  tagline:"Plataforma de código abierto para nubes privadas y públicas (IaaS)",
+  cat:"Cloud & infraestructura",
+  lic:"osi", licLabel:"Apache-2.0",
+  creador:"Rackspace + NASA, 2010 → gobernado por OpenInfra Foundation",
+  adopcion:"Alta en telcos, gobierno y grandes empresas que necesitan nube privada soberana; uno de los proyectos open source más activos históricamente",
+  que_es:"Un conjunto modular de servicios (Nova, Neutron, Cinder, Glance, Keystone, etc.) que orquestan cómputo, red, almacenamiento e identidad para construir una nube IaaS propia sobre hardware estándar.",
+  que_hace:"Provisiona VMs, redes virtuales, volúmenes de bloque y objetos, con APIs compatibles y un dashboard web, replicando gran parte de lo que ofrece AWS/Azure pero on-premise.",
+  que_no_hace:"No es un orquestador de contenedores (no reemplaza Kubernetes), no gestiona serverless nativamente, y su operación/upgrade demanda un equipo de infraestructura dedicado.",
+  estado:"En 2026 el foco es soberanía digital, migración desde VMware y cargas de IA/GPU; convive con Kubernetes más que competir con él.",
+  cuando_si:"Organizaciones que necesitan una nube privada a gran escala, soberanía de datos o independencia de hyperscalers (telcos, gobierno, sector regulado).",
+  cuando_no:"Equipos pequeños o startups: la complejidad operativa de mantener OpenStack rara vez se justifica frente a usar un cloud público directamente."
+},
+{
+  name:"OpenFGA",
+  tagline:"Motor de autorización de grano fino inspirado en Google Zanzibar",
+  cat:"Identidad & autorización",
+  lic:"osi", licLabel:"Apache-2.0",
+  creador:"Auth0 (Okta), 2022 → proyecto CNCF",
+  adopcion:"En crecimiento fuerte, especialmente en SaaS multi-tenant y, más recientemente, en autorización de agentes de IA/MCP",
+  que_es:"Un servidor de autorización relacional (ReBAC) que modela permisos como relaciones entre objetos ('usuario X es editor del documento Y'), al estilo del sistema Zanzibar de Google.",
+  que_hace:"Resuelve preguntas de 'puede el usuario X hacer Y sobre Z' en milisegundos, con SDKs multi-lenguaje, integración OpenTelemetry y modelos definidos en su propio DSL.",
+  que_no_hace:"No gestiona autenticación (no es un IdP), no reemplaza RBAC simple cuando no lo necesitás, y requiere modelar bien tu esquema de permisos, lo cual tiene curva de aprendizaje.",
+  estado:"En 2026 se posiciona fuerte para autorización de agentes IA, RAG y servidores MCP, un caso de uso que no existía cuando se lanzó.",
+  cuando_si:"Apps multi-tenant con jerarquías de permisos complejas (carpetas, equipos, roles anidados) que un RBAC plano no puede modelar bien.",
+  cuando_no:"Apps con permisos simples (admin/usuario) donde RBAC básico es suficiente y OpenFGA añadiría complejidad operativa innecesaria."
+},
+{
+  name:"OpenFeature",
+  tagline:"Estándar abierto y vendor-neutral para feature flags",
+  cat:"DevOps & entrega continua",
+  lic:"osi", licLabel:"Apache-2.0",
+  creador:"CNCF (impulsado por Dynatrace, GitLab, LaunchDarkly y otros), 2022",
+  adopcion:"Media-alta y en crecimiento; adoptado como capa de abstracción por varios proveedores comerciales de feature flags",
+  que_es:"Una especificación y SDKs que definen una API común para evaluar feature flags, desacoplando el código de la aplicación del proveedor de flags que uses por detrás (LaunchDarkly, Flagsmith, Split, uno propio, etc.).",
+  que_hace:"Provee providers, hooks y un modelo de evaluación uniforme para que cambiar de proveedor de feature flags no implique reescribir código de negocio.",
+  que_no_hace:"No es en sí mismo un sistema de gestión de flags con UI de administración: necesitás un provider (comercial o propio) detrás para almacenar y targetear los flags.",
+  estado:"Especificación 1.0 estable; foco actual en soporte para flags de configuración de modelos de IA y targeting más rico.",
+  cuando_si:"Equipos que quieren evitar lock-in de proveedor de feature flags o que anticipan migrar de herramienta en el futuro.",
+  cuando_no:"Proyectos pequeños con un único flag flag ocasional, donde una variable de entorno o un flag hardcodeado es más simple y suficiente."
+},
+{
+  name:"OpenTofu",
+  tagline:"Fork open source de Terraform tras el cambio de licencia de HashiCorp",
+  cat:"Infraestructura como código",
+  lic:"osi", licLabel:"MPL-2.0",
+  creador:"Comunidad (Spacelift, Gruntwork, env0, Harness, Scalr, etc.), 2023 → Linux Foundation / CNCF Sandbox",
+  adopcion:"~12% de adopción entre practicantes de IaC en 2026, con 27% evaluando adoptarlo; Terraform sigue liderando pero la migración se acelera (Fidelity, GitLab, Oracle, VMware, Boeing, AMD)",
+  que_es:"Un fork community-driven de la última versión MPL de Terraform (1.5.x), creado en 2023 cuando HashiCorp relicenció Terraform bajo BSL (no-OSI) y luego fue adquirida por IBM.",
+  que_hace:"Todo lo que hacía Terraform (HCL declarativo, gestión de estado, providers) más funciones propias que Terraform no tiene en su versión abierta: cifrado nativo de state, provider for_each, evaluación temprana de variables.",
+  que_no_hace:"No tiene una plataforma cloud propia de primer nivel equivalente a HCP Terraform: para ejecución remota/gobernanza gestionada depende de terceros (Spacelift, Scalr, env0, Atlantis).",
+  estado:"En 2026 ya diverge técnicamente de Terraform (no es un simple 'mismo binario con otro nombre'); Terraform Stacks sigue siendo exclusivo del lado comercial de HashiCorp/IBM.",
+  cuando_si:"Proyectos nuevos de IaC, o migraciones donde la licencia BSL de Terraform es un problema legal/de procurement (sector público, competidores de HashiCorp/IBM).",
+  cuando_no:"Equipos ya profundamente integrados con HCP Terraform, Sentinel o Terraform Stacks, donde migrar implica reemplazar plataforma, no solo binario."
+},
+{
+  name:"Open Policy Agent (OPA)",
+  tagline:"Motor de políticas como código de propósito general",
+  cat:"Seguridad & gobernanza",
+  lic:"osi", licLabel:"Apache-2.0",
+  creador:"Styra, 2016 → proyecto graduado de CNCF",
+  adopcion:"Muy alta en Kubernetes (admission control) y CI/CD; estándar de facto para 'policy as code'",
+  que_es:"Un motor de decisión de políticas desacoplado de la aplicación, que evalúa reglas escritas en Rego (su DSL declarativo) contra datos estructurados en JSON.",
+  que_hace:"Aplica políticas de autorización, validación de configuración (admission controllers de Kubernetes), compliance y control de acceso en microservicios, APIs y pipelines CI/CD.",
+  que_no_hace:"No modela relaciones jerárquicas de permisos tan naturalmente como OpenFGA/Zanzibar, y Rego tiene una curva de aprendizaje pronunciada para equipos sin background declarativo.",
+  estado:"Ecosistema estable y maduro; Styra impulsa OPAL y capacidades de distribución de políticas a escala como capa comercial encima del proyecto abierto.",
+  cuando_si:"Validar manifiestos de Kubernetes, aplicar guardrails de seguridad/compliance centralizados desacoplados del código de cada servicio.",
+  cuando_no:"Autorización de aplicación fina orientada a relaciones usuario-recurso (ahí OpenFGA/Zanzibar suelen encajar mejor que Rego)."
+},
+{
+  name:"OpenSearch",
+  tagline:"Motor de búsqueda y analítica, fork abierto de Elasticsearch/Kibana",
+  cat:"Datos & búsqueda",
+  lic:"osi", licLabel:"Apache-2.0",
+  creador:"AWS, 2021 (tras el relicenciamiento SSPL de Elastic) → Linux Foundation",
+  adopcion:"Alta, especialmente en AWS y organizaciones que evitaban la licencia SSPL de Elastic; base de servicios gestionados como Amazon OpenSearch Service",
+  que_es:"Un fork de la última versión Apache-2.0 de Elasticsearch y Kibana, mantenido de forma independiente tras el cambio de licencia de Elastic a SSPL.",
+  que_hace:"Búsqueda de texto completo, analítica de logs, observabilidad y, desde 2025-2026, funciones agénticas (Agent Skills, agentes conversacionales) sobre datos indexados.",
+  que_no_hace:"No mantiene paridad 100% con las funciones más nuevas de Elasticsearch (que ahora vuelve a ser parcialmente open source bajo AGPL en paralelo); requiere seguimiento de ambas ramas si te importa una función específica.",
+  estado:"OpenSearch 3.x añade capacidades agénticas para búsqueda conversacional; se consolidó como alternativa real, no solo de transición.",
+  cuando_si:"Necesitás Elasticsearch/Kibana sin las restricciones de la licencia SSPL, o ya usás el ecosistema AWS.",
+  cuando_no:"Si dependés de plugins o funciones muy recientes exclusivas del Elastic Stack comercial que aún no tienen equivalente en OpenSearch."
+},
+{
+  name:"OpenCost",
+  tagline:"Medición y asignación de costos de Kubernetes en tiempo real",
+  cat:"FinOps & costos cloud",
+  lic:"osi", licLabel:"Apache-2.0",
+  creador:"Kubecost (ahora IBM), 2022 → proyecto incubado en CNCF",
+  adopcion:"Media-alta y creciente en equipos de plataforma que hacen FinOps sobre Kubernetes",
+  que_es:"Un estándar y herramienta open source para medir y asignar costos de infraestructura y contenedores en entornos Kubernetes multi-cloud.",
+  que_hace:"Calcula costos por namespace, pod, servicio o etiqueta, integra con Prometheus (u opcionalmente sin él) y expone datos vía un servidor MCP para que agentes de IA generen reportes de costos en lenguaje natural.",
+  que_no_hace:"No gestiona automáticamente el ahorro (no aplica rightsizing por sí solo) ni sustituye la facturación oficial del proveedor cloud: es visibilidad, no ejecución.",
+  estado:"Prioridad 2026: tracking de costos de cargas de IA/ML y una capa de datos más robusta ('KubeModel', Data Model 2.0).",
+  cuando_si:"Equipos de plataforma que necesitan showback/chargeback de costos Kubernetes multi-cloud sin pagar por Kubecost Enterprise.",
+  cuando_no:"Infraestructura no-Kubernetes (VMs tradicionales, serverless puro) donde la herramienta de costos nativa del cloud ya cubre la necesidad."
+},
+{
+  name:"OpenHands (ex OpenDevin)",
+  tagline:"Plataforma open source de agentes de IA para desarrollo de software",
+  cat:"IA & agentes",
+  lic:"core", licLabel:"MIT (core) + capa enterprise propietaria",
+  creador:"All Hands AI, 2024 (nació como respuesta comunitaria al demo cerrado 'Devin')",
+  adopcion:"Alta visibilidad en GitHub (decenas de miles de estrellas); referencia principal como alternativa abierta a agentes de código cerrados",
+  que_es:"Un framework de agentes de IA capaces de actuar como ingenieros de software: leen tickets, editan código en múltiples archivos, ejecutan comandos en un sandbox, corren tests y abren pull requests.",
+  que_hace:"Es agnóstico de modelo (podés usar Claude, GPT, Gemini o modelos locales vía LiteLLM), corre en Docker aislado, y ofrece CLI, GUI web y un SDK de agentes componible.",
+  que_no_hace:"No garantiza soluciones correctas en tareas ambiguas o refactors grandes de arquitectura; necesita criterios de éxito claros (tests) para converger bien, y requiere revisión humana antes de mergear.",
+  estado:"En 2026 el core (imágenes Docker del agente y agent-server) es MIT, pero el directorio 'enterprise' es source-available bajo licencia separada — un modelo open-core, no 100% abierto.",
+  cuando_si:"Tareas de ingeniería acotadas y verificables (agregar un campo, escribir tests, portear un script, perseguir un test roto) donde querés no depender de un único proveedor de agentes.",
+  cuando_no:"Tareas de diseño arquitectónico ambiguo sin criterio de éxito claro, o entornos sin proceso de revisión de código robusto antes de mergear."
+},
+{
+  name:"Open WebUI",
+  tagline:"Interfaz de chat self-hosted para LLMs (Ollama, APIs compatibles con OpenAI)",
+  cat:"IA & agentes",
+  lic:"brand", licLabel:"Licencia propia con cláusula de marca (no certificada OSI)",
+  creador:"Timothy Jaeryang Baek, 2023",
+  adopcion:"Muy alta (uno de los frontends self-hosted de IA más usados), con casos como Samsung Semiconductor, Astellas Pharma y universidades grandes",
+  que_es:"Una interfaz web autoalojada, tipo ChatGPT, para hablar con modelos locales (vía Ollama) o cualquier API compatible con OpenAI, con RAG integrado y soporte multiusuario.",
+  que_hace:"Chat con múltiples modelos, gestión de usuarios, RAG sobre documentos propios, extensiones (terminal integrada, herramientas) y despliegue on-premise/air-gapped para cumplir requisitos de datos.",
+  que_no_hace:"Desde la versión 0.6.6 (abril 2025) ya NO usa una licencia aprobada por la OSI: agregó una cláusula que obliga a mantener la marca 'Open WebUI' salvo que compres licencia enterprise, lo cual generó forks y controversia en la comunidad.",
+  estado:"En 2026 sigue siendo código público y modificable, pero se lo considera 'source-available con condiciones', no open source puro; alternativas mencionadas por la comunidad incluyen LibreChat, Jan.ai y Agent Zero.",
+  cuando_si:"Necesitás una interfaz de chat self-hosted lista para producción y no te afecta la cláusula de marca (uso interno, sin quitar el branding).",
+  cuando_no:"Si tu política de compliance exige estrictamente licencias aprobadas por la OSI, o si planeás hacer un fork comercial sin conservar el nombre 'Open WebUI'."
+},
+{
+  name:"OpenSSL",
+  tagline:"Biblioteca criptográfica que asegura buena parte de internet",
+  cat:"Seguridad & criptografía",
+  lic:"osi", licLabel:"Apache-2.0 (desde 3.x)",
+  creador:"Eric Young y Tim Hudson (base SSLeay) → proyecto OpenSSL, 1998",
+  adopcion:"Prácticamente universal: TLS/SSL en servidores web, sistemas operativos y dispositivos embebidos de todo el mundo",
+  que_es:"Una biblioteca en C que implementa los protocolos TLS/SSL y una amplia gama de primitivas criptográficas (cifrado, hashing, certificados X.509).",
+  que_hace:"Provee la capa criptográfica para HTTPS, VPNs, firma de certificados y cifrado de datos en tránsito o en reposo en la inmensa mayoría del software que 'habla' TLS.",
+  que_no_hace:"No es una aplicación de usuario final ni gestiona identidades por sí sola; su API en C es notoriamente difícil de usar bien, causa histórica de vulnerabilidades como Heartbleed (2014).",
+  estado:"OpenSSL 3.x consolidado como rama LTS; persiste competencia de alternativas más modernas y con superficie de ataque menor como BoringSSL (Google) y LibreSSL (OpenBSD).",
+  cuando_si:"Prácticamente cualquier software que necesite TLS o primitivas criptográficas estándar y probadas en el tiempo.",
+  cuando_no:"Proyectos nuevos que priorizan una API más segura por diseño y superficie mínima, donde libsodium o BoringSSL pueden ser preferibles."
+},
+{
+  name:"OpenSSH",
+  tagline:"Implementación estándar de facto del protocolo SSH",
+  cat:"Seguridad & redes",
+  lic:"osi", licLabel:"Licencia BSD",
+  creador:"Proyecto OpenBSD, 1999",
+  adopcion:"Universal: viene preinstalado en casi todas las distros Linux/BSD, macOS y Windows moderno",
+  que_es:"Un conjunto de herramientas (ssh, sshd, scp, sftp, ssh-keygen) que implementan el protocolo SSH para acceso remoto y transferencia de archivos cifrada.",
+  que_hace:"Acceso remoto seguro a servidores, túneles/port-forwarding, autenticación por clave pública y transferencia de archivos cifrada.",
+  que_no_hace:"No es un sistema de gestión de identidades centralizado ni de bastion/PAM por sí solo; para eso se combina con herramientas como Teleport o Vault.",
+  estado:"Desarrollo continuo y conservador desde OpenBSD; foco reciente en resistencia a computación cuántica en el intercambio de claves.",
+  cuando_si:"Acceso remoto a cualquier servidor Linux/Unix — es el estándar y no hay razón práctica para evitarlo.",
+  cuando_no:"Cuando necesitás gestión centralizada de accesos, grabación de sesiones y auditoría avanzada a escala empresarial: ahí conviene una capa encima (Teleport, bastiones gestionados)."
+},
+{
+  name:"OpenVPN",
+  tagline:"Solución de VPN de código abierto basada en SSL/TLS",
+  cat:"Seguridad & redes",
+  lic:"osi", licLabel:"GPLv2 (community) + edición Access Server comercial",
+  creador:"James Yonan, 2001 → OpenVPN Inc.",
+  adopcion:"Alta históricamente, aunque en descenso relativo frente a WireGuard en despliegues nuevos por su simplicidad y rendimiento",
+  que_es:"Un protocolo y software de VPN que crea túneles cifrados punto a punto o cliente-servidor usando TLS para el intercambio de claves.",
+  que_hace:"Conecta redes remotas de forma segura, cifra tráfico entre sitios/usuarios y soporta configuraciones flexibles de enrutamiento y autenticación.",
+  que_no_hace:"Es más pesado y lento que alternativas modernas como WireGuard; la configuración puede ser compleja y el modelo de negocio principal ahora es la edición Access Server (parcialmente propietaria).",
+  estado:"Convive con WireGuard, que ganó terreno como alternativa más simple y rápida; OpenVPN sigue siendo relevante por compatibilidad y flexibilidad de configuración.",
+  cuando_si:"Entornos que ya dependen de su ecosistema, necesitan configuración granular de reglas de acceso o compatibilidad amplia con clientes legacy.",
+  cuando_no:"Despliegues nuevos donde rendimiento y simplicidad son prioridad: WireGuard suele ser la opción más moderna."
+},
+{
+  name:"OpenCV",
+  tagline:"Biblioteca de referencia para visión por computadora",
+  cat:"IA & visión por computadora",
+  lic:"osi", licLabel:"Apache-2.0",
+  creador:"Intel, 1999 → OpenCV.org (sin fines de lucro)",
+  adopcion:"Muy alta en investigación, robótica, industria y educación; una de las librerías de visión artificial más usadas del mundo",
+  que_es:"Una biblioteca multiplataforma (C++, con bindings a Python, Java, etc.) con cientos de algoritmos de procesamiento de imágenes y visión por computadora clásica.",
+  que_hace:"Detección de bordes, features, tracking de objetos, calibración de cámaras, procesamiento de video en tiempo real, e integración con backends de deep learning para inferencia.",
+  que_no_hace:"No es un framework de entrenamiento de modelos de deep learning (no compite con PyTorch/TensorFlow para entrenar); su fuerte es el pipeline clásico de visión y la inferencia, no el entrenamiento.",
+  estado:"Mantiene módulos DNN para correr modelos entrenados en otros frameworks; sigue siendo el 'pegamento' estándar de visión por computadora en producción y edge.",
+  cuando_si:"Cualquier pipeline de procesamiento de imágenes/video clásico o de inferencia ligera en dispositivos con recursos limitados.",
+  cuando_no:"Entrenamiento de modelos de deep learning desde cero: ahí PyTorch/TensorFlow son la herramienta correcta, no OpenCV."
+},
+{
+  name:"OpenJDK",
+  tagline:"Implementación de referencia open source de Java SE",
+  cat:"Lenguajes & runtimes",
+  lic:"osi", licLabel:"GPLv2 con excepción de classpath",
+  creador:"Sun Microsystems, 2006 → Oracle / comunidad",
+  adopcion:"Universal: es la base de prácticamente todas las distribuciones de Java (Temurin/Adoptium, Amazon Corretto, Azul Zulu, etc.)",
+  que_es:"El código fuente abierto y de referencia de la plataforma Java SE (JVM + bibliotecas estándar), del cual derivan la mayoría de distribuciones comerciales y comunitarias de Java.",
+  que_hace:"Compila y ejecuta bytecode Java con garbage collection, JIT, y toda la biblioteca estándar; base para Spring, Kafka, Android (históricamente) y gran parte del backend empresarial mundial.",
+  que_no_hace:"No incluye por sí solo soporte comercial de largo plazo ni certificación legal 'Java compatible' — eso lo dan las distribuciones derivadas (Oracle JDK, Corretto, Temurin, etc.).",
+  estado:"Ciclo de releases cada 6 meses consolidado (Java 21, 25 LTS...); foco 2025-2026 en Project Loom (virtual threads), Panama (FFI) y mejoras de arranque para contenedores.",
+  cuando_si:"Backend empresarial, sistemas Android legacy, cualquier stack que ya viva en el ecosistema JVM (Kotlin, Scala, Clojure incluidos).",
+  cuando_no:"Servicios nuevos donde el arranque en frío y el footprint de memoria son críticos (serverless muy sensible a cold start) y un runtime más liviano encaja mejor."
+},
+{
+  name:"OpenGL",
+  tagline:"API estándar multiplataforma para gráficos 2D/3D acelerados por GPU",
+  cat:"Gráficos & multimedia",
+  lic:"osi", licLabel:"Especificación abierta gestionada por Khronos Group",
+  creador:"Silicon Graphics (SGI), 1992 → Khronos Group",
+  adopcion:"Alta en software legacy, CAD, ciencia y educación; en descenso frente a Vulkan/Metal/DirectX 12 en gaming de alto rendimiento",
+  que_es:"Una especificación abierta (no una implementación única) para renderizado de gráficos 2D y 3D acelerado por hardware, implementada por los fabricantes de GPU en sus drivers.",
+  que_hace:"Define primitivas de renderizado, shaders y el pipeline gráfico usado por CAD, visualización científica, juegos y aplicaciones multiplataforma.",
+  que_no_hace:"No ofrece el control de bajo nivel sobre la GPU que dan las APIs modernas (Vulkan, DirectX 12, Metal); Khronos considera OpenGL en modo mantenimiento, con Vulkan como sucesor de facto para alto rendimiento.",
+  estado:"Sin versiones mayores nuevas desde hace años; Khronos enfoca su desarrollo activo en Vulkan, mientras OpenGL se mantiene por compatibilidad.",
+  cuando_si:"Aplicaciones multiplataforma existentes, herramientas científicas/CAD o casos donde la simplicidad relativa de su API pesa más que el máximo rendimiento.",
+  cuando_no:"Motores de videojuegos nuevos o software que necesite control fino de GPU y multihilo moderno: ahí Vulkan (o APIs nativas) es la elección actual."
+},
+{
+  name:"OpenID Connect (OIDC)",
+  tagline:"Capa de identidad y autenticación construida sobre OAuth 2.0",
+  cat:"Identidad & autorización",
+  lic:"osi", licLabel:"Especificación abierta, OpenID Foundation",
+  creador:"OpenID Foundation, 2014",
+  adopcion:"Estándar universal de 'Iniciar sesión con Google/Microsoft/Apple' y SSO empresarial",
+  que_es:"Un protocolo de identidad que añade autenticación (quién sos) sobre el protocolo de autorización OAuth 2.0 (qué podés hacer), usando JSON Web Tokens (JWT).",
+  que_hace:"Permite 'inicio de sesión único' (SSO), emisión de tokens de identidad verificables y delegación de autenticación a un proveedor confiable (Google, Azure AD, Auth0, Keycloak, etc.).",
+  que_no_hace:"No gestiona autorización de grano fino (qué recursos puede tocar cada usuario) — para eso se combina con OPA, OpenFGA o un sistema RBAC/ABAC propio.",
+  estado:"Estándar maduro y estable; el foco actual está en flujos más seguros para SPAs/mobile (PKCE) y en federación de identidad entre organizaciones.",
+  cuando_si:"Cualquier aplicación que necesite login delegado, SSO empresarial o federación de identidad entre sistemas.",
+  cuando_no:"Sistemas internos muy simples de un solo usuario/servicio donde implementar OIDC completo sería sobreingeniería frente a una autenticación básica."
+},
+{
+  name:"OpenLDAP",
+  tagline:"Implementación open source del protocolo LDAP para directorios",
+  cat:"Identidad & directorio",
+  lic:"osi", licLabel:"Licencia OpenLDAP (estilo BSD)",
+  creador:"Comunidad OpenLDAP (fork de University of Michigan LDAP), 1998",
+  adopcion:"Alta en infraestructura empresarial y educativa, aunque compite con Active Directory y soluciones cloud de identidad",
+  que_es:"Un servidor de directorio que implementa el protocolo LDAP para almacenar y consultar información jerárquica de usuarios, grupos y recursos organizacionales.",
+  que_hace:"Autenticación centralizada, gestión de usuarios/grupos y como backend de directorio para múltiples aplicaciones empresariales (Linux, Samba, herramientas legacy).",
+  que_no_hace:"No ofrece una interfaz de administración moderna lista para usar (requiere herramientas de terceros o mucha configuración manual) ni las integraciones SaaS nativas que dan los IdP cloud modernos.",
+  estado:"Estable y de bajo cambio; muchas organizaciones migran a Entra ID, Okta o Keycloak para gestión de identidad moderna, manteniendo LDAP como capa de compatibilidad legacy.",
+  cuando_si:"Infraestructura on-premise que necesita directorio centralizado compatible con aplicaciones legacy que hablan LDAP nativamente.",
+  cuando_no:"Organizaciones cloud-native nuevas: un IdP moderno (Okta, Entra ID, Keycloak con OIDC) suele ofrecer mejor experiencia y menos mantenimiento."
+},
+{
+  name:"OpenWrt",
+  tagline:"Firmware Linux embebido para routers y dispositivos de red",
+  cat:"Redes & firmware",
+  lic:"osi", licLabel:"GPLv2",
+  creador:"Comunidad OpenWrt (surgido de Linksys WRT54G), 2004",
+  adopcion:"Alta entre entusiastas, ISPs pequeños y proyectos IoT; base de firmwares comerciales (GL.iNet y otros)",
+  que_es:"Una distribución Linux altamente modular y personalizable diseñada para correr en routers, puntos de acceso y dispositivos embebidos de red.",
+  que_hace:"Reemplaza el firmware propietario de fábrica con un sistema Linux completo, gestor de paquetes propio (opkg) y control granular de red, firewall, VPN y QoS.",
+  que_no_hace:"No corre en cualquier hardware: requiere que el dispositivo esté en su lista de soporte, y algunos routers modernos bloquean firmware de terceros (bootloader cerrado).",
+  estado:"Desarrollo activo continuo; foco reciente en soporte de Wi-Fi 6/6E/7 y mejor gestión de mesh networking.",
+  cuando_si:"Querés control total de tu router, funciones avanzadas de red (VLAN, VPN, QoS granular) que el firmware de fábrica no ofrece.",
+  cuando_no:"Usuarios sin experiencia en redes que solo necesitan conectividad básica: el riesgo de 'brickear' el dispositivo no se justifica."
+},
+{
+  name:"OpenShift",
+  tagline:"Plataforma Kubernetes empresarial de Red Hat (open-core)",
+  cat:"Cloud & contenedores",
+  lic:"core", licLabel:"Open-core: OKD (Apache-2.0) es la base comunitaria; OpenShift es el producto comercial de Red Hat/IBM",
+  creador:"Red Hat, 2011 (rediseñado sobre Kubernetes desde 2015)",
+  adopcion:"Alta en grandes empresas y sector regulado que buscan Kubernetes con soporte enterprise y seguridad reforzada out-of-the-box",
+  que_es:"Una distribución de Kubernetes de nivel empresarial con capas adicionales de seguridad, CI/CD integrado, operadores certificados y soporte comercial de Red Hat (IBM).",
+  que_hace:"Orquesta contenedores con políticas de seguridad más estrictas por defecto que Kubernetes vanilla, pipelines integrados, un catálogo de operadores y consola de administración.",
+  que_no_hace:"La versión completa con soporte y todas las funciones no es gratuita; el proyecto 100% comunitario y abierto equivalente es OKD, que va un paso por detrás en algunas integraciones comerciales.",
+  estado:"Sigue siendo la opción dominante de Kubernetes 'enterprise-ready' en sectores regulados; Red Hat/IBM invierte fuerte en IA (RHEL AI, InstructLab) integrada a la plataforma.",
+  cuando_si:"Empresas que necesitan Kubernetes con soporte comercial, hardening de seguridad por defecto y cumplimiento normativo (gobierno, finanzas, salud).",
+  cuando_no:"Equipos pequeños cómodos administrando Kubernetes vanilla o un servicio gestionado (EKS/GKE/AKS): el costo de licencia de OpenShift no siempre se justifica."
+},
+{
+  name:"OpenNebula",
+  tagline:"Plataforma de gestión de nube privada e híbrida, más simple que OpenStack",
+  cat:"Cloud & infraestructura",
+  lic:"osi", licLabel:"Apache-2.0",
+  creador:"Universidad Complutense de Madrid / OpenNebula Systems, 2008",
+  adopcion:"Media, nicho de organizaciones que quieren una alternativa más ligera a OpenStack",
+  que_es:"Una plataforma de gestión de centros de datos que unifica cómputo, almacenamiento y redes para construir nubes privadas, públicas e híbridas, con un enfoque en simplicidad operativa.",
+  que_hace:"Provisión y gestión del ciclo de vida de VMs y contenedores, integración con KVM/LXC, y edge computing con menor complejidad de despliegue que OpenStack.",
+  que_no_hace:"Su ecosistema de integraciones y comunidad es bastante más chico que OpenStack o Kubernetes, con menos soporte de terceros y menos oferta de talento en el mercado.",
+  estado:"Desarrollo continuo con foco en edge computing y como alternativa 'sin vendor lock-in' frente a VMware tras su adquisición por Broadcom.",
+  cuando_si:"Equipos que quieren una nube privada funcional sin la complejidad operativa de OpenStack.",
+  cuando_no:"Organizaciones grandes que necesitan el ecosistema, la escala y el soporte comercial masivo que sí tiene OpenStack o Kubernetes."
+},
+{
+  name:"OpenStreetMap (OSM)",
+  tagline:"Mapa mundial libre y editable colaborativamente",
+  cat:"Datos geoespaciales",
+  lic:"osi", licLabel:"Open Database License (ODbL) — datos, no código en sentido estricto",
+  creador:"Steve Coast, 2004",
+  adopcion:"Muy alta: base de datos de mapas de facto para proyectos que no quieren depender de Google Maps (Meta, Apple Maps parcialmente, apps de bicis/senderismo, gobiernos)",
+  que_es:"Un proyecto colaborativo tipo 'Wikipedia de los mapas': una base de datos geográfica global editada por voluntarios y organizaciones bajo licencia abierta.",
+  que_hace:"Provee datos de calles, edificios, puntos de interés y límites administrativos que cualquiera puede usar, modificar y redistribuir, con herramientas de renderizado y ruteo del ecosistema.",
+  que_no_hace:"No ofrece por sí mismo funciones comerciales pulidas (tráfico en tiempo real, Street View) al nivel de Google Maps; eso lo agregan capas de terceros sobre los datos abiertos.",
+  estado:"Cobertura y calidad de datos siguen creciendo, con mapeo asistido por IA/imágenes satelitales y un rol creciente en respuesta a desastres humanitarios.",
+  cuando_si:"Apps que necesitan datos de mapas sin costo de licencia por uso ni dependencia de un proveedor único, o proyectos con foco en soberanía de datos.",
+  cuando_no:"Productos que dependen críticamente de datos de tráfico en tiempo real muy precisos o Street View: ahí Google Maps/Mapbox comercial siguen liderando."
+},
+{
+  name:"OpenRefine",
+  tagline:"Herramienta de limpieza y transformación de datos desordenados",
+  cat:"Datos & analítica",
+  lic:"osi", licLabel:"BSD-3-Clause",
+  creador:"Google (como Google Refine), 2010 → comunidad OpenRefine",
+  adopcion:"Media, muy usada en periodismo de datos, bibliotecas/GLAM y ciencia de datos exploratoria",
+  que_es:"Una aplicación de escritorio (que corre como servidor local con interfaz web) para explorar, limpiar y transformar datasets desordenados sin escribir código.",
+  que_hace:"Detecta y corrige inconsistencias, agrupa valores similares ('clustering'), transforma columnas con expresiones, y reconcilia datos contra bases externas (Wikidata, etc.).",
+  que_no_hace:"No está pensado para pipelines de datos en producción a gran escala ni streaming; es una herramienta de exploración/limpieza puntual, no un ETL productivo.",
+  estado:"Desarrollo comunitario estable, con mejoras incrementales de UI y conectores de reconciliación.",
+  cuando_si:"Limpieza exploratoria puntual de datasets desordenados (CSVs de fuentes diversas, datos históricos, scraping) antes de análisis o carga a un sistema.",
+  cuando_no:"Pipelines ETL recurrentes y automatizados a escala: ahí herramientas de datos como dbt, Airflow o Spark son más adecuadas."
+},
+{
+  name:"Open Container Initiative (OCI)",
+  tagline:"Estándares abiertos para formatos de imágenes y runtimes de contenedores",
+  cat:"Estándares & specs",
+  lic:"osi", licLabel:"Apache-2.0 (specs)",
+  creador:"Docker, CoreOS y otros, 2015 → Linux Foundation",
+  adopcion:"Universal: prácticamente todo el ecosistema de contenedores (Docker, containerd, Podman, Kubernetes) implementa las specs OCI",
+  que_es:"Un cuerpo de gobernanza que define especificaciones abiertas para el formato de imágenes de contenedores, el runtime de ejecución y la distribución de registries.",
+  que_hace:"Garantiza que una imagen construida con Docker corra en containerd, Podman o cualquier runtime compatible OCI, evitando fragmentación del ecosistema de contenedores.",
+  que_no_hace:"No es software ejecutable en sí mismo, es la especificación; no resuelve orquestación (eso es trabajo de Kubernetes) ni seguridad de imágenes por sí sola.",
+  estado:"Especificaciones maduras y estables (Image Spec, Runtime Spec, Distribution Spec); trabajo activo en soporte para artefactos no-contenedor (modelos de IA, WASM) en registries OCI.",
+  cuando_si:"Prácticamente cualquier trabajo con contenedores se beneficia implícitamente de que las herramientas cumplan OCI — es la base invisible del ecosistema.",
+  cuando_no:"No aplica como decisión directa de 'usar o no': es una capa de estándares que ya está debajo de las herramientas de contenedores que uses."
+},
+{
+  name:"Open3D",
+  tagline:"Biblioteca para procesamiento de datos 3D (nubes de puntos, mallas)",
+  cat:"IA & visión por computadora",
+  lic:"osi", licLabel:"MIT",
+  creador:"Intel Labs, 2018",
+  adopcion:"Media, fuerte en robótica, escaneo 3D y visión por computadora académica/industrial",
+  que_es:"Una biblioteca (C++ y Python) para trabajar con datos 3D: nubes de puntos, mallas, reconstrucción de superficies y registro de datos LiDAR/RGB-D.",
+  que_hace:"Visualización 3D interactiva, algoritmos de registro (ICP), reconstrucción de superficies, y utilidades de machine learning sobre datos 3D.",
+  que_no_hace:"No es un motor de renderizado para videojuegos ni un CAD paramétrico completo; su foco es procesamiento y análisis, no diseño ni animación.",
+  estado:"Desarrollo activo con integración creciente de pipelines de deep learning 3D (NeRF, point cloud transformers).",
+  cuando_si:"Robótica, escaneo 3D, procesamiento de datos LiDAR o cualquier pipeline que trabaje con nubes de puntos/mallas.",
+  cuando_no:"Diseño 3D artístico o CAD paramétrico de producto: ahí Blender, FreeCAD u otras herramientas especializadas son más apropiadas."
+},
+{
+  name:"OpenCTI",
+  tagline:"Plataforma open source de inteligencia de amenazas cibernéticas (CTI)",
+  cat:"Seguridad & threat intel",
+  lic:"osi", licLabel:"Apache-2.0",
+  creador:"Filigran (con apoyo de ANSSI, la agencia de ciberseguridad francesa), 2018",
+  adopcion:"Media-alta en equipos de seguridad/SOC, especialmente en Europa y organismos gubernamentales",
+  que_es:"Una plataforma para estructurar, almacenar, organizar y visualizar información técnica y no técnica sobre amenazas cibernéticas, basada en el estándar STIX2.",
+  que_hace:"Centraliza indicadores de compromiso (IOCs), TTPs de actores de amenaza, y correlaciona inteligencia de múltiples fuentes (feeds, informes, MISP) en un grafo de conocimiento consultable.",
+  que_no_hace:"No es una herramienta de detección/respuesta en tiempo real (EDR/SIEM); es la capa de conocimiento y contexto, no de detección directa en endpoints o red.",
+  estado:"Desarrollo activo con foco en automatización de ingesta de feeds y correlación asistida por IA de indicadores de amenaza.",
+  cuando_si:"Equipos de seguridad/CTI que necesitan centralizar y correlacionar inteligencia de amenazas de múltiples fuentes en un solo repositorio estructurado.",
+  cuando_no:"Organizaciones sin un equipo dedicado de threat intelligence: el valor de OpenCTI depende de tener quién lo alimente y consulte activamente."
+},
+{
+  name:"OpenMetadata",
+  tagline:"Plataforma unificada de catálogo de datos y linaje",
+  cat:"Datos & gobernanza",
+  lic:"osi", licLabel:"Apache-2.0",
+  creador:"Comunidad OpenMetadata (liderada por ex-ingenieros de Uber/Amazon), 2021",
+  adopcion:"En crecimiento sostenido como alternativa abierta a catálogos de datos comerciales (Alation, Collibra)",
+  que_es:"Una plataforma que centraliza metadatos técnicos y de negocio de todo tu stack de datos: tablas, dashboards, pipelines, modelos ML, en un único grafo de metadatos.",
+  que_hace:"Descubrimiento de datos, linaje de extremo a extremo, gestión de calidad de datos, glosarios de negocio y colaboración entre equipos de datos alrededor de un catálogo común.",
+  que_no_hace:"No mueve ni transforma datos por sí mismo (no es un ETL); depende de conectores hacia tus fuentes reales (bases de datos, warehouses, BI tools) para poblarse.",
+  estado:"Ecosistema de conectores en expansión constante; foco 2026 en gobernanza de datos para pipelines de IA/LLM.",
+  cuando_si:"Organizaciones con un stack de datos fragmentado (múltiples bases, warehouses, BI) que necesitan visibilidad y gobernanza centralizada.",
+  cuando_no:"Equipos pequeños con pocas fuentes de datos donde documentación manual o un wiki interno todavía alcanza."
+},
+{
+  name:"OpenLineage",
+  tagline:"Estándar abierto para capturar linaje de datos entre herramientas",
+  cat:"Datos & gobernanza",
+  lic:"osi", licLabel:"Apache-2.0",
+  creador:"Comunidad (impulsada por Astronomer/Airflow), 2021 → proyecto LF AI & Data",
+  adopcion:"Media-alta, adoptado como estándar de integración por Airflow, dbt, Spark y varios catálogos de datos (incluido OpenMetadata)",
+  que_es:"Una especificación abierta y API para capturar eventos de linaje de datos (qué job leyó qué, produjo qué) de forma consistente entre distintas herramientas de datos.",
+  que_hace:"Estandariza cómo orquestadores (Airflow), motores de procesamiento (Spark) y transformadores (dbt) emiten metadatos de linaje, para que un catálogo los consuma sin integraciones ad-hoc.",
+  que_no_hace:"No almacena ni visualiza el linaje por sí mismo (es el 'protocolo', no el catálogo); necesita un backend consumidor como Marquez, OpenMetadata o DataHub.",
+  estado:"Adopción creciente como capa de interoperabilidad de facto entre herramientas de orquestación y catálogos de datos.",
+  cuando_si:"Stacks de datos con múltiples herramientas (Airflow + dbt + Spark) donde querés linaje unificado sin integraciones propietarias por cada par de herramientas.",
+  cuando_no:"Pipelines muy simples de una sola herramienta, donde el linaje nativo de esa herramienta ya es suficiente."
+},
+{
+  name:"OpenFaaS",
+  tagline:"Framework de funciones serverless sobre contenedores/Kubernetes",
+  cat:"Cloud & serverless",
+  lic:"core", licLabel:"MIT (Community Edition) + Enterprise Edition comercial",
+  creador:"Alex Ellis, 2016",
+  adopcion:"Media, nicho de organizaciones que quieren serverless self-hosted sin atarse a Lambda/Cloud Functions",
+  que_es:"Un framework para empaquetar cualquier proceso o contenedor como una función serverless, corriendo sobre Kubernetes o Docker Swarm.",
+  que_hace:"Escalado automático a cero, plantillas para múltiples lenguajes, y una experiencia 'FaaS' (functions as a service) sin depender de un proveedor cloud específico.",
+  que_no_hace:"La Community Edition tiene límites de funcionalidad frente a la Enterprise Edition (que sí es comercial); no reemplaza el ecosistema de integraciones nativas de AWS Lambda o Cloud Functions.",
+  estado:"Desarrollo estable, con foco en portabilidad multi-cloud y edge para cargas serverless que no quieren lock-in de un hyperscaler.",
+  cuando_si:"Necesitás serverless portable que corra igual en tu propio Kubernetes, on-premise o cualquier cloud, evitando lock-in de un proveedor.",
+  cuando_no:"Si ya estás cómodo en un solo cloud y aprovechás fuerte sus integraciones nativas (Lambda + API Gateway + EventBridge, etc.), el valor de portabilidad pesa menos."
+},
+{
+  name:"OpenYurt",
+  tagline:"Extensión de Kubernetes para edge computing",
+  cat:"Cloud & edge computing",
+  lic:"osi", licLabel:"Apache-2.0",
+  creador:"Alibaba Cloud, 2020 → proyecto CNCF",
+  adopcion:"Media, sobre todo en China y casos de IoT industrial a gran escala",
+  que_es:"Una extensión no invasiva de Kubernetes que permite gestionar nodos edge (fábricas, IoT, ubicaciones remotas) de forma unificada con clústeres cloud, tolerando desconexiones de red.",
+  que_hace:"Autonomía de nodos edge cuando pierden conectividad con el control plane central, gestión de dispositivos IoT y despliegue unificado cloud-edge.",
+  que_no_hace:"No reemplaza Kubernetes: es una capa encima: si tu caso de uso no tiene nodos edge con conectividad intermitente, no aporta valor extra sobre K8s vanilla.",
+  estado:"Adopción creciente en manufactura inteligente y proyectos IoT industriales; compite con KubeEdge (también CNCF) en el mismo nicho.",
+  cuando_si:"Cargas Kubernetes que se extienden a ubicaciones edge con conectividad poco confiable (fábricas, retail distribuido, IoT).",
+  cuando_no:"Clústeres Kubernetes puramente en datacenter/cloud sin componente edge: la complejidad adicional no se justifica."
+},
+{
+  name:"OpenAI",
+  tagline:"El caso 'Open' que hoy no es open source — incluido a modo de contraste",
+  cat:"IA (contraste, no-open)",
+  lic:"notopen", licLabel:"Propietario — no es open source (con excepciones puntuales de pesos abiertos)",
+  creador:"Sam Altman, Elon Musk, Greg Brockman y otros, 2015 (originalmente sin fines de lucro)",
+  adopcion:"Enorme como servicio comercial (ChatGPT, API GPT); su 'apertura' real es mínima frente al nombre",
+  que_es:"Una empresa de IA que, pese a llevar 'Open' en el nombre por su misión fundacional original, opera hoy principalmente como un laboratorio comercial de modelos propietarios de acceso cerrado vía API.",
+  que_hace:"Ofrece modelos de lenguaje y multimodales de última generación a través de una API paga y productos como ChatGPT; publicó puntualmente algunos modelos de pesos abiertos (como la familia 'gpt-oss') como excepción, no como norma.",
+  que_no_hace:"No publica el código de entrenamiento, los datos ni los pesos de sus modelos insignia (GPT-4o, GPT-5 y sucesores); no es una organización sin fines de lucro desde su reestructuración corporativa, y no cumple los criterios de la Open Source Definition para su producto principal.",
+  estado:"En 2026 el nombre 'Open' es ampliamente reconocido como un artefacto histórico de marketing/misión más que una descripción de licencia; se lo suele citar como ejemplo del fenómeno 'open-washing' en IA.",
+  cuando_si:"Cuando necesitás el modelo de mayor capacidad disponible vía API y no te importa la falta de transparencia sobre pesos/datos de entrenamiento.",
+  cuando_no:"Cuando el requisito real es 'modelo verdaderamente open source' (pesos descargables, licencia permisiva): ahí herramientas como Llama, Mistral, Qwen o los propios 'gpt-oss' encajan mejor que el modelo insignia de OpenAI."
+}
+];
+
+const grid = document.getElementById('grid');
+const searchInput = document.getElementById('search');
+const catFilter = document.getElementById('catFilter');
+const licFilter = document.getElementById('licFilter');
+const countEl = document.getElementById('count');
+const emptyState = document.getElementById('emptyState');
+
+const LIC_LABELS = {osi:'Open Source', core:'Open-core', brand:'Marca restringida', notopen:'No es open'};
+
+// Populate category filter
+const cats = [...new Set(DATA.map(d=>d.cat))].sort();
+catFilter.innerHTML = '<option value="">Toda categoría</option>' + cats.map(c=>`<option value="${c}">${c}</option>`).join('');
+
+function render(){
+  const q = searchInput.value.trim().toLowerCase();
+  const cat = catFilter.value;
+  const lic = licFilter.value;
+
+  const filtered = DATA.filter(d=>{
+    if(cat && d.cat !== cat) return false;
+    if(lic && d.lic !== lic) return false;
+    if(q){
+      const hay = (d.name+' '+d.tagline+' '+d.cat+' '+d.creador+' '+d.que_es+' '+d.que_hace).toLowerCase();
+      if(!hay.includes(q)) return false;
+    }
+    return true;
+  });
+
+  countEl.textContent = `${filtered.length} / ${DATA.length} proyectos`;
+  emptyState.style.display = filtered.length ? 'none' : 'block';
+
+  grid.innerHTML = filtered.map((d,i)=>`
+    <div class="card" data-idx="${i}">
+      <div class="card-head" onclick="this.parentElement.classList.toggle('open')">
+        <div class="status-bar ${d.lic}"></div>
+        <span class="card-name">${d.name}</span>
+        <span class="card-tagline">${d.tagline}</span>
+        <span class="tag">${d.cat}</span>
+        <span class="lic-badge ${d.lic}">${LIC_LABELS[d.lic]}</span>
+        <span class="chevron">▶</span>
+      </div>
+      <div class="card-body">
+        <div class="body-inner">
+          <div class="meta-row"><span><b>Creador / año:</b> ${d.creador}</span><span><b>Licencia:</b> ${d.licLabel}</span></div>
+          <div class="field full"><label>¿Qué es?</label><p>${d.que_es}</p></div>
+          <div class="field yes"><label>✓ Qué hace</label><p>${d.que_hace}</p></div>
+          <div class="field no"><label>✕ Qué NO hace</label><p>${d.que_no_hace}</p></div>
+          <div class="field full"><label>State of the art (jul. 2026)</label><p>${d.estado}</p></div>
+          <div class="field full"><label>Qué tan usado está</label><p>${d.adopcion}</p></div>
+          <div class="field yes"><label>Cuándo usarlo</label><p>${d.cuando_si}</p></div>
+          <div class="field no"><label>Cuándo NO usarlo</label><p>${d.cuando_no}</p></div>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+searchInput.addEventListener('input', render);
+catFilter.addEventListener('change', render);
+licFilter.addEventListener('change', render);
+
+render();
+</script>
+</body>
+</html>

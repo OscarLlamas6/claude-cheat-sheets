@@ -38,6 +38,8 @@ Cuadros comparativos y guías de referencia generados con Claude, centralizados 
 | DevSecOps Pipeline Toolkit — Comparativa de Herramientas | DevOps, CI/CD, Seguridad |
 | registry://open* — Catálogo comparativo de tecnologías "Open*" | Open Source, DevOps, Seguridad |
 | Alternativas a BIND9 — Comparativa de soluciones DNS | DevOps, IT |
+| Comparativa de Apps de Notas y PKM | Productividad, Dev Tools |
+| Sistemas de Control de Versiones — Cuadro Comparativo | Dev Tools, Git |
 
 ## Activar GitHub Pages
 

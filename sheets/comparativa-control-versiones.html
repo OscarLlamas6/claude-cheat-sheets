@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cuadro comparativo · Sistemas de control de versiones</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap');
+
+  :root{
+    --bg: #0f1119;
+    --bg-raised: #161927;
+    --bg-row: #12141f;
+    --line: #2a2e42;
+    --text: #e8e9f0;
+    --muted: #8b8fa3;
+    --add: #3fb950;
+    --add-dim: #1f4a2a;
+    --del: #f85149;
+    --del-dim: #4a201f;
+    --amber: #d29922;
+    --blue: #58a6ff;
+  }
+
+  *{ box-sizing: border-box; }
+  html,body{ margin:0; padding:0; }
+  body{
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'IBM Plex Sans', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    padding: 48px 20px 80px;
+  }
+
+  .wrap{ max-width: 1280px; margin: 0 auto; }
+
+  /* ---------- Header / signature commit graph ---------- */
+  header{ margin-bottom: 40px; }
+  .eyebrow{
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 13px;
+    color: var(--add);
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+    display:flex; align-items:center; gap:8px;
+  }
+  .eyebrow::before{ content:"$"; color: var(--muted); }
+  h1{
+    font-family: 'IBM Plex Mono', monospace;
+    font-weight: 700;
+    font-size: clamp(28px, 4vw, 44px);
+    margin: 0 0 10px;
+    letter-spacing: -0.01em;
+  }
+  h1 .dim{ color: var(--muted); font-weight: 400; }
+  .subtitle{
+    color: var(--muted);
+    font-size: 15px;
+    max-width: 680px;
+    line-height: 1.55;
+    margin-bottom: 28px;
+  }
+
+  .graph{
+    width: 100%;
+    height: 90px;
+    display: block;
+    margin-bottom: 4px;
+  }
+  .graph-caption{
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    display:flex;
+    justify-content: space-between;
+    padding: 0 2px;
+  }
+
+  /* ---------- Legend ---------- */
+  .legend{
+    display:flex; flex-wrap:wrap; gap: 18px;
+    margin: 28px 0 8px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    color: var(--muted);
+  }
+  .legend span{ display:inline-flex; align-items:center; gap:6px; }
+  .dot{ width:9px; height:9px; border-radius:2px; display:inline-block; }
+  .dot.free{ background: var(--add); }
+  .dot.paid{ background: var(--amber); }
+  .dot.mixed{ background: var(--blue); }
+
+  /* ---------- Table ---------- */
+  .table-scroll{
+    overflow-x: auto;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    background: var(--bg-raised);
+  }
+  table{
+    border-collapse: collapse;
+    width: 100%;
+    min-width: 1400px;
+  }
+  thead th{
+    position: sticky; top:0;
+    background: var(--bg-raised);
+    z-index: 3;
+    padding: 16px 20px;
+    text-align:left;
+    border-bottom: 1px solid var(--line);
+    vertical-align: top;
+  }
+  thead th:first-child{
+    left:0; z-index:4;
+  }
+  .tool-name{
+    font-family:'IBM Plex Mono', monospace;
+    font-weight: 700;
+    font-size: 17px;
+    display:flex; align-items:center; gap:8px;
+  }
+  .tool-year{
+    font-family:'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    font-weight:400;
+    margin-top:4px;
+  }
+  .badge{
+    display:inline-block;
+    font-family:'IBM Plex Mono', monospace;
+    font-size:10px;
+    padding: 2px 7px;
+    border-radius: 20px;
+    margin-top: 8px;
+    letter-spacing:.03em;
+  }
+  .badge.free{ background: var(--add-dim); color: var(--add); }
+  .badge.paid{ background: #3a2c10; color: var(--amber); }
+  .badge.mixed{ background: #163049; color: var(--blue); }
+
+  tbody th{
+    position: sticky; left:0;
+    background: var(--bg-row);
+    z-index:2;
+    text-align:left;
+    padding: 16px 20px;
+    font-family:'IBM Plex Mono', monospace;
+    font-size: 12px;
+    color: var(--muted);
+    letter-spacing:.03em;
+    text-transform: uppercase;
+    min-width: 190px;
+    border-bottom: 1px solid var(--line);
+    border-right: 1px solid var(--line);
+    vertical-align: top;
+  }
+  tbody td{
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--line);
+    border-left: 1px dashed var(--line);
+    font-size: 14px;
+    line-height: 1.5;
+    min-width: 230px;
+    max-width: 300px;
+    vertical-align: top;
+    color: var(--text);
+  }
+  tbody tr:nth-child(even) td, tbody tr:nth-child(even) th{
+    background: rgba(255,255,255,0.015);
+  }
+  td.ok::before{ content:"+ "; color: var(--add); font-family:'IBM Plex Mono', monospace; }
+  td.no::before{ content:"− "; color: var(--del); font-family:'IBM Plex Mono', monospace; }
+
+  th[scope="col"]{ min-width: 230px; }
+
+  /* first col header cell blank styling */
+  thead th.corner{
+    background: var(--bg-raised);
+  }
+
+  footer{
+    margin-top: 36px;
+    color: var(--muted);
+    font-size: 12.5px;
+    font-family:'IBM Plex Mono', monospace;
+    line-height:1.7;
+  }
+  footer a{ color: var(--blue); }
+
+  ::-webkit-scrollbar{ height: 10px; }
+  ::-webkit-scrollbar-track{ background: var(--bg-raised); }
+  ::-webkit-scrollbar-thumb{ background: var(--line); border-radius: 10px; }
+
+  @media (max-width: 640px){
+    body{ padding: 28px 12px 60px; }
+    .graph{ display:none; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="eyebrow">git log --graph --oneline --all</div>
+    <h1>Sistemas de control de versiones <span class="dim">// cuadro comparativo</span></h1>
+    <p class="subtitle">
+      Ocho tecnologías de versionamiento de código, ordenadas por año de aparición. Se agrupan
+      GitHub, GitLab, Bitbucket, CodeCommit, Forgejo y Gitea bajo <strong>Git</strong>, ya que todas
+      implementan el mismo motor: son plataformas de alojamiento, no sistemas de control de versiones distintos.
+    </p>
+
+    <svg class="graph" viewBox="0 0 1200 90" preserveAspectRatio="none">
+      <line x1="0" y1="45" x2="1200" y2="45" stroke="#2a2e42" stroke-width="1.5" stroke-dasharray="2 6"/>
+      <!-- branch curves -->
+      <path d="M 60 45 C 120 45, 140 20, 200 20" stroke="#58a6ff" stroke-width="2" fill="none" opacity="0.6"/>
+      <path d="M 200 20 C 260 20, 280 45, 340 45" stroke="#58a6ff" stroke-width="2" fill="none" opacity="0.6"/>
+      <path d="M 480 45 C 540 45, 560 70, 620 70" stroke="#3fb950" stroke-width="2" fill="none" opacity="0.6"/>
+      <path d="M 620 70 C 680 70, 700 45, 760 45" stroke="#3fb950" stroke-width="2" fill="none" opacity="0.6"/>
+      <path d="M 900 45 C 960 45, 980 20, 1040 20" stroke="#d29922" stroke-width="2" fill="none" opacity="0.6"/>
+      <path d="M 1040 20 C 1080 20, 1090 45, 1140 45" stroke="#d29922" stroke-width="2" fill="none" opacity="0.6"/>
+      <!-- nodes: CVS, SVN, Darcs, Bazaar, Git, Mercurial, Fossil, Perforce(reordered by year below), Plastic, Jujutsu -->
+      <circle cx="60" cy="45" r="6" fill="#8b8fa3"/>
+      <circle cx="200" cy="20" r="6" fill="#8b8fa3"/>
+      <circle cx="340" cy="45" r="6" fill="#8b8fa3"/>
+      <circle cx="480" cy="45" r="7" fill="#3fb950"/>
+      <circle cx="620" cy="70" r="6" fill="#3fb950"/>
+      <circle cx="760" cy="45" r="6" fill="#3fb950"/>
+      <circle cx="900" cy="45" r="6" fill="#d29922"/>
+      <circle cx="1040" cy="20" r="6" fill="#d29922"/>
+      <circle cx="1140" cy="45" r="7" fill="#58a6ff"/>
+    </svg>
+    <div class="graph-caption">
+      <span>1990 · Perforce</span>
+      <span>2000 · SVN</span>
+      <span>2003 · Darcs</span>
+      <span>2005 · Git / Mercurial</span>
+      <span>2007 · Fossil</span>
+      <span>2015 · Plastic SCM</span>
+      <span>2021 · Jujutsu</span>
+    </div>
+
+    <div class="legend">
+      <span><span class="dot free"></span> Gratis / código abierto</span>
+      <span><span class="dot paid"></span> Comercial / de pago</span>
+      <span><span class="dot mixed"></span> Gratis con límites, pago para equipos grandes</span>
+    </div>
+  </header>
+
+  <div class="table-scroll">
+  <table>
+    <thead>
+      <tr>
+        <th class="corner"></th>
+        <th scope="col">
+          <div class="tool-name">🔀 Git</div>
+          <div class="tool-year">Linus Torvalds · 2005</div>
+          <span class="badge free">gratis / open source</span>
+        </th>
+        <th scope="col">
+          <div class="tool-name">📦 Subversion (SVN)</div>
+          <div class="tool-year">CollabNet · 2000</div>
+          <span class="badge free">gratis / open source</span>
+        </th>
+        <th scope="col">
+          <div class="tool-name">☿ Mercurial (Hg)</div>
+          <div class="tool-year">Matt Mackall · 2005</div>
+          <span class="badge free">gratis / open source</span>
+        </th>
+        <th scope="col">
+          <div class="tool-name">🥋 Jujutsu (jj)</div>
+          <div class="tool-year">Martin von Zweigbergk (Google) · 2021</div>
+          <span class="badge free">gratis / open source</span>
+        </th>
+        <th scope="col">
+          <div class="tool-name">🎮 Perforce (Helix Core)</div>
+          <div class="tool-year">Christopher Seiwald · 1995</div>
+          <span class="badge mixed">gratis ≤5 usuarios, luego pago</span>
+        </th>
+        <th scope="col">
+          <div class="tool-name">🗿 Fossil</div>
+          <div class="tool-year">D. Richard Hipp (creador de SQLite) · 2007</div>
+          <span class="badge free">gratis / open source</span>
+        </th>
+        <th scope="col">
+          <div class="tool-name">🎨 Plastic SCM (Unity VCS)</div>
+          <div class="tool-year">Códice Software · 2006 (hoy de Unity)</div>
+          <span class="badge mixed">gratis ≤3 usuarios, luego pago</span>
+        </th>
+        <th scope="col">
+          <div class="tool-name">🕰️ CVS</div>
+          <div class="tool-year">Dick Grune · 1986</div>
+          <span class="badge free">gratis / open source</span>
+        </th>
+      </tr>
+    </thead>
+    <tbody>
+
+      <tr>
+        <th>¿Qué es?</th>
+        <td>Sistema de control de versiones <strong>distribuido</strong>. Cada clon del repositorio es una copia completa con todo el historial.</td>
+        <td>Sistema <strong>centralizado</strong>: existe un único servidor con la verdad; los clientes descargan solo la revisión que necesitan.</td>
+        <td>Sistema distribuido, contemporáneo de Git, con filosofía muy similar pero interfaz de comandos más simple y consistente.</td>
+        <td>Motor de control de versiones distribuido de nueva generación, compatible con repos Git existentes, pensado para reescribir historial sin miedo.</td>
+        <td>Sistema centralizado orientado a archivos binarios grandes (assets, videos, planos CAD), muy usado en videojuegos y estudios de animación.</td>
+        <td>Sistema distribuido que empaqueta control de versiones + wiki + issues + foro, todo en un único archivo SQLite.</td>
+        <td>Sistema que puede operar centralizado o distribuido ("branch per task"), con foco en archivos grandes y ramas visuales.</td>
+        <td>Uno de los primeros sistemas de control de versiones centralizados de uso amplio; versiona archivo por archivo, no el proyecto como conjunto.</td>
+      </tr>
+
+      <tr>
+        <th>¿Qué hace bien?</th>
+        <td class="ok">Ramas y fusiones baratísimas, trabajo 100% offline, ecosistema enorme, estándar de facto de la industria.</td>
+        <td class="ok">Control de acceso granular por carpeta, buen manejo de binarios grandes, historial lineal fácil de auditar.</td>
+        <td class="ok">Comandos predecibles y coherentes, buen rendimiento en repos con historiales muy largos.</td>
+        <td class="ok">Deshacer/rehacer cualquier operación, editar commits antiguos sin "rebase interactivo" doloroso, un solo modelo mental para todo.</td>
+        <td class="ok">Bloqueo de archivos (locking) para que dos personas no pisen el mismo binario, control fino de permisos, escalabilidad a TB de datos.</td>
+        <td class="ok">Cero dependencias externas: un solo ejecutable y un archivo para todo el proyecto, ideal para autocontención.</td>
+        <td class="ok">Interfaz gráfica pulida, diffs visuales de assets de Unity/Unreal, mezcla de modelos centralizado y distribuido.</td>
+        <td class="ok">Simplicidad histórica, funcionó como estándar durante los 90 y 2000.</td>
+      </tr>
+
+      <tr>
+        <th>¿Qué NO hace / limitaciones?</th>
+        <td class="no">No maneja bien archivos binarios grandes de forma nativa (necesita Git LFS aparte); curva de aprendizaje pronunciada.</td>
+        <td class="no">Sin servidor no hay nada que hacer; ramas y fusiones son costosas y propensas a conflictos.</td>
+        <td class="no">Ecosistema y adopción mucho menores que Git; GitHub eliminó soporte nativo de Hg hace años.</td>
+        <td class="no">Todavía joven: menos documentación, menos integraciones de terceros, comunidad pequeña comparada con Git.</td>
+        <td class="no">No es adecuado para código abierto ni proyectos pequeños; licenciamiento y administración de servidor complejos.</td>
+        <td class="no">Adopción marginal fuera del propio proyecto SQLite; pocas integraciones con CI/CD modernas.</td>
+        <td class="no">Menos estándar fuera de la industria de videojuegos; curva de aprendizaje del modelo mixto.</td>
+        <td class="no">Sin commits atómicos multi-archivo, ramas casi inutilizables, sin manejo real de renombrados. Prácticamente abandonado.</td>
+      </tr>
+
+      <tr>
+        <th>¿Es gratis?</th>
+        <td class="ok">Sí, 100% libre (GPLv2). El costo, si existe, viene de la plataforma de hosting (GitHub/GitLab de pago en planes empresariales).</td>
+        <td class="ok">Sí, 100% libre y de código abierto (Apache License).</td>
+        <td class="ok">Sí, 100% libre (GPLv2).</td>
+        <td class="ok">Sí, 100% libre (Apache 2.0 / MIT), respaldado y usado internamente por Google.</td>
+        <td>Gratis hasta 5 usuarios y 20 workspaces; a partir de ahí requiere licencia comercial por usuario.</td>
+        <td class="ok">Sí, 100% libre (dominio público / BSD-like).</td>
+        <td>Gratis hasta 3 usuarios (Unity VCS free tier); planes de equipo son de pago.</td>
+        <td class="ok">Sí, 100% libre (GPL).</td>
+      </tr>
+
+      <tr>
+        <th>Cuándo usarlo</th>
+        <td>Prácticamente cualquier proyecto de software moderno, solo o en equipo, open source o privado.</td>
+        <td>Organizaciones con estructura jerárquica estricta que necesitan control de acceso por carpeta y ya tienen infraestructura SVN.</td>
+        <td>Si el equipo ya lo domina o si se mantiene un proyecto histórico creado en Mercurial (ej. partes de Mozilla, Facebook internamente lo usó años).</td>
+        <td>Desarrolladores que quieren la potencia de Git pero con una UX más limpia, o que reescriben historial constantemente.</td>
+        <td>Estudios de videojuegos, animación o ingeniería con archivos binarios enormes y necesidad de bloqueo de archivos.</td>
+        <td>Proyectos pequeños/personales que quieren versionado + wiki + tickets sin montar infraestructura adicional.</td>
+        <td>Equipos de videojuegos que usan Unity/Unreal y necesitan diffs visuales de assets.</td>
+        <td>Solo para mantener sistemas legados que aún corren sobre CVS. No para proyectos nuevos.</td>
+      </tr>
+
+      <tr>
+        <th>Cuándo NO usarlo</th>
+        <td>Si el equipo maneja principalmente archivos binarios pesados sin configurar Git LFS.</td>
+        <td>Proyectos open source distribuidos globalmente o equipos que necesitan trabajar offline.</td>
+        <td>Si se necesita integración amplia con plataformas modernas (la mayoría ya no lo soporta de forma nativa).</td>
+        <td>Si el equipo depende de integraciones maduras de CI/CD, code review o hosting que aún no soportan jj de forma nativa.</td>
+        <td>Proyectos pequeños, open source, o con presupuesto limitado.</td>
+        <td>Proyectos grandes con muchos colaboradores externos que ya esperan un flujo tipo GitHub/GitLab.</td>
+        <td>Software genérico fuera del ámbito de videojuegos, o equipos con presupuesto ajustado.</td>
+        <td>En cualquier proyecto nuevo: fue reemplazado por SVN y luego por Git.</td>
+      </tr>
+
+      <tr>
+        <th>¿Quién lo creó?</th>
+        <td>Linus Torvalds (también creador de Linux), en 2005, para versionar el propio kernel de Linux.</td>
+        <td>CollabNet, como sucesor directo de CVS, en 2000.</td>
+        <td>Matt Mackall, en 2005 (la misma semana que Git, ambos como respuesta al fin de BitKeeper).</td>
+        <td>Martin von Zweigbergk, ingeniero de Google, iniciado como proyecto personal en 2019 y liberado públicamente en 2021.</td>
+        <td>Christopher Seiwald, fundador de Perforce Software, en 1995.</td>
+        <td>D. Richard Hipp, el mismo creador de SQLite, en 2007, para versionar el propio código de SQLite.</td>
+        <td>Códice Software (España), en 2006; adquirido por Unity Technologies en 2020/2021.</td>
+        <td>Dick Grune, en 1986, como scripts sobre RCS; más tarde mantenido por varios equipos.</td>
+      </tr>
+
+      <tr>
+        <th>Modelo</th>
+        <td>Distribuido</td>
+        <td>Centralizado</td>
+        <td>Distribuido</td>
+        <td>Distribuido (interopera con repos Git)</td>
+        <td>Centralizado</td>
+        <td>Distribuido</td>
+        <td>Híbrido (centralizado + distribuido)</td>
+        <td>Centralizado</td>
+      </tr>
+
+    </tbody>
+  </table>
+  </div>
+
+  <footer>
+    Nota: se excluyen intencionalmente GitHub, GitLab, Bitbucket, AWS CodeCommit, Forgejo y Gitea de esta tabla
+    porque son plataformas de alojamiento y colaboración construidas sobre el motor de Git, no sistemas de
+    versionamiento independientes. // generado como cuadro de referencia, no exhaustivo.
+  </footer>
+
+</div>
+</body>
+</html>

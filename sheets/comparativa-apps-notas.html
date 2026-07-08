@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Comparativa de Apps de Notas y PKM</title>
+<style>
+  :root{
+    --bg:#0f1115;
+    --panel:#171a21;
+    --panel2:#1d212b;
+    --border:#2a2f3a;
+    --text:#e6e8ee;
+    --muted:#9aa3b2;
+    --accent:#7c9eff;
+    --green:#4ade80;
+    --red:#f87171;
+    --yellow:#facc15;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--text);
+    font-family:'Segoe UI', system-ui, -apple-system, Roboto, Helvetica, Arial, sans-serif;
+    padding:24px;
+  }
+  header{
+    max-width:1400px;
+    margin:0 auto 24px auto;
+  }
+  h1{
+    font-size:28px;
+    margin-bottom:4px;
+  }
+  .subtitle{
+    color:var(--muted);
+    font-size:15px;
+    max-width:800px;
+    line-height:1.5;
+  }
+  .legend{
+    display:flex;
+    flex-wrap:wrap;
+    gap:16px;
+    margin-top:16px;
+    font-size:13px;
+    color:var(--muted);
+  }
+  .legend span{display:flex;align-items:center;gap:6px;}
+  .dot{width:10px;height:10px;border-radius:50%;display:inline-block;}
+  .dot.green{background:var(--green);}
+  .dot.red{background:var(--red);}
+  .dot.yellow{background:var(--yellow);}
+
+  .controls{
+    max-width:1400px;
+    margin:0 auto 20px auto;
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+  }
+  .controls input{
+    background:var(--panel);
+    border:1px solid var(--border);
+    color:var(--text);
+    padding:10px 14px;
+    border-radius:8px;
+    font-size:14px;
+    flex:1;
+    min-width:220px;
+  }
+  .controls select{
+    background:var(--panel);
+    border:1px solid var(--border);
+    color:var(--text);
+    padding:10px 14px;
+    border-radius:8px;
+    font-size:14px;
+  }
+
+  .table-wrap{
+    max-width:1400px;
+    margin:0 auto;
+    overflow-x:auto;
+    border:1px solid var(--border);
+    border-radius:12px;
+    background:var(--panel);
+  }
+  table{
+    border-collapse:collapse;
+    width:100%;
+    min-width:1200px;
+  }
+  th, td{
+    padding:14px 16px;
+    text-align:left;
+    border-bottom:1px solid var(--border);
+    vertical-align:top;
+    font-size:13.5px;
+    line-height:1.45;
+  }
+  th{
+    background:var(--panel2);
+    position:sticky;
+    top:0;
+    z-index:2;
+    font-size:12.5px;
+    text-transform:uppercase;
+    letter-spacing:0.03em;
+    color:var(--muted);
+    white-space:nowrap;
+  }
+  tbody tr:hover{
+    background:#1c202a;
+  }
+  td.tool-name{
+    position:sticky;
+    left:0;
+    background:var(--panel);
+    z-index:1;
+    min-width:150px;
+  }
+  tbody tr:hover td.tool-name{
+    background:#1c202a;
+  }
+  .tool-title{
+    font-weight:700;
+    font-size:15px;
+    color:var(--accent);
+    margin-bottom:4px;
+  }
+  .badge{
+    display:inline-block;
+    padding:2px 8px;
+    border-radius:20px;
+    font-size:11px;
+    font-weight:600;
+    margin-top:2px;
+  }
+  .badge.opensource{background:rgba(74,222,128,0.15);color:var(--green);border:1px solid rgba(74,222,128,0.4);}
+  .badge.closed{background:rgba(248,113,113,0.15);color:var(--red);border:1px solid rgba(248,113,113,0.4);}
+  .badge.freemium{background:rgba(250,204,21,0.15);color:var(--yellow);border:1px solid rgba(250,204,21,0.4);}
+
+  ul.cell-list{
+    margin:0;
+    padding-left:16px;
+  }
+  ul.cell-list li{
+    margin-bottom:3px;
+  }
+  .tag{
+    display:inline-block;
+    background:var(--panel2);
+    border:1px solid var(--border);
+    color:var(--muted);
+    padding:3px 8px;
+    border-radius:6px;
+    font-size:11px;
+    margin:2px 4px 2px 0;
+  }
+  .good{color:var(--green);}
+  .bad{color:var(--red);}
+  .warn{color:var(--yellow);}
+
+  footer{
+    max-width:1400px;
+    margin:24px auto 0 auto;
+    color:var(--muted);
+    font-size:12.5px;
+    line-height:1.6;
+  }
+
+  @media print{
+    body{background:white;color:black;}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>🗂️ Comparativa de Apps de Notas y Gestión de Conocimiento (PKM)</h1>
+  <p class="subtitle">
+    Cuadro comparativo de 12 herramientas populares para tomar notas y construir una base de conocimiento personal:
+    qué son, qué hacen, qué NO hacen, su modelo de negocio y cuándo (no) conviene usarlas.
+    Usa el buscador para filtrar por nombre o característica.
+  </p>
+  <div class="legend">
+    <span><span class="dot green"></span> Open Source</span>
+    <span><span class="dot red"></span> Código cerrado</span>
+    <span><span class="dot yellow"></span> Freemium / mixto</span>
+  </div>
+</header>
+
+<div class="controls">
+  <input type="text" id="search" placeholder="🔍 Buscar herramienta o palabra clave (ej: markdown, gratis, sync)..." onkeyup="filterTable()">
+</div>
+
+<div class="table-wrap">
+  <table id="mainTable">
+    <thead>
+      <tr>
+        <th>Herramienta</th>
+        <th>Qué es / Enfoque</th>
+        <th>Qué hace bien</th>
+        <th>Qué NO hace / Limitaciones</th>
+        <th>Modelo & Precio</th>
+        <th>Plataformas</th>
+        <th>Formato de datos</th>
+        <th>✅ Úsala si...</th>
+        <th>❌ Evítala si...</th>
+      </tr>
+    </thead>
+    <tbody>
+
+      <!-- OBSIDIAN -->
+      <tr>
+        <td class="tool-name">
+          <div class="tool-title">Obsidian</div>
+          <span class="badge closed">Freemium (núcleo gratis)</span>
+        </td>
+        <td>Editor de notas en Markdown local, orientado a "segundo cerebro" con vínculos bidireccionales y grafo de conexiones.</td>
+        <td>
+          <ul class="cell-list">
+            <li>Grafo de relaciones entre notas</li>
+            <li>Enorme ecosistema de plugins (1000+)</li>
+            <li>Total control local, sin cuenta obligatoria</li>
+            <li>Personalización extrema (temas, CSS)</li>
+          </ul>
+        </td>
+        <td>
+          <ul class="cell-list">
+            <li>El core no es open source (cerrado, gratis para uso personal)</li>
+            <li>Sync y Publish son de paga</li>
+            <li>Colaboración en tiempo real limitada</li>
+            <li>Curva de aprendizaje con plugins</li>
+          </ul>
+        </td>
+        <td>Gratis para uso personal. Sync $8/mes, Publish $10/mes. Uso comercial requiere licencia.</td>
+        <td>Win, macOS, Linux, iOS, Android</td>
+        <td>Archivos .md locales</td>
+        <td>Quieres control total de tus archivos y un ecosistema de plugins maduro.</td>
+        <td>Necesitas open source real o colaboración en equipo fluida.</td>
+      </tr>
+
+      <!-- JOPLIN -->
+      <tr>
+        <td class="tool-name">
+          <div class="tool-title">Joplin</div>
+          <span class="badge opensource">Open Source</span>
+        </td>
+        <td>App de notas Markdown 100% open source, con cifrado end-to-end y múltiples opciones de sincronización.</td>
+        <td>
+          <ul class="cell-list">
+            <li>Totalmente gratis y open source (MIT)</li>
+            <li>Cifrado E2E real</li>
+            <li>Sync con Dropbox, Nextcloud, WebDAV, S3, etc.</li>
+            <li>Plugins y clipper de navegador</li>
+          </ul>
+        </td>
+        <td>
+          <ul class="cell-list">
+            <li>Grafo de conexiones muy básico o inexistente</li>
+            <li>Interfaz menos pulida que Obsidian/Notion</li>
+            <li>Colaboración en tiempo real inexistente</li>
+          </ul>
+        </td>
+        <td>100% gratis. Joplin Cloud (sync oficial) desde ~$2.99/mes opcional.</td>
+        <td>Win, macOS, Linux, iOS, Android, Web</td>
+        <td>Archivos .md + JEX (export propio)</td>
+        <td>Buscas una alternativa gratuita, privada y verdaderamente open source a Evernote.</td>
+        <td>Buscas vínculos bidireccionales avanzados o diseño visual moderno.</td>
+      </tr>
+
+      <!-- BLINKO -->
+      <tr>
+        <td class="tool-name">
+          <div class="tool-title">Blinko</div>
+          <span class="badge opensource">Open Source</span>
+        </td>
+        <td>Nota rápida + microblogging + IA (RAG) autoalojada. Mezcla capturas rápidas ("Blinkos") con notas detalladas y búsqueda semántica local.</td>
+        <td>
+          <ul class="cell-list">
+            <li>Captura ultra rápida ("Quick Capture Box")</li>
+            <li>Búsqueda con IA/RAG en lenguaje natural (Ollama, OpenAI, etc.)</li>
+            <li>Self-hosted, control total de datos</li>
+            <li>Bot de Telegram y extensión de navegador</li>
+          </ul>
+        </td>
+        <td>
+          <ul class="cell-list">
+            <li>Requiere Docker/servidor propio (no trivial para no técnicos)</li>
+            <li>Apps móviles nativas más limitadas que Notion/Evernote</li>
+            <li>No apto para gestión de proyectos compleja</li>
+            <li>Comunidad y ecosistema aún pequeños (proyecto joven)</li>
+          </ul>
+        </td>
+        <td>Núcleo 100% gratis (GPL-3.0). Membresías opcionales $5–$9.90/mes por extras (extensión, bots, créditos IA).</td>
+        <td>Web (self-hosted), macOS, Windows, Linux, Android</td>
+        <td>Markdown + base PostgreSQL propia</td>
+        <td>Quieres capturar ideas al vuelo con IA local, sin depender de la nube.</td>
+        <td>No quieres mantener tu propio servidor/Docker.</td>
+      </tr>
+
+      <!-- NOTION -->
+      <tr>
+        <td class="tool-name">
+          <div class="tool-title">Notion</div>
+          <span class="badge closed">Freemium</span>
+        </td>
+        <td>Workspace todo-en-uno: notas, bases de datos, wikis y gestión de proyectos en un solo lugar en la nube.</td>
+        <td>
+          <ul class="cell-list">
+            <li>Bases de datos relacionales muy flexibles</li>
+            <li>Colaboración en tiempo real excelente</li>
+            <li>Plantillas para casi cualquier caso de uso</li>
+            <li>IA integrada (Notion AI)</li>
+          </ul>
+        </td>
+        <td>
+          <ul class="cell-list">
+            <li>No es open source ni self-hosted</li>
+            <li>Puede volverse lento con bases grandes</li>
+            <li>Datos ligados a su nube (exportar es limitado)</li>
+            <li>Offline limitado</li>
+          </ul>
+        </td>
+        <td>Gratis (limitado) / Plus ~$10 / Business ~$20 por usuario/mes.</td>
+        <td>Web, Win, macOS, iOS, Android</td>
+        <td>Propietario (exporta a Markdown/CSV/PDF)</td>
+        <td>Trabajas en equipo y necesitas wikis + proyectos + docs en un solo lugar.</td>
+        <td>Te preocupa la privacidad de datos o quieres trabajar 100% offline.</td>
+      </tr>
+
+      <!-- LOGSEQ -->
+      <tr>
+        <td class="tool-name">
+          <div class="tool-title">Logseq</div>
+          <span class="badge opensource">Open Source</span>
+        </td>
+        <td>App de notas tipo "outliner" (basada en bloques) con enfoque en pensamiento no lineal, similar a Roam Research.</td>
+        <td>
+          <ul class="cell-list">
+            <li>Estructura por bloques/outliner muy potente</li>
+            <li>Notas diarias (daily notes) nativas</li>
+            <li>Grafo de conexiones y backlinks</li>
+            <li>100% local, código abierto</li>
+          </ul>
+        </td>
+        <td>
+          <ul class="cell-list">
+            <li>Rendimiento se degrada con grafos muy grandes</li>
+            <li>Interfaz menos amigable para principiantes</li>
+            <li>Sync oficial aún en evolución</li>
+            <li>Móvil menos maduro</li>
+          </ul>
+        </td>
+        <td>Completamente gratis. Plan Sync opcional de paga.</td>
+        <td>Win, macOS, Linux, iOS, Android</td>
+        <td>Markdown u Org-mode locales</td>
+        <td>Prefieres pensar en bloques/outliner y quieres algo abierto y local.</td>
+        <td>Manejas miles de notas y priorizas velocidad sobre estructura.</td>
+      </tr>
+
+      <!-- ANYTYPE -->
+      <tr>
+        <td class="tool-name">
+          <div class="tool-title">Anytype</div>
+          <span class="badge freemium">Open Source (parcial)</span>
+        </td>
+        <td>Espacio de trabajo local-first tipo Notion, con objetos, bases de datos y sincronización P2P cifrada.</td>
+        <td>
+          <ul class="cell-list">
+            <li>Local-first con cifrado y sync P2P</li>
+            <li>Bases de datos y "objetos" muy flexibles</li>
+            <li>Sin necesidad de servidor propio para sincronizar</li>
+            <li>Diseño visual atractivo</li>
+          </ul>
+        </td>
+        <td>
+          <ul class="cell-list">
+            <li>Aún en desarrollo activo (algunas funciones inestables)</li>
+            <li>Solo parte del código es abierto</li>
+            <li>Ecosistema de plugins pequeño comparado con Obsidian</li>
+            <li>Curva de aprendizaje por su modelo de "objetos"</li>
+          </ul>
+        </td>
+        <td>Gratis con límite de almacenamiento en nube; planes de pago para más espacio/sync.</td>
+        <td>Win, macOS, Linux, iOS, Android</td>
+        <td>Formato propio (exportable a Markdown)</td>
+        <td>Quieres algo tipo Notion pero local-first y más privado.</td>
+        <td>Necesitas estabilidad total y un producto ya maduro.</td>
+      </tr>
+
+      <!-- STANDARD NOTES -->
+      <tr>
+        <td class="tool-name">
+          <div class="tool-title">Standard Notes</div>
+          <span class="badge opensource">Open Source</span>
+        </td>
+        <td>Notas simples, minimalistas, con cifrado end-to-end como prioridad número uno.</td>
+        <td>
+          <ul class="cell-list">
+            <li>Cifrado E2E de extremo a extremo por defecto</li>
+            <li>Interfaz simple y estable, enfocada en durabilidad</li>
+            <li>Historial de versiones robusto</li>
+            <li>Editor extensible (Markdown, código, tablero, etc.)</li>
+          </ul>
+        </td>
+        <td>
+          <ul class="cell-list">
+            <li>Funciones avanzadas (editores extra, sync extendido) requieren plan pago</li>
+            <li>No tiene grafo de conexiones ni vínculos bidireccionales</li>
+            <li>Menos plugins que Obsidian</li>
+          </ul>
+        </td>
+        <td>Núcleo gratis. Plan "Productivity" ~$8.33/mes (facturado anual) para extras.</td>
+        <td>Web, Win, macOS, Linux, iOS, Android</td>
+        <td>Texto plano cifrado, exportable</td>
+        <td>La privacidad y simplicidad a largo plazo son tu prioridad #1.</td>
+        <td>Buscas un sistema tipo "segundo cerebro" con vínculos y grafo.</td>
+      </tr>
+
+      <!-- TRILIUM -->
+      <tr>
+        <td class="tool-name">
+          <div class="tool-title">Trilium Notes</div>
+          <span class="badge opensource">Open Source</span>
+        </td>
+        <td>Editor jerárquico de notas (árbol) autoalojado, orientado a grandes bases de conocimiento personal.</td>
+        <td>
+          <ul class="cell-list">
+            <li>Jerarquía de notas ilimitada tipo árbol</li>
+            <li>Cifrado de notas individuales</li>
+            <li>Scripting/automatización avanzada (JS)</li>
+            <li>Self-hosted, control total</li>
+          </ul>
+        </td>
+        <td>
+          <ul class="cell-list">
+            <li>Interfaz anticuada comparada con apps modernas</li>
+            <li>Requiere algo de configuración técnica para sync propio</li>
+            <li>Comunidad más pequeña</li>
+          </ul>
+        </td>
+        <td>100% gratis, sin planes de pago (self-hosted).</td>
+        <td>Win, macOS, Linux, Web (server), Android (beta)</td>
+        <td>Base de datos propia (exportable)</td>
+        <td>Necesitas jerarquías profundas y automatización con scripts.</td>
+        <td>Priorizas una interfaz moderna y pulida "out of the box".</td>
+      </tr>
+
+      <!-- NOTESNOOK -->
+      <tr>
+        <td class="tool-name">
+          <div class="tool-title">Notesnook</div>
+          <span class="badge opensource">Open Source</span>
+        </td>
+        <td>Alternativa privada a Evernote, con cifrado end-to-end de código abierto y sync multiplataforma.</td>
+        <td>
+          <ul class="cell-list">
+            <li>Cifrado E2E en todos los planes, incluso gratis</li>
+            <li>Sincronización fluida entre dispositivos</li>
+            <li>Interfaz moderna y amigable</li>
+            <li>Notebooks, tags y organización simple</li>
+          </ul>
+        </td>
+        <td>
+          <ul class="cell-list">
+            <li>Sin vínculos bidireccionales ni grafo</li>
+            <li>Adjuntos y almacenamiento limitados en plan gratis</li>
+            <li>Ecosistema de extensiones pequeño</li>
+          </ul>
+        </td>
+        <td>Gratis con límites. Plan Pro ~$4.49/mes.</td>
+        <td>Web, Win, macOS, Linux, iOS, Android</td>
+        <td>Formato propio cifrado (exportable)</td>
+        <td>Quieres una alternativa simple y privada a Evernote/OneNote.</td>
+        <td>Necesitas PKM avanzado con enlaces entre ideas.</td>
+      </tr>
+
+      <!-- AFFINE -->
+      <tr>
+        <td class="tool-name">
+          <div class="tool-title">AFFiNE</div>
+          <span class="badge opensource">Open Source</span>
+        </td>
+        <td>Editor híbrido documento/whiteboard/base de datos, pensado como alternativa open source a Notion + Miro.</td>
+        <td>
+          <ul class="cell-list">
+            <li>Combina documento, pizarra infinita y base de datos</li>
+            <li>Local-first con opción de sync en la nube</li>
+            <li>Bloques editables tipo Notion</li>
+            <li>Código abierto activo y en crecimiento</li>
+          </ul>
+        </td>
+        <td>
+          <ul class="cell-list">
+            <li>Aún en beta/desarrollo activo, con bugs ocasionales</li>
+            <li>Rendimiento variable con documentos grandes</li>
+            <li>Ecosistema de plugins limitado</li>
+          </ul>
+        </td>
+        <td>Gratis (self-hosted u online). Plan Cloud Pro de pago para más almacenamiento.</td>
+        <td>Web, Win, macOS, Linux, iOS, Android</td>
+        <td>Formato propio (exportable a Markdown)</td>
+        <td>Quieres una alternativa abierta a Notion con pizarra visual incluida.</td>
+        <td>Necesitas estabilidad de nivel producción hoy mismo.</td>
+      </tr>
+
+      <!-- SIYUAN -->
+      <tr>
+        <td class="tool-name">
+          <div class="tool-title">SiYuan</div>
+          <span class="badge opensource">Open Source</span>
+        </td>
+        <td>App de notas basada en bloques (block-based), con grafo de conocimiento y fuerte soporte para self-hosting.</td>
+        <td>
+          <ul class="cell-list">
+            <li>Edición por bloques con referencias entre bloques</li>
+            <li>Grafo de relaciones y "flashcards" para repaso espaciado</li>
+            <li>Totalmente local y self-hosted</li>
+            <li>Exportación flexible (Word, PDF, etc.)</li>
+          </ul>
+        </td>
+        <td>
+          <ul class="cell-list">
+            <li>Interfaz y documentación menos accesibles para hispanohablantes/angloparlantes (origen chino)</li>
+            <li>Comunidad occidental más pequeña</li>
+            <li>Curva de aprendizaje moderada</li>
+          </ul>
+        </td>
+        <td>Gratis y open source; sync en la nube de pago opcional.</td>
+        <td>Win, macOS, Linux, iOS, Android, Web</td>
+        <td>Base de datos propia + exportable a Markdown</td>
+        <td>Quieres repetición espaciada (flashcards) integrada a tus notas.</td>
+        <td>Prefieres un ecosistema con más soporte y comunidad en español/inglés.</td>
+      </tr>
+
+      <!-- REMNOTE -->
+      <tr>
+        <td class="tool-name">
+          <div class="tool-title">RemNote</div>
+          <span class="badge closed">Freemium</span>
+        </td>
+        <td>Outliner de notas enfocado en estudio y memorización, con flashcards de repetición espaciada integradas.</td>
+        <td>
+          <ul class="cell-list">
+            <li>Flashcards automáticas desde tus notas (spaced repetition)</li>
+            <li>Estructura tipo outliner con jerarquías</li>
+            <li>Ideal para estudiantes y oposiciones</li>
+            <li>Vínculos entre conceptos</li>
+          </ul>
+        </td>
+        <td>
+          <ul class="cell-list">
+            <li>No es open source</li>
+            <li>Funciones clave (más flashcards, IA) tras muro de pago</li>
+            <li>Menos enfocado en "segundo cerebro" general que en estudio</li>
+          </ul>
+        </td>
+        <td>Gratis limitado. Plan Pro ~$8/mes (anual).</td>
+        <td>Web, Win, macOS, iOS, Android</td>
+        <td>Propietario (exportable a Markdown)</td>
+        <td>Estudias con frecuencia y quieres flashcards nativas desde tus apuntes.</td>
+        <td>Buscas privacidad total u open source.</td>
+      </tr>
+
+      <!-- TANA -->
+      <tr>
+        <td class="tool-name">
+          <div class="tool-title">Tana</div>
+          <span class="badge closed">Freemium</span>
+        </td>
+        <td>Workspace "AI-native" basado en un supertag system: mezcla notas, bases de datos y automatización con IA.</td>
+        <td>
+          <ul class="cell-list">
+            <li>Sistema de "supertags" muy potente para estructurar datos</li>
+            <li>IA integrada para resumir y generar contenido</li>
+            <li>Búsquedas/consultas dinámicas tipo base de datos</li>
+            <li>Colaboración en equipo</li>
+          </ul>
+        </td>
+        <td>
+          <ul class="cell-list">
+            <li>No es open source ni self-hosted</li>
+            <li>Curva de aprendizaje alta (conceptos nuevos)</li>
+            <li>App móvil y offline aún limitados</li>
+            <li>Precio más alto que la mayoría de alternativas</li>
+          </ul>
+        </td>
+        <td>Gratis limitado. Plan de pago desde ~$10-20/mes por usuario.</td>
+        <td>Web, Win, macOS (apps de escritorio vía navegador), iOS, Android</td>
+        <td>Propietario (exportable parcialmente)</td>
+        <td>Quieres combinar notas + bases de datos + IA en flujos avanzados.</td>
+        <td>Buscas algo simple, gratuito o completamente offline.</td>
+      </tr>
+
+    </tbody>
+  </table>
+</div>
+
+<footer>
+  <p><strong>Notas sobre esta comparativa:</strong> Los precios y características cambian con frecuencia; verifica siempre en el sitio oficial de cada herramienta antes de decidir. "Open Source" indica que el código fuente del núcleo de la app es público y auditable (aunque el hosting/soporte pueda tener planes de pago); "Freemium" indica que el software base es gratis pero con funciones o límites que requieren pago para desbloquearse; "Código cerrado" indica que el software no es open source aunque tenga un plan gratuito.</p>
+  <p>Generado el 8 de julio de 2026. Descarga este archivo y ábrelo en cualquier navegador — no requiere conexión a internet para visualizarse.</p>
+</footer>
+
+<script>
+function filterTable() {
+  const input = document.getElementById('search').value.toLowerCase();
+  const rows = document.querySelectorAll('#mainTable tbody tr');
+  rows.forEach(row => {
+    const text = row.textContent.toLowerCase();
+    row.style.display = text.includes(input) ? '' : 'none';
+  });
+}
+</script>
+
+</body>
+</html>

@@ -37,6 +37,7 @@ Cuadros comparativos y guías de referencia generados con Claude, centralizados 
 | Comparativa de Herramientas de Migración de BD — schema_history | DevOps, Bases de Datos |
 | DevSecOps Pipeline Toolkit — Comparativa de Herramientas | DevOps, CI/CD, Seguridad |
 | registry://open* — Catálogo comparativo de tecnologías "Open*" | Open Source, DevOps, Seguridad |
+| Alternativas a BIND9 — Comparativa de soluciones DNS | DevOps, IT |
 
 ## Activar GitHub Pages
 

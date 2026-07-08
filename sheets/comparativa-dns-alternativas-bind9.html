@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Alternativas a BIND9 — Comparativa de soluciones DNS (Julio 2026)</title>
+<style>
+  :root{
+    --bg:#0f1419;
+    --panel:#161c24;
+    --panel-2:#1c232d;
+    --border:#2a3340;
+    --text:#e6ebf1;
+    --text-dim:#9aa7b4;
+    --accent:#5eb3ff;
+    --accent-2:#7ee8c2;
+    --warn:#ffb454;
+    --bad:#ff6b6b;
+    --good:#5fd888;
+    --paid:#ffd166;
+    --radius:10px;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    line-height:1.5;
+    padding:0 0 60px 0;
+  }
+  header{
+    padding:36px 32px 24px 32px;
+    border-bottom:1px solid var(--border);
+    background:linear-gradient(180deg, #141a22 0%, #0f1419 100%);
+  }
+  header h1{
+    margin:0 0 8px 0;
+    font-size:1.7rem;
+    letter-spacing:-0.02em;
+  }
+  header p{
+    margin:4px 0;
+    color:var(--text-dim);
+    font-size:0.95rem;
+    max-width:900px;
+  }
+  .meta-tags{
+    margin-top:14px;
+    display:flex;
+    gap:8px;
+    flex-wrap:wrap;
+  }
+  .meta-tags span{
+    background:var(--panel-2);
+    border:1px solid var(--border);
+    color:var(--text-dim);
+    padding:4px 10px;
+    border-radius:20px;
+    font-size:0.78rem;
+  }
+
+  .controls{
+    padding:18px 32px;
+    display:flex;
+    gap:12px;
+    flex-wrap:wrap;
+    align-items:center;
+    position:sticky;
+    top:0;
+    background:var(--bg);
+    z-index:20;
+    border-bottom:1px solid var(--border);
+  }
+  #search{
+    background:var(--panel);
+    border:1px solid var(--border);
+    color:var(--text);
+    padding:9px 14px;
+    border-radius:8px;
+    font-size:0.9rem;
+    min-width:220px;
+    flex:1;
+    max-width:320px;
+  }
+  #search:focus{outline:none; border-color:var(--accent);}
+  .filter-btn{
+    background:var(--panel);
+    border:1px solid var(--border);
+    color:var(--text-dim);
+    padding:8px 14px;
+    border-radius:8px;
+    font-size:0.82rem;
+    cursor:pointer;
+    transition:all .15s;
+    white-space:nowrap;
+  }
+  .filter-btn:hover{border-color:var(--accent); color:var(--text);}
+  .filter-btn.active{
+    background:var(--accent);
+    color:#0f1419;
+    border-color:var(--accent);
+    font-weight:600;
+  }
+  .count{
+    color:var(--text-dim);
+    font-size:0.82rem;
+    margin-left:auto;
+    white-space:nowrap;
+  }
+
+  .table-wrap{
+    margin:20px 32px;
+    border:1px solid var(--border);
+    border-radius:var(--radius);
+    overflow:auto;
+    max-height:75vh;
+    background:var(--panel);
+  }
+  table{
+    border-collapse:collapse;
+    width:100%;
+    min-width:1900px;
+    font-size:0.85rem;
+  }
+  thead th{
+    position:sticky;
+    top:0;
+    background:#1a222c;
+    color:var(--accent-2);
+    text-align:left;
+    padding:12px 14px;
+    border-bottom:2px solid var(--border);
+    font-size:0.75rem;
+    text-transform:uppercase;
+    letter-spacing:0.04em;
+    z-index:10;
+    white-space:nowrap;
+  }
+  thead th:first-child{
+    position:sticky;
+    left:0;
+    z-index:12;
+  }
+  tbody td{
+    padding:13px 14px;
+    border-bottom:1px solid var(--border);
+    vertical-align:top;
+    color:var(--text);
+  }
+  tbody tr:hover{background:var(--panel-2);}
+  tbody td:first-child{
+    position:sticky;
+    left:0;
+    background:var(--panel);
+    font-weight:700;
+    color:var(--accent);
+    z-index:5;
+    min-width:170px;
+  }
+  tbody tr:hover td:first-child{background:#20293350;}
+  .sub{
+    display:block;
+    color:var(--text-dim);
+    font-weight:400;
+    font-size:0.72rem;
+    margin-top:2px;
+  }
+  td.desc, td.lim{
+    min-width:260px;
+    color:var(--text-dim);
+    font-size:0.82rem;
+  }
+  .badge{
+    display:inline-block;
+    padding:3px 9px;
+    border-radius:6px;
+    font-size:0.72rem;
+    font-weight:600;
+    white-space:nowrap;
+  }
+  .b-recursivo{background:#1e3a5f; color:#8fd0ff;}
+  .b-autoritativo{background:#3a2a5c; color:#c9a8ff;}
+  .b-hibrido{background:#2a4a3a; color:#8fe0b8;}
+  .b-servicio{background:#4a3a1e; color:#ffcf8f;}
+  .b-filtrado{background:#4a1e3a; color:#ff9fc9;}
+
+  .os-yes{color:var(--good); font-weight:700;}
+  .os-no{color:var(--bad); font-weight:700;}
+  .cost-free{color:var(--good);}
+  .cost-paid{color:var(--paid);}
+  .cost-freemium{color:var(--accent);}
+
+  tr.hidden{display:none;}
+
+  footer{
+    margin:30px 32px 0 32px;
+    color:var(--text-dim);
+    font-size:0.78rem;
+    border-top:1px solid var(--border);
+    padding-top:18px;
+    max-width:1000px;
+  }
+  footer a{color:var(--accent);}
+  @media (max-width:700px){
+    header, .controls, .table-wrap, footer{margin-left:12px; margin-right:12px; padding-left:14px; padding-right:14px;}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>🧭 Alternativas a BIND9 — Comparativa de soluciones DNS</h1>
+  <p>Panorama de 24 soluciones DNS (servidores autoritativos, resolvers recursivos, herramientas de filtrado y servicios gestionados en la nube), con estado aproximado a <strong>julio de 2026</strong>. Incluye software open source y comercial, gratuito y de pago.</p>
+  <div class="meta-tags">
+    <span>24 soluciones</span>
+    <span>Generado: julio 2026</span>
+    <span>Usa el buscador o los filtros para explorar</span>
+  </div>
+</header>
+
+<div class="controls">
+  <input type="text" id="search" placeholder="Buscar por nombre, creador, uso...">
+  <button class="filter-btn active" data-filter="all">Todas</button>
+  <button class="filter-btn" data-filter="opensource">Open Source</button>
+  <button class="filter-btn" data-filter="comercial">Comercial / Pago</button>
+  <button class="filter-btn" data-filter="recursivo">Recursivo</button>
+  <button class="filter-btn" data-filter="autoritativo">Autoritativo</button>
+  <button class="filter-btn" data-filter="servicio">Servicio en la nube</button>
+  <button class="filter-btn" data-filter="filtrado">Filtrado / Ad-block</button>
+  <span class="count" id="count"></span>
+</div>
+
+<div class="table-wrap">
+<table id="dnsTable">
+  <thead>
+    <tr>
+      <th>Nombre</th>
+      <th>Tipo</th>
+      <th>Qué es / qué hace</th>
+      <th>Qué NO hace / limitaciones</th>
+      <th>Open Source</th>
+      <th>Licencia</th>
+      <th>Costo</th>
+      <th>Creado por</th>
+      <th>Año origen</th>
+      <th>Estado en julio 2026</th>
+    </tr>
+  </thead>
+  <tbody>
+
+    <tr data-tags="opensource autoritativo recursivo">
+      <td>BIND 9<span class="sub">named</span></td>
+      <td><span class="badge b-hibrido">Recursivo + Autoritativo</span></td>
+      <td class="desc">El estándar histórico de facto. Soporta zonas autoritativas, resolución recursiva, DNSSEC, vistas (split-horizon), transferencias de zona, RPZ.</td>
+      <td class="lim">Configuración compleja con muchas opciones; huella de memoria mayor; históricamente foco de CVEs por su superficie amplia.</td>
+      <td class="os-yes">Sí</td>
+      <td>MPL 2.0</td>
+      <td class="cost-free">Gratis</td>
+      <td>ISC (Internet Systems Consortium)</td>
+      <td>1988 (v9 ~2000)</td>
+      <td>Sigue siendo referencia y ampliamente desplegado, pero muchos operadores migran a alternativas más simples o especializadas por complejidad/seguridad.</td>
+    </tr>
+
+    <tr data-tags="opensource autoritativo">
+      <td>PowerDNS Authoritative Server</td>
+      <td><span class="badge b-autoritativo">Autoritativo</span></td>
+      <td class="desc">Servidor autoritativo con múltiples backends (MySQL, PostgreSQL, SQLite, LMDB, ficheros estilo BIND), API REST, orientado a automatización.</td>
+      <td class="lim">No incluye resolución recursiva (eso lo hace PowerDNS Recursor, aparte); sin interfaz gráfica nativa (se usa PowerDNS-Admin de terceros).</td>
+      <td class="os-yes">Sí</td>
+      <td>GPLv2</td>
+      <td class="cost-freemium">Gratis (núcleo) / Enterprise de pago</td>
+      <td>PowerDNS.com (Open-Xchange), fundado por Bert Hubert</td>
+      <td>1999</td>
+      <td>Muy usado por hosters, registradores e ISPs por su enfoque API-first y backends de base de datos.</td>
+    </tr>
+
+    <tr data-tags="opensource recursivo">
+      <td>PowerDNS Recursor</td>
+      <td><span class="badge b-recursivo">Recursivo</span></td>
+      <td class="desc">Resolver recursivo de alto rendimiento con "packet cache" (cachea el paquete completo, no solo registros), pensado para grandes volúmenes de consultas.</td>
+      <td class="lim">No sirve zonas autoritativas; requiere combinarse con otro componente para un stack completo.</td>
+      <td class="os-yes">Sí</td>
+      <td>GPLv2</td>
+      <td class="cost-free">Gratis</td>
+      <td>PowerDNS.com</td>
+      <td>2002</td>
+      <td>Elección habitual en ISPs y entornos de alto QPS; sigue destacando en benchmarks de rendimiento en 2026.</td>
+    </tr>
+
+    <tr data-tags="opensource">
+      <td>dnsdist</td>
+      <td><span class="badge b-servicio">Balanceador / Proxy DNS</span></td>
+      <td class="desc">Balanceador de carga y proxy DNS del ecosistema PowerDNS; termina DoH/DoT/DoQ, filtra y enruta tráfico hacia backends.</td>
+      <td class="lim">No resuelve ni sirve zonas por sí mismo: es una capa intermedia, no un servidor de nombres completo.</td>
+      <td class="os-yes">Sí</td>
+      <td>GPLv2</td>
+      <td class="cost-free">Gratis</td>
+      <td>PowerDNS.com</td>
+      <td>2015</td>
+      <td>Pieza estándar para terminar DoH/DoT delante de flotas de resolvers/autoritativos.</td>
+    </tr>
+
+    <tr data-tags="opensource autoritativo">
+      <td>Knot DNS</td>
+      <td><span class="badge b-autoritativo">Autoritativo</span></td>
+      <td class="desc">Servidor autoritativo de muy alto rendimiento, multihilo, con soporte DNSSEC automatizado y "zone catalogs". Usado por varios ccTLD (p. ej. .cz).</td>
+      <td class="lim">Sin funcionalidad recursiva (para eso existe Knot Resolver, proyecto hermano).</td>
+      <td class="os-yes">Sí</td>
+      <td>GPLv3</td>
+      <td class="cost-free">Gratis</td>
+      <td>CZ.NIC (registro de dominios .cz)</td>
+      <td>2011</td>
+      <td>Referencia en despliegues de TLD/registro por rendimiento y firmado DNSSEC automatizado.</td>
+    </tr>
+
+    <tr data-tags="opensource recursivo">
+      <td>Knot Resolver</td>
+      <td><span class="badge b-recursivo">Recursivo</span></td>
+      <td class="desc">Resolver recursivo modular (núcleo en C, extensible en Lua), con soporte nativo de DoH/DoT y validación DNSSEC.</td>
+      <td class="lim">Curva de aprendizaje algo mayor por su extensibilidad vía Lua; ecosistema de módulos más reducido que Unbound.</td>
+      <td class="os-yes">Sí</td>
+      <td>GPLv3</td>
+      <td class="cost-free">Gratis</td>
+      <td>CZ.NIC</td>
+      <td>2015</td>
+      <td>Usado en despliegues que necesitan resolvers programables/personalizables.</td>
+    </tr>
+
+    <tr data-tags="opensource autoritativo">
+      <td>NSD<span class="sub">Name Server Daemon</span></td>
+      <td><span class="badge b-autoritativo">Autoritativo</span></td>
+      <td class="desc">Servidor autoritativo minimalista, rápido y muy estable, sin funciones recursivas. Diseñado para simplicidad y seguridad.</td>
+      <td class="lim">Sin recursividad, sin caché de resolución, sin interfaz web; requiere herramientas externas para gestión dinámica.</td>
+      <td class="os-yes">Sí</td>
+      <td>BSD</td>
+      <td class="cost-free">Gratis</td>
+      <td>NLnet Labs</td>
+      <td>2003</td>
+      <td>Muy usado en zonas raíz y TLD por su estabilidad; combinado a menudo con Unbound para un stack completo.</td>
+    </tr>
+
+    <tr data-tags="opensource recursivo">
+      <td>Unbound</td>
+      <td><span class="badge b-recursivo">Recursivo</span></td>
+      <td class="desc">Resolver recursivo/caché validador, con foco en seguridad y privacidad: valida DNSSEC por defecto, soporta DoT hacia upstreams, minimización de nombres de consulta.</td>
+      <td class="lim">No sirve zonas autoritativas; sin GUI propia (se integra con Pi-hole, AdGuard Home, etc. como backend).</td>
+      <td class="os-yes">Sí</td>
+      <td>BSD</td>
+      <td class="cost-free">Gratis</td>
+      <td>NLnet Labs</td>
+      <td>2008</td>
+      <td>Resolver por defecto en FreeBSD/OpenBSD; recomendado como upstream de Pi-hole y AdGuard Home en 2026.</td>
+    </tr>
+
+    <tr data-tags="opensource recursivo filtrado">
+      <td>dnsmasq</td>
+      <td><span class="badge b-hibrido">DNS ligero + DHCP</span></td>
+      <td class="desc">Servidor DNS/DHCP/TFTP muy liviano para redes pequeñas y sistemas embebidos; cachea y reenvía consultas, sirve /etc/hosts.</td>
+      <td class="lim">No es un resolver validador robusto (DNSSEC limitado); no pensado para zonas grandes ni entornos empresariales.</td>
+      <td class="os-yes">Sí</td>
+      <td>GPLv2/v3</td>
+      <td class="cost-free">Gratis</td>
+      <td>Simon Kelley</td>
+      <td>2001</td>
+      <td>Base de routers domésticos, Raspberry Pi y del propio Pi-hole (vía su fork FTLDNS).</td>
+    </tr>
+
+    <tr data-tags="opensource hibrido filtrado">
+      <td>Technitium DNS Server</td>
+      <td><span class="badge b-hibrido">Recursivo + Autoritativo + Filtrado</span></td>
+      <td class="desc">Solución "todo en uno" autoalojada con interfaz web: recursivo, autoritativo, servidor DoH/DoT/DoQ, bloqueo de anuncios, split-horizon, API.</td>
+      <td class="lim">Comunidad y madurez menor que BIND/PowerDNS en entornos de gran escala/carrier-grade.</td>
+      <td class="os-yes">Sí</td>
+      <td>GPLv3</td>
+      <td class="cost-free">Gratis</td>
+      <td>Technitium (Shreyas Zare, India)</td>
+      <td>2016</td>
+      <td>Ganó mucha popularidad en homelab/self-hosting 2024-2026 por combinar todo en una sola app con UI amigable.</td>
+    </tr>
+
+    <tr data-tags="opensource autoritativo">
+      <td>CoreDNS</td>
+      <td><span class="badge b-hibrido">DNS modular (plugins)</span></td>
+      <td class="desc">Servidor DNS en Go basado en cadenas de plugins (similar a un middleware HTTP); es el DNS por defecto de Kubernetes.</td>
+      <td class="lim">Fuera de Kubernetes/entornos cloud-native su adopción es menor; requiere escribir/instalar plugins para funciones avanzadas.</td>
+      <td class="os-yes">Sí</td>
+      <td>Apache 2.0</td>
+      <td class="cost-free">Gratis</td>
+      <td>Miek Gieben / proyecto CNCF</td>
+      <td>2016</td>
+      <td>Estándar de facto para DNS de clúster en Kubernetes; proyecto graduado de CNCF.</td>
+    </tr>
+
+    <tr data-tags="opensource filtrado">
+      <td>Pi-hole</td>
+      <td><span class="badge b-filtrado">Filtrado de anuncios</span></td>
+      <td class="desc">Bloqueador de anuncios/rastreadores a nivel de red mediante DNS (FTLDNS, basado en dnsmasq), con dashboard web y listas de bloqueo.</td>
+      <td class="lim">No es un resolver recursivo completo por sí mismo: reenvía a un upstream (recomiendan Unbound); no gestiona zonas autoritativas complejas.</td>
+      <td class="os-yes">Sí</td>
+      <td>EUPL 1.2</td>
+      <td class="cost-free">Gratis (acepta donaciones)</td>
+      <td>Pi-hole LLC / comunidad</td>
+      <td>2014</td>
+      <td>Sigue siendo la opción más popular para bloqueo de anuncios en el hogar; combinado habitualmente con Unbound.</td>
+    </tr>
+
+    <tr data-tags="opensource filtrado">
+      <td>AdGuard Home</td>
+      <td><span class="badge b-filtrado">Filtrado de anuncios</span></td>
+      <td class="desc">Alternativa a Pi-hole con servidor DNS propio (no depende de dnsmasq), soporta DoH/DoT/DNSCrypt nativos, control parental y estadísticas.</td>
+      <td class="lim">Ecosistema de plugins más reducido que Pi-hole; algunas listas/comunidad de terceros menos extensas.</td>
+      <td class="os-yes">Sí</td>
+      <td>GPLv3</td>
+      <td class="cost-free">Gratis (versión Home) / AdGuard DNS en la nube de pago</td>
+      <td>AdGuard (Chipre/Rusia)</td>
+      <td>2018</td>
+      <td>Muy usada junto a Pi-hole; su versión en la nube (AdGuard DNS) creció como alternativa a NextDNS.</td>
+    </tr>
+
+    <tr data-tags="opensource filtrado">
+      <td>Blocky</td>
+      <td><span class="badge b-filtrado">Proxy DNS + bloqueo</span></td>
+      <td class="desc">Proxy DNS ligero escrito en Go, configurable por YAML, con bloqueo de dominios, caché y métricas Prometheus.</td>
+      <td class="lim">Sin interfaz gráfica completa (algunos forks/paneles de terceros la añaden); comunidad más pequeña.</td>
+      <td class="os-yes">Sí</td>
+      <td>Apache 2.0</td>
+      <td class="cost-free">Gratis</td>
+      <td>Comunidad open source (0xERR0R)</td>
+      <td>2020</td>
+      <td>Opción popular como alternativa "cloud-native"/ligera a Pi-hole en contenedores.</td>
+    </tr>
+
+    <tr data-tags="opensource hibrido">
+      <td>MaraDNS / Deadwood</td>
+      <td><span class="badge b-hibrido">Autoritativo + Recursivo (Deadwood)</span></td>
+      <td class="desc">MaraDNS es un servidor autoritativo simple orientado a seguridad; Deadwood es su componente recursivo/caché.</td>
+      <td class="lim">Sin soporte de transferencias de zona secundaria directas; ecosistema y comunidad pequeños comparados con opciones mayores.</td>
+      <td class="os-yes">Sí</td>
+      <td>BSD</td>
+      <td class="cost-free">Gratis</td>
+      <td>Sam Trenholme</td>
+      <td>2002</td>
+      <td>Nicho, usado por quienes priorizan simplicidad y baja superficie de ataque frente a BIND.</td>
+    </tr>
+
+    <tr data-tags="opensource autoritativo">
+      <td>YADIFA</td>
+      <td><span class="badge b-autoritativo">Autoritativo</span></td>
+      <td class="desc">Servidor autoritativo eficiente en memoria y CPU, creado para operar el TLD .eu con alta fiabilidad.</td>
+      <td class="lim">Sin capacidades recursivas; adopción fuera de registros de TLD relativamente limitada.</td>
+      <td class="os-yes">Sí</td>
+      <td>BSD</td>
+      <td class="cost-free">Gratis</td>
+      <td>EURid (registro del TLD .eu)</td>
+      <td>2011</td>
+      <td>Sigue en producción para infraestructura de .eu; poco uso fuera de ese nicho.</td>
+    </tr>
+
+    <tr data-tags="opensource autoritativo">
+      <td>djbdns<span class="sub">tinydns / dnscache</span></td>
+      <td><span class="badge b-hibrido">Autoritativo (tinydns) + Caché (dnscache)</span></td>
+      <td class="desc">Suite clásica minimalista orientada a seguridad, diseñada como conjunto de procesos pequeños con privilegios separados.</td>
+      <td class="lim">DNSSEC no soportado de forma nativa (requiere parches); desarrollo original detenido; wildcards no conformes a RFC.</td>
+      <td class="os-yes">Sí (dominio público)</td>
+      <td>Licencia pública/dominio público</td>
+      <td class="cost-free">Gratis</td>
+      <td>Daniel J. Bernstein</td>
+      <td>2001</td>
+      <td>Prácticamente en desuso salvo forks de comunidad (p. ej. ndjbdns); interesante como referencia histórica de diseño seguro.</td>
+    </tr>
+
+    <tr data-tags="opensource autoritativo">
+      <td>gdnsd</td>
+      <td><span class="badge b-autoritativo">Autoritativo (Geo-DNS)</span></td>
+      <td class="desc">Servidor autoritativo de alto rendimiento con enfoque en DNS geográfico/balanceo por ubicación y monitorización de salud de backends.</td>
+      <td class="lim">Sin funciones recursivas; comunidad y documentación más reducidas que PowerDNS o Knot.</td>
+      <td class="os-yes">Sí</td>
+      <td>GPLv3</td>
+      <td class="cost-free">Gratis</td>
+      <td>Comunidad open source (Brandon Black y colaboradores)</td>
+      <td>2007</td>
+      <td>Nicho para quien necesita geo-balanceo autoritativo sin depender de un proveedor cloud.</td>
+    </tr>
+
+    <tr data-tags="comercial autoritativo recursivo">
+      <td>Simple DNS Plus</td>
+      <td><span class="badge b-hibrido">Recursivo + Autoritativo (Windows)</span></td>
+      <td class="desc">Servidor DNS comercial para Windows con interfaz gráfica sencilla, pensado para administradores que no quieren editar archivos de zona a mano.</td>
+      <td class="lim">Solo Windows; no es open source; desarrollo/actualizaciones más lentas en los últimos años según reportes de usuarios.</td>
+      <td class="os-no">No</td>
+      <td>Comercial (propietaria)</td>
+      <td class="cost-paid">De pago</td>
+      <td>JH Software (Dinamarca)</td>
+      <td>1998</td>
+      <td>Sigue vendiéndose para entornos Windows pequeños/medianos, aunque con mantenimiento aparentemente más lento.</td>
+    </tr>
+
+    <tr data-tags="comercial hibrido">
+      <td>Microsoft DNS Server<span class="sub">Windows Server DNS</span></td>
+      <td><span class="badge b-hibrido">Recursivo + Autoritativo</span></td>
+      <td class="desc">Servidor DNS integrado en Windows Server, estrechamente ligado a Active Directory (zonas integradas en AD, actualizaciones dinámicas seguras).</td>
+      <td class="lim">Requiere licencia de Windows Server; menos flexible que soluciones Unix para automatización vía API/GitOps.</td>
+      <td class="os-no">No</td>
+      <td>Comercial (propietaria)</td>
+      <td class="cost-paid">De pago (incluido en licencia de Windows Server)</td>
+      <td>Microsoft</td>
+      <td>1996</td>
+      <td>Sigue siendo estándar en entornos corporativos basados en Active Directory.</td>
+    </tr>
+
+    <tr data-tags="servicio autoritativo comercial">
+      <td>Cloudflare DNS<span class="sub">Authoritative + 1.1.1.1</span></td>
+      <td><span class="badge b-servicio">Servicio gestionado + Resolver público</span></td>
+      <td class="desc">DNS autoritativo gestionado (SaaS) con red Anycast global, más el resolver público 1.1.1.1 orientado a privacidad y velocidad.</td>
+      <td class="lim">No es software autoalojable; la configuración avanzada depende de las funciones que Cloudflare decida exponer.</td>
+      <td class="os-no">No (servicio)</td>
+      <td>N/A (SaaS)</td>
+      <td class="cost-freemium">Gratis (plan básico) / Planes de pago para empresas</td>
+      <td>Cloudflare, Inc.</td>
+      <td>2010 (1.1.1.1 en 2018)</td>
+      <td>Uno de los proveedores de DNS gestionado y resolución pública más usados a nivel mundial en 2026.</td>
+    </tr>
+
+    <tr data-tags="servicio autoritativo comercial">
+      <td>Amazon Route 53</td>
+      <td><span class="badge b-servicio">Servicio gestionado (AWS)</span></td>
+      <td class="desc">DNS autoritativo gestionado dentro de AWS, con enrutamiento avanzado (latencia, geolocalización, failover) e integración nativa con otros servicios AWS.</td>
+      <td class="lim">No es autoalojable; el costo escala con número de zonas/consultas; atado al ecosistema AWS para su valor completo.</td>
+      <td class="os-no">No (servicio)</td>
+      <td>N/A (SaaS)</td>
+      <td class="cost-paid">De pago (pago por uso)</td>
+      <td>Amazon Web Services</td>
+      <td>2010</td>
+      <td>Elección por defecto para quienes ya operan en AWS y necesitan DNS con alta disponibilidad e integración cloud.</td>
+    </tr>
+
+    <tr data-tags="servicio autoritativo comercial">
+      <td>Google Cloud DNS</td>
+      <td><span class="badge b-servicio">Servicio gestionado (GCP)</span></td>
+      <td class="desc">DNS autoritativo gestionado dentro de Google Cloud, con zonas públicas y privadas, DNSSEC automatizado e integración con otros servicios GCP.</td>
+      <td class="lim">No es autoalojable; funciones más ricas requieren estar dentro del ecosistema GCP.</td>
+      <td class="os-no">No (servicio)</td>
+      <td>N/A (SaaS)</td>
+      <td class="cost-paid">De pago (pago por uso)</td>
+      <td>Google</td>
+      <td>2015</td>
+      <td>Opción estándar para cargas en GCP; comparable en madurez a Route 53.</td>
+    </tr>
+
+    <tr data-tags="servicio filtrado comercial">
+      <td>NextDNS</td>
+      <td><span class="badge b-servicio">Servicio de filtrado en la nube</span></td>
+      <td class="desc">DNS recursivo gestionado en la nube con bloqueo de anuncios/rastreo/malware configurable, analítica y apps para múltiples dispositivos.</td>
+      <td class="lim">No es autoalojable ni open source; el plan gratuito tiene límite de consultas mensuales.</td>
+      <td class="os-no">No (servicio)</td>
+      <td>N/A (SaaS)</td>
+      <td class="cost-freemium">Freemium (límite gratuito, luego de pago)</td>
+      <td>NextDNS Inc.</td>
+      <td>2019</td>
+      <td>Popular como "Pi-hole en la nube" para quienes no quieren autoalojar nada.</td>
+    </tr>
+
+    <tr data-tags="servicio recursivo">
+      <td>Quad9</td>
+      <td><span class="badge b-servicio">Resolver público (seguridad)</span></td>
+      <td class="desc">Resolver DNS público sin fines de lucro centrado en seguridad: bloquea dominios maliciosos conocidos y valida DNSSEC por defecto.</td>
+      <td class="lim">No es software autoalojable ni personalizable por el usuario final más allá de activar/desactivar bloqueo.</td>
+      <td class="os-no">No (servicio; usa software propio no publicado como producto)</td>
+      <td>N/A (servicio)</td>
+      <td class="cost-free">Gratis</td>
+      <td>Fundación Quad9 (sin fines de lucro, Suiza)</td>
+      <td>2016</td>
+      <td>Referencia como resolver público orientado a seguridad y privacidad, sin monetizar datos de consultas.</td>
+    </tr>
+
+  </tbody>
+</table>
+</div>
+
+<footer>
+  <p><strong>Notas:</strong> "Recursivo" = resuelve consultas para clientes consultando otros servidores; "Autoritativo" = responde con datos de zonas que aloja directamente; "Híbrido" = hace ambas cosas. Los servicios gestionados (Route 53, Cloudflare, Google Cloud DNS, NextDNS, Quad9) no son software que se instale, sino infraestructura operada por un tercero.</p>
+  <p>Información recopilada y verificada a partir de fuentes públicas y benchmarks disponibles hasta julio de 2026. Los precios, licencias y estados de proyecto pueden cambiar; se recomienda verificar en la fuente oficial de cada proyecto antes de una decisión de producción.</p>
+</footer>
+
+<script>
+  const search = document.getElementById('search');
+  const rows = Array.from(document.querySelectorAll('#dnsTable tbody tr'));
+  const buttons = document.querySelectorAll('.filter-btn');
+  const countEl = document.getElementById('count');
+  let activeFilter = 'all';
+
+  function applyFilters(){
+    const q = search.value.trim().toLowerCase();
+    let visible = 0;
+    rows.forEach(row => {
+      const tags = row.getAttribute('data-tags') || '';
+      const text = row.textContent.toLowerCase();
+      const matchesFilter = activeFilter === 'all' || tags.includes(activeFilter);
+      const matchesSearch = q === '' || text.includes(q);
+      if(matchesFilter && matchesSearch){
+        row.classList.remove('hidden');
+        visible++;
+      } else {
+        row.classList.add('hidden');
+      }
+    });
+    countEl.textContent = visible + ' de ' + rows.length + ' soluciones';
+  }
+
+  buttons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      buttons.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      activeFilter = btn.getAttribute('data-filter');
+      applyFilters();
+    });
+  });
+
+  search.addEventListener('input', applyFilters);
+  applyFilters();
+</script>
+
+</body>
+</html>

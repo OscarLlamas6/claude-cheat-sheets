@@ -506,6 +506,33 @@
     .detail-row { grid-template-columns: 1fr; gap: 4px; }
   }
 
+  /* FEATURE STORES BONUS SECTION */
+  #featurestores {
+    background: linear-gradient(180deg, transparent 0%, #FEF3E7 30%, #FEF3E7 100%);
+    margin-top: 40px;
+    padding: 40px 24px;
+    border-radius: 16px;
+    border: 1px dashed #FCA5A5;
+    position: relative;
+  }
+  #featurestores::before {
+    content: 'BONUS · ML / AI INFRASTRUCTURE';
+    position: absolute;
+    top: -12px;
+    left: 24px;
+    background: #7C2D12;
+    color: #fff;
+    padding: 4px 12px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    border-radius: 4px;
+    font-weight: 700;
+  }
+  #featurestores .phase-number {
+    font-size: 56px;
+  }
+
   /* CDC BONUS SECTION */
   #cdc {
     background: linear-gradient(180deg, transparent 0%, #F8FAFC 30%, #F8FAFC 100%);
@@ -547,10 +574,10 @@
   <div class="hero-inner">
     <div class="eyebrow">Atlas DataOps · Edición Junio 2026</div>
     <h1>Herramientas para el flujo completo de <span class="accent">Data Engineering</span> &amp; DataOps</h1>
-    <p>Una referencia exhaustiva de las 7 fases del ciclo de vida del dato: ingesta, procesamiento, serving, visualización, orquestación, gobierno y veracidad. Más una sección bonus sobre Change Data Capture (CDC), el tema transversal que cruza todo el stack. Incluye herramientas open source, comerciales, servicios gestionados de AWS/Azure/GCP, líderes del estado del arte y soluciones legacy/deprecadas para contexto histórico.</p>
+    <p>Una referencia exhaustiva de las 7 fases del ciclo de vida del dato: ingesta, procesamiento, serving, visualización, orquestación, gobierno y veracidad. Más dos secciones bonus sobre temas transversales: Change Data Capture (CDC) y Feature Stores para ML/AI. Incluye herramientas open source, comerciales, servicios gestionados de AWS/Azure/GCP, líderes del estado del arte y soluciones legacy/deprecadas para contexto histórico.</p>
     <div class="hero-meta">
-      <span><span class="dot"></span><strong>7</strong> fases + 1 tema transversal (CDC)</span>
-      <span><span class="dot"></span><strong>150+</strong> herramientas catalogadas</span>
+      <span><span class="dot"></span><strong>7</strong> fases + 2 temas transversales</span>
+      <span><span class="dot"></span><strong>165+</strong> herramientas catalogadas</span>
       <span><span class="dot"></span><strong>4</strong> estados (SOTA / Activo / Legacy / Deprecado)</span>
       <span><span class="dot"></span><strong>5</strong> tipos de licenciamiento</span>
     </div>
@@ -638,7 +665,8 @@ const PHASES_META = [
   { id: 'orchestration', num: '05', name: 'Data Orchestration', desc: 'Coordinación, scheduling y monitoreo de pipelines y workflows de datos con dependencias, reintentos y observabilidad.', color: 'var(--c-orchestrate)' },
   { id: 'governance',    num: '06', name: 'Data Governance',    desc: 'Catálogos, linaje, control de acceso, gestión de metadatos, políticas de privacidad y cumplimiento normativo.', color: 'var(--c-govern)' },
   { id: 'veracity',      num: '07', name: 'Data Veracity',      desc: 'Calidad de datos, validaciones, detección de anomalías y observabilidad del dato (freshness, volumen, schema, distribución).', color: 'var(--c-veracity)' },
-  { id: 'cdc',           num: '+',  name: 'Change Data Capture (CDC)', desc: 'Tema transversal, no una fase per se. CDC captura cambios (INSERT/UPDATE/DELETE) en bases de datos origen — leyendo logs de transacciones (WAL, binlog, redo logs) — y los propaga en tiempo real a destinos analíticos. Es la columna vertebral del data engineering moderno: cruza ingestion, processing y serving.', color: '#1E3A8A', eyebrow: 'Tema Transversal · Bonus' }
+  { id: 'cdc',           num: '+',  name: 'Change Data Capture (CDC)', desc: 'Tema transversal, no una fase per se. CDC captura cambios (INSERT/UPDATE/DELETE) en bases de datos origen — leyendo logs de transacciones (WAL, binlog, redo logs) — y los propaga en tiempo real a destinos analíticos. Es la columna vertebral del data engineering moderno: cruza ingestion, processing y serving.', color: '#1E3A8A', eyebrow: 'Tema Transversal · Bonus' },
+  { id: 'featurestores', num: '+',  name: 'Feature Stores (ML)', desc: 'Segundo tema transversal, ML-adjacente. Los feature stores centralizan features de ML: definirlas una vez, servirlas consistentemente en entrenamiento (offline, batch) e inferencia (online, low-latency). Resuelven training-serving skew, reutilización de features y governance de assets ML.', color: '#7C2D12', eyebrow: 'Tema Transversal · Bonus ML/AI' }
 ];
 
 const TOOLS_DATA = {
@@ -2570,6 +2598,223 @@ veracity: [
 // Merge all three parts into single TOOLS_DATA
 Object.assign(TOOLS_DATA, TOOLS_PART2);
 Object.assign(TOOLS_DATA, TOOLS_PART3);
+
+// Add Feature Stores bonus section (ML)
+const TOOLS_FEATURESTORES = {
+featurestores: [
+  {
+    name: "Feast",
+    vendor: "LF AI & Data (Tecton + comunidad)",
+    status: "sota", license: "foss",
+    cost: "Gratis · Apache 2.0",
+    summary: "El feature store open source estándar de la industria. Framework universal que integra con tu infraestructura existente (warehouse, Redis, Kafka) sin imponer stack. Sponsored por Tecton, adoptado por CNCF/LF AI.",
+    whatIs: "Framework open source modular que actúa como capa de acceso universal a features ML. No trae infra propia: se conecta a offline stores (BigQuery, Snowflake, Redshift, Parquet) y online stores (Redis, DynamoDB, Postgres, Bigtable).",
+    whatDoes: "Registro central de feature definitions en Python/YAML, materialización batch → online store, point-in-time joins, integración con Kubeflow/SageMaker/Databricks, retrieval consistente training + inference.",
+    whatDoesnt: "No hace feature engineering (delega en Spark/dbt/etc.). Sin UI robusta out-of-the-box. Sin transformaciones streaming nativas maduras. Sin RBAC empresarial.",
+    pros: ["Estándar de facto open source", "Sin lock-in de infra", "Comunidad grande (Slack activo, CNCF)", "Integraciones amplias"],
+    cons: ["Requiere infra propia (Postgres + Redis + Spark)", "Sin UI/governance rica", "Streaming features menos maduras que Tecton", "Ops burden self-host"],
+    whenUse: ["Equipos con capacidad de operar OSS", "Cuando quieres evitar vendor lock-in", "Stack heterogéneo donde ya tienes warehouse + Redis", "Presupuesto ajustado con equipo técnico"],
+    whenNotUse: ["Equipos sin platform team", "Cuando features streaming sub-minuto importan (Tecton mejor)", "Necesitas governance/UI enterprise out-of-the-box"]
+  },
+  {
+    name: "Tecton",
+    vendor: "Tecton",
+    status: "sota", license: "commercial",
+    cost: "Enterprise pricing · consumption-based · típicamente $100k-500k+/año",
+    summary: "El feature store enterprise premium. Fundado por el equipo del Michelangelo de Uber. La opción cuando latencia sub-segundo, streaming features y DX pulido importan más que el precio.",
+    whatIs: "Plataforma managed end-to-end de features con DSL propio (Python), motor de transformaciones batch + streaming + on-demand, y serving low-latency. Tecton también es el sponsor principal de Feast.",
+    whatDoes: "Definición declarativa de features, materialization scheduling automático, streaming CDC integrado, point-in-time correctness, monitoring built-in (freshness, drift), GitOps.",
+    whatDoesnt: "Caro. Lock-in del DSL Tecton (migrar significa reescribir). Overkill para <10 modelos ML.",
+    pros: ["El mejor DX del mercado", "Streaming + batch + on-demand nativos", "Monitoring integrado", "Bajo op burden"],
+    cons: ["Costos escalan agresivamente con throughput", "Lock-in DSL propietario", "Overbuilt para teams chicos"],
+    whenUse: ["Empresas con muchos modelos ML en producción", "Cuando latencia real-time es crítica (fintech, e-commerce, fraud)", "Presupuesto enterprise", "Cuando quieres eliminar op burden"],
+    whenNotUse: ["Startups sin múltiples modelos productivos", "Solo cargas batch (Feast basta)", "Presupuesto restrictivo"]
+  },
+  {
+    name: "Databricks Feature Store / Unity Catalog Feature Store",
+    vendor: "Databricks",
+    status: "sota", license: "commercial",
+    cost: "Incluido en Databricks · pago por DBU/serving compute",
+    summary: "El feature store nativo del Lakehouse. Delta Lake + Unity Catalog governance + MLflow tracking en un solo plano. Excelente si ya vives en Databricks.",
+    whatIs: "Feature store integrado en Databricks Data Intelligence Platform, con Unity Catalog para governance unificada de data + AI assets, backed por Delta Lake.",
+    whatDoes: "Registro de feature tables Delta, online serving (Databricks Online Tables), lineage automático, tracking MLflow, point-in-time joins, batch + real-time.",
+    whatDoesnt: "Solo dentro de Databricks (lock-in). Menos extensible fuera del ecosistema.",
+    pros: ["Unity Catalog governance unificada", "Delta Lake source of truth (una copia)", "Lineage automático MLflow", "Onboarding cero para usuarios Databricks"],
+    cons: ["Lock-in Databricks", "Fuera del ecosistema es menos útil", "Online serving más nuevo"],
+    whenUse: ["Stack Databricks completo", "Cuando ML está embebido en data engineering", "Governance data + AI unificada", "Empresas ya en Lakehouse"],
+    whenNotUse: ["Sin Databricks", "Multi-vendor extremo", "Cuando quieres flexibilidad de infra"]
+  },
+  {
+    name: "Hopsworks",
+    vendor: "Hopsworks AB (ex-Logical Clocks)",
+    status: "sota", license: "freemium",
+    cost: "Community edition gratis (AGPL v3) · Enterprise + Hopsworks.ai managed",
+    summary: "Plataforma all-in-one AI Lakehouse con feature store, model registry y serving. Fuerte en industrias reguladas (banca, salud, defensa). El middle ground entre Feast (DIY) y Tecton (premium).",
+    whatIs: "Plataforma data-intensive AI con feature store, HopsFS distribuido, model management y serving integrados. AGPL open core + versión managed.",
+    whatDoes: "Feature groups (batch/stream), online + offline stores nativos, feature discovery, drift detection, RBAC granular, on-prem/air-gapped supported.",
+    whatDoesnt: "AGPL license puede ser problemática para SaaS embebido. Documentación con huecos en casos avanzados. Comunidad menor que Feast.",
+    pros: ["Todo-en-uno maduro", "On-prem/air-gapped strong", "RBAC + governance rich", "Performance excelente"],
+    cons: ["AGPL v3 (restrictivo)", "Documentación variable", "Requires K8s expertise self-host", "Comunidad más pequeña"],
+    whenUse: ["Industrias reguladas (banca, salud, gobierno)", "On-prem/soberanía de datos requerida", "Cuando Feast es poco pero Tecton es caro", "Casos con governance estricto"],
+    whenNotUse: ["Cuando AGPL es incompatible con negocio", "Equipos sin K8s expertise (self-host)", "Solo cargas batch simples"]
+  },
+  {
+    name: "Vertex AI Feature Store",
+    vendor: "Google Cloud",
+    status: "active", license: "cloud",
+    cost: "Pago por node-hours (online) + storage + operations",
+    summary: "El feature store managed de GCP integrado con BigQuery, Dataflow y Vertex Pipelines. La opción natural en stacks GCP-first ML.",
+    whatIs: "Servicio managed de GCP para feature serving batch + online, con integración nativa a BigQuery (offline store) y Bigtable (online store).",
+    whatDoes: "Feature ingestion desde BigQuery/GCS, serving online sub-100ms, point-in-time correctness, integración Vertex AI Pipelines, monitoring drift.",
+    whatDoesnt: "Solo GCP. Sin transforms nativas (delega en Dataflow/BQ).",
+    pros: ["Managed cero-ops", "Integración BigQuery/Vertex nativa", "Monitoring drift built-in", "Escalado automático"],
+    cons: ["Solo GCP", "Menos flexible que Feast", "Sin transforms in-platform", "Pricing puede sorprender"],
+    whenUse: ["Stack GCP con Vertex AI", "Equipos que quieren managed sin operar Feast", "Cuando BigQuery es el warehouse"],
+    whenNotUse: ["Multi-cloud", "Sin BigQuery", "Cuando control fino importa"]
+  },
+  {
+    name: "Amazon SageMaker Feature Store",
+    vendor: "Amazon Web Services",
+    status: "active", license: "cloud",
+    cost: "Storage + ReadCU/WriteCU (online) + S3 storage (offline)",
+    summary: "El feature store managed de AWS integrado con SageMaker. Online + offline stores, integración con Lambda/Athena/Kinesis. La opción natural para stacks SageMaker.",
+    whatIs: "Servicio managed AWS con dual store: online (baja latencia key-value) + offline (S3/Athena para training).",
+    whatDoes: "Ingesta desde Kinesis/Lambda/Glue, serving online <50ms, integración con SageMaker Pipelines/Model Registry, tiered storage.",
+    whatDoesnt: "Solo AWS. Sin transformaciones (delega). Monitoring drift no tan rico como Vertex/Tecton.",
+    pros: ["Integrado con SageMaker ecosystem", "Online serving <50ms", "Serverless", "Storage tiering para costos"],
+    cons: ["Lock-in AWS", "Sin transformaciones", "Monitoring básico", "UX menos pulida que Tecton"],
+    whenUse: ["Stack AWS con SageMaker", "Cuando model registry SageMaker es central", "Real-time inference AWS"],
+    whenNotUse: ["Sin SageMaker", "Multi-cloud", "Cuando monitoring drift importa (Tecton mejor)"]
+  },
+  {
+    name: "Azure ML Feature Store / Fabric",
+    vendor: "Microsoft",
+    status: "active", license: "cloud",
+    cost: "Consumo Azure ML + storage",
+    summary: "El feature store nativo de Azure ML (GA 2024), ahora integrándose con Microsoft Fabric. Managed feature store para stacks Microsoft.",
+    whatIs: "Servicio managed de Azure ML para features batch + streaming, integrado con Azure ML workspace, Spark pools y Fabric OneLake.",
+    whatDoes: "Feature sets con Spark, materialization automática, online serving via Managed Online Endpoints, integración Fabric.",
+    whatDoesnt: "Adopción menor que Vertex/SageMaker. Solo Azure. Documentación en evolución.",
+    pros: ["Integración Azure ML profunda", "Fabric/OneLake unificado", "Spark-based transforms"],
+    cons: ["Solo Azure", "Menos maduro que Vertex/SageMaker", "Adopción menor"],
+    whenUse: ["Stack Azure ML/Fabric", "Cuando Fabric es la apuesta corporativa", "Compliance Microsoft enterprise"],
+    whenNotUse: ["Sin Azure", "Multi-cloud", "Cuando madurez importa (Feast/Tecton mejor)"]
+  },
+  {
+    name: "Featureform",
+    vendor: "Featureform",
+    status: "active", license: "foss",
+    cost: "Open source Mozilla PL 2.0 · Enterprise/Cloud comercial",
+    summary: "'Virtual feature store' open source: en lugar de mover datos, orquesta features sobre tu infraestructura existente (Snowflake, Postgres, Redis, Spark). Enfoque MLOps + governance.",
+    whatIs: "Virtual feature store open source que actúa como plano de control sobre infraestructura existente, no como storage propio.",
+    whatDoes: "Feature registry, versioning, lineage, orquesta transforms sobre providers (Spark, Snowflake, Postgres, dbt), RBAC, CLI + Python SDK.",
+    whatDoesnt: "No trae compute propio (delega). Adopción menor que Feast. Comunidad más chica.",
+    pros: ["Virtual (no mueve datos)", "Governance rich (versioning, lineage, RBAC)", "Open source con enterprise option", "Multi-provider flexible"],
+    cons: ["Adopción menor que Feast", "Requires deep provider knowledge", "Comunidad más chica"],
+    whenUse: ["Cuando quieres governance sin mover datos", "Stacks heterogéneos con múltiples providers", "Enfoque MLOps + compliance"],
+    whenNotUse: ["Cuando Feast bastara (más comunidad)", "Sin necesidad de virtual layer"]
+  },
+  {
+    name: "Chronon",
+    vendor: "Airbnb (open source 2023)",
+    status: "active", license: "foss",
+    cost: "Gratis · Apache 2.0",
+    summary: "Feature engineering platform open source de Airbnb, liberado en 2023. Especializado en temporal aggregations complejas (windowed features) con backfills correctos.",
+    whatIs: "Framework de feature computation con foco en temporal features y point-in-time correctness, escrito en Scala + Python API.",
+    whatDoes: "Define features con windowed aggregations declarativas, backfills point-in-time correct, batch + streaming en un modelo unificado, integración Spark/Flink.",
+    whatDoesnt: "Comunidad joven. Menos plug-and-play que Feast. Documentación en evolución. Curva alta.",
+    pros: ["Temporal features únicas en OSS", "Point-in-time correctness real", "Probado en Airbnb a escala", "Unified batch + streaming"],
+    cons: ["Comunidad emergente", "Curva Scala + concepts", "Menos integraciones", "Documentación limitada"],
+    whenUse: ["Casos con windowed aggregations complejas", "Cuando point-in-time correctness es crítico", "Equipos técnicos avanzados"],
+    whenNotUse: ["Feature stores simples (Feast mejor)", "Sin necesidad de temporal features complejas", "Equipos sin Scala expertise"]
+  },
+  {
+    name: "Fennel",
+    vendor: "Fennel AI",
+    status: "active", license: "commercial",
+    cost: "Managed pricing por consumption",
+    summary: "Feature engineering platform moderna con foco en developer experience Python-nativo. Alternativa emergente a Tecton con precios más accesibles.",
+    whatIs: "Plataforma managed de feature engineering + serving con SDK Python puro (sin DSL propietario), streaming-nativa.",
+    whatDoes: "Feature pipelines en Python decorated, batch + streaming, low-latency serving, materialization automática, monitoring integrado.",
+    whatDoesnt: "Adopción menor. SaaS only. Roadmap en evolución.",
+    pros: ["Python puro (no DSL)", "DX moderno", "Streaming-first", "Más asequible que Tecton"],
+    cons: ["Startup joven", "Adopción emergente", "SaaS only"],
+    whenUse: ["Startups/mid-market que necesitan streaming features", "Cuando Tecton es caro pero Feast poco", "Equipos Python-heavy"],
+    whenNotUse: ["Enterprise conservador (Tecton más probado)", "Self-host requerido"]
+  },
+  {
+    name: "Bytewax",
+    vendor: "Bytewax (open source)",
+    status: "active", license: "foss",
+    cost: "Open source Apache 2.0 · Bytewax Platform comercial",
+    summary: "Framework Python streaming distribuido (Rust core + Python API). Adyacente a feature stores: se usa como motor para computar streaming features que alimentan Feast/similares.",
+    whatIs: "Motor de stream processing con core en Rust y API Python nativa, alternativa Pythonic a Flink para casos streaming.",
+    whatDoes: "Pipelines streaming Python, stateful processing, windowing, integración con Feast como source para streaming features.",
+    whatDoesnt: "No es feature store por sí solo (es engine complementario).",
+    pros: ["Pythonic puro (sin JVM/Scala)", "Rust performance", "Se combina bien con Feast"],
+    cons: ["No es feature store solo", "Comunidad menor que Flink"],
+    whenUse: ["Streaming features Python-first", "Como complement de Feast para streaming", "Equipos Python sin querer Flink"],
+    whenNotUse: ["Sin streaming features", "Como reemplazo de feature store (no lo es)"]
+  },
+  {
+    name: "Redis + RedisAI (patrón)",
+    vendor: "Redis Ltd. + comunidad",
+    status: "active", license: "commercial",
+    cost: "Redis OSS gratis · Redis Enterprise / Cloud por uso",
+    summary: "No es feature store per se, sino el online store más común detrás de Feast/Tecton/Hopsworks. Sub-milisegundo para serving. RedisAI añade inference in-DB.",
+    whatIs: "Base key-value in-memory ultra-rápida que actúa como online store estándar en feature store deployments.",
+    whatDoes: "Storage online <1ms, TTL, replicación, RedisAI para inference embedded, vector search (Redis Stack).",
+    whatDoesnt: "No es feature store completo. Sin offline store. Sin governance de features.",
+    pros: ["Latencia sub-milisegundo", "Estándar de facto online store", "Vector search + AI capabilities"],
+    cons: ["No es feature store solo (patrón)", "Memory-bound costoso a escala", "Sin governance nativa"],
+    whenUse: ["Como online store detrás de Feast/Tecton", "Serving sub-ms crítico", "Cuando ya usas Redis"],
+    whenNotUse: ["Como feature store standalone (necesitas Feast/etc encima)", "Volúmenes que exceden RAM económica"]
+  },
+  {
+    name: "Kaskada",
+    vendor: "DataStax (adquirió Kaskada 2023)",
+    status: "legacy", license: "foss",
+    cost: "Open source · DataStax comercial",
+    summary: "Motor de streaming features open source con event-time SQL. Adquirido por DataStax en 2023 y absorbido en su Astra platform. Innovación estancada como proyecto standalone.",
+    whatIs: "Query engine open source para eventos con foco en features ML temporales, con SQL event-time propio.",
+    whatDoes: "Streaming features con event-time correctness, backfills, integración con Feast.",
+    whatDoesnt: "Absorbido por DataStax, foco standalone perdido.",
+    pros: ["Event-time SQL innovador", "Bueno para features complejas de eventos"],
+    cons: ["Absorbido por DataStax", "Innovación standalone estancada", "Adopción menor"],
+    whenUse: ["Solo si ya usas DataStax Astra"],
+    whenNotUse: ["Greenfield · Chronon o Tecton mejor para temporal features"]
+  },
+  {
+    name: "Michelangelo Palette (Uber)",
+    vendor: "Uber (interno, no público)",
+    status: "legacy", license: "enterprise",
+    cost: "N/A · sistema interno de Uber",
+    summary: "El feature store original que inspiró a toda la industria. Nunca open-sourced. Sus creadores fundaron Tecton para llevar el concepto al mercado. Referencia histórica esencial.",
+    whatIs: "Sistema interno de Uber (2017+) que formalizó el concepto 'feature store' para ML en producción.",
+    whatDoes: "Feature computation, serving offline + online, versioning, monitoring — internamente en Uber.",
+    whatDoesnt: "No es público. No lo puedes usar. Referencia conceptual únicamente.",
+    pros: ["Origen histórico del concepto", "Base del pensamiento de Tecton"],
+    cons: ["No es público", "No es un producto disponible"],
+    whenUse: ["Nunca (no es accesible)"],
+    whenNotUse: ["Todo · usa Tecton (mismos creadores) si quieres 'un Michelangelo comercial'"]
+  },
+  {
+    name: "Butterfree",
+    vendor: "QuintoAndar (open source)",
+    status: "legacy", license: "foss",
+    cost: "Gratis · Apache 2.0",
+    summary: "Framework Python/Spark de feature engineering hecho por QuintoAndar (Brasil). Popular en LATAM 2020-2022, hoy en mantenimiento mínimo. Reemplazado por Feast en la mayoría de casos.",
+    whatIs: "Librería Python open source para construir features Spark declarativamente con outputs a Cassandra/Redis.",
+    whatDoes: "ETL declarativo de features con Spark, escritura a online/offline stores.",
+    whatDoesnt: "Sin innovación reciente. Comunidad menguante. Reemplazado por stacks modernos.",
+    pros: ["Simple para casos Spark básicos", "Fue relevante en LATAM ML community"],
+    cons: ["Sin desarrollo activo", "Comunidad menguante", "Reemplazado por Feast"],
+    whenUse: ["Solo si ya lo tienes en producción heredado"],
+    whenNotUse: ["Cualquier nuevo proyecto · Feast/Featureform mejor"]
+  }
+]
+};
+Object.assign(TOOLS_DATA, TOOLS_FEATURESTORES);
 
 // Add CDC bonus section
 const TOOLS_CDC = {

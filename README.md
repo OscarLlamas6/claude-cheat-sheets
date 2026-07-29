@@ -40,6 +40,7 @@ Cuadros comparativos y guías de referencia generados con Claude, centralizados 
 | Alternativas a BIND9 — Comparativa de soluciones DNS | DevOps, IT |
 | Comparativa de Apps de Notas y PKM | Productividad, Dev Tools |
 | Sistemas de Control de Versiones — Cuadro Comparativo | Dev Tools, Git |
+| Automatización de Infraestructura — Comparativo 2026 | DevOps, Infra |
 
 ## Activar GitHub Pages
 

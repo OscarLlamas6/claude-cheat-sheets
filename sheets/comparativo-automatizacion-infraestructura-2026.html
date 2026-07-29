@@ -1,0 +1,754 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cuadro comparativo · Automatización de infraestructura 2026</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@100..125,400..800&family=Public+Sans:ital,wght@0,400;0,600;1,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#EBEDF0;
+  --card:#FFFFFF;
+  --ink:#101820;
+  --slate:#4A5A6A;
+  --mute:#6E7C8A;
+  --rule:#C6CDD5;
+  --ok:#0F7A6E;
+  --warn:#9C6200;
+  --risk:#A22C2C;
+  --layer:#3E3A7A;
+  --sans:"Public Sans","Segoe UI",Helvetica,Arial,sans-serif;
+  --disp:"Archivo","Public Sans",Helvetica,Arial,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,"SFMono-Regular",Consolas,monospace;
+  --maxw:1180px;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0;background:var(--paper);color:var(--ink);
+  font-family:var(--sans);font-size:15px;line-height:1.55;
+}
+.wrap{max-width:var(--maxw);margin:0 auto;padding:0 22px}
+
+/* ---------- Cabecera ---------- */
+.masthead{border-bottom:2px solid var(--ink);padding:44px 0 22px;margin-bottom:0}
+.eyebrow{
+  font-family:var(--mono);font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--slate);margin:0 0 14px
+}
+h1{
+  font-family:var(--disp);font-variation-settings:"wdth" 118,"wght" 780;
+  font-size:clamp(30px,5.2vw,54px);line-height:1.02;letter-spacing:-.015em;margin:0 0 14px;
+  text-transform:uppercase
+}
+.deck{max-width:62ch;font-size:16.5px;color:var(--slate);margin:0}
+.meta{
+  display:flex;flex-wrap:wrap;gap:8px 26px;margin-top:20px;
+  font-family:var(--mono);font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--mute)
+}
+.meta b{color:var(--ink);font-weight:600}
+
+/* ---------- Mapa de capas (elemento firma) ---------- */
+.stack{padding:30px 0 6px;border-bottom:1px solid var(--rule)}
+.stack h2,.matrix h2,.guide h2,.notes h2{
+  font-family:var(--disp);font-variation-settings:"wdth" 112,"wght" 700;
+  font-size:13px;letter-spacing:.12em;text-transform:uppercase;margin:0 0 6px
+}
+.stack p.hint,.matrix p.hint{font-size:13.5px;color:var(--mute);margin:0 0 18px;max-width:70ch}
+.band{
+  display:grid;grid-template-columns:190px 1fr;gap:18px;align-items:start;
+  padding:13px 0;border-top:1px solid var(--rule)
+}
+.band:last-child{border-bottom:1px solid var(--rule)}
+.band__label{font-family:var(--mono);font-size:11.5px;line-height:1.4;color:var(--slate);text-transform:uppercase;letter-spacing:.06em}
+.band__label span{display:block;color:var(--mute);text-transform:none;letter-spacing:0;font-size:11px;margin-top:3px}
+.band__items{display:flex;flex-wrap:wrap;gap:6px}
+.pin{
+  font-family:var(--mono);font-size:11.5px;padding:4px 9px;border:1px solid var(--rule);
+  background:var(--card);border-radius:2px;cursor:pointer;color:var(--ink);
+  transition:background .12s ease,border-color .12s ease
+}
+.pin:hover,.pin:focus-visible{background:var(--ink);color:#fff;border-color:var(--ink)}
+.pin.dead{color:var(--risk);border-color:#E3C6C6}
+
+/* ---------- Barra de control ---------- */
+.controls{
+  position:sticky;top:0;z-index:20;background:var(--paper);
+  border-bottom:1px solid var(--rule);padding:14px 0;margin-bottom:26px
+}
+.controls .row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.search{
+  flex:1 1 240px;min-width:200px;font-family:var(--mono);font-size:13px;
+  padding:9px 12px;border:1px solid var(--rule);background:var(--card);border-radius:2px;color:var(--ink)
+}
+.search::placeholder{color:var(--mute)}
+.filters{display:flex;flex-wrap:wrap;gap:6px}
+.chip{
+  font-family:var(--mono);font-size:11.5px;letter-spacing:.04em;padding:7px 11px;
+  border:1px solid var(--rule);background:transparent;border-radius:2px;cursor:pointer;color:var(--slate)
+}
+.chip[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:#fff}
+.count{font-family:var(--mono);font-size:11.5px;color:var(--mute);margin-left:auto;white-space:nowrap}
+
+/* ---------- Fichas ---------- */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(370px,1fr));gap:18px;padding-bottom:40px}
+.tool{
+  background:var(--card);border:1px solid var(--rule);border-radius:3px;
+  padding:20px 20px 6px;display:flex;flex-direction:column
+}
+.tool.hidden{display:none}
+.tool__head{border-bottom:1px solid var(--rule);padding-bottom:14px;margin-bottom:4px}
+.tool h3{
+  font-family:var(--disp);font-variation-settings:"wdth" 112,"wght" 720;
+  font-size:22px;letter-spacing:-.01em;margin:0 0 2px
+}
+.tool__alias{font-family:var(--mono);font-size:11.5px;color:var(--mute);margin:0 0 9px}
+.tool__line{font-size:14px;color:var(--slate);margin:0 0 12px}
+.tags{display:flex;flex-wrap:wrap;gap:5px;list-style:none;margin:0;padding:0}
+.tags li{
+  font-family:var(--mono);font-size:10.5px;letter-spacing:.05em;text-transform:uppercase;
+  padding:3px 7px;border-radius:2px;border:1px solid currentColor
+}
+.t-layer{color:var(--layer)}
+.t-ok{color:var(--ok)}
+.t-warn{color:var(--warn)}
+.t-risk{color:var(--risk)}
+.t-cost{color:var(--slate)}
+
+.facts{margin:0}
+.facts>div{padding:11px 0;border-bottom:1px solid #EDF0F3;display:grid;grid-template-columns:96px 1fr;gap:12px}
+.facts>div:last-child{border-bottom:0}
+.facts dt{
+  font-family:var(--mono);font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;
+  color:var(--mute);padding-top:2px
+}
+.facts dd{margin:0;font-size:14px}
+.facts dd b{font-weight:600}
+.no dt{color:var(--risk)}
+.yes dt{color:var(--ok)}
+
+/* ---------- Matriz ---------- */
+.matrix{padding:34px 0 10px;border-top:2px solid var(--ink)}
+.scroller{overflow-x:auto;border:1px solid var(--rule);background:var(--card);border-radius:3px}
+table{border-collapse:collapse;width:100%;min-width:900px;font-size:13px}
+th,td{padding:9px 12px;text-align:left;border-bottom:1px solid #E6EAEE;vertical-align:top}
+thead th{
+  position:sticky;top:0;background:var(--ink);color:#fff;z-index:2;
+  font-family:var(--mono);font-size:10.5px;letter-spacing:.07em;text-transform:uppercase;font-weight:500
+}
+tbody th{font-family:var(--disp);font-variation-settings:"wdth" 108,"wght" 660;font-size:14px;white-space:nowrap}
+tbody tr:nth-child(even){background:#F7F9FA}
+td.mono{font-family:var(--mono);font-size:12px}
+.dot{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:6px;vertical-align:1px}
+.d-ok{background:var(--ok)}.d-warn{background:var(--warn)}.d-risk{background:var(--risk)}
+
+/* ---------- Guía y notas ---------- */
+.guide{padding:38px 0 10px;border-top:2px solid var(--ink);margin-top:34px}
+.guide ul{list-style:none;margin:16px 0 0;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:0 26px}
+.guide li{padding:12px 0;border-top:1px solid var(--rule);font-size:14.5px}
+.guide li b{display:block;font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--mute);margin-bottom:3px;font-weight:500}
+.notes{padding:34px 0 60px;font-size:13.5px;color:var(--slate)}
+.notes ul{margin:12px 0 0;padding-left:18px}
+.notes li{margin-bottom:7px}
+footer{border-top:1px solid var(--rule);padding:18px 0 44px;font-family:var(--mono);font-size:11px;color:var(--mute)}
+
+:focus-visible{outline:2px solid var(--layer);outline-offset:2px}
+@media (max-width:640px){
+  .band{grid-template-columns:1fr;gap:8px}
+  .facts>div{grid-template-columns:1fr;gap:2px}
+  .grid{grid-template-columns:1fr}
+  .controls{position:static}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+@media print{
+  .controls,.stack .hint{display:none}
+  body{background:#fff;font-size:11px}
+  .tool{break-inside:avoid;border-color:#999}
+  .grid{grid-template-columns:1fr 1fr;gap:10px}
+  table{min-width:0;font-size:9.5px}
+}
+</style>
+</head>
+<body>
+
+<header class="masthead">
+  <div class="wrap">
+    <p class="eyebrow">Referencia técnica · Actualizado julio 2026</p>
+    <h1>Automatización de<br>infraestructura</h1>
+    <p class="deck">Catorce herramientas que la gente mete en el mismo saco y que en realidad resuelven problemas distintos. Qué es cada una, qué no es, cuándo conviene, cuándo no, cuánto cuesta y en qué estado llega a 2026.</p>
+    <div class="meta">
+      <span><b>14</b> herramientas</span>
+      <span><b>4</b> capas del stack</span>
+      <span><b>2</b> proyectos en fin de vida</span>
+      <span><b>2</b> forks comunitarios activos</span>
+    </div>
+  </div>
+</header>
+
+<section class="stack">
+  <div class="wrap">
+    <h2>Dónde vive cada herramienta</h2>
+    <p class="hint">La mayoría de las discusiones "¿Ansible o Terraform?" son comparaciones entre capas distintas. Toca un nombre para filtrar las fichas.</p>
+
+    <div class="band">
+      <div class="band__label">Aprovisionamiento<span>Crear la máquina o el recurso que antes no existía</span></div>
+      <div class="band__items">
+        <button class="pin" data-jump="terraform">Terraform</button>
+        <button class="pin" data-jump="opentofu">OpenTofu</button>
+        <button class="pin" data-jump="pulumi">Pulumi</button>
+        <button class="pin" data-jump="foreman">Foreman</button>
+      </div>
+    </div>
+
+    <div class="band">
+      <div class="band__label">Contenido y parches<span>Repositorios, erratas, canales, ciclo de vida del software</span></div>
+      <div class="band__items">
+        <button class="pin" data-jump="katello">Katello</button>
+        <button class="pin" data-jump="uyuni">Uyuni</button>
+        <button class="pin dead" data-jump="spacewalk">Spacewalk †</button>
+      </div>
+    </div>
+
+    <div class="band">
+      <div class="band__label">Configuración del SO<span>Mantener el estado interno de un host que ya existe</span></div>
+      <div class="band__items">
+        <button class="pin" data-jump="ansible">Ansible</button>
+        <button class="pin" data-jump="puppet">Puppet / OpenVox</button>
+        <button class="pin" data-jump="salt">Salt</button>
+        <button class="pin dead" data-jump="chef">Chef †</button>
+        <button class="pin" data-jump="cfengine">CFEngine</button>
+        <button class="pin" data-jump="rudder">Rudder</button>
+      </div>
+    </div>
+
+    <div class="band">
+      <div class="band__label">Orquestación y entrega<span>Ejecutar cambios en orden, o reconciliar contra Git</span></div>
+      <div class="band__items">
+        <button class="pin" data-jump="ansible">Ansible</button>
+        <button class="pin" data-jump="salt">Salt</button>
+        <button class="pin" data-jump="argocd">Argo CD</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="controls">
+  <div class="wrap">
+    <div class="row">
+      <input type="search" class="search" id="q" placeholder="Buscar: agente, YAML, parches, Kubernetes…" aria-label="Buscar herramienta">
+      <div class="filters" id="filters">
+        <button class="chip" data-filter="all" aria-pressed="true">Todas</button>
+        <button class="chip" data-filter="config" aria-pressed="false">Configuración</button>
+        <button class="chip" data-filter="content" aria-pressed="false">Parches</button>
+        <button class="chip" data-filter="iac" aria-pressed="false">IaC</button>
+        <button class="chip" data-filter="gitops" aria-pressed="false">GitOps</button>
+        <button class="chip" data-filter="libre" aria-pressed="false">100 % libre</button>
+        <button class="chip" data-filter="riesgo" aria-pressed="false">Con riesgo</button>
+      </div>
+      <span class="count" id="count">14 de 14</span>
+    </div>
+  </div>
+</div>
+
+<main class="wrap">
+<div class="grid" id="grid">
+
+<!-- ANSIBLE -->
+<article class="tool" id="ansible" data-cat="config gitops" data-flag="libre" data-text="ansible awx aap red hat ibm yaml sin agente ssh playbook collections galaxy push orquestacion">
+  <div class="tool__head">
+    <h3>Ansible</h3>
+    <p class="tool__alias">ansible-core · AWX (libre) · Ansible Automation Platform (Red Hat / IBM)</p>
+    <p class="tool__line">El estándar de facto para "haz esto en 500 máquinas ahora mismo", sin instalar nada en ellas.</p>
+    <ul class="tags">
+      <li class="t-layer">Configuración + orquestación</li>
+      <li class="t-ok">Activo · líder</li>
+      <li class="t-cost">GPLv3 · núcleo gratis</li>
+    </ul>
+  </div>
+  <dl class="facts">
+    <div><dt>Qué es</dt><dd>Un motor <b>sin agente</b> que se conecta por SSH (o WinRM en Windows), copia módulos Python, los ejecuta y se desconecta. Los playbooks son YAML: lista ordenada de tareas idempotentes.</dd></div>
+    <div class="no"><dt>Qué no es</dt><dd>No es un servidor de parches ni un espejo de repositorios. No es declarativo puro: describes pasos, no un estado global. Sin AWX/AAP no hay interfaz web, RBAC ni historial.</dd></div>
+    <div><dt>Qué hace</dt><dd>Configura SO y aplicaciones, orquesta despliegues multi-nodo con orden explícito, ejecuta tareas puntuales (<span class="mono">ad-hoc</span>), habla con cloud, red y dispositivos vía colecciones.</dd></div>
+    <div class="no"><dt>Qué no hace</dt><dd>No vigila el host de forma continua: si alguien cambia algo a mano, nadie lo corrige hasta la siguiente ejecución. No lleva inventario de contenido ni de suscripciones.</dd></div>
+    <div class="yes"><dt>Úsalo si</dt><dd>Necesitas resultados en días, tu equipo ya lee YAML, tienes flota heterogénea o dispositivos donde no puedes instalar agentes, o quieres orquestar procesos con pasos y dependencias.</dd></div>
+    <div class="no"><dt>Evítalo si</dt><dd>Necesitas <i>enforcement</i> continuo con reporte de cumplimiento, o gestionas decenas de miles de nodos donde el modelo push por SSH se vuelve lento y frágil.</dd></div>
+    <div><dt>Costo</dt><dd>ansible-core y AWX gratis. <b>AAP 2.6</b> se paga por nodo gestionado; añade panel de valor, portal de autoservicio y el asistente Lightspeed.</dd></div>
+    <div><dt>2026</dt><dd>Es el ganador del mercado y el destino de casi todas las migraciones desde Chef y Puppet. Riesgo real: gobernanza y ecosistema cada vez más orientados a la plataforma de pago.</dd></div>
+  </dl>
+</article>
+
+<!-- FOREMAN -->
+<article class="tool" id="foreman" data-cat="iac config" data-flag="libre" data-text="foreman satellite provisioning pxe kickstart inventario smart proxy remote execution ciclo de vida">
+  <div class="tool__head">
+    <h3>Foreman</h3>
+    <p class="tool__alias">theforeman.org · upstream de Red Hat Satellite (con Katello)</p>
+    <p class="tool__line">El panel de control del ciclo de vida del servidor físico y virtual, desde el arranque PXE hasta la baja.</p>
+    <ul class="tags">
+      <li class="t-layer">Aprovisionamiento + gestión</li>
+      <li class="t-ok">Activo · 3.16 / 3.17</li>
+      <li class="t-cost">GPLv3 · gratis</li>
+    </ul>
+  </div>
+  <dl class="facts">
+    <div><dt>Qué es</dt><dd>Una plataforma web con base de datos que aprovisiona hosts (PXE, kickstart, imágenes, cloud), guarda su inventario y hechos, y <b>delega la configuración</b> en Puppet, Salt o Ansible mediante smart proxies.</dd></div>
+    <div class="no"><dt>Qué no es</dt><dd>No es un motor de configuración propio; sin un backend detrás es un inventario bonito. Sin el plugin Katello no gestiona repositorios ni erratas.</dd></div>
+    <div><dt>Qué hace</dt><dd>Instala sistemas operativos desde cero, gestiona DHCP/DNS/TFTP, organiza hosts por organización y ubicación, ejecuta comandos remotos, informa de cumplimiento OpenSCAP y expone API y CLI (<span class="mono">hammer</span>).</dd></div>
+    <div class="no"><dt>Qué no hace</dt><dd>No gestiona contenedores ni Kubernetes como ciudadanos de primera. No es ligero: es una aplicación Rails con PostgreSQL y varios servicios.</dd></div>
+    <div class="yes"><dt>Úsalo si</dt><dd>Tienes centro de datos propio con instalaciones bare-metal frecuentes, necesitas Satellite pero sin pagar Red Hat, o quieres un único inventario que gobierne todo el parque.</dd></div>
+    <div class="no"><dt>Evítalo si</dt><dd>Toda tu infraestructura es efímera en la nube y las máquinas nacen de imágenes preconstruidas: pagarías una complejidad enorme por nada.</dd></div>
+    <div><dt>Costo</dt><dd>Gratis, sin límite de nodos. La versión con soporte es Red Hat Satellite, de pago por suscripción.</dd></div>
+    <div><dt>2026</dt><dd>Proyecto sano y con roadmap claro: instalación en contenedores (<span class="mono">foremanctl</span>), soporte IPv6 y arranque seguro. Aplica los parches: en 2026 se corrigieron varios CVE críticos de ejecución remota.</dd></div>
+  </dl>
+</article>
+
+<!-- KATELLO -->
+<article class="tool" id="katello" data-cat="content" data-flag="libre" data-text="katello pulp candlepin repositorios erratas content view suscripciones plugin foreman rpm deb flatpak">
+  <div class="tool__head">
+    <h3>Katello</h3>
+    <p class="tool__alias">Plugin de Foreman · Pulp + Candlepin · Katello 4.18 / 4.19</p>
+    <p class="tool__line">La mitad que le falta a Foreman: repositorios espejados, versionados y promovidos por entornos.</p>
+    <ul class="tags">
+      <li class="t-layer">Contenido y parches</li>
+      <li class="t-ok">Activo</li>
+      <li class="t-cost">GPLv3 · gratis</li>
+    </ul>
+  </div>
+  <dl class="facts">
+    <div><dt>Qué es</dt><dd>Un plugin que añade a Foreman gestión de contenido: sincroniza repositorios RPM, DEB, contenedores, Flatpak, Python y colecciones de Ansible, y los congela en <b>content views</b> promovibles de desarrollo a producción.</dd></div>
+    <div class="no"><dt>Qué no es</dt><dd>No es un producto independiente: no existe "instalar Katello solo". No es un motor de configuración ni un orquestador.</dd></div>
+    <div><dt>Qué hace</dt><dd>Espeja repositorios externos, aplica filtros de erratas, gestiona suscripciones y claves de activación, y permite instalar y parchear paquetes de forma masiva desde la interfaz de Foreman.</dd></div>
+    <div class="no"><dt>Qué no hace</dt><dd>No decide el contenido de tus archivos de configuración. No sustituye a un registro de contenedores completo para desarrollo.</dd></div>
+    <div class="yes"><dt>Úsalo si</dt><dd>Necesitas parches reproducibles y auditables, tienes entornos desconectados o con salida a internet restringida, o quieres que dev, QA y producción vean exactamente la misma versión de cada paquete.</dd></div>
+    <div class="no"><dt>Evítalo si</dt><dd>Solo tienes unas pocas máquinas apuntando a los repos públicos: la infraestructura de Pulp exige mucho disco y mantenimiento.</dd></div>
+    <div><dt>Costo</dt><dd>Gratis. Su equivalente comercial soportado es Red Hat Satellite.</dd></div>
+    <div><dt>2026</dt><dd>Sigue el ritmo de Foreman. Novedades recientes: contenido Flatpak con interfaz propia, autenticación por certificado para contenedores y migración del contenido Deb a formato estructurado (planifica ese paso antes de actualizar).</dd></div>
+  </dl>
+</article>
+
+<!-- PUPPET -->
+<article class="tool" id="puppet" data-cat="config" data-flag="riesgo" data-text="puppet perforce openvox vox pupuli forge hiera agente pull catalogo dsl declarativo eula 25 nodos">
+  <div class="tool__head">
+    <h3>Puppet <span style="font-family:var(--mono);font-size:13px;color:var(--warn)">/ OpenVox</span></h3>
+    <p class="tool__alias">Puppet Core y Puppet Enterprise (Perforce) · OpenVox (Vox Pupuli, comunidad)</p>
+    <p class="tool__line">El clásico declarativo con agente. En 2026 hay que elegir bando: el comercial o el fork libre.</p>
+    <ul class="tags">
+      <li class="t-layer">Configuración</li>
+      <li class="t-warn">Bifurcado</li>
+      <li class="t-cost">EULA con tope · fork libre</li>
+    </ul>
+  </div>
+  <dl class="facts">
+    <div><dt>Qué es</dt><dd>Un sistema declarativo agente/servidor: describes el <b>estado deseado</b> en un DSL propio, el servidor compila un catálogo por host y el agente lo aplica solo, por defecto cada 30 minutos, corrigiendo cualquier desviación.</dd></div>
+    <div class="no"><dt>Qué no es</dt><dd>No es imperativo: no controlas el orden salvo con dependencias explícitas. Y desde finales de 2024 el "Puppet abierto" ya no es lo que era.</dd></div>
+    <div><dt>Qué hace</dt><dd>Mantiene la configuración convergente sin intervención, guarda hechos e informes en PuppetDB, separa datos y código con Hiera, y trae un ecosistema enorme de módulos en Forge.</dd></div>
+    <div class="no"><dt>Qué no hace</dt><dd>Orquestar mal: no es su fuerte coordinar pasos entre máquinas (para eso existe Bolt). Y no es la herramienta para "hazlo ya en este momento".</dd></div>
+    <div class="yes"><dt>Úsalo si</dt><dd>Gestionas miles de servidores de larga vida, necesitas que la configuración se autorrepare y valoras un modelo estricto de estado deseado auditable.</dd></div>
+    <div class="no"><dt>Evítalo si</dt><dd>Empiezas de cero hoy: el DSL en Ruby, la curva de aprendizaje y la incertidumbre de licencia hacen difícil justificarlo frente a Ansible.</dd></div>
+    <div><dt>Costo</dt><dd>Perforce movió los paquetes a descarga controlada con EULA y <b>uso gratuito limitado a 25 nodos</b>; más allá, Puppet Enterprise de pago. <b>OpenVox es libre y sin tope.</b></dd></div>
+    <div><dt>2026</dt><dd>Perforce trasladó el desarrollo a repositorios privados y la comunidad respondió con <b>OpenVox</b>, un fork suave compatible módulo a módulo, con OpenVoxDB, OpenBolt y la beta de OpenVox 9 publicada en julio. Los 177 módulos de Vox Pupuli se prueban ya contra OpenVox, no contra Puppet Core.</dd></div>
+  </dl>
+</article>
+
+<!-- SALT -->
+<article class="tool" id="salt" data-cat="config gitops" data-flag="libre" data-text="salt saltstack broadcom vmware tanzu python zeromq minion master pillar grains reactor beacon event driven velocidad">
+  <div class="tool__head">
+    <h3>Salt</h3>
+    <p class="tool__alias">SaltStack → VMware → Broadcom · Tanzu Salt es la edición comercial</p>
+    <p class="tool__line">El más rápido a gran escala y el único con orientación real a eventos. Su punto débil no es técnico.</p>
+    <ul class="tags">
+      <li class="t-layer">Configuración + orquestación</li>
+      <li class="t-warn">Estable · dueño frío</li>
+      <li class="t-cost">Apache 2.0 · gratis</li>
+    </ul>
+  </div>
+  <dl class="facts">
+    <div><dt>Qué es</dt><dd>Un motor en Python con bus de eventos: el master habla con los minions por un canal persistente y ejecuta órdenes en miles de nodos en segundos. Los estados son YAML con plantillas Jinja.</dd></div>
+    <div class="no"><dt>Qué no es</dt><dd>No es obligatoriamente con agente: existe <span class="mono">salt-ssh</span> (sin agente) y el modo <span class="mono">masterless</span>. Tampoco es un proyecto con gobernanza comunitaria independiente.</dd></div>
+    <div><dt>Qué hace</dt><dd>Configuración declarativa, ejecución remota casi instantánea, y automatización reactiva: los <i>beacons</i> detectan un evento en el host y el <i>reactor</i> dispara una respuesta sin que nadie lo pida.</dd></div>
+    <div class="no"><dt>Qué no hace</dt><dd>No perdona los errores de arquitectura: mezclar pillar, grains, entornos y plantillas Jinja produce con facilidad un sistema que nadie entiende seis meses después.</dd></div>
+    <div class="yes"><dt>Úsalo si</dt><dd>Tienes escala grande y necesitas velocidad, quieres respuestas automáticas a eventos, o ya usas Uyuni / SUSE Multi-Linux Manager, que lo llevan dentro.</dd></div>
+    <div class="no"><dt>Evítalo si</dt><dd>Tu criterio principal es la salud de la comunidad y del proveedor, o buscas contratar perfiles con experiencia previa: el mercado laboral es fino.</dd></div>
+    <div><dt>Costo</dt><dd>Núcleo Apache 2.0, gratis y sin tope. La capa empresarial es Tanzu Salt (antes Aria Automation Config), de pago.</dd></div>
+    <div><dt>2026</dt><dd>Broadcom lo mantiene como patrocinador oficial y sigue siendo la base de productos de SUSE, Juniper y otros, pero tras los recortes en VMware la comunidad viene señalando un ritmo de publicación lento y ha llegado a debatir un fork. Ojo también con la migración de repositorios a <span class="mono">packages.broadcom.com</span>.</dd></div>
+  </dl>
+</article>
+
+<!-- CHEF -->
+<article class="tool" id="chef" data-cat="config" data-flag="riesgo" data-text="chef progress infra server cookbook recipe ruby inspec habitat chef 360 dsm eol fin de vida noviembre 2026">
+  <div class="tool__head">
+    <h3>Chef</h3>
+    <p class="tool__alias">Progress Chef · Infra Client 19 · Chef 360 Platform · InSpec</p>
+    <p class="tool__line">Potente, elegante y con fecha de caducidad para la parte libre: noviembre de 2026.</p>
+    <ul class="tags">
+      <li class="t-layer">Configuración</li>
+      <li class="t-risk">Servidor libre en EOL</li>
+      <li class="t-cost">Descargas con licencia</li>
+    </ul>
+  </div>
+  <dl class="facts">
+    <div><dt>Qué es</dt><dd>Configuración como código en <b>Ruby real</b>: los cookbooks son programas, con toda la expresividad y todo el peligro que eso implica. Modelo cliente/servidor con agente que converge periódicamente.</dd></div>
+    <div class="no"><dt>Qué no es</dt><dd>Ya no es una opción libre para nuevos despliegues. Y no es apto para quien no quiera aprender Ruby.</dd></div>
+    <div><dt>Qué hace</dt><dd>Gestiona configuración compleja con lógica programática, valida con Test Kitchen y ChefSpec, y audita cumplimiento con <b>InSpec</b>, que sigue siendo de lo mejor en su categoría.</dd></div>
+    <div class="no"><dt>Qué no hace</dt><dd>No mantiene ya su ecosistema abierto: el catálogo de recetas comunitario perdió tracción y las descargas requieren cuenta y aceptación de licencia.</dd></div>
+    <div class="yes"><dt>Úsalo si</dt><dd>Ya tienes cientos de cookbooks en producción y un contrato con Progress, o quieres InSpec como herramienta de cumplimiento independiente del resto.</dd></div>
+    <div class="no"><dt>Evítalo si</dt><dd>Empiezas un proyecto nuevo. En 2026 no hay ningún argumento para adoptar Chef desde cero en la versión abierta.</dd></div>
+    <div><dt>Costo</dt><dd>Chef Infra Client e InSpec siguen siendo Apache 2.0 en código fuente, pero los binarios se distribuyen bajo EULA. Chef 360 es comercial.</dd></div>
+    <div><dt>2026</dt><dd><b>Chef Infra Server abierto está deprecado y llega a fin de vida en noviembre de 2026</b>; después de octubre no habrá parches de seguridad. Las salidas son tres: pagar Chef 360, quedarte con código sin mantenimiento, o migrar. La mayoría está migrando a Ansible.</dd></div>
+  </dl>
+</article>
+
+<!-- SPACEWALK -->
+<article class="tool" id="spacewalk" data-cat="content" data-flag="riesgo" data-text="spacewalk red hat satellite 5 descontinuado 2020 muerto historico migrar uyuni foreman katello">
+  <div class="tool__head">
+    <h3>Spacewalk</h3>
+    <p class="tool__alias">Red Hat · descontinuado el 31 de mayo de 2020 · upstream de Satellite 5</p>
+    <p class="tool__line">Está muerto. Solo aparece aquí porque sigue vivo en salas de servidores que nadie ha tocado en seis años.</p>
+    <ul class="tags">
+      <li class="t-layer">Contenido y parches</li>
+      <li class="t-risk">Fin de vida desde 2020</li>
+      <li class="t-cost">GPLv2 · abandonado</li>
+    </ul>
+  </div>
+  <dl class="facts">
+    <div><dt>Qué es</dt><dd>La plataforma histórica de gestión de sistemas Linux de Red Hat: inventario, canales de software, erratas, aprovisionamiento con Cobbler y configuración básica. Fue la base de Satellite 5, SUSE Manager y Oracle Linux Manager.</dd></div>
+    <div class="no"><dt>Qué no es</dt><dd>No es software vigente. No recibe parches de seguridad desde 2020 y su interfaz y arquitectura son de otra época.</dd></div>
+    <div><dt>Qué hace</dt><dd>Lo que hacía: distribuir paquetes y erratas a clientes RHEL 6 y 7 y llevar un inventario centralizado.</dd></div>
+    <div class="no"><dt>Qué no hace</dt><dd>No soporta distribuciones modernas, ni contenedores, ni cumplimiento actual. Cualquier CVE en su código sigue abierto para siempre.</dd></div>
+    <div class="yes"><dt>Úsalo si</dt><dd>Nunca. La única razón legítima para tocarlo es leer sus datos antes de apagarlo.</dd></div>
+    <div class="no"><dt>Evítalo si</dt><dd>Siempre. Si lo tienes en producción, eso es un hallazgo de auditoría, no una herramienta.</dd></div>
+    <div><dt>Costo</dt><dd>Gratis, y aun así demasiado caro por el riesgo que arrastra.</dd></div>
+    <div><dt>2026</dt><dd>Camino de migración: <b>Uyuni</b> si quieres el heredero directo del modelo de canales, o <b>Foreman + Katello</b> si vienes del mundo Red Hat y prefieres el camino que eligió Red Hat.</dd></div>
+  </dl>
+</article>
+
+<!-- UYUNI -->
+<article class="tool" id="uyuni" data-cat="content config" data-flag="libre" data-text="uyuni suse manager multi linux manager opensuse salt cobbler openscap canales parches rhel ubuntu debian almalinux">
+  <div class="tool__head">
+    <h3>Uyuni</h3>
+    <p class="tool__alias">Fork de Spacewalk (2018) · upstream de SUSE Multi-Linux Manager · proyecto openSUSE</p>
+    <p class="tool__line">El heredero vivo de Spacewalk, con Salt dentro y soporte multidistribución de verdad.</p>
+    <ul class="tags">
+      <li class="t-layer">Parches + configuración</li>
+      <li class="t-ok">Activo · 2026.06</li>
+      <li class="t-cost">GPLv2 · gratis</li>
+    </ul>
+  </div>
+  <dl class="facts">
+    <div><dt>Qué es</dt><dd>Una plataforma de gestión de sistemas todo en uno: parches por canales, configuración vía <b>Salt</b>, aprovisionamiento con Cobbler, integración con Ansible, auditoría OpenSCAP e inventario, desde un solo servidor.</dd></div>
+    <div class="no"><dt>Qué no es</dt><dd>No es ligero: es la pieza más pesada de esta lista en RAM y disco. Y no es una herramienta pensada para infraestructura efímera.</dd></div>
+    <div><dt>Qué hace</dt><dd>Gestiona clientes SLE, openSUSE, RHEL y derivados (incluido RHEL 10), Ubuntu, Debian, AlmaLinux y Amazon Linux; congela canales por entorno, hace migraciones masivas de producto y expone informes en Grafana.</dd></div>
+    <div class="no"><dt>Qué no hace</dt><dd>No gestiona cargas de trabajo en Kubernetes ni recursos de nube como haría Terraform.</dd></div>
+    <div class="yes"><dt>Úsalo si</dt><dd>Tienes parque Linux mixto on-premise, necesitas control estricto de parches con auditoría, o quieres SUSE Multi-Linux Manager sin pagar la suscripción.</dd></div>
+    <div class="no"><dt>Evítalo si</dt><dd>Tienes menos de unas decenas de servidores, o tu flota es toda inmutable y reconstruida desde imágenes.</dd></div>
+    <div><dt>Costo</dt><dd>Gratis y sin límite de clientes. La edición soportada es SUSE Multi-Linux Manager (antes SUSE Manager), de pago.</dd></div>
+    <div><dt>2026</dt><dd>Ritmo de publicación casi mensual, integración con openSUSE reforzada este año, soporte de Leap 16 y SLES 16 como clientes, auditoría SCAP mejorada y una auditoría de seguridad completa del código publicada por el equipo de SUSE. Cuidado con la validación estricta de certificados SSL al saltar a 2026.06.</dd></div>
+  </dl>
+</article>
+
+<!-- TERRAFORM -->
+<article class="tool" id="terraform" data-cat="iac" data-flag="riesgo" data-text="terraform hashicorp ibm busl bsl hcl provider estado plan apply nube declarativo licencia">
+  <div class="tool__head">
+    <h3>Terraform</h3>
+    <p class="tool__alias">HashiCorp, hoy propiedad de IBM · BUSL 1.1 desde 2023</p>
+    <p class="tool__line">Crea la infraestructura; no entra dentro de ella. La discusión de 2026 es de licencia, no de capacidades.</p>
+    <ul class="tags">
+      <li class="t-layer">Aprovisionamiento</li>
+      <li class="t-warn">Activo · licencia restrictiva</li>
+      <li class="t-cost">BUSL · no es OSI</li>
+    </ul>
+  </div>
+  <dl class="facts">
+    <div><dt>Qué es</dt><dd>Infraestructura como código declarativa en HCL: declaras los recursos, Terraform calcula el plan contra un <b>archivo de estado</b> y aplica solo la diferencia. Miles de providers para nube, red, SaaS y bases de datos.</dd></div>
+    <div class="no"><dt>Qué no es</dt><dd>No es gestión de configuración: crea la VM, no mantiene el contenido de <span class="mono">/etc</span> a lo largo del tiempo. Y desde 2023 <b>no es software de código abierto</b> según la definición de la OSI.</dd></div>
+    <div><dt>Qué hace</dt><dd>Aprovisiona y destruye recursos de forma reproducible, muestra el impacto antes de aplicarlo, gestiona dependencias entre recursos y permite modularizar con módulos reutilizables.</dd></div>
+    <div class="no"><dt>Qué no hace</dt><dd>No corrige por sí solo un cambio hecho a mano en la consola de la nube hasta que ejecutas el plan. No instala paquetes ni gestiona servicios de forma continua.</dd></div>
+    <div class="yes"><dt>Úsalo si</dt><dd>Tu equipo ya está estandarizado en él, necesitas soporte contractual con SLA, o dependes de HCP Terraform, Stacks o las políticas de Sentinel.</dd></div>
+    <div class="no"><dt>Evítalo si</dt><dd>Tu organización exige licencias aprobadas por la OSI, vendes un producto que podría "solaparse" con la oferta comercial de HashiCorp, o quieres evitar dependencia de un único proveedor.</dd></div>
+    <div><dt>Costo</dt><dd>La CLI es gratuita para uso interno bajo BUSL. HCP Terraform retiró su nivel gratuito en marzo de 2026: estado remoto, ejecución remota y funciones de equipo son ahora de pago.</dd></div>
+    <div><dt>2026</dt><dd>IBM cerró la compra de HashiCorp en febrero de 2025 y el foco del producto está en integración con HCP y funciones asistidas por IA. Sigue siendo el líder de cuota, pero ya convive con un competidor libre y creíble.</dd></div>
+  </dl>
+</article>
+
+<!-- OPENTOFU -->
+<article class="tool" id="opentofu" data-cat="iac" data-flag="libre" data-text="opentofu fork terraform mpl linux foundation cncf cifrado de estado registro abierto drop-in">
+  <div class="tool__head">
+    <h3>OpenTofu</h3>
+    <p class="tool__alias">Fork de Terraform · MPL 2.0 · Linux Foundation / CNCF</p>
+    <p class="tool__line">Lo mismo que Terraform, con licencia libre, gobernanza neutral y algunas funciones que el original no tiene.</p>
+    <ul class="tags">
+      <li class="t-layer">Aprovisionamiento</li>
+      <li class="t-ok">Activo · 1.12</li>
+      <li class="t-cost">MPL 2.0 · gratis</li>
+    </ul>
+  </div>
+  <dl class="facts">
+    <div><dt>Qué es</dt><dd>El fork comunitario de la última versión libre de Terraform, adoptado por la Linux Foundation y aceptado en la CNCF en 2025. Comparte HCL, protocolo de providers y formato de estado.</dd></div>
+    <div class="no"><dt>Qué no es</dt><dd>Ya no es "Terraform con otro nombre": tras tres años de decisiones propias, los dos proyectos han divergido de verdad.</dd></div>
+    <div><dt>Qué hace</dt><dd>Todo lo de Terraform, más <b>cifrado nativo del estado</b> y del plan, <span class="mono">for_each</span> en providers, la bandera <span class="mono">-exclude</span>, registro OCI y un registro de providers abierto.</dd></div>
+    <div class="no"><dt>Qué no hace</dt><dd>No te da HCP Terraform, Stacks ni Sentinel. Su equivalente de CDKTF está menos maduro, y el soporte comercial viene de terceros, no de un fabricante único.</dd></div>
+    <div class="yes"><dt>Úsalo si</dt><dd>Empiezas de cero, necesitas una licencia OSI por contratación pública o política interna, quieres cifrar el estado sin herramientas externas, o construyes un producto sobre la herramienta.</dd></div>
+    <div class="no"><dt>Evítalo si</dt><dd>Tu flujo de trabajo depende profundamente de la plataforma gestionada de HashiCorp: eso no es cambiar de binario, es migrar de plano de control.</dd></div>
+    <div><dt>Costo</dt><dd>Gratis y libre, sin restricciones de uso comercial.</dd></div>
+    <div><dt>2026</dt><dd>Adopción minoritaria pero creciente y con casos de migración masiva documentados. GitLab retiró sus plantillas de Terraform y migró a OpenTofu por exposición legal de la BUSL, lo que arrastró a muchos equipos.</dd></div>
+  </dl>
+</article>
+
+<!-- PULUMI -->
+<article class="tool" id="pulumi" data-cat="iac" data-flag="libre" data-text="pulumi typescript python go csharp java iac lenguajes reales automation api cloud">
+  <div class="tool__head">
+    <h3>Pulumi</h3>
+    <p class="tool__alias">CLI Apache 2.0 · Pulumi Cloud como servicio gestionado</p>
+    <p class="tool__line">IaC para quien prefiere escribir código de verdad en vez de aprender otro lenguaje de plantillas.</p>
+    <ul class="tags">
+      <li class="t-layer">Aprovisionamiento</li>
+      <li class="t-ok">Activo</li>
+      <li class="t-cost">CLI gratis · nube de pago</li>
+    </ul>
+  </div>
+  <dl class="facts">
+    <div><dt>Qué es</dt><dd>Un motor de infraestructura como código que usa <b>lenguajes de programación reales</b>: TypeScript, Python, Go, C#, Java o YAML, con el mismo modelo de estado y plan que Terraform.</dd></div>
+    <div class="no"><dt>Qué no es</dt><dd>No es gestión de configuración ni parcheo. Y no es la opción natural para un equipo de sistemas sin cultura de desarrollo.</dd></div>
+    <div><dt>Qué hace</dt><dd>Permite bucles, condicionales, clases, pruebas unitarias y tipado sobre la infraestructura, e incorpora la Automation API para incrustar despliegues dentro de tus propias aplicaciones o portales internos.</dd></div>
+    <div class="no"><dt>Qué no hace</dt><dd>No impide que un equipo convierta la infraestructura en una aplicación imposible de auditar. La libertad del lenguaje corta por los dos lados.</dd></div>
+    <div class="yes"><dt>Úsalo si</dt><dd>Construyes una plataforma interna, tu equipo es de desarrollo, o necesitas lógica compleja y pruebas automatizadas sobre la infraestructura.</dd></div>
+    <div class="no"><dt>Evítalo si</dt><dd>Tu equipo es puramente de operaciones, o necesitas contratar rápido: hay mucha menos gente con Pulumi que con Terraform.</dd></div>
+    <div><dt>Costo</dt><dd>CLI y motor gratis. Pulumi Cloud tiene un nivel gratuito para uso individual y planes de pago por equipo y por recurso gestionado.</dd></div>
+    <div><dt>2026</dt><dd>Nicho consolidado y saludable dentro de la ingeniería de plataforma. Migrar desde Terraform u OpenTofu implica reescribir, así que es una elección de proyecto nuevo.</dd></div>
+  </dl>
+</article>
+
+<!-- RUDDER -->
+<article class="tool" id="rudder" data-cat="config" data-flag="libre" data-text="rudder normation cumplimiento compliance auditoria continua agente ligero interfaz web directivas gplv3 francia">
+  <div class="tool__head">
+    <h3>Rudder</h3>
+    <p class="tool__alias">Normation · núcleo GPLv3 · edición Enterprise de pago</p>
+    <p class="tool__line">Configuración continua con reporte de cumplimiento en tiempo real y sin escribir código.</p>
+    <ul class="tags">
+      <li class="t-layer">Configuración + cumplimiento</li>
+      <li class="t-ok">Activo · nicho</li>
+      <li class="t-cost">GPLv3 · núcleo gratis</li>
+    </ul>
+  </div>
+  <dl class="facts">
+    <div><dt>Qué es</dt><dd>Una plataforma de configuración y cumplimiento con agente muy ligero, construida sobre la base de CFEngine, donde defines <b>directivas</b> desde una interfaz web y las asignas a grupos dinámicos de nodos.</dd></div>
+    <div class="no"><dt>Qué no es</dt><dd>No es un orquestador de despliegues de aplicaciones. No tiene el tamaño de comunidad ni de catálogo de Ansible o Puppet.</dd></div>
+    <div><dt>Qué hace</dt><dd>Verifica y corrige el estado cada pocos minutos y devuelve un porcentaje de cumplimiento por nodo, por directiva y por regla: la evidencia que pide un auditor, sin construirla tú.</dd></div>
+    <div class="no"><dt>Qué no hace</dt><dd>No sustituye a un sistema de parches con canales ni gestiona recursos de nube.</dd></div>
+    <div class="yes"><dt>Úsalo si</dt><dd>Trabajas en un sector regulado (banca, salud, administración pública), necesitas demostrar cumplimiento continuo, o tu equipo de operaciones no quiere programar.</dd></div>
+    <div class="no"><dt>Evítalo si</dt><dd>Necesitas un ecosistema enorme de módulos listos, o tu prioridad es orquestar despliegues complejos entre servicios.</dd></div>
+    <div><dt>Costo</dt><dd>Núcleo libre bajo GPLv3 con todas las funciones esenciales; la edición Enterprise añade escalado, informes avanzados y soporte.</dd></div>
+    <div><dt>2026</dt><dd>Sólido y con desarrollo constante, muy presente en Europa. Es una de las pocas alternativas reales para quien busca <i>enforcement</i> continuo tras la salida de Puppet y Chef del terreno libre.</dd></div>
+  </dl>
+</article>
+
+<!-- CFENGINE -->
+<article class="tool" id="cfengine" data-cat="config" data-flag="libre" data-text="cfengine promise theory mark burgess c ligero escala embebido edge convergencia 1993 northern tech">
+  <div class="tool__head">
+    <h3>CFEngine</h3>
+    <p class="tool__alias">Desde 1993 · Northern.tech · Community GPLv3 + Enterprise</p>
+    <p class="tool__line">El abuelo de toda esta lista. Sigue siendo insuperable en huella y en escala bruta.</p>
+    <ul class="tags">
+      <li class="t-layer">Configuración</li>
+      <li class="t-ok">Activo · veterano</li>
+      <li class="t-cost">GPLv3 · gratis hasta 25 hosts en Enterprise</li>
+    </ul>
+  </div>
+  <dl class="facts">
+    <div><dt>Qué es</dt><dd>El sistema de gestión de configuración original, escrito en C y basado en la <b>teoría de promesas</b>: cada nodo promete un estado y converge hacia él de forma autónoma, incluso sin red.</dd></div>
+    <div class="no"><dt>Qué no es</dt><dd>No es amigable. Su lenguaje propio es la curva más empinada de toda la lista y la comunidad es pequeña.</dd></div>
+    <div><dt>Qué hace</dt><dd>Ejecuta con un consumo de memoria y CPU mínimo, escala a decenas de miles de nodos sin infraestructura pesada, y funciona en hardware limitado y sistemas embebidos donde nada más cabe.</dd></div>
+    <div class="no"><dt>Qué no hace</dt><dd>No te da una interfaz web moderna en la versión libre ni un catálogo comparable de contenido reutilizable.</dd></div>
+    <div class="yes"><dt>Úsalo si</dt><dd>Gestionas escalas extremas, dispositivos edge o embebidos, o necesitas que el nodo se mantenga correcto aunque pierda contacto con el servidor durante días.</dd></div>
+    <div class="no"><dt>Evítalo si</dt><dd>Buscas incorporar gente rápido o quieres resolver un problema normal de 200 servidores: pagarías la curva sin recibir la ventaja.</dd></div>
+    <div><dt>Costo</dt><dd>Community es GPLv3 y gratis. CFEngine Enterprise es de pago, con uso gratuito hasta 25 hosts.</dd></div>
+    <div><dt>2026</dt><dd>Estable y en mantenimiento activo. Nicho reducido pero real: donde la eficiencia importa más que la comodidad, no tiene competencia directa.</dd></div>
+  </dl>
+</article>
+
+<!-- ARGO CD -->
+<article class="tool" id="argocd" data-cat="gitops" data-flag="libre" data-text="argo cd gitops kubernetes cncf reconciliacion manifiestos helm kustomize flux clusters">
+  <div class="tool__head">
+    <h3>Argo CD</h3>
+    <p class="tool__alias">CNCF graduado · Apache 2.0 · alternativa directa: Flux CD</p>
+    <p class="tool__line">La capa que se comió parte del trabajo de la gestión de configuración clásica, pero solo dentro de Kubernetes.</p>
+    <ul class="tags">
+      <li class="t-layer">GitOps</li>
+      <li class="t-ok">Activo · estándar</li>
+      <li class="t-cost">Apache 2.0 · gratis</li>
+    </ul>
+  </div>
+  <dl class="facts">
+    <div><dt>Qué es</dt><dd>Un controlador que vive dentro del clúster y <b>reconcilia continuamente</b> el estado de Kubernetes contra los manifiestos declarados en un repositorio Git. Git es la única fuente de verdad.</dd></div>
+    <div class="no"><dt>Qué no es</dt><dd>No es una herramienta de sistemas: no configura un servidor Linux, no aplica parches al SO ni gestiona VMs.</dd></div>
+    <div><dt>Qué hace</dt><dd>Detecta y revierte desviaciones, despliega con Helm o Kustomize, muestra el estado de sincronización de cada aplicación y gobierna decenas de clústeres desde un punto único.</dd></div>
+    <div class="no"><dt>Qué no hace</dt><dd>No crea el clúster ni la red que lo sostiene: eso sigue siendo trabajo de Terraform, OpenTofu o Pulumi.</dd></div>
+    <div class="yes"><dt>Úsalo si</dt><dd>Tus cargas están en Kubernetes y quieres despliegues auditables donde cada cambio es un commit revisable y reversible.</dd></div>
+    <div class="no"><dt>Evítalo si</dt><dd>No usas Kubernetes. No hay término medio: fuera del clúster, no aplica.</dd></div>
+    <div><dt>Costo</dt><dd>Gratis y libre. Existen distribuciones comerciales con soporte de terceros.</dd></div>
+    <div><dt>2026</dt><dd>Es el modelo mental dominante: el patrón GitOps, "reconciliar contra Git de forma continua", es hoy lo que la gente espera de cualquier herramienta de automatización, incluidas las de esta lista que nacieron veinte años antes.</dd></div>
+  </dl>
+</article>
+
+</div>
+</main>
+
+<section class="matrix wrap">
+  <h2>Matriz rápida</h2>
+  <p class="hint">Desplázate horizontalmente si estás en pantalla pequeña. El punto de color indica la salud del proyecto en su versión libre.</p>
+  <div class="scroller">
+    <table>
+      <thead>
+        <tr>
+          <th scope="col">Herramienta</th>
+          <th scope="col">Capa</th>
+          <th scope="col">Arquitectura</th>
+          <th scope="col">Lenguaje</th>
+          <th scope="col">Modelo</th>
+          <th scope="col">Licencia libre</th>
+          <th scope="col">Costo</th>
+          <th scope="col">Estado 2026</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <th scope="row">Ansible</th><td>Configuración, orquestación</td><td>Sin agente (SSH/WinRM)</td><td class="mono">YAML + Jinja</td><td>Push, procedural idempotente</td><td class="mono">GPLv3</td><td>Núcleo gratis · AAP por nodo</td><td><span class="dot d-ok"></span>Líder del mercado</td>
+        </tr>
+        <tr>
+          <th scope="row">Foreman</th><td>Aprovisionamiento, inventario</td><td>Servidor + smart proxies</td><td class="mono">Web / API / hammer</td><td>Ciclo de vida del host</td><td class="mono">GPLv3</td><td>Gratis</td><td><span class="dot d-ok"></span>Sano, 3.16 / 3.17</td>
+        </tr>
+        <tr>
+          <th scope="row">Katello</th><td>Contenido y parches</td><td>Plugin de Foreman</td><td class="mono">Web / API</td><td>Repos, erratas, content views</td><td class="mono">GPLv3</td><td>Gratis</td><td><span class="dot d-ok"></span>Sano, 4.18 / 4.19</td>
+        </tr>
+        <tr>
+          <th scope="row">Puppet</th><td>Configuración</td><td>Agente + servidor</td><td class="mono">DSL propio (Ruby)</td><td>Pull, declarativo</td><td class="mono">EULA, tope 25 nodos</td><td>Enterprise de pago</td><td><span class="dot d-warn"></span>Cerrándose</td>
+        </tr>
+        <tr>
+          <th scope="row">OpenVox</th><td>Configuración</td><td>Agente + servidor</td><td class="mono">DSL de Puppet</td><td>Pull, declarativo</td><td class="mono">Apache 2.0</td><td>Gratis, sin tope</td><td><span class="dot d-ok"></span>Fork comunitario activo</td>
+        </tr>
+        <tr>
+          <th scope="row">Salt</th><td>Configuración, orquestación</td><td>Agente, o sin agente (salt-ssh)</td><td class="mono">YAML + Jinja</td><td>Push y eventos, declarativo</td><td class="mono">Apache 2.0</td><td>Gratis · Tanzu Salt de pago</td><td><span class="dot d-warn"></span>Estable, ritmo lento</td>
+        </tr>
+        <tr>
+          <th scope="row">Chef</th><td>Configuración</td><td>Agente + servidor</td><td class="mono">Ruby</td><td>Pull, convergente</td><td class="mono">Binarios con EULA</td><td>Chef 360 de pago</td><td><span class="dot d-risk"></span>Servidor libre EOL nov 2026</td>
+        </tr>
+        <tr>
+          <th scope="row">Spacewalk</th><td>Contenido y parches</td><td>Servidor + cliente</td><td class="mono">Web / API</td><td>Canales y erratas</td><td class="mono">GPLv2</td><td>Gratis</td><td><span class="dot d-risk"></span>Muerto desde 2020</td>
+        </tr>
+        <tr>
+          <th scope="row">Uyuni</th><td>Parches + configuración</td><td>Servidor + Salt minion</td><td class="mono">Web / YAML (Salt)</td><td>Canales, estado, provisioning</td><td class="mono">GPLv2</td><td>Gratis · SUSE MLM de pago</td><td><span class="dot d-ok"></span>Muy activo, 2026.06</td>
+        </tr>
+        <tr>
+          <th scope="row">Terraform</th><td>Aprovisionamiento</td><td>CLI + estado</td><td class="mono">HCL</td><td>Declarativo con plan</td><td class="mono">BUSL 1.1 (no OSI)</td><td>CLI gratis · HCP de pago</td><td><span class="dot d-warn"></span>Líder, licencia restrictiva</td>
+        </tr>
+        <tr>
+          <th scope="row">OpenTofu</th><td>Aprovisionamiento</td><td>CLI + estado</td><td class="mono">HCL</td><td>Declarativo con plan</td><td class="mono">MPL 2.0</td><td>Gratis</td><td><span class="dot d-ok"></span>CNCF, en crecimiento</td>
+        </tr>
+        <tr>
+          <th scope="row">Pulumi</th><td>Aprovisionamiento</td><td>CLI + estado</td><td class="mono">TS, Python, Go, C#, Java</td><td>Declarativo con código real</td><td class="mono">Apache 2.0</td><td>CLI gratis · nube de pago</td><td><span class="dot d-ok"></span>Nicho sólido</td>
+        </tr>
+        <tr>
+          <th scope="row">Rudder</th><td>Configuración, cumplimiento</td><td>Agente ligero + servidor</td><td class="mono">Web + DSL</td><td>Pull continuo con reporte</td><td class="mono">GPLv3</td><td>Núcleo gratis · Enterprise de pago</td><td><span class="dot d-ok"></span>Activo, fuerte en Europa</td>
+        </tr>
+        <tr>
+          <th scope="row">CFEngine</th><td>Configuración</td><td>Agente en C</td><td class="mono">DSL propio</td><td>Pull, convergente autónomo</td><td class="mono">GPLv3</td><td>Community gratis · Enterprise hasta 25 hosts</td><td><span class="dot d-ok"></span>Estable, muy de nicho</td>
+        </tr>
+        <tr>
+          <th scope="row">Argo CD</th><td>GitOps en Kubernetes</td><td>Controlador en el clúster</td><td class="mono">YAML, Helm, Kustomize</td><td>Reconciliación continua</td><td class="mono">Apache 2.0</td><td>Gratis</td><td><span class="dot d-ok"></span>Estándar del sector</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section class="guide wrap">
+  <h2>Si tu problema es este, empieza por aquí</h2>
+  <ul>
+    <li><b>Automatizar tareas ya, con poco tiempo</b>Ansible. Sin agentes, sin servidor obligatorio, resultados el primer día.</li>
+    <li><b>Que la configuración se autocorrija sola</b>OpenVox o Rudder. Ansible solo actúa cuando lo ejecutas.</li>
+    <li><b>Parches auditables en Linux on-premise</b>Uyuni, o Foreman + Katello si vienes del mundo Red Hat.</li>
+    <li><b>Instalar servidores bare-metal desde cero</b>Foreman, con PXE y kickstart.</li>
+    <li><b>Crear recursos en la nube</b>OpenTofu si empiezas hoy; Terraform si ya tienes contrato y plataforma montada.</li>
+    <li><b>Infraestructura escrita por desarrolladores</b>Pulumi, con pruebas y tipado sobre los recursos.</li>
+    <li><b>Miles de nodos y respuesta en segundos</b>Salt, asumiendo la incertidumbre sobre Broadcom.</li>
+    <li><b>Demostrar cumplimiento a un auditor</b>Rudder por el reporte continuo, o InSpec como verificador independiente.</li>
+    <li><b>Cargas de trabajo en Kubernetes</b>Argo CD o Flux. Las herramientas clásicas no aplican aquí.</li>
+    <li><b>Edge, embebidos o hardware muy limitado</b>CFEngine. Nada más tiene esa huella.</li>
+    <li><b>Sales de Chef antes de noviembre de 2026</b>Ansible es el destino mayoritario; conserva InSpec si te sirve.</li>
+    <li><b>Sales de Spacewalk</b>Uyuni conserva el modelo de canales que ya conoces.</li>
+  </ul>
+</section>
+
+<section class="notes wrap">
+  <h2>Cinco cosas que conviene tener claras</h2>
+  <ul>
+    <li><b>Comparar entre capas no tiene sentido.</b> Ansible y Terraform no compiten: uno configura lo que ya existe, el otro lo crea. Muchos equipos usan los dos, y eso es lo normal, no una señal de mal diseño.</li>
+    <li><b>Katello no existe sin Foreman</b>, y Foreman sin Katello no gestiona contenido. Se instalan juntos y juntos forman el equivalente libre de Red Hat Satellite.</li>
+    <li><b>"Gratis" ya no significa "abierto".</b> Terraform es gratis para uso interno pero su licencia no es OSI. Puppet Core es gratis hasta 25 nodos bajo EULA. Chef Infra Client es Apache 2.0 en código pero los binarios llevan licencia. Lee la letra pequeña antes de comprometer una arquitectura.</li>
+    <li><b>La tendencia de fondo es la infraestructura inmutable.</b> Cada vez se configuran menos servidores en caliente y se reconstruyen más desde imágenes. Eso reduce el terreno de la gestión de configuración clásica, pero no lo elimina: el parcheo, el cumplimiento y el bare-metal siguen existiendo y siguen necesitando estas herramientas.</li>
+    <li><b>Menciones que no entraron en la lista</b> pero que conviene conocer: Red Hat Satellite (Foreman + Katello con soporte), SUSE Multi-Linux Manager (Uyuni con soporte), Canonical Landscape para parques Ubuntu, Flux CD como alternativa a Argo, Bolt y OpenBolt para ejecución puntual, y Mender o Balena si tu problema es actualizar dispositivos IoT.</li>
+  </ul>
+</section>
+
+<footer class="wrap">
+  Documento de referencia · versiones y estados verificados en julio de 2026 · las licencias y hojas de ruta de estos proyectos cambian con frecuencia, confirma en la fuente oficial antes de decidir.
+</footer>
+
+<script>
+(function(){
+  var grid=document.getElementById('grid');
+  var cards=Array.prototype.slice.call(grid.querySelectorAll('.tool'));
+  var q=document.getElementById('q');
+  var count=document.getElementById('count');
+  var chips=Array.prototype.slice.call(document.querySelectorAll('#filters .chip'));
+  var active='all';
+
+  function apply(){
+    var term=q.value.trim().toLowerCase();
+    var shown=0;
+    cards.forEach(function(c){
+      var okFilter =
+        active==='all' ||
+        (c.getAttribute('data-cat')||'').indexOf(active)>-1 ||
+        c.getAttribute('data-flag')===active;
+      var hay=(c.getAttribute('data-text')+' '+c.textContent).toLowerCase();
+      var okTerm = !term || hay.indexOf(term)>-1;
+      var show = okFilter && okTerm;
+      c.classList.toggle('hidden', !show);
+      if(show) shown++;
+    });
+    count.textContent = shown + ' de ' + cards.length;
+  }
+
+  chips.forEach(function(ch){
+    ch.addEventListener('click', function(){
+      active = ch.getAttribute('data-filter');
+      chips.forEach(function(o){ o.setAttribute('aria-pressed', o===ch ? 'true':'false'); });
+      apply();
+    });
+  });
+
+  q.addEventListener('input', apply);
+
+  document.querySelectorAll('.pin').forEach(function(p){
+    p.addEventListener('click', function(){
+      var id=p.getAttribute('data-jump');
+      active='all';
+      chips.forEach(function(o){ o.setAttribute('aria-pressed', o.getAttribute('data-filter')==='all' ? 'true':'false'); });
+      q.value='';
+      apply();
+      var el=document.getElementById(id);
+      if(el){
+        el.scrollIntoView({behavior:'smooth', block:'center'});
+        el.style.borderColor='#3E3A7A';
+        setTimeout(function(){ el.style.borderColor=''; }, 1600);
+      }
+    });
+  });
+
+  apply();
+})();
+</script>
+</body>
+</html>

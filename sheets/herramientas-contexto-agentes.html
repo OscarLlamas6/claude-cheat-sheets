@@ -44,6 +44,12 @@
     margin:0 auto;
     padding:0 20px 80px;
   }
+  code{
+    font-family:var(--mono);
+    font-size:.9em;
+    background:rgba(20,26,22,.07);
+    padding:1px 4px;
+  }
 
   /* ---------- encabezado tipo hoja de datos ---------- */
   .masthead{
@@ -80,35 +86,8 @@
     font-size:16px;
   }
 
-  /* ---------- aviso ---------- */
-  .caveat{
-    border:1px solid var(--rule-hard);
-    border-left:4px solid var(--rust);
-    background:var(--card);
-    padding:16px 18px;
-    margin:0 0 34px;
-    font-size:13.5px;
-    color:var(--ink-2);
-  }
-  .caveat h2{
-    font-family:var(--mono);
-    font-size:11px;
-    letter-spacing:.16em;
-    text-transform:uppercase;
-    color:var(--rust);
-    margin:0 0 8px;
-  }
-  .caveat p{margin:0 0 8px;}
-  .caveat p:last-child{margin-bottom:0;}
-  .caveat code{
-    font-family:var(--mono);
-    font-size:.92em;
-    background:rgba(20,26,22,.06);
-    padding:1px 4px;
-  }
-
   /* ---------- tira de capas (elemento firma) ---------- */
-  .pipeline{margin:0 0 30px;}
+  .pipeline{margin:34px 0 30px;}
   .pipeline-label{
     font-family:var(--mono);
     font-size:11px;
@@ -437,13 +416,6 @@
     <p class="deck">Diecisiete herramientas que se meten entre vos y el modelo para gastar menos tokens, recordar más, o hacer que el agente se porte mejor. Cada ficha dice explícitamente qué <em>no</em> hace, porque casi todo el ruido del ecosistema viene de esperar de una herramienta algo que nunca prometió.</p>
   </header>
 
-  <section class="caveat">
-    <h2>Leé esto antes de la tabla</h2>
-    <p><strong>Dos nombres de tu lista no existen tal cual.</strong> «Ponytale» es <code>Ponytail</code>. Y «engram» es un nombre colisionado: hay al menos cinco proyectos distintos y sin relación con ese nombre. Averiguá cuál te recomendaron antes de instalar.</p>
-    <p><strong>Los números son autorreportados.</strong> Casi todos los porcentajes de ahorro los publica el propio proyecto, medidos en cargas de trabajo que le convienen. Tratalos como orden de magnitud, no como promesa, y medí en tu propio repo.</p>
-    <p><strong>Este ecosistema se mueve por semanas, no por trimestres.</strong> Precios, licencias y modelos de negocio cambian rápido — varios de estos proyectos nacieron en 2026. Verificá licencia y precio en el repo antes de comprometerte, sobre todo con AGPL si tu producto es cerrado.</p>
-  </section>
-
   <section class="pipeline">
     <div class="pipeline-label">Dónde interviene cada capa · tocá para filtrar</div>
     <div class="rail" id="rail">
@@ -487,8 +459,10 @@
   <div class="empty" id="empty" hidden>Sin resultados. Probá con otro término o quitá los filtros.</div>
 
   <section class="closing">
-    <h3>Cómo armaría yo el stack</h3>
+    <h3>Criterios de adopción</h3>
     <ol>
+      <li><strong>Los porcentajes de ahorro son autorreportados.</strong> Casi todos los publica el propio proyecto, medidos sobre cargas de trabajo que le convienen. Sirven como orden de magnitud, no como promesa.</li>
+      <li><strong>Verificá licencia y precio en la fuente.</strong> Varios de estos proyectos nacieron en 2026 y cambian por semanas, no por trimestres. AGPL en particular puede ser incompatible con un producto cerrado.</li>
       <li><strong>Primero medí, después instalá.</strong> Corré una sesión real y mirá de dónde salen los tokens. Si el 70% viene de salidas de <code>test</code> y <code>git</code>, un compresor de memoria no te sirve de nada — y viceversa.</li>
       <li><strong>Empezá por lo que ya tenés y es gratis:</strong> caché de prompt bien ordenada, compactación nativa, y limpiar el archivo de instrucciones del proyecto. Eso suele dar más que la primera herramienta que instales.</li>
       <li><strong>Una capa a la vez.</strong> Apilar cuatro compresores hace difícil saber cuál rompió qué cuando el agente empiece a alucinar por falta de un detalle que alguien recortó.</li>
@@ -599,16 +573,16 @@ const DATA = [
     link:"honcho.dev"
   },
   {
-    id:"09", layer:3, name:"Engram", by:"⚠ nombre colisionado",
-    gist:"Al menos cinco proyectos distintos con este nombre. El más visible: memoria local en un binario Go.",
-    cost:"<b>Varía por proyecto</b><br>desde OSS gratis hasta SaaS",
-    es:"«Engram» (la huella física de un recuerdo, en neurociencia) es un nombre que varios equipos eligieron a la vez. La variante más difundida es un binario Go único con SQLite + FTS5, expuesto por CLI, API HTTP, servidor MCP y una interfaz de terminal: memoria persistente local para agentes de código, sin infraestructura.",
-    noEs:"<strong>No es un solo producto.</strong> Circulan además: uno SaaS con auditoría y detección de contradicciones, uno con grafo de conocimiento y consolidación vía embeddings de Gemini, uno sincronizado con Convex para multiagente, y uno enfocado en tareas y cadenas de razonamiento versionadas en git. Comparten nombre y casi nada más.",
-    hace:["En la variante Go: cero dependencias, la fuente de verdad es un SQLite local, la nube es replicación opcional.","Herramientas MCP para que el agente guarde y recupere memorias por su cuenta.","Sincronización entre máquinas o equipo comprometiendo fragmentos comprimidos al repo.","Funciona con cualquier agente que hable MCP."],
-    noHace:["No hay garantía de que el «engram» que te recomendaron sea el que instalaste — confirmá el usuario de GitHub.","La variante local no ofrece memoria multiusuario ni servidor compartido.","Ninguna variante comprime contexto: solo decide qué guardar y traer."],
-    usar:"Memoria persistente para tu agente de código en tu máquina, sin levantar servicios. La variante Go es la apuesta segura ahí.",
-    noUsar:"Antes de haber identificado <em>cuál</em> es. Y si necesitás memoria compartida y auditada a nivel organización, mirá Honcho o Zep primero.",
-    link:"verificá el repo exacto en GitHub"
+    id:"09", layer:3, name:"Engram", by:"Gentleman-Programming · MIT",
+    gist:"Un binario, un archivo SQLite. Memoria persistente local para agentes de código, sin infraestructura.",
+    cost:"<b>Gratis · MIT</b><br>nube opcional y autoalojable",
+    es:"Un binario de Go con SQLite y búsqueda de texto completo FTS5, expuesto por cuatro vías: CLI, API HTTP, servidor MCP e interfaz de terminal. Funciona con cualquier agente que hable MCP — Claude Code, Codex, OpenCode, Gemini CLI, Cursor, Windsurf, VS Code. Sin Node, sin Python, sin Docker.",
+    noEs:"No es un servicio en la nube ni un almacén vectorial. La memoria no se genera sola por un pipeline aparte: el agente decide qué vale la pena guardar y llama a <code>mem_save</code> con una estructura fija de qué / por qué / dónde / qué aprendí. Ojo con el nombre: hay varios proyectos distintos llamados «engram» en GitHub, sin relación entre sí.",
+    hace:["19 herramientas MCP: guardar, buscar, línea de tiempo, ciclo de vida de sesión y utilidades de diagnóstico.","<strong>Recuperación tras compactación</strong>: <code>mem_context</code> devuelve el estado de la sesión cuando el agente pierde el hilo — el problema exacto de la capa 04.","Detección de conflictos: <code>mem_judge</code> y <code>mem_compare</code> marcan memorias que se contradicen; en beta hay un juez semántico que usa tu propio CLI de Claude Code u OpenCode, sin costo extra si estás en una suscripción.","Sincronización entre máquinas o equipo con fragmentos comprimidos versionados en el repo, sin conflictos de merge.","La nube es replicación opcional y por proyecto: el SQLite local siempre manda.","Interfaz de terminal con navegación vim para revisar y auditar qué recuerda."],
+    noHace:["No comprime contexto ni salidas de herramientas: decide qué guardar y traer, no cuánto ocupa lo demás.","No modela usuarios ni relaciones sociales como Honcho — está enfocado en el proyecto y su historia técnica.","No razona en segundo plano por su cuenta: sin disciplina de guardado del agente, la memoria queda vacía.","No es memoria multiusuario en tiempo real; el modo compartido es sincronización, no concurrencia."],
+    usar:"Trabajo de código diario donde te cansa reexplicar decisiones de arquitectura cada sesión. Es la opción de menor fricción de toda la capa 03: se instala con un comando y no levanta servicios.",
+    noUsar:"Aplicaciones con muchos usuarios finales que necesitan memoria individual — eso es territorio de Honcho, Zep o Mem0. Tampoco reemplaza un grafo de conocimiento sobre tu documentación.",
+    link:"github.com/Gentleman-Programming/engram"
   },
   {
     id:"10", layer:3, name:"OpenViking", by:"volcengine · abierto",

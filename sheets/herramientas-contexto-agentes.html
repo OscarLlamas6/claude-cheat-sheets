@@ -1,0 +1,811 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ficha comparativa · Herramientas de contexto y tokens para agentes de IA</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#E7EAE3;
+    --card:#F3F5EF;
+    --ink:#141A16;
+    --ink-2:#59635B;
+    --ink-3:#828C84;
+    --rule:#C6CCC0;
+    --rule-hard:#A9B2A5;
+    --blue:#1F4FD8;
+    --rust:#9C3A26;
+    --mono:"IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    --sans:"IBM Plex Sans", ui-sans-serif, system-ui, -apple-system, Segoe UI, sans-serif;
+    --l1:#3F6D4E;
+    --l2:#1F4FD8;
+    --l3:#6B3FA0;
+    --l4:#8A6A1F;
+  }
+
+  *{box-sizing:border-box;}
+  html{-webkit-text-size-adjust:100%;}
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:var(--sans);
+    font-size:15px;
+    line-height:1.55;
+    background-image:linear-gradient(var(--rule) 1px, transparent 1px);
+    background-size:100% 34px;
+    background-position:0 -1px;
+  }
+  .sheet{
+    max-width:1180px;
+    margin:0 auto;
+    padding:0 20px 80px;
+  }
+
+  /* ---------- encabezado tipo hoja de datos ---------- */
+  .masthead{
+    border-bottom:2px solid var(--ink);
+    padding:38px 0 14px;
+    margin-bottom:0;
+  }
+  .stamp{
+    font-family:var(--mono);
+    font-size:11px;
+    letter-spacing:.16em;
+    text-transform:uppercase;
+    color:var(--ink-2);
+    display:flex;
+    flex-wrap:wrap;
+    gap:6px 22px;
+    margin-bottom:26px;
+  }
+  .stamp b{color:var(--ink);font-weight:600;}
+  h1{
+    font-family:var(--mono);
+    font-weight:600;
+    font-size:clamp(26px,4.4vw,42px);
+    line-height:1.08;
+    letter-spacing:-.02em;
+    margin:0 0 14px;
+    max-width:20ch;
+  }
+  h1 em{font-style:normal;color:var(--ink-3);}
+  .deck{
+    max-width:62ch;
+    color:var(--ink-2);
+    margin:0 0 22px;
+    font-size:16px;
+  }
+
+  /* ---------- aviso ---------- */
+  .caveat{
+    border:1px solid var(--rule-hard);
+    border-left:4px solid var(--rust);
+    background:var(--card);
+    padding:16px 18px;
+    margin:0 0 34px;
+    font-size:13.5px;
+    color:var(--ink-2);
+  }
+  .caveat h2{
+    font-family:var(--mono);
+    font-size:11px;
+    letter-spacing:.16em;
+    text-transform:uppercase;
+    color:var(--rust);
+    margin:0 0 8px;
+  }
+  .caveat p{margin:0 0 8px;}
+  .caveat p:last-child{margin-bottom:0;}
+  .caveat code{
+    font-family:var(--mono);
+    font-size:.92em;
+    background:rgba(20,26,22,.06);
+    padding:1px 4px;
+  }
+
+  /* ---------- tira de capas (elemento firma) ---------- */
+  .pipeline{margin:0 0 30px;}
+  .pipeline-label{
+    font-family:var(--mono);
+    font-size:11px;
+    letter-spacing:.16em;
+    text-transform:uppercase;
+    color:var(--ink-3);
+    margin-bottom:10px;
+  }
+  .rail{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:2px;
+    border:1px solid var(--rule-hard);
+    background:var(--rule-hard);
+  }
+  .rail button{
+    appearance:none;
+    border:0;
+    background:var(--card);
+    text-align:left;
+    padding:12px 12px 13px;
+    cursor:pointer;
+    font-family:var(--sans);
+    color:var(--ink);
+    display:block;
+    transition:background .12s ease;
+  }
+  .rail button:hover{background:#FBFCF8;}
+  .rail button[aria-pressed="true"]{background:var(--ink);color:var(--paper);}
+  .rail button[aria-pressed="true"] .rail-n,
+  .rail button[aria-pressed="true"] .rail-sub{color:rgba(231,234,227,.72);}
+  .rail-n{
+    font-family:var(--mono);
+    font-size:10.5px;
+    letter-spacing:.14em;
+    color:var(--ink-3);
+    display:block;
+    margin-bottom:4px;
+  }
+  .rail-t{
+    font-weight:600;
+    font-size:14px;
+    display:block;
+    line-height:1.25;
+  }
+  .rail-sub{
+    display:block;
+    font-size:12px;
+    color:var(--ink-2);
+    margin-top:3px;
+    line-height:1.35;
+  }
+  .rail button:focus-visible{outline:2px solid var(--blue);outline-offset:-2px;}
+
+  /* ---------- controles ---------- */
+  .controls{
+    display:flex;
+    flex-wrap:wrap;
+    gap:12px;
+    align-items:center;
+    justify-content:space-between;
+    border-bottom:1px solid var(--rule-hard);
+    padding-bottom:12px;
+    margin-bottom:2px;
+    position:sticky;
+    top:0;
+    background:var(--paper);
+    z-index:5;
+    padding-top:12px;
+  }
+  .search{
+    flex:1 1 260px;
+    display:flex;
+    align-items:center;
+    gap:8px;
+    border:1px solid var(--rule-hard);
+    background:var(--card);
+    padding:7px 11px;
+  }
+  .search span{
+    font-family:var(--mono);
+    font-size:11px;
+    letter-spacing:.12em;
+    color:var(--ink-3);
+    text-transform:uppercase;
+  }
+  .search input{
+    border:0;
+    background:transparent;
+    font-family:var(--mono);
+    font-size:13px;
+    color:var(--ink);
+    width:100%;
+    padding:2px 0;
+  }
+  .search input:focus{outline:none;}
+  .search:focus-within{border-color:var(--blue);}
+  .btns{display:flex;gap:8px;flex-wrap:wrap;}
+  .btn{
+    appearance:none;
+    border:1px solid var(--rule-hard);
+    background:var(--card);
+    font-family:var(--mono);
+    font-size:11px;
+    letter-spacing:.1em;
+    text-transform:uppercase;
+    padding:8px 12px;
+    cursor:pointer;
+    color:var(--ink);
+  }
+  .btn:hover{background:#FBFCF8;}
+  .btn:focus-visible{outline:2px solid var(--blue);outline-offset:1px;}
+  .count{
+    font-family:var(--mono);
+    font-size:11px;
+    letter-spacing:.1em;
+    color:var(--ink-3);
+    text-transform:uppercase;
+  }
+
+  /* ---------- filas ---------- */
+  .rows{border-top:1px solid var(--rule-hard);}
+  .tool{border-bottom:1px solid var(--rule);}
+  .tool[hidden]{display:none;}
+
+  .head{
+    width:100%;
+    appearance:none;
+    border:0;
+    background:transparent;
+    padding:14px 4px;
+    cursor:pointer;
+    display:grid;
+    grid-template-columns:56px minmax(150px,1.05fr) 92px minmax(200px,2fr) 130px 26px;
+    gap:16px;
+    align-items:baseline;
+    text-align:left;
+    font-family:var(--sans);
+    color:var(--ink);
+  }
+  .head:hover{background:rgba(255,255,255,.42);}
+  .head:focus-visible{outline:2px solid var(--blue);outline-offset:-2px;}
+  .idx{
+    font-family:var(--mono);
+    font-size:11px;
+    color:var(--ink-3);
+    letter-spacing:.06em;
+  }
+  .name{
+    font-family:var(--mono);
+    font-weight:600;
+    font-size:15.5px;
+    letter-spacing:-.01em;
+  }
+  .name small{
+    display:block;
+    font-family:var(--sans);
+    font-weight:400;
+    font-size:11.5px;
+    color:var(--ink-3);
+    letter-spacing:0;
+    margin-top:2px;
+  }
+  .chip{
+    font-family:var(--mono);
+    font-size:10px;
+    letter-spacing:.1em;
+    text-transform:uppercase;
+    border:1px solid currentColor;
+    padding:2px 6px;
+    display:inline-block;
+    white-space:nowrap;
+  }
+  .c1{color:var(--l1);} .c2{color:var(--l2);} .c3{color:var(--l3);} .c4{color:var(--l4);}
+  .gist{font-size:13.5px;color:var(--ink-2);line-height:1.45;}
+  .cost{
+    font-family:var(--mono);
+    font-size:11.5px;
+    color:var(--ink);
+    line-height:1.4;
+  }
+  .cost b{font-weight:600;}
+  .toggle{
+    font-family:var(--mono);
+    font-size:16px;
+    color:var(--ink-3);
+    justify-self:end;
+    line-height:1;
+  }
+  .tool.open .toggle{color:var(--ink);}
+  .tool.open .head{background:rgba(255,255,255,.55);}
+
+  /* ---------- detalle ---------- */
+  .detail{
+    display:none;
+    padding:4px 4px 30px 76px;
+    background:rgba(255,255,255,.55);
+  }
+  .tool.open .detail{display:block;}
+  .grid{
+    display:grid;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:0;
+    border:1px solid var(--rule-hard);
+    background:var(--rule-hard);
+    margin-bottom:16px;
+  }
+  .cell{background:var(--card);padding:14px 16px;}
+  .cell h4{
+    font-family:var(--mono);
+    font-size:10.5px;
+    letter-spacing:.14em;
+    text-transform:uppercase;
+    margin:0 0 7px;
+    color:var(--ink-3);
+  }
+  .cell.pos h4{color:var(--l1);}
+  .cell.neg h4{color:var(--rust);}
+  .cell p{margin:0;font-size:13.5px;line-height:1.5;}
+  .cell ul{margin:0;padding-left:16px;font-size:13.5px;line-height:1.5;}
+  .cell li{margin-bottom:4px;}
+  .cell li:last-child{margin-bottom:0;}
+  .meta{
+    font-family:var(--mono);
+    font-size:11.5px;
+    color:var(--ink-2);
+    display:flex;
+    flex-wrap:wrap;
+    gap:4px 20px;
+  }
+  .meta b{color:var(--ink);font-weight:600;}
+  .meta a{color:var(--blue);text-decoration:none;border-bottom:1px solid rgba(31,79,216,.35);}
+  .meta a:hover{border-bottom-color:var(--blue);}
+
+  /* ---------- cierre ---------- */
+  .closing{
+    margin-top:46px;
+    border-top:2px solid var(--ink);
+    padding-top:22px;
+  }
+  .closing h3{
+    font-family:var(--mono);
+    font-size:11px;
+    letter-spacing:.16em;
+    text-transform:uppercase;
+    margin:0 0 14px;
+    color:var(--ink-2);
+  }
+  .closing ol{
+    margin:0;
+    padding-left:20px;
+    max-width:70ch;
+    font-size:14px;
+    color:var(--ink-2);
+  }
+  .closing li{margin-bottom:9px;}
+  .closing strong{color:var(--ink);}
+  .colophon{
+    font-family:var(--mono);
+    font-size:11px;
+    letter-spacing:.08em;
+    color:var(--ink-3);
+    margin-top:30px;
+    text-transform:uppercase;
+  }
+
+  .empty{
+    padding:40px 4px;
+    font-family:var(--mono);
+    font-size:13px;
+    color:var(--ink-3);
+  }
+
+  /* ---------- responsive ---------- */
+  @media (max-width:980px){
+    .head{
+      grid-template-columns:48px 1fr 26px;
+      grid-template-areas:
+        "idx name tgl"
+        ". chip chip"
+        ". gist gist"
+        ". cost cost";
+      gap:6px 14px;
+      padding:16px 4px;
+    }
+    .idx{grid-area:idx;}
+    .name{grid-area:name;}
+    .chipwrap{grid-area:chip;}
+    .gist{grid-area:gist;}
+    .cost{grid-area:cost;margin-top:4px;}
+    .toggle{grid-area:tgl;}
+    .detail{padding-left:52px;}
+    .grid{grid-template-columns:1fr;}
+    .rail{grid-template-columns:repeat(2,1fr);}
+  }
+  @media (max-width:560px){
+    body{background-image:none;}
+    .sheet{padding:0 14px 60px;}
+    .rail{grid-template-columns:1fr;}
+    .detail{padding-left:4px;}
+    .controls{position:static;}
+  }
+  @media (prefers-reduced-motion:reduce){
+    *{transition:none !important;}
+  }
+  @media print{
+    body{background:#fff;background-image:none;}
+    .controls,.rail,.pipeline{display:none;}
+    .detail{display:block !important;}
+    .tool{break-inside:avoid;}
+    .toggle{display:none;}
+  }
+</style>
+</head>
+<body>
+<div class="sheet">
+
+  <header class="masthead">
+    <div class="stamp">
+      <span>Ficha <b>CTX-2026-07</b></span>
+      <span>Corte <b>30 jul 2026</b></span>
+      <span>Fichas <b>17</b></span>
+      <span>Estado <b>verificar antes de adoptar</b></span>
+    </div>
+    <h1>Contexto, caché y tokens: <em>qué es cada herramienta y qué no.</em></h1>
+    <p class="deck">Diecisiete herramientas que se meten entre vos y el modelo para gastar menos tokens, recordar más, o hacer que el agente se porte mejor. Cada ficha dice explícitamente qué <em>no</em> hace, porque casi todo el ruido del ecosistema viene de esperar de una herramienta algo que nunca prometió.</p>
+  </header>
+
+  <section class="caveat">
+    <h2>Leé esto antes de la tabla</h2>
+    <p><strong>Dos nombres de tu lista no existen tal cual.</strong> «Ponytale» es <code>Ponytail</code>. Y «engram» es un nombre colisionado: hay al menos cinco proyectos distintos y sin relación con ese nombre. Averiguá cuál te recomendaron antes de instalar.</p>
+    <p><strong>Los números son autorreportados.</strong> Casi todos los porcentajes de ahorro los publica el propio proyecto, medidos en cargas de trabajo que le convienen. Tratalos como orden de magnitud, no como promesa, y medí en tu propio repo.</p>
+    <p><strong>Este ecosistema se mueve por semanas, no por trimestres.</strong> Precios, licencias y modelos de negocio cambian rápido — varios de estos proyectos nacieron en 2026. Verificá licencia y precio en el repo antes de comprometerte, sobre todo con AGPL si tu producto es cerrado.</p>
+  </section>
+
+  <section class="pipeline">
+    <div class="pipeline-label">Dónde interviene cada capa · tocá para filtrar</div>
+    <div class="rail" id="rail">
+      <button data-layer="1" aria-pressed="false">
+        <span class="rail-n">Capa 01</span>
+        <span class="rail-t">Comportamiento</span>
+        <span class="rail-sub">Reglas y skills que cambian cómo piensa y escribe el agente.</span>
+      </button>
+      <button data-layer="2" aria-pressed="false">
+        <span class="rail-n">Capa 02</span>
+        <span class="rail-t">Intercepción</span>
+        <span class="rail-sub">Comprimen lo que entra al contexto antes de llegar al modelo.</span>
+      </button>
+      <button data-layer="3" aria-pressed="false">
+        <span class="rail-n">Capa 03</span>
+        <span class="rail-t">Memoria</span>
+        <span class="rail-sub">Guardan y recuperan lo que no cabe en la ventana.</span>
+      </button>
+      <button data-layer="4" aria-pressed="false">
+        <span class="rail-n">Capa 04</span>
+        <span class="rail-t">Primitivas nativas</span>
+        <span class="rail-sub">Ya vienen con el proveedor. No se instalan, se usan bien.</span>
+      </button>
+    </div>
+  </section>
+
+  <div class="controls">
+    <label class="search">
+      <span>Buscar</span>
+      <input type="text" id="q" placeholder="nombre, función, «gratis», «grafo»…" autocomplete="off">
+    </label>
+    <div class="btns">
+      <button class="btn" id="expand">Abrir todo</button>
+      <button class="btn" id="collapse">Cerrar todo</button>
+      <button class="btn" id="reset">Quitar filtros</button>
+    </div>
+    <div class="count" id="count"></div>
+  </div>
+
+  <main class="rows" id="rows"></main>
+  <div class="empty" id="empty" hidden>Sin resultados. Probá con otro término o quitá los filtros.</div>
+
+  <section class="closing">
+    <h3>Cómo armaría yo el stack</h3>
+    <ol>
+      <li><strong>Primero medí, después instalá.</strong> Corré una sesión real y mirá de dónde salen los tokens. Si el 70% viene de salidas de <code>test</code> y <code>git</code>, un compresor de memoria no te sirve de nada — y viceversa.</li>
+      <li><strong>Empezá por lo que ya tenés y es gratis:</strong> caché de prompt bien ordenada, compactación nativa, y limpiar el archivo de instrucciones del proyecto. Eso suele dar más que la primera herramienta que instales.</li>
+      <li><strong>Una capa a la vez.</strong> Apilar cuatro compresores hace difícil saber cuál rompió qué cuando el agente empiece a alucinar por falta de un detalle que alguien recortó.</li>
+      <li><strong>Desconfiá de la compresión irreversible</strong> en depuración y análisis de logs. Si el original no se puede recuperar, el agente va a tener que volver a leer todo — y ahí perdiste el ahorro.</li>
+      <li><strong>Memoria y compresión son problemas distintos.</strong> Comprimir reduce el costo de lo que ya está en contexto; la memoria decide qué merece entrar. Resolver uno no resuelve el otro.</li>
+    </ol>
+    <div class="colophon">Ficha CTX-2026-07 · datos verificados por búsqueda web el 30 jul 2026 · sin afiliación con ninguno de los proyectos listados</div>
+  </section>
+
+</div>
+
+<script>
+const DATA = [
+  {
+    id:"01", layer:1, name:"Caveman", by:"JuliusBrussee · MIT",
+    gist:"Skill que hace que el agente responda en telegrama. Recorta la salida, no la entrada.",
+    cost:"<b>Gratis</b><br>OSS, sin cuenta",
+    es:"Un archivo de skill (un prompt, en el fondo) que instruye al agente a hablar sin relleno: sin cortesías, sin transiciones, fragmentos en vez de oraciones. Tiene modos <em>lite</em>, <em>full</em> y <em>ultra</em>. Se instala en 30+ agentes (Claude Code, Codex, Cursor, Gemini CLI, Windsurf…).",
+    noEs:"No es un compresor de contexto ni una capa de infraestructura. No toca tus tokens de entrada ni los de razonamiento — y el propio proyecto lo documenta así, cosa que se agradece.",
+    hace:["Recorta ~65% de los tokens de salida en promedio (hasta 87% reportado).","Deja intactos código, comandos, mensajes de error y texto de commits.","Trae utilidades hermanas: comprimir el archivo CLAUDE.md (~46% menos) y las descripciones de herramientas MCP.","Sin telemetría ni llamadas de red después de instalar."],
+    noHace:["No reduce entrada ni razonamiento, que suelen ser el grueso del gasto en sesiones de código.","Se suma ~1–1.5k tokens de entrada por turno solo por estar cargado.","En tareas que ya son cortas el balance puede salir <em>negativo</em>."],
+    usar:"Sesiones largas y conversacionales donde el agente escribe párrafos que nadie lee. También si simplemente te cansa la verbosidad — la ganancia real es de lectura, el ahorro es bono.",
+    noUsar:"Si necesitás prosa presentable para humanos, documentación o mensajes a clientes. Y si tu gasto viene de leer archivos grandes, esto no toca ese problema.",
+    link:"github.com/JuliusBrussee/caveman"
+  },
+  {
+    id:"02", layer:1, name:"Ponytail", by:"DietrichGebert · OSS",
+    gist:"Le mete al agente la mentalidad del senior perezoso: el mejor código es el que no escribís.",
+    cost:"<b>Gratis</b><br>OSS, multi-agente",
+    es:"Un conjunto de reglas que se carga como contexto permanente al inicio de sesión. El núcleo es una «escalera»: ¿esto necesita existir? → ¿lo cubre la librería estándar? → ¿hay algo nativo de la plataforma? → ¿ya existe en este repo? Recién al final se escribe código nuevo.",
+    noEs:"No es una herramienta de tokens, aunque terminen ahorrándose. No es un linter ni valida nada: es persuasión textual, y el modelo puede ignorarla.",
+    hace:["Frena la sobre-ingeniería: menos dependencias instaladas, menos capas de abstracción, diffs más chicos.","Funciona en ~15 agentes vía plugin, o simplemente copiando el archivo de reglas (AGENTS.md) al repo.","Registra comandos <code>/ponytail</code> en los agentes que soportan skills."],
+    noHace:["No comprime nada ni administra memoria.","No mide su propio efecto — el proyecto publica un benchmark sobre diffs reales, pero en tu repo no vas a tener ese número.","No frena la <em>lectura</em> del código; el principio explícito es «perezoso con la solución, nunca con leer»."],
+    usar:"Cuando tu agente le pide un date picker y te instala tres dependencias, escribe un wrapper y abre un debate sobre zonas horarias. Es el problema que ataca de frente.",
+    noUsar:"Exploración greenfield donde querés que el agente proponga alternativas y arquitecturas. Además ocupa contexto en <em>todas</em> las sesiones, útiles o no.",
+    link:"github.com/DietrichGebert/ponytail"
+  },
+  {
+    id:"03", layer:1, name:"Superpowers", by:"obra · OSS",
+    gist:"Metodología de desarrollo empaquetada como skills: planificar, TDD, revisar. Sube calidad, sube costo.",
+    cost:"<b>Gratis</b><br>soporte comercial aparte",
+    es:"Una librería de 20+ skills que imponen un flujo de trabajo: lluvia de ideas → plan escrito → pruebas primero → implementación → revisión en dos etapas. Las skills se disparan solas según lo que estés haciendo. Disponible en el marketplace oficial de plugins y en Codex, Antigravity y otros.",
+    noEs:"No es una herramienta de eficiencia. Es lo contrario de Caveman y Ponytail: <em>agrega</em> pasos, contexto y tokens a propósito, a cambio de resultados más confiables.",
+    hace:["Obliga a planificar antes de tocar un archivo y a escribir la prueba antes del código.","Aporta comandos <code>/brainstorm</code>, <code>/write-plan</code>, <code>/execute-plan</code> y búsqueda entre skills.","Inyecta contexto al arrancar la sesión, así que está activo desde el primer mensaje."],
+    noHace:["No ahorra tokens; el flujo completo consume bastante más que responder directo.","No sustituye tu criterio de revisión — la autorevisión del modelo tiene el techo del modelo.","No administra memoria entre sesiones."],
+    usar:"Código que va a producción y que otra persona va a mantener. Equipos que quieren que el agente siga un proceso repetible en vez de improvisar.",
+    noUsar:"Tareas de una línea, scripts descartables, exploración rápida. Y si estás peleando con límites de cuota, esto empuja en la dirección contraria.",
+    link:"github.com/obra/superpowers"
+  },
+  {
+    id:"04", layer:2, name:"Headroom", by:"headroomlabs · OSS + comercial",
+    gist:"Capa de compresión local entre el agente y el proveedor. Reversible: podés recuperar el original.",
+    cost:"<b>Núcleo abierto</b><br>hay oferta comercial",
+    es:"Una capa que se interpone y comprime todo lo que el agente <em>lee</em>: salidas de herramientas, logs, archivos, fragmentos de RAG, historial. Se usa de cuatro formas: librería (Python/TS), proxy compatible con OpenAI, servidor MCP, o envolviendo el agente entero con <code>headroom wrap claude</code>.",
+    noEs:"No es un sistema de memoria, aunque tenga un almacén compartido entre agentes. Y no es magia: si el compresor descarta el detalle que hacía falta, el agente falla más — el propio ecosistema advierte que hay que medir tasa de tareas completadas, no solo tokens.",
+    hace:["Compresión <strong>reversible</strong>: el original queda local y se recupera bajo demanda. Esta es la diferencia central contra un resumen.","Reporta ~20% menos en agentes de código y 60–95% en JSON y logs ruidosos.","<code>headroom learn</code> mina sesiones fallidas y escribe correcciones al archivo de instrucciones del proyecto.","Contexto compartido entre agentes con deduplicación, útil si corrés Claude y Codex en paralelo.","Integra con LangChain, LiteLLM, Agno, Vercel AI SDK."],
+    noHace:["No reduce lo que el agente <em>escribe</em>.","No decide qué vale la pena recordar entre sesiones.","No es cero configuración si te importa dónde vive tu data: en modo proxy, revisá por dónde pasa cada request."],
+    usar:"Cuando el agente hace trabajo de verdad: leer logs, correr búsquedas que devuelven cientos de resultados, procesar JSON grande. Ahí la compresión reversible paga.",
+    noUsar:"Chats cortos con prompts breves. Tampoco si no podés justificar una capa más de infraestructura entre vos y el modelo.",
+    link:"github.com/headroomlabs-ai/headroom"
+  },
+  {
+    id:"05", layer:2, name:"RTK (Rust Token Killer)", by:"binario Rust",
+    gist:"Comprime la salida de la terminal antes de que llegue al contexto. Solo eso, y muy bien.",
+    cost:"<b>Gratis en OSS</b><br>equipos ~$15/dev/mes",
+    es:"Un proxy de línea de comandos que intercepta stdout/stderr y reescribe salidas verbosas — <code>cargo test</code>, <code>git log</code>, <code>npm install</code>, <code>grep</code>, <code>ls</code> — en resúmenes compactos. Se instala como hook: cada llamada Bash del agente se reescribe sola.",
+    noEs:"No es de propósito general. Solo toca salidas de comandos; si tu agente lee archivos directamente, RTK no ve nada.",
+    hace:["60–90% menos tokens en salidas de shell, con analíticas propias (<code>rtk gain</code>) para ver el ahorro real.","Cero cambios en tu código: es un hook a nivel de ejecución.","Filtrado contextual que preserva errores y fallos de test mientras descarta el ruido de los que pasaron."],
+    noHace:["No toca lecturas de archivos, memoria ni salida del modelo.","Los porcentajes se miden <em>por comando</em>, no por sesión: 90% menos en <code>cargo test</code> importa solo si esos comandos dominan tu gasto.","Puede esconder detalle que necesitabas — hay que confiar en su criterio de filtrado."],
+    usar:"Agentes que corren suites de pruebas, builds y comandos git todo el día. Ahí el ahorro es inmediato y visible.",
+    noUsar:"Flujos donde el agente casi no usa la terminal. Y si ya usás Headroom, medí si se solapan antes de apilarlos.",
+    link:"rtk-ai.app"
+  },
+  {
+    id:"06", layer:2, name:"Serena", by:"servidor MCP · OSS",
+    gist:"Navegación semántica de código vía LSP. El agente consulta símbolos en vez de leer archivos enteros.",
+    cost:"<b>Gratis</b><br>OSS",
+    es:"Un servidor MCP que le da al agente herramientas de servidor de lenguaje: buscar definición, referencias, símbolos de un archivo. Reemplaza el patrón de leer 2000 líneas para encontrar una función.",
+    noEs:"No es un compresor ni un sistema de memoria. Ataca una fuente concreta de desperdicio: la lectura indiscriminada de archivos.",
+    hace:["Corta lecturas completas de archivos en repos grandes.","Complementa a RTK sin conflicto: uno cubre la terminal, el otro la navegación de código.","Mejora la precisión, no solo el costo — el agente encuentra el símbolo correcto en vez de adivinar."],
+    noHace:["No sirve donde no hay un buen servidor de lenguaje para tu stack.","No impide que el agente igual pida leer archivos si decide hacerlo.","No aporta nada fuera de tareas de código."],
+    usar:"Monorepos y bases de código grandes donde el agente se pierde y quema contexto explorando.",
+    noUsar:"Proyectos de pocos archivos, donde leerlo todo es más barato que la sobrecarga de las herramientas MCP.",
+    link:"MCP · buscar «serena mcp»"
+  },
+  {
+    id:"07", layer:2, name:"LLMLingua y compresión de prompt", by:"investigación (Microsoft) · MIT",
+    gist:"Un modelo chico decide qué tokens del prompt son prescindibles y los borra. Ratios agresivos, riesgo real.",
+    cost:"<b>Gratis</b><br>librería, no producto",
+    es:"Una familia de métodos de investigación que comprime el prompt evaluando cuánta información aporta cada token y descartando los redundantes, con ratios reportados de 2× a 20×. Existen variantes para contextos largos y para RAG.",
+    noEs:"No es una herramienta lista para producción con instalador de un comando. Es una librería que integrás y calibrás vos, con evaluación propia.",
+    hace:["Reduce el prompt de entrada, que es justo lo que Caveman no toca.","Funciona bien sobre texto redundante: documentos, transcripciones, contexto recuperado.","Está publicado y evaluado en literatura académica, no solo en un README."],
+    noHace:["No preserva formato exacto. Sobre código, JSON o cualquier cosa donde la sintaxis importe, romperlo es fácil.","No es reversible: lo borrado se fue.","No se integra solo con tu agente de código — es para pipelines que vos controlás."],
+    usar:"Pipelines RAG propios, con volumen alto y un conjunto de evaluación que te diga si la calidad aguantó.",
+    noUsar:"Agentes de código, contenido estructurado, o cualquier caso donde no puedas medir la degradación.",
+    link:"github.com/microsoft/LLMLingua"
+  },
+  {
+    id:"08", layer:3, name:"Honcho", by:"Plastic Labs · AGPL-3.0",
+    gist:"Memoria que razona en segundo plano y modela a cada participante como una entidad que cambia.",
+    cost:"<b>Abierto (AGPL)</b><br>gestionado: créditos gratis al registrarse",
+    es:"Infraestructura de memoria construida sobre el concepto de «peer»: usuarios, agentes, grupos, proyectos e incluso ideas son entidades de primera clase. Guardás mensajes y eventos, Honcho razona en background, y después consultás representaciones, contexto de sesión o preguntas en lenguaje natural desde cualquier modelo o framework.",
+    noEs:"No es un almacén vectorial que devuelve fragmentos parecidos. Extrae <em>conclusiones</em>, no trozos de texto. Tampoco es una skill que instalás y olvidás: es un servicio.",
+    hace:["Puntajes muy altos en varios benchmarks de memoria (LongMem, LoCoMo, BEAM) usando una mediana de ~5% del contexto disponible.","Modela relaciones cruzadas: qué sabe A sobre B, útil de verdad en sistemas multiagente.","Gestionado en api.honcho.dev o autoalojado (servidor FastAPI).","Integraciones para Claude Code, Cursor, Codex, OpenCode y cualquier cliente MCP."],
+    noHace:["No comprime contexto ni salidas de herramientas.","No es instantáneo: el razonamiento en background tarda, y la memoria puede contaminarse si elegís mal el modelo derivador — hay reportes de eso en el propio repo.","No resuelve el problema con licencia permisiva: AGPL-3.0 puede ser un problema si tu producto es cerrado."],
+    usar:"Productos con usuarios que vuelven — asistentes, tutores, agentes de soporte — y sistemas multiagente donde importa quién sabe qué.",
+    noUsar:"Herramientas de un solo uso, scripts, o cualquier cosa donde la sesión empieza y termina en el día. Y revisá AGPL con quien corresponda antes de integrarlo.",
+    link:"honcho.dev"
+  },
+  {
+    id:"09", layer:3, name:"Engram", by:"⚠ nombre colisionado",
+    gist:"Al menos cinco proyectos distintos con este nombre. El más visible: memoria local en un binario Go.",
+    cost:"<b>Varía por proyecto</b><br>desde OSS gratis hasta SaaS",
+    es:"«Engram» (la huella física de un recuerdo, en neurociencia) es un nombre que varios equipos eligieron a la vez. La variante más difundida es un binario Go único con SQLite + FTS5, expuesto por CLI, API HTTP, servidor MCP y una interfaz de terminal: memoria persistente local para agentes de código, sin infraestructura.",
+    noEs:"<strong>No es un solo producto.</strong> Circulan además: uno SaaS con auditoría y detección de contradicciones, uno con grafo de conocimiento y consolidación vía embeddings de Gemini, uno sincronizado con Convex para multiagente, y uno enfocado en tareas y cadenas de razonamiento versionadas en git. Comparten nombre y casi nada más.",
+    hace:["En la variante Go: cero dependencias, la fuente de verdad es un SQLite local, la nube es replicación opcional.","Herramientas MCP para que el agente guarde y recupere memorias por su cuenta.","Sincronización entre máquinas o equipo comprometiendo fragmentos comprimidos al repo.","Funciona con cualquier agente que hable MCP."],
+    noHace:["No hay garantía de que el «engram» que te recomendaron sea el que instalaste — confirmá el usuario de GitHub.","La variante local no ofrece memoria multiusuario ni servidor compartido.","Ninguna variante comprime contexto: solo decide qué guardar y traer."],
+    usar:"Memoria persistente para tu agente de código en tu máquina, sin levantar servicios. La variante Go es la apuesta segura ahí.",
+    noUsar:"Antes de haber identificado <em>cuál</em> es. Y si necesitás memoria compartida y auditada a nivel organización, mirá Honcho o Zep primero.",
+    link:"verificá el repo exacto en GitHub"
+  },
+  {
+    id:"10", layer:3, name:"OpenViking", by:"volcengine · abierto",
+    gist:"Base de datos de contexto con forma de sistema de archivos. El agente navega su memoria con ls y find.",
+    cost:"<b>Abierto</b><br>confirmá la licencia en el repo",
+    es:"Una base de datos de contexto que unifica memorias, recursos y skills en un único sistema de archivos virtual bajo el protocolo <code>viking://</code>. Todo lo que se escribe se procesa en tres niveles — L0 resumen de una línea, L1 panorama, L2 detalle — y se carga solo tan profundo como la tarea lo pida.",
+    noEs:"No es RAG clásico. Rechaza a propósito el almacén vectorial plano: la idea es que el agente ubique contexto de forma determinista, como un desarrollador con archivos, en vez de esperar que una búsqueda por similitud acierte.",
+    hace:["Carga jerárquica que recorta el gasto de tokens (el proyecto reporta ~35% de ahorro).","Cada recuperación deja una traza inspeccionable: se puede depurar por qué trajo lo que trajo.","Extrae preferencias del usuario y experiencia del agente a memoria de largo plazo después de cada sesión.","SDKs, integraciones con Claude Code, Codex, Cursor y una app de escritorio para inspeccionar sesiones."],
+    noHace:["No es liviano: es una base de datos, con su operación correspondiente.","No comprime salidas de herramientas en vuelo.","Las fuentes públicas no coinciden sobre la licencia (aparece Apache 2.0 en la documentación y AGPL en el repo) — verificalo vos."],
+    usar:"Cuando querés contexto auditable e inspeccionable en lugar de una caja negra vectorial, y tenés varios agentes compartiendo el mismo conocimiento.",
+    noUsar:"Un agente simple con un caso de uso acotado. Es infraestructura, y la infraestructura se mantiene.",
+    link:"github.com/volcengine/OpenViking"
+  },
+  {
+    id:"11", layer:3, name:"Mem0", by:"Apache 2.0 · hosted + self-host",
+    gist:"La forma más rápida de ponerle memoria a un agente que ya existe. Pocas líneas y anda.",
+    cost:"<b>Apache 2.0</b><br>capa gratuita en el hosted",
+    es:"Una capa de memoria que se enchufa al costado de tu agente. Extrae hechos de la conversación y los guarda en un almacén híbrido (vectorial, grafo y clave-valor). Es una librería, no un framework: no te obliga a reescribir nada.",
+    noEs:"No es un runtime de agentes ni razona sobre el tiempo. Guarda hechos; si un hecho cambia, no lleva bien la historia de ese cambio.",
+    hace:["Camino más corto de cero a memoria funcionando: SDK limpio, gestionado o autoalojado.","Es el más adoptado del grupo, así que hay ejemplos e integraciones para casi todo.","Licencia permisiva, sin la fricción de AGPL."],
+    noHace:["Razonamiento temporal flojo: en comparativas públicas queda claramente debajo de Zep en LongMemEval.","No unifica skills ni recursos, solo memoria.","No comprime nada."],
+    usar:"Chatbots y asistentes personalizados donde la pregunta es «qué prefiere este usuario». Y cuando querés algo andando esta semana.",
+    noUsar:"Cuando importa <em>cuándo</em> algo fue verdad, o cuando necesitás recorrer relaciones entre entidades de muchos documentos.",
+    link:"github.com/mem0ai/mem0"
+  },
+  {
+    id:"12", layer:3, name:"Zep / Graphiti", by:"Apache 2.0 · cloud pago",
+    gist:"Grafo de conocimiento temporal: no solo qué es verdad, sino desde cuándo y hasta cuándo.",
+    cost:"<b>Núcleo Apache 2.0</b><br>servicio en la nube pago",
+    es:"Un servidor de memoria que construye un grafo temporal a partir de la conversación. Si alguien dice «vivía en Londres, me mudé a Tokio», Zep no sobrescribe: registra ambos hechos con su vigencia y su relación. La extracción de entidades y el resumen corren de forma asíncrona.",
+    noEs:"No es una librería que enchufás en cinco minutos. Es infraestructura, con un grafo detrás que hay que operar.",
+    hace:["El mejor del grupo en razonamiento temporal — lidera LongMemEval con margen amplio sobre Mem0.","Pensado para producción y escala, con certificaciones que los otros no tienen.","Procesamiento asíncrono: no te agrega latencia en la ruta caliente."],
+    noHace:["No es simple. Si tu caso es «recordá que le gusta el café», es desproporcionado.","No administra el contexto del agente ni comprime nada.","El núcleo abierto y el servicio en la nube no son la misma superficie de funciones — leé la letra chica."],
+    usar:"Aplicaciones empresariales con usuarios de larga vida cuyos datos cambian: estado de cuentas, roles, historial clínico o legal.",
+    noUsar:"Prototipos, proyectos personales, o equipos sin nadie que quiera operar un grafo.",
+    link:"github.com/getzep/zep"
+  },
+  {
+    id:"13", layer:3, name:"Letta (ex MemGPT)", by:"Apache 2.0",
+    gist:"Acá la memoria no es un accesorio: es la arquitectura. El agente administra su propio contexto.",
+    cost:"<b>Apache 2.0</b><br>cloud opcional",
+    es:"Un runtime de agentes con jerarquía de memoria al estilo sistema operativo: el contexto principal es la RAM, la memoria archival es el disco, y el agente decide qué mover entre ambos usando herramientas. Los agentes viven como servicios direccionables por API REST.",
+    noEs:"No es una capa que agregás a tu agente existente. Es el único de este grupo que incluye runtime propio, y quiere ser <em>el</em> runtime.",
+    hace:["Agentes de larga duración que sobreviven días y mantienen coherencia.","El agente edita su propio bloque de memoria central — se autocorrige sobre lo que sabe de vos.","Persistencia como servicio: los agentes tienen identidad y estado."],
+    noHace:["No convive fácil con tu orquestador actual: si ya tenés LangGraph o similar, hay solapamiento.","No comprime contexto de herramientas.","Más piezas móviles que Mem0 para arrancar."],
+    usar:"Agentes autónomos que corren solos por días o semanas y necesitan sentirse una entidad continua.",
+    noUsar:"Si ya elegiste tu framework de orquestación y no pensás cambiarlo.",
+    link:"github.com/letta-ai/letta"
+  },
+  {
+    id:"14", layer:3, name:"Cognee", by:"Apache 2.0",
+    gist:"Grafo tipado construido desde tus documentos, no desde la conversación. Y mejora con correcciones.",
+    cost:"<b>Apache 2.0</b><br>sin SOC 2 / HIPAA",
+    es:"Un pipeline Extract–Cognify–Load: le das documentos heterogéneos (registros de decisiones, docs, código) y construye un grafo de conocimiento tipado más índice vectorial a la vez. Después responde preguntas de relación que la búsqueda vectorial no puede: qué causó X, qué depende de Y.",
+    noEs:"No es memoria conversacional. Zep hace grafos de <em>lo que se dijo</em>; Cognee hace grafos de <em>lo que tenés escrito</em>.",
+    hace:["Reponderación del grafo a partir de retroalimentación: mejora con el uso, no solo acumula.","Razonamiento multidocumento: rastrea cadenas de decisiones entre archivos distintos.","Ingesta directa de carpetas y fuentes variadas."],
+    noHace:["No tiene certificaciones SOC 2 ni HIPAA — descartado de entrada en entornos regulados.","No modela usuarios ni preferencias.","Construir el grafo cuesta tiempo y llamadas al modelo antes de que sirva de algo."],
+    usar:"Bases de conocimiento internas, agentes de investigación, cualquier caso donde la pregunta interesante es cómo se conectan las cosas.",
+    noUsar:"Personalización de usuario, memoria de chat, o industrias reguladas.",
+    link:"github.com/topoteretes/cognee"
+  },
+  {
+    id:"15", layer:4, name:"Caché de prompt", by:"nativo del proveedor",
+    gist:"Ya lo tenés. Reusar el prefijo estable del prompt es el ahorro más grande y más ignorado.",
+    cost:"<b>Incluido</b><br>lecturas ~10% del precio de entrada",
+    es:"Una primitiva de la API: marcás la parte estable del prompt (instrucciones de sistema, definiciones de herramientas, documentos de referencia) y el proveedor la guarda. Las llamadas siguientes que compartan ese prefijo lo leen del caché en vez de reprocesarlo.",
+    noEs:"No es una herramienta que instalás. Es una decisión de cómo ordenás el prompt: lo que no cambia va adelante, lo que cambia va atrás.",
+    hace:["Reduce fuerte el costo de entrada en cargas repetitivas — el descuento en lectura es sustancial frente al precio normal.","Baja también la latencia, no solo el gasto.","Se combina con todo lo demás de esta ficha sin conflicto."],
+    noHace:["No ayuda si cada llamada tiene un prompt distinto desde el primer token.","Escribir al caché cuesta <em>más</em> que una llamada normal — con poco reuso, perdés.","El caché expira (minutos, extensible), así que sesiones espaciadas no se benefician.","Los multiplicadores exactos y el TTL cambian con el tiempo: confirmá en la documentación vigente."],
+    usar:"Prompts de sistema largos, muchas definiciones de herramientas, o el mismo documento consultado varias veces seguidas. Antes de instalar cualquier otra cosa, ordená esto.",
+    noUsar:"Llamadas únicas y aisladas, o prompts que se arman distinto cada vez. Ahí solo agrega costo de escritura.",
+    link:"docs.claude.com · prompt caching"
+  },
+  {
+    id:"16", layer:4, name:"Edición de contexto + herramienta de memoria", by:"Claude Developer Platform",
+    gist:"El contexto se limpia solo de resultados viejos, y el modelo guarda archivos fuera de la ventana.",
+    cost:"<b>Incluido en la API</b><br>vos ponés el almacenamiento",
+    es:"Dos capacidades de la plataforma. La edición de contexto borra automáticamente llamadas y resultados de herramientas que ya quedaron obsoletos cuando te acercás al límite, preservando el hilo de la conversación. La herramienta de memoria le da al modelo un directorio donde crear, leer y actualizar archivos que persisten entre conversaciones.",
+    noEs:"No es un servicio de memoria administrado. La herramienta de memoria opera del lado del cliente: el backend de almacenamiento lo manejás vos, y decidís dónde vive esa data.",
+    hace:["Extiende cuánto puede correr un agente antes de chocar con el límite, sin intervención manual.","Mejora el rendimiento efectivo: menos ruido acumulado, más atención en lo relevante.","Construye base de conocimiento entre sesiones con archivos que el modelo administra."],
+    noHace:["No razona sobre lo que guarda como lo hace Honcho — son archivos, no conclusiones.","No comprime salidas de herramientas antes de que entren.","Requiere que implementes y operes el almacenamiento."],
+    usar:"Agentes de larga duración que acumulan muchos resultados de herramientas, y casos donde querés control total sobre dónde se guarda la memoria.",
+    noUsar:"Conversaciones cortas. Y si no querés operar almacenamiento, un servicio de memoria te sale más barato en tiempo.",
+    link:"anthropic.com/news/context-management"
+  },
+  {
+    id:"17", layer:4, name:"Compactación nativa", by:"incluido en el agente",
+    gist:"Resumir la conversación cuando se llena. Gratis, ya está ahí, y pierde detalle para siempre.",
+    cost:"<b>Incluido</b><br>costo: el resumen se genera con el modelo",
+    es:"La función de los agentes de código que resume la conversación cuando el contexto se llena, manual o automáticamente. Es la línea base contra la que hay que comparar todo lo demás de esta lista.",
+    noEs:"No es compresión reversible. El detalle original desaparece — es exactamente el problema que Headroom ataca guardando el original en local.",
+    hace:["Evita que la sesión muera al llegar al límite.","No requiere instalar, configurar ni mantener nada.","Suele bastar para sesiones de trabajo normales."],
+    noHace:["Pérdida irreversible: códigos de error, timestamps y trazas exactas se van en el resumen.","El agente puede olvidar herramientas y convenciones tras compactar — por eso varias herramientas de memoria recomiendan explícitamente recuperar estado después de una compactación.","No reduce el costo de llegar hasta ahí."],
+    usar:"Siempre. Es tu punto de partida — medí acá antes de instalar cualquier otra cosa de esta lista.",
+    noUsar:"Cuando el trabajo depende de detalles exactos que necesitás recuperar después: depuración, análisis de logs, auditoría.",
+    link:"documentación de tu agente"
+  }
+];
+
+const LAYERS = {
+  1:{t:"Comportamiento", c:"c1"},
+  2:{t:"Intercepción",  c:"c2"},
+  3:{t:"Memoria",       c:"c3"},
+  4:{t:"Nativo",        c:"c4"}
+};
+
+const rows = document.getElementById('rows');
+const emptyEl = document.getElementById('empty');
+const countEl = document.getElementById('count');
+const qEl = document.getElementById('q');
+let activeLayer = null;
+
+function li(arr){ return arr.map(x => '<li>' + x + '</li>').join(''); }
+
+rows.innerHTML = DATA.map(d => {
+  const L = LAYERS[d.layer];
+  return `
+  <article class="tool" data-layer="${d.layer}" data-blob="${(d.name+' '+d.by+' '+d.gist+' '+d.es+' '+d.noEs+' '+d.usar+' '+d.noUsar+' '+d.cost+' '+L.t).replace(/<[^>]*>/g,' ').replace(/"/g,'&quot;').toLowerCase()}">
+    <button class="head" aria-expanded="false">
+      <span class="idx">${d.id}</span>
+      <span class="name">${d.name}<small>${d.by}</small></span>
+      <span class="chipwrap"><span class="chip ${L.c}">${L.t}</span></span>
+      <span class="gist">${d.gist}</span>
+      <span class="cost">${d.cost}</span>
+      <span class="toggle" aria-hidden="true">+</span>
+    </button>
+    <div class="detail">
+      <div class="grid">
+        <div class="cell pos"><h4>Qué es</h4><p>${d.es}</p></div>
+        <div class="cell neg"><h4>Qué no es</h4><p>${d.noEs}</p></div>
+        <div class="cell pos"><h4>Qué hace</h4><ul>${li(d.hace)}</ul></div>
+        <div class="cell neg"><h4>Qué no hace</h4><ul>${li(d.noHace)}</ul></div>
+        <div class="cell pos"><h4>Cuándo usarlo</h4><p>${d.usar}</p></div>
+        <div class="cell neg"><h4>Cuándo no usarlo</h4><p>${d.noUsar}</p></div>
+      </div>
+      <div class="meta"><span><b>Referencia</b> ${d.link}</span><span><b>Capa</b> 0${d.layer} · ${L.t}</span></div>
+    </div>
+  </article>`;
+}).join('');
+
+rows.addEventListener('click', e => {
+  const btn = e.target.closest('.head');
+  if(!btn) return;
+  const tool = btn.parentElement;
+  const open = tool.classList.toggle('open');
+  btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+  btn.querySelector('.toggle').textContent = open ? '\u2212' : '+';
+});
+
+function apply(){
+  const term = qEl.value.trim().toLowerCase();
+  let shown = 0;
+  document.querySelectorAll('.tool').forEach(t => {
+    const okLayer = !activeLayer || t.dataset.layer === activeLayer;
+    const okTerm  = !term || t.dataset.blob.includes(term);
+    const vis = okLayer && okTerm;
+    t.hidden = !vis;
+    if(vis) shown++;
+  });
+  emptyEl.hidden = shown !== 0;
+  countEl.textContent = shown + ' / ' + DATA.length + ' fichas';
+}
+
+document.getElementById('rail').addEventListener('click', e => {
+  const b = e.target.closest('button');
+  if(!b) return;
+  const l = b.dataset.layer;
+  activeLayer = (activeLayer === l) ? null : l;
+  document.querySelectorAll('#rail button').forEach(x =>
+    x.setAttribute('aria-pressed', x.dataset.layer === activeLayer ? 'true' : 'false'));
+  apply();
+});
+
+qEl.addEventListener('input', apply);
+
+document.getElementById('expand').addEventListener('click', () => {
+  document.querySelectorAll('.tool:not([hidden])').forEach(t => {
+    t.classList.add('open');
+    t.querySelector('.head').setAttribute('aria-expanded','true');
+    t.querySelector('.toggle').textContent = '\u2212';
+  });
+});
+document.getElementById('collapse').addEventListener('click', () => {
+  document.querySelectorAll('.tool').forEach(t => {
+    t.classList.remove('open');
+    t.querySelector('.head').setAttribute('aria-expanded','false');
+    t.querySelector('.toggle').textContent = '+';
+  });
+});
+document.getElementById('reset').addEventListener('click', () => {
+  qEl.value = '';
+  activeLayer = null;
+  document.querySelectorAll('#rail button').forEach(x => x.setAttribute('aria-pressed','false'));
+  apply();
+});
+
+apply();
+</script>
+</body>
+</html>

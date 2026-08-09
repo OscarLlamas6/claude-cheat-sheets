@@ -1,0 +1,942 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cuadro comparativo · Herramientas de orquestación de jobs y workflows</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #0a0e14;
+    --bg-alt: #0d1219;
+    --surface: #12181f;
+    --surface-2: #161d26;
+    --border: #232b36;
+    --border-soft: #1a212b;
+    --text: #dfe6ec;
+    --text-dim: #8a97a6;
+    --text-faint: #5a6572;
+    --amber: #e8a33d;
+    --amber-dim: #4a3a1e;
+    --blue: #55a2e8;
+    --blue-dim: #1e3548;
+    --green: #52b788;
+    --green-dim: #1c3a2c;
+    --red: #e8664c;
+    --red-dim: #422019;
+    --violet: #a78bfa;
+    --violet-dim: #2e2450;
+    --radius: 8px;
+    --mono: 'IBM Plex Mono', ui-monospace, monospace;
+    --sans: 'IBM Plex Sans', system-ui, sans-serif;
+  }
+
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+
+  body{
+    margin:0;
+    background:
+      radial-gradient(ellipse 900px 500px at 15% -10%, rgba(85,162,232,0.08), transparent 60%),
+      radial-gradient(ellipse 900px 500px at 100% 0%, rgba(232,163,61,0.06), transparent 60%),
+      var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  a { color: var(--blue); }
+
+  /* ---------- HEADER ---------- */
+  header{
+    padding: 56px 24px 36px;
+    max-width: 1180px;
+    margin: 0 auto;
+    border-bottom: 1px solid var(--border-soft);
+  }
+  .eyebrow{
+    font-family: var(--mono);
+    font-size: 12.5px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--text-faint);
+    display:flex;
+    align-items:center;
+    gap:10px;
+    margin-bottom: 18px;
+  }
+  .eyebrow::before{
+    content:"";
+    width:8px; height:8px;
+    background: var(--green);
+    border-radius: 50%;
+    box-shadow: 0 0 0 3px var(--green-dim);
+    animation: pulse 2.4s ease-in-out infinite;
+  }
+  @keyframes pulse{
+    0%,100%{ opacity:1; }
+    50%{ opacity:0.35; }
+  }
+  h1{
+    font-family: var(--mono);
+    font-size: clamp(28px, 4vw, 44px);
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    margin: 0 0 14px;
+    color: #f2f5f8;
+  }
+  h1 span{ color: var(--amber); }
+  header p.lead{
+    max-width: 760px;
+    color: var(--text-dim);
+    font-size: 16px;
+    margin: 0 0 22px;
+  }
+  .meta-row{
+    display:flex; flex-wrap:wrap; gap: 10px;
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--text-faint);
+  }
+  .meta-row .chip{
+    border:1px solid var(--border);
+    background: var(--surface);
+    padding: 5px 10px;
+    border-radius: 20px;
+  }
+
+  /* ---------- CONTROLS ---------- */
+  .controls{
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    backdrop-filter: blur(10px);
+    background: rgba(10,14,20,0.92);
+    border-bottom: 1px solid var(--border-soft);
+    padding: 16px 24px;
+  }
+  .controls-inner{
+    max-width: 1180px;
+    margin: 0 auto;
+    display:flex;
+    flex-wrap:wrap;
+    gap: 12px;
+    align-items:center;
+  }
+  #search{
+    flex: 1 1 240px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 14px;
+    padding: 10px 14px;
+    border-radius: var(--radius);
+    outline: none;
+  }
+  #search::placeholder{ color: var(--text-faint); }
+  #search:focus{ border-color: var(--blue); }
+
+  .filter-group{ display:flex; flex-wrap:wrap; gap:6px; }
+  .pill{
+    font-family: var(--mono);
+    font-size: 11.5px;
+    letter-spacing: 0.02em;
+    padding: 7px 12px;
+    border-radius: 20px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text-dim);
+    cursor: pointer;
+    user-select:none;
+    transition: all .15s ease;
+    white-space: nowrap;
+  }
+  .pill:hover{ border-color: var(--text-faint); color: var(--text); }
+  .pill.active{
+    background: var(--blue-dim);
+    border-color: var(--blue);
+    color: #cfe6fb;
+  }
+  .count-badge{
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--text-faint);
+    margin-left: auto;
+    white-space: nowrap;
+  }
+
+  /* ---------- SUMMARY TABLE ---------- */
+  .section-title{
+    max-width: 1180px;
+    margin: 40px auto 16px;
+    padding: 0 24px;
+    display:flex;
+    align-items:baseline;
+    gap: 10px;
+  }
+  .section-title h2{
+    font-family: var(--mono);
+    font-size: 13px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-faint);
+    margin:0;
+    font-weight: 600;
+  }
+  .section-title .line{
+    flex:1;
+    height:1px;
+    background: var(--border-soft);
+  }
+
+  .table-wrap{
+    max-width: 1180px;
+    margin: 0 auto 8px;
+    padding: 0 24px;
+    overflow-x: auto;
+  }
+  table.summary{
+    width:100%;
+    border-collapse: collapse;
+    font-size: 13.5px;
+    min-width: 880px;
+  }
+  table.summary thead th{
+    text-align:left;
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-faint);
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 61px;
+    background: var(--bg-alt);
+  }
+  table.summary tbody tr{
+    border-bottom: 1px solid var(--border-soft);
+    cursor: pointer;
+    transition: background .12s ease;
+  }
+  table.summary tbody tr:hover{ background: var(--surface); }
+  table.summary tbody td{
+    padding: 11px 12px;
+    color: var(--text-dim);
+    vertical-align: top;
+  }
+  table.summary tbody td.name{
+    color: var(--text);
+    font-weight: 600;
+    font-family: var(--mono);
+    font-size: 13px;
+  }
+  table.summary tbody td.name .cat-dot{
+    display:inline-block;
+    width:7px; height:7px;
+    border-radius:50%;
+    margin-right:8px;
+  }
+
+  .badge{
+    display:inline-block;
+    font-family: var(--mono);
+    font-size: 10.5px;
+    padding: 2px 7px;
+    border-radius: 4px;
+    border: 1px solid transparent;
+    white-space:nowrap;
+  }
+  .badge.oss{ background: var(--green-dim); color: #9fe0bd; border-color: rgba(82,183,136,0.3); }
+  .badge.free{ background: var(--blue-dim); color: #a9d3f5; border-color: rgba(85,162,232,0.3); }
+  .badge.paid{ background: var(--amber-dim); color: #f3c988; border-color: rgba(232,163,61,0.3); }
+  .badge.fair{ background: var(--violet-dim); color: #d3c4fb; border-color: rgba(167,139,250,0.3); }
+
+  /* ---------- CARDS ---------- */
+  #cards{
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 8px 24px 80px;
+    position: relative;
+  }
+  #cards::before{
+    content:"";
+    position:absolute;
+    left: 43px;
+    top: 8px;
+    bottom: 80px;
+    width: 1px;
+    background: repeating-linear-gradient(to bottom, var(--border) 0, var(--border) 4px, transparent 4px, transparent 9px);
+  }
+
+  .card{
+    position:relative;
+    padding-left: 56px;
+    margin-bottom: 22px;
+    scroll-margin-top: 130px;
+  }
+  .node{
+    position:absolute;
+    left: 36px;
+    top: 22px;
+    width: 15px; height: 15px;
+    border-radius: 50%;
+    background: var(--bg);
+    border: 2px solid var(--text-faint);
+  }
+  .card-inner{
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px 22px;
+    transition: border-color .15s ease;
+  }
+  .card-inner:hover{ border-color: #2c3644; }
+
+  .card-head{
+    display:flex;
+    flex-wrap:wrap;
+    align-items:flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 12px;
+  }
+  .card-head h3{
+    font-family: var(--mono);
+    font-size: 19px;
+    margin: 0 0 4px;
+    color: #f2f5f8;
+  }
+  .card-sub{
+    font-size: 12.5px;
+    color: var(--text-faint);
+    font-family: var(--mono);
+  }
+  .badges-row{ display:flex; gap:6px; flex-wrap:wrap; justify-content:flex-end; }
+
+  .grid-2{
+    display:grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px 20px;
+    margin-top: 14px;
+  }
+  @media (max-width: 720px){ .grid-2{ grid-template-columns: 1fr; } }
+
+  .field{ }
+  .field .label{
+    font-family: var(--mono);
+    font-size: 10.5px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 5px;
+    display:flex;
+    align-items:center;
+    gap:6px;
+  }
+  .field.si .label{ color: var(--green); }
+  .field.no .label{ color: var(--red); }
+  .field.es .label{ color: var(--blue); }
+  .field.notes .label{ color: var(--text-faint); }
+  .field p{ margin: 0; font-size: 13.5px; color: var(--text-dim); }
+
+  .arte-box{
+    margin-top: 14px;
+    padding: 12px 14px;
+    background: var(--bg-alt);
+    border: 1px dashed var(--border);
+    border-radius: 6px;
+  }
+  .arte-box .label{
+    font-family: var(--mono);
+    font-size: 10.5px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--amber);
+    margin-bottom: 6px;
+  }
+  .arte-box p{ margin:0; font-size: 13.5px; color: var(--text-dim); }
+
+  .meta-line{
+    display:flex; flex-wrap:wrap; gap: 14px;
+    font-size: 12.5px;
+    color: var(--text-faint);
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid var(--border-soft);
+    font-family: var(--mono);
+  }
+  .meta-line b{ color: var(--text-dim); font-weight: 500; }
+
+  .hidden{ display:none !important; }
+
+  footer{
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 30px 24px 60px;
+    color: var(--text-faint);
+    font-size: 12.5px;
+    border-top: 1px solid var(--border-soft);
+  }
+
+  ::selection{ background: var(--blue-dim); }
+
+  #empty-state{
+    text-align:center;
+    padding: 60px 20px;
+    color: var(--text-faint);
+    font-family: var(--mono);
+    font-size: 13px;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="eyebrow">actualizado · agosto 2026</div>
+  <h1>Orquestadores de <span>jobs</span> &amp; workflows</h1>
+  <p class="lead">Comparativa de 30 herramientas de orquestación, automatización e integración — desde CI/CD clásico hasta iPaaS no-code y motores de datos/ML — con licencia, creador, casos de uso y estado del arte a agosto 2026.</p>
+  <div class="meta-row">
+    <span class="chip">30 herramientas</span>
+    <span class="chip">7 categorías</span>
+    <span class="chip">filtrable y buscable</span>
+    <span class="chip">100% offline / sin tracking</span>
+  </div>
+</header>
+
+<div class="controls">
+  <div class="controls-inner">
+    <input id="search" type="text" placeholder="Buscar por nombre, creador o palabra clave...">
+    <div class="filter-group" id="cat-filters"></div>
+    <div class="filter-group" id="lic-filters"></div>
+    <span class="count-badge"><span id="count">30</span> / 30</span>
+  </div>
+</div>
+
+<div class="section-title"><h2>Vista rápida</h2><div class="line"></div></div>
+<div class="table-wrap">
+  <table class="summary">
+    <thead>
+      <tr>
+        <th>Herramienta</th>
+        <th>Categoría</th>
+        <th>Licencia</th>
+        <th>Creador</th>
+        <th>Año</th>
+      </tr>
+    </thead>
+    <tbody id="summary-body"></tbody>
+  </table>
+</div>
+
+<div class="section-title"><h2>Ficha detallada</h2><div class="line"></div></div>
+<div id="cards"></div>
+<div id="empty-state" class="hidden">Sin resultados para ese filtro. Probá con otro término.</div>
+
+<footer>
+  Comparativa elaborada a partir de documentación pública de cada proyecto/empresa y de la información disponible a agosto de 2026. Precios, licencias y roadmaps cambian con frecuencia — verificá siempre la fuente oficial de cada herramienta antes de tomar una decisión de compra o migración. Documento generado como referencia, sin afiliación con ninguno de los proveedores listados.
+</footer>
+
+<script>
+const CATS = {
+  cicd:   { label: "CI/CD",                 color: "#e8664c" },
+  data:   { label: "Orquestación de datos/ML", color: "#55a2e8" },
+  infra:  { label: "Infra & runbooks",       color: "#e8a33d" },
+  ipaas:  { label: "Automatización / iPaaS",  color: "#52b788" },
+  cloudnative: { label: "Cloud-native / motores", color: "#a78bfa" },
+  sci:    { label: "Workflows científicos",  color: "#f2c14e" },
+  sec:    { label: "SecOps / SOAR",          color: "#ff8fa3" },
+};
+
+const LIC = {
+  oss:  { label: "Open Source", cls: "oss" },
+  free: { label: "Freemium/Managed", cls: "free" },
+  paid: { label: "Propietario · pago", cls: "paid" },
+  fair: { label: "Fair-code", cls: "fair" },
+};
+
+const TOOLS = [
+{ name:"Jenkins", cat:"cicd", lic:"oss",
+  es:"Servidor de automatización open source para CI/CD; el pionero de la orquestación de builds y pipelines.",
+  noes:"No es una plataforma de orquestación de datos ni un iPaaS con conectores SaaS listos para usar.",
+  hace:"Ejecuta pipelines definidos en Groovy (Jenkinsfile), gestiona agentes/nodos y dispara builds por webhooks, cron o eventos de Git.",
+  nohace:"No maneja de forma nativa DAGs de datos con lineage, ni reintentos inteligentes basados en assets.",
+  licTxt:"OSS (MIT), gratis. Soporte comercial vía CloudBees.",
+  creador:"Kohsuke Kawaguchi (fork de Hudson tras salida de Oracle)", anio:"2011",
+  usoSi:"Pipelines de build/test/deploy · infraestructura propia · gran ecosistema de plugins",
+  usoNo:"Orquestación de datos/ML · flujos low-code de negocio · equipos que evitan mantener plugins",
+  arte:"Sigue muy usado en enterprise, pero pierde terreno frente a GitHub Actions/GitLab CI en CI y frente a Airflow/Dagster en datos; UI y arquitectura se perciben legacy." },
+
+{ name:"Apache Airflow", cat:"data", lic:"oss",
+  es:"Plataforma open source (Apache) para programar y monitorear DAGs de datos; estándar de facto en orquestación de datos.",
+  noes:"No es un motor de ejecución en tiempo real de baja latencia ni un iPaaS drag-and-drop para negocio.",
+  hace:"Define pipelines como código Python, con scheduler, assets, ejecución distribuida y UI de monitoreo.",
+  nohace:"Tradicionalmente no maneja bien streaming ni tareas de milisegundos; requiere infraestructura propia sin un servicio managed.",
+  licTxt:"OSS (Apache 2.0), gratis. Managed services de pago (Astronomer, MWAA, Cloud Composer).",
+  creador:"Airbnb (Maxime Beauchemin) → donado a Apache Software Foundation", anio:"2015 (Apache TLP 2019)",
+  usoSi:"ETL/ELT batch · pipelines de ML · orquestación multi-sistema con gran catálogo de providers",
+  usoNo:"Automatización simple de negocio sin código · flujos que requieren baja latencia · equipos sin DevOps",
+  arte:"Con Airflow 3.3 (jul 2026) llegan SDK de tareas en Java/Go, un \"state store\" de assets/tareas y providers de IA nativos; sigue siendo el estándar dominante, con más de 30M de descargas mensuales." },
+
+{ name:"Prefect", cat:"data", lic:"free",
+  es:"Framework open-core en Python para orquestar workflows de datos, con enfoque \"código primero\" y manejo de fallos.",
+  noes:"No es un iPaaS visual ni reemplaza un motor de CI/CD tradicional.",
+  hace:"Convierte funciones Python en flows/tasks con reintentos, cacheo, programación dinámica y observabilidad vía Prefect Cloud o self-hosted.",
+  nohace:"No ofrece un catálogo grande de conectores SaaS prearmados como Make o n8n.",
+  licTxt:"Núcleo OSS (Apache 2.0), gratis. Prefect Cloud de pago (freemium).",
+  creador:"Jeremiah Lowin / Prefect Technologies", anio:"2018",
+  usoSi:"Pipelines de datos dinámicos · equipos Python que prefieren código sobre configuración · orquestación híbrida",
+  usoNo:"Automatización sin código para negocio · integraciones SaaS masivas out-of-the-box",
+  arte:"Prefect 3.x consolida su motor de eventos y \"work pools\" híbridos; sigue como alternativa developer-friendly a Airflow, con fuerte tracción en equipos de datos medianos." },
+
+{ name:"Dagster", cat:"data", lic:"free",
+  es:"Plataforma open-core de orquestación de datos centrada en \"assets\" (activos de datos) en vez de solo tareas.",
+  noes:"No es un simple scheduler de cron ni una herramienta de automatización de procesos de negocio.",
+  hace:"Modela pipelines como grafos de assets versionados, con testing local, catálogo de datos y linaje integrado.",
+  nohace:"No está pensado para automatizaciones ad-hoc de negocio ni para RPA.",
+  licTxt:"Núcleo OSS (Apache 2.0), gratis. Dagster+ de pago.",
+  creador:"Nick Schrock (ex-Facebook, co-creador de GraphQL) / Dagster Labs", anio:"2019",
+  usoSi:"Plataformas de datos con foco en calidad/linaje · testear pipelines como software · data mesh",
+  usoNo:"Automatización simple de TI · equipos sin experiencia en Python",
+  arte:"Refuerza su enfoque asset-centric y su catálogo de datos con IA para descubrimiento; compite directamente con Airflow 3 por el liderazgo en orquestación de datos moderna." },
+
+{ name:"Windmill", cat:"infra", lic:"fair",
+  es:"Plataforma open source para convertir scripts (Python, TS, Go, Bash, SQL) en workflows, APIs internas y UIs.",
+  noes:"No es únicamente un iPaaS de marketing/ventas ni un motor de CI/CD.",
+  hace:"Orquesta scripts como flujos, genera apps internas automáticamente y ofrece ejecución de alta concurrencia escrita en Rust.",
+  nohace:"No tiene el mismo ecosistema de conectores no-code maduro que Zapier/Make.",
+  licTxt:"OSS (AGPLv3), self-host gratis. Windmill Cloud/Enterprise de pago.",
+  creador:"Ruben Fiszel / Windmill Labs (YCombinator)", anio:"2022",
+  usoSi:"Equipos técnicos que quieren self-host rápido y barato · automatización interna + apps · reemplazo económico de Airflow/Retool",
+  usoNo:"Usuarios de negocio 100% no-code · organizaciones que priorizan un catálogo gigante de integraciones",
+  arte:"Ganó tracción en 2025-2026 como alternativa developer-first de bajo costo frente a Airflow y Retool, con foco en rendimiento y self-hosting simple." },
+
+{ name:"Rundeck", cat:"infra", lic:"free",
+  es:"Herramienta de automatización operacional y runbooks self-service para ejecutar tareas en servidores/infraestructura.",
+  noes:"No es un orquestador de pipelines de datos ni una herramienta de CI/CD de builds.",
+  hace:"Permite definir \"jobs\" que ejecutan scripts/comandos remotos con control de acceso, auditoría y programación.",
+  nohace:"No maneja DAGs de datos con lineage ni integra de forma nativa APIs SaaS de marketing/ventas.",
+  licTxt:"Community OSS (Apache 2.0). Rundeck Enterprise de pago (PagerDuty).",
+  creador:"SimplifyOps → adquirido por PagerDuty en 2020", anio:"2010",
+  usoSi:"Runbooks de operaciones/DevOps · auto-remediación de incidentes · delegar tareas a equipos no-admin de forma segura",
+  usoNo:"Pipelines de datos/ML · automatización de marketing/ventas",
+  arte:"Integrado en la suite de automatización de PagerDuty, combinando remediación automática con la detección de incidentes asistida por IA de la plataforma." },
+
+{ name:"Kestra", cat:"data", lic:"oss",
+  es:"Plataforma open source de orquestación declarativa (YAML) \"todo como código\", que compite con Airflow con foco en simplicidad y eventos.",
+  noes:"No es un builder puramente visual sin código, aunque incluye un editor low-code opcional.",
+  hace:"Orquesta workflows de datos e infraestructura mediante YAML declarativo, con triggers por eventos, diseño API-first y plugins.",
+  nohace:"Su ecosistema de plugins/comunidad aún es menor que el de Airflow, aunque crece rápido.",
+  licTxt:"OSS (Apache 2.0), self-host gratis. Kestra Enterprise/Cloud de pago.",
+  creador:"Kestra Technologies (Francia)", anio:"2019 (público 2021)",
+  usoSi:"Equipos que prefieren YAML declarativo a Python puro · orquestación event-driven · alternativa liviana a Airflow",
+  usoNo:"Equipos ya profundamente invertidos en el ecosistema de providers de Airflow",
+  arte:"Ha ganado adopción como alternativa moderna \"API-first\" a Airflow, con rondas de financiamiento recientes y foco en orquestación event-driven e IA generativa para crear flujos." },
+
+{ name:"Make", cat:"ipaas", lic:"paid",
+  es:"Plataforma visual (iPaaS) de automatización drag-and-drop con escenarios tipo diagrama de flujo (ex Integromat).",
+  noes:"No es una herramienta de orquestación de datos a gran escala ni pensada para developers que quieren código.",
+  hace:"Conecta apps SaaS mediante escenarios visuales con lógica condicional, iteradores y transformación de datos sin código.",
+  nohace:"No maneja bien volúmenes masivos de datos ni pipelines de ingeniería de datos complejos.",
+  licTxt:"Freemium; planes de pago por \"operaciones\" ejecutadas. Propietario, no open source.",
+  creador:"Integromat → Celonis adquirió la empresa matriz en 2022", anio:"2016 (rebrand Make 2022)",
+  usoSi:"Automatización de procesos de negocio/marketing · integrar SaaS rápido sin developers",
+  usoNo:"Pipelines de datos de alto volumen · casos que requieren versionado de código y CI/CD",
+  arte:"Bajo Celonis, se integra cada vez más con process mining e IA agentic para automatización empresarial, compitiendo de cerca con Zapier y n8n." },
+
+{ name:"Zapier", cat:"ipaas", lic:"paid",
+  es:"Pionero y líder de mercado en automatización no-code entre apps SaaS (\"si esto, entonces aquello\").",
+  noes:"No es una herramienta para developers que necesitan control fino de infraestructura ni orquestación de datos.",
+  hace:"Conecta miles de apps mediante \"Zaps\" (triggers + acciones), con lógica simple, tablas y agentes de IA.",
+  nohace:"No está pensado para pipelines complejos con lógica de reintentos avanzada ni para self-hosting.",
+  licTxt:"Freemium; planes de pago por tareas. Propietario, no open source.",
+  creador:"Wade Foster, Bryan Helmig, Mike Knoop", anio:"2011",
+  usoSi:"Automatización rápida entre SaaS para equipos no técnicos · el catálogo de integraciones más grande del mercado",
+  usoNo:"Equipos que necesitan self-hosting/control de datos · flujos con lógica de programación compleja",
+  arte:"Apuesta fuerte por \"Zapier Agents\" (agentes de IA autónomos) sobre su motor clásico de Zaps, posicionándose como plataforma de automatización agentic para negocio." },
+
+{ name:"n8n", cat:"ipaas", lic:"fair",
+  es:"Plataforma de automatización de workflows \"fair-code\" (código visible, licencia restringida) muy popular entre developers.",
+  noes:"No es completamente open source permisivo (licencia Sustainable Use) ni un orquestador de datos batch tradicional.",
+  hace:"Automatiza flujos entre apps con editor visual de nodos, permite código JS/Python embebido y self-hosting.",
+  nohace:"La licencia restringe ofrecer n8n como SaaS competidor sin acuerdo comercial.",
+  licTxt:"Fair-code (Sustainable Use License), self-host gratis con límites. n8n Cloud de pago.",
+  creador:"Jan Oberhauser", anio:"2019",
+  usoSi:"Automatización técnica self-hosted con control de datos · mezclar low-code con código custom · flujos con IA/LLMs",
+  usoNo:"Empresas que requieren licencia OSI estricta · revender n8n como servicio propio",
+  arte:"Fuerte foco en automatización agentic con LLMs (nodos de IA nativos); se consolidó como la alternativa self-hosted favorita frente a Zapier/Make, con rondas de financiamiento relevantes." },
+
+{ name:"Argo Workflows", cat:"cloudnative", lic:"oss",
+  es:"Motor de orquestación de workflows nativo de Kubernetes, parte del ecosistema CNCF.",
+  noes:"No es una herramienta pensada para usuarios de negocio ni tiene interfaz low-code amigable.",
+  hace:"Ejecuta DAGs/steps como pods de Kubernetes, ideal para pipelines de CI/CD, ML y procesamiento batch cloud-native.",
+  nohace:"No funciona sin un clúster de Kubernetes; no tiene conectores SaaS prearmados.",
+  licTxt:"OSS (Apache 2.0), gratis. Proyecto CNCF graduado.",
+  creador:"Comunidad Argo (origen en Applatix) / CNCF", anio:"2017",
+  usoSi:"Pipelines cloud-native en Kubernetes · CI/CD y ML ops sobre K8s · alta escalabilidad horizontal",
+  usoNo:"Equipos sin Kubernetes · automatización simple de negocio",
+  arte:"Sigue como estándar de facto para orquestación en Kubernetes, integrado con Argo CD/Events/Rollouts, ampliamente usado en plataformas MLOps." },
+
+{ name:"Temporal", cat:"cloudnative", lic:"free",
+  es:"Motor de orquestación de aplicaciones/microservicios duraderos (durable execution), no solo de \"jobs\" batch.",
+  noes:"No es una herramienta de automatización no-code ni un scheduler simple de tareas.",
+  hace:"Garantiza ejecución confiable de workflows de larga duración escritos en código (Go, Java, Python, TS) con estado persistente y reintentos automáticos.",
+  nohace:"No está diseñado como ETL de datos ni como iPaaS de integraciones SaaS.",
+  licTxt:"OSS (MIT), self-host gratis. Temporal Cloud de pago.",
+  creador:"Maxim Fateev y equipo (ex-Uber Cadence) / Temporal Technologies", anio:"2019",
+  usoSi:"Microservicios con procesos de negocio de larga duración (pagos, onboarding) · sagas distribuidas · resiliencia extrema",
+  usoNo:"ETL de datos batch tradicional · automatizaciones simples sin estado complejo",
+  arte:"Se consolidó como infraestructura clave para \"durable execution\" en agentes de IA de larga duración, con fuerte adopción para orquestar agentic workflows con memoria y reintentos." },
+
+{ name:"Camunda 8", cat:"cloudnative", lic:"paid",
+  es:"Plataforma de orquestación de procesos de negocio (BPM) y decisiones, basada en estándares BPMN/DMN.",
+  noes:"No es una herramienta de ETL de datos ni de automatización simple entre apps SaaS.",
+  hace:"Modela y ejecuta procesos de negocio complejos con notación gráfica BPMN, motor de decisiones DMN y conectores a sistemas empresariales.",
+  nohace:"No está optimizado para pipelines de datos masivos ni para automatización ad-hoc rápida.",
+  licTxt:"Componentes OSS limitados. Camunda 8 SaaS/Self-Managed principalmente de pago.",
+  creador:"Camunda GmbH (Berlín)", anio:"2013 (Camunda 8 en 2022)",
+  usoSi:"Procesos de negocio regulados (banca, seguros) · orquestar humanos + sistemas · compliance con BPMN estándar",
+  usoNo:"Pipelines de datos técnicos · automatización simple sin necesidad de gobernanza",
+  arte:"Se posiciona como \"process orchestration\" con capacidades de IA para automatizar decisiones y conectar agentes de IA dentro de procesos BPMN empresariales." },
+
+{ name:"Node-RED", cat:"ipaas", lic:"oss",
+  es:"Herramienta de programación visual basada en flujos (\"flow-based\"), popular en IoT y automatización de hardware.",
+  noes:"No es una plataforma empresarial de orquestación de datos ni tiene alta escalabilidad distribuida nativa.",
+  hace:"Conecta dispositivos, APIs y servicios mediante nodos arrastrables en un editor de flujo basado en Node.js.",
+  nohace:"No maneja bien orquestación distribuida a gran escala ni pipelines de datos analíticos complejos.",
+  licTxt:"OSS (Apache 2.0), completamente gratis.",
+  creador:"IBM (Emerging Technology) → OpenJS Foundation", anio:"2013",
+  usoSi:"Prototipos IoT/hardware · automatización de hogar/edge · integraciones simples rápidas de aprender",
+  usoNo:"Orquestación de datos empresarial a gran escala · procesos de negocio críticos con auditoría estricta",
+  arte:"Sigue siendo el estándar para IoT/edge y automatización de hardware (Home Assistant, industria), con desarrollo estable bajo OpenJS, aunque menos protagonismo en el boom de automatización con IA." },
+
+{ name:"Luigi", cat:"data", lic:"oss",
+  es:"Biblioteca Python open source de Spotify para construir pipelines batch con dependencias complejas.",
+  noes:"No tiene una UI moderna ni scheduler distribuido nativo potente; es más simple que Airflow/Dagster.",
+  hace:"Define tareas con dependencias explícitas, targets (verifica si ya se ejecutó) y visualización básica de grafo.",
+  nohace:"No ofrece programación de eventos avanzada, ni gran ecosistema de integraciones, ni desarrollo activo fuerte.",
+  licTxt:"OSS (Apache 2.0), gratis.",
+  creador:"Spotify (Erik Bernhardsson)", anio:"2012",
+  usoSi:"Pipelines batch simples con dependencias de archivos · proyectos legacy ya construidos sobre Luigi",
+  usoNo:"Proyectos nuevos que buscan orquestación moderna con buena UI/observabilidad",
+  arte:"Está en modo mantenimiento; la mayoría de equipos nuevos migran a Airflow, Dagster o Prefect, quedando Luigi principalmente en sistemas legacy." },
+
+{ name:"AWS Step Functions", cat:"cloudnative", lic:"paid",
+  es:"Servicio serverless de AWS para orquestar funciones Lambda y servicios de AWS como máquinas de estado.",
+  noes:"No es multi-nube ni open source; está atado al ecosistema AWS.",
+  hace:"Coordina llamadas a servicios AWS mediante máquinas de estado visuales (Amazon States Language/JSON), con reintentos y manejo de errores nativo.",
+  nohace:"No orquesta fácilmente sistemas fuera de AWS ni ofrece portabilidad de código a otras nubes.",
+  licTxt:"Servicio de pago (pay-per-use), propietario de AWS.",
+  creador:"Amazon Web Services", anio:"2016",
+  usoSi:"Arquitecturas serverless 100% AWS · orquestación de microservicios/Lambda con alta disponibilidad gestionada",
+  usoNo:"Entornos multi-nube o híbridos · equipos que quieren evitar vendor lock-in",
+  arte:"Suma integración más profunda con Bedrock y orquestación de agentes de IA, reforzando su rol como \"pegamento\" serverless dentro del stack de IA generativa de AWS." },
+
+{ name:"Azure Data Factory", cat:"data", lic:"paid",
+  es:"Servicio de integración y orquestación de datos (ETL/ELT) totalmente gestionado de Microsoft Azure.",
+  noes:"No es open source ni portable fuera del ecosistema Azure/Fabric.",
+  hace:"Mueve y transforma datos entre cientos de fuentes con pipelines visuales, integrando Synapse y Microsoft Fabric.",
+  nohace:"No está pensado para orquestar procesos de negocio generales ni automatización SaaS ligera.",
+  licTxt:"Servicio de pago (pay-per-uso), propietario de Microsoft.",
+  creador:"Microsoft", anio:"2015",
+  usoSi:"Integración de datos empresarial en Azure · equipos ya invertidos en Microsoft Fabric/Synapse",
+  usoNo:"Organizaciones multi-nube que evitan lock-in · automatización ligera de negocio",
+  arte:"Se está fusionando en la experiencia \"Data Factory en Microsoft Fabric\", con integración creciente de Copilot/IA para generar pipelines automáticamente." },
+
+{ name:"Google Cloud Composer", cat:"data", lic:"paid",
+  es:"Versión gestionada de Apache Airflow ofrecida como servicio dentro de Google Cloud.",
+  noes:"No es un producto distinto de Airflow; es Airflow operado por Google, sin enfoque multi-nube nativo.",
+  hace:"Aprovisiona y administra clústeres de Airflow (scheduler, workers, UI) integrados con BigQuery, GCS y otros servicios de GCP.",
+  nohace:"No añade funcionalidades más allá de las de Airflow open source, salvo la gestión de infraestructura.",
+  licTxt:"Servicio de pago (pay-per-uso), basado en Airflow OSS.",
+  creador:"Google Cloud, sobre Apache Airflow", anio:"2018",
+  usoSi:"Equipos GCP que quieren Airflow sin operar infraestructura · integración nativa con BigQuery",
+  usoNo:"Equipos multi-nube · quienes quieren control total de versión/infra de Airflow",
+  arte:"Ha ido actualizando su base a versiones recientes de Airflow 3, y Google promueve cada vez más su integración con Vertex AI para pipelines de ML." },
+
+{ name:"Nextflow", cat:"sci", lic:"free",
+  es:"DSL y motor de workflows open source diseñado para pipelines científicos reproducibles, muy usado en bioinformática.",
+  noes:"No es una herramienta genérica de automatización de negocio ni de ETL corporativo.",
+  hace:"Orquesta pipelines complejos con paralelización automática, portabilidad (Docker/Singularity/Conda) y ejecución en HPC, cloud o local.",
+  nohace:"No está orientado a integraciones SaaS ni a procesos transaccionales de negocio.",
+  licTxt:"OSS (Apache 2.0), gratis. Seqera Platform de pago para gestión.",
+  creador:"Paolo Di Tommaso (Centre for Genomic Regulation) → hoy Seqera", anio:"2013",
+  usoSi:"Pipelines de genómica/bioinformática · investigación reproducible en HPC/cloud · comunidad nf-core",
+  usoNo:"Automatización de procesos de negocio · integraciones SaaS",
+  arte:"Domina la orquestación científica reproducible junto al ecosistema nf-core; Seqera sigue ampliando capacidades cloud y de IA para optimizar costos de cómputo científico." },
+
+{ name:"Snakemake", cat:"sci", lic:"oss",
+  es:"Motor de workflows open source inspirado en Make, popular en bioinformática y ciencia de datos reproducible.",
+  noes:"No es una herramienta empresarial de integración SaaS ni tiene la escala cloud-native de Argo.",
+  hace:"Define reglas basadas en archivos de entrada/salida (similar a Makefiles) con sintaxis Python; soporta ejecución paralela y en clústeres HPC.",
+  nohace:"No ofrece triggers por eventos SaaS ni una UI de monitoreo empresarial robusta out-of-the-box.",
+  licTxt:"OSS (MIT), gratis.",
+  creador:"Johannes Köster (Universidad de Duisburgo-Essen)", anio:"2012",
+  usoSi:"Pipelines científicos reproducibles · investigadores que prefieren sintaxis tipo Makefile · HPC académico",
+  usoNo:"Automatización empresarial de negocio · integraciones SaaS complejas",
+  arte:"Sigue siendo referencia académica junto a Nextflow, con mejoras continuas en integración con contenedores y ejecución en la nube (Snakemake 8+)." },
+
+{ name:"Flyte", cat:"data", lic:"free",
+  es:"Plataforma open-source cloud-native para orquestar pipelines de datos y machine learning a escala, nacida en Lyft.",
+  noes:"No es una herramienta ligera para automatizaciones simples; requiere Kubernetes y tiene curva de aprendizaje.",
+  hace:"Orquesta workflows de ML/datos como código Python fuertemente tipado, con versionado, caching y ejecución distribuida en K8s.",
+  nohace:"No está pensado para automatización de negocio no técnica ni integraciones SaaS ligeras.",
+  licTxt:"OSS (Apache 2.0), gratis. Union.ai ofrece plataforma gestionada de pago.",
+  creador:"Lyft → hoy Union.ai / Linux Foundation (LF AI & Data)", anio:"2020 (open source)",
+  usoSi:"MLOps a gran escala en Kubernetes · pipelines de ML con fuerte tipado y reproducibilidad",
+  usoNo:"Equipos sin Kubernetes · automatización simple de negocio",
+  arte:"Bajo Union.ai se posiciona para orquestar pipelines de entrenamiento de modelos de IA/agentes a gran escala, compitiendo con Kubeflow y Metaflow en la capa MLOps." },
+
+{ name:"Metaflow", cat:"data", lic:"free",
+  es:"Framework Python open source (originado en Netflix) para construir y gestionar workflows de ciencia de datos/ML.",
+  noes:"No es una herramienta de automatización de negocio ni un motor genérico de integraciones.",
+  hace:"Permite a data scientists definir flujos como clases Python, con versionado automático, gestión de datos y despliegue a producción.",
+  nohace:"No incluye scheduler empresarial robusto out-of-the-box (se integra con Airflow/Step Functions para eso).",
+  licTxt:"OSS (Apache 2.0), gratis. Outerbounds ofrece plataforma gestionada de pago.",
+  creador:"Netflix → hoy Outerbounds", anio:"2019",
+  usoSi:"Prototipado rápido de ML para data scientists · pipelines que escalan de laptop a cloud sin reescribir código",
+  usoNo:"Automatización de procesos de negocio · orquestación de infraestructura general",
+  arte:"Vía Outerbounds expande soporte para orquestar entrenamiento y despliegue de modelos de IA generativa, manteniendo su enfoque \"developer experience first\"." },
+
+{ name:"Mage", cat:"data", lic:"free",
+  es:"Herramienta open source moderna de orquestación de datos con foco en experiencia de desarrollo tipo notebook/IDE.",
+  noes:"No es tan maduro/enterprise-ready como Airflow todavía, ni un iPaaS de automatización de negocio.",
+  hace:"Combina bloques de código (Python/SQL/R) con una UI interactiva tipo notebook, orquestación y capacidades de ingesta de datos.",
+  nohace:"Su ecosistema de integraciones y comunidad es menor que el de Airflow/Dagster.",
+  licTxt:"OSS (Apache 2.0), gratis. Mage Pro (cloud) de pago.",
+  creador:"Mage Technologies (ex-ingenieros de Airbnb/Uber)", anio:"2022",
+  usoSi:"Equipos de datos que quieren UX moderna tipo notebook · pipelines de ingesta/transformación rápidos",
+  usoNo:"Organizaciones enterprise que requieren madurez/gobernanza probada a gran escala",
+  arte:"Sigue creciendo como alternativa amigable a Airflow, con foco reciente en pipelines de datos para IA/RAG y despliegue simplificado en la nube." },
+
+{ name:"StackStorm", cat:"sec", lic:"oss",
+  es:"Plataforma open source de automatización de eventos (\"if this then that\" para infraestructura/DevOps) tipo IFTTT empresarial.",
+  noes:"No es una herramienta de orquestación de datos analíticos ni un iPaaS orientado a marketing.",
+  hace:"Reacciona automáticamente a eventos de infraestructura ejecutando \"sensors\", \"rules\" y \"actions\" encadenadas (auto-remediación).",
+  nohace:"No maneja pipelines de datos batch complejos ni tiene la simplicidad no-code de Zapier.",
+  licTxt:"OSS (Apache 2.0), gratis. Soporte comercial vía comunidad/exchange.",
+  creador:"StackStorm Inc. → Brocade → donado a Linux Foundation", anio:"2014",
+  usoSi:"Auto-remediación de infraestructura/ChatOps · SecOps y respuesta automática a incidentes",
+  usoNo:"Pipelines de datos · automatización de negocio no técnica",
+  arte:"Mantiene una comunidad activa pero de nicho bajo la Linux Foundation, con menor momentum comercial frente a Rundeck o herramientas SOAR modernas." },
+
+{ name:"Control-M", cat:"infra", lic:"paid",
+  es:"Plataforma empresarial de orquestación de workflows batch de BMC Software, con décadas de uso en mainframe/enterprise.",
+  noes:"No es open source ni gratuita; no está orientada a startups o equipos ágiles pequeños.",
+  hace:"Orquesta jobs batch complejos entre mainframe, ERP, cloud y big data, con SLAs, predicción de fallos y gobernanza estricta.",
+  nohace:"No es ligera ni rápida de adoptar; no encaja en flujos de desarrollo \"código primero\" modernos.",
+  licTxt:"Propietario, de pago (licencia enterprise).",
+  creador:"BMC Software", anio:"Producto histórico (desde los 90)",
+  usoSi:"Grandes empresas con mainframes/ERP legacy · SLAs críticos regulados (banca, seguros, gobierno)",
+  usoNo:"Startups · equipos que buscan agilidad y bajo costo · pipelines cloud-native modernos",
+  arte:"BMC integra IA predictiva (BMC AMI/HelixGPT) para anticipar fallos de jobs y auto-optimizar SLAs, manteniendo su posición dominante en batch enterprise crítico." },
+
+{ name:"Cronicle", cat:"infra", lic:"oss",
+  es:"Programador de tareas (job scheduler) multi-servidor open source, alternativa moderna a cron con UI web.",
+  noes:"No es una herramienta de orquestación de datos con DAGs complejos ni un iPaaS con conectores SaaS.",
+  hace:"Programa y ejecuta scripts/comandos en múltiples servidores con dashboard web, logs en vivo y reintentos.",
+  nohace:"No maneja dependencias complejas de datos (assets/lineage) ni integraciones SaaS.",
+  licTxt:"OSS (MIT), completamente gratis.",
+  creador:"Joseph Huckaby (PixlCore)", anio:"2015",
+  usoSi:"Reemplazo simple y visual de cron en múltiples servidores · equipos pequeños con necesidades básicas de scheduling",
+  usoNo:"Pipelines de datos complejos con dependencias · automatización de negocio con integraciones SaaS",
+  arte:"Sigue siendo un proyecto estable de nicho, mantenido pero de desarrollo lento; lo usan equipos que buscan algo más simple que Airflow/Rundeck." },
+
+{ name:"Activepieces", cat:"ipaas", lic:"oss",
+  es:"Alternativa open source a Zapier/Make: automatización no-code con enfoque \"AI-first\" y piezas (pieces) extensibles.",
+  noes:"No es una plataforma de orquestación de datos batch a gran escala.",
+  hace:"Conecta apps mediante flujos visuales, permite crear \"pieces\" personalizadas en TypeScript y se puede self-hostear.",
+  nohace:"Su catálogo de integraciones aún es menor que el de Zapier/Make, aunque crece rápido.",
+  licTxt:"OSS (MIT) para el core, self-host gratis. Activepieces Cloud de pago.",
+  creador:"Activepieces (equipo ex-Copy.ai y otros)", anio:"2022",
+  usoSi:"Equipos que quieren un \"Zapier open source\" self-hosted · automatización con agentes de IA embebidos",
+  usoNo:"Organizaciones que necesitan el catálogo de integraciones más grande posible ya probado",
+  arte:"Se posicionó fuertemente en la ola de automatización \"agentic\" con IA, siendo una de las alternativas open source más mencionadas junto a n8n." },
+
+{ name:"Pipedream", cat:"ipaas", lic:"free",
+  es:"Plataforma de integración y automatización orientada a developers, con código serverless embebido en cada paso.",
+  noes:"No es puramente no-code; asume que el usuario puede escribir código cuando lo necesita.",
+  hace:"Conecta APIs/eventos con \"workflows\" que mezclan pasos no-code y código Node.js/Python serverless, con triggers HTTP muy rápidos de crear.",
+  nohace:"No está pensado como orquestador de datos batch pesado ni como BPM empresarial.",
+  licTxt:"Freemium; planes de pago por invocaciones. Componentes parcialmente open source.",
+  creador:"Pipedream (respaldado por YCombinator)", anio:"2019",
+  usoSi:"Prototipar APIs/webhooks rápido · developers que mezclan low-code con código real",
+  usoNo:"Automatización 100% no-code para usuarios de negocio sin conocimientos técnicos",
+  arte:"Sigue creciendo como herramienta favorita de developers para integraciones rápidas, con foco reciente en dar herramientas MCP a agentes de IA." },
+
+{ name:"Tines", cat:"sec", lic:"paid",
+  es:"Plataforma no-code de automatización de seguridad (SOAR) para equipos de SecOps/ITOps.",
+  noes:"No es una herramienta general de orquestación de datos ni de automatización de marketing.",
+  hace:"Automatiza flujos de respuesta a incidentes de seguridad, triage de alertas y workflows entre herramientas de seguridad.",
+  nohace:"No está diseñada para pipelines de datos analíticos ni integraciones de e-commerce/marketing.",
+  licTxt:"Propietario, de pago (con capa community gratuita limitada).",
+  creador:"Eoin Hinchy y Thomas Kinsella (Dublín)", anio:"2018",
+  usoSi:"Equipos de seguridad (SOC) que automatizan respuesta a incidentes · reducir trabajo manual repetitivo en SecOps",
+  usoNo:"Orquestación de datos general · automatización de procesos que no son de seguridad/TI",
+  arte:"Amplió su enfoque hacia \"AI agents\" para SOC, permitiendo que agentes de IA ejecuten partes de las investigaciones de seguridad, consolidándose como líder en automatización de seguridad no-code." },
+
+{ name:"Huginn", cat:"ipaas", lic:"oss",
+  es:"Sistema open source auto-hospedado para crear agentes que monitorean y actúan sobre la web (similar a un IFTTT/Zapier casero).",
+  noes:"No es una plataforma comercial mantenida al ritmo de Zapier/n8n; su desarrollo es mucho más lento.",
+  hace:"Ejecuta \"agentes\" (scrapers, monitores RSS, triggers) encadenados que reaccionan a eventos y ejecutan acciones.",
+  nohace:"No ofrece soporte comercial, UI moderna ni el ritmo de nuevas integraciones de las alternativas actuales.",
+  licTxt:"OSS (MIT), completamente gratis.",
+  creador:"Andrew Cantino y comunidad", anio:"2013",
+  usoSi:"Proyectos personales/hobby de automatización web · usuarios técnicos que quieren control total self-hosted gratis",
+  usoNo:"Uso empresarial serio · equipos que necesitan soporte y actualizaciones constantes",
+  arte:"Quedó relegado a un proyecto de nicho/hobby; la mayoría de los casos de uso migraron a n8n o Activepieces, con experiencia similar pero desarrollo activo." },
+];
+
+// ---------- RENDER ----------
+const catFiltersEl = document.getElementById('cat-filters');
+const licFiltersEl = document.getElementById('lic-filters');
+const summaryBody = document.getElementById('summary-body');
+const cardsEl = document.getElementById('cards');
+const searchEl = document.getElementById('search');
+const countEl = document.getElementById('count');
+const emptyState = document.getElementById('empty-state');
+
+let activeCat = 'all';
+let activeLic = 'all';
+
+// category pills
+const allCatPill = document.createElement('div');
+allCatPill.className = 'pill active';
+allCatPill.textContent = 'Todas las categorías';
+allCatPill.dataset.cat = 'all';
+catFiltersEl.appendChild(allCatPill);
+Object.entries(CATS).forEach(([key, val]) => {
+  const p = document.createElement('div');
+  p.className = 'pill';
+  p.textContent = val.label;
+  p.dataset.cat = key;
+  catFiltersEl.appendChild(p);
+});
+
+const allLicPill = document.createElement('div');
+allLicPill.className = 'pill active';
+allLicPill.textContent = 'Toda licencia';
+allLicPill.dataset.lic = 'all';
+licFiltersEl.appendChild(allLicPill);
+Object.entries(LIC).forEach(([key, val]) => {
+  const p = document.createElement('div');
+  p.className = 'pill';
+  p.textContent = val.label;
+  p.dataset.lic = key;
+  licFiltersEl.appendChild(p);
+});
+
+catFiltersEl.addEventListener('click', (e) => {
+  if(!e.target.dataset.cat) return;
+  activeCat = e.target.dataset.cat;
+  [...catFiltersEl.children].forEach(el => el.classList.toggle('active', el === e.target));
+  applyFilters();
+});
+licFiltersEl.addEventListener('click', (e) => {
+  if(!e.target.dataset.lic) return;
+  activeLic = e.target.dataset.lic;
+  [...licFiltersEl.children].forEach(el => el.classList.toggle('active', el === e.target));
+  applyFilters();
+});
+searchEl.addEventListener('input', applyFilters);
+
+function slug(s){ return s.toLowerCase().replace(/[^a-z0-9]+/g,'-'); }
+
+TOOLS.forEach((t, i) => {
+  const id = 'tool-' + slug(t.name);
+  const catInfo = CATS[t.cat];
+  const licInfo = LIC[t.lic];
+
+  // summary row
+  const tr = document.createElement('tr');
+  tr.dataset.name = t.name.toLowerCase();
+  tr.dataset.creator = t.creador.toLowerCase();
+  tr.dataset.cat = t.cat;
+  tr.dataset.lic = t.lic;
+  tr.dataset.blob = (t.name + ' ' + t.es + ' ' + t.hace + ' ' + t.usoSi + ' ' + t.creador).toLowerCase();
+  tr.addEventListener('click', () => {
+    document.getElementById(id).scrollIntoView({behavior:'smooth', block:'start'});
+  });
+  tr.innerHTML = `
+    <td class="name"><span class="cat-dot" style="background:${catInfo.color}"></span>${t.name}</td>
+    <td>${catInfo.label}</td>
+    <td><span class="badge ${licInfo.cls}">${licInfo.label}</span></td>
+    <td>${t.creador}</td>
+    <td>${t.anio}</td>
+  `;
+  summaryBody.appendChild(tr);
+
+  // card
+  const card = document.createElement('div');
+  card.className = 'card';
+  card.id = id;
+  card.dataset.name = t.name.toLowerCase();
+  card.dataset.creator = t.creador.toLowerCase();
+  card.dataset.cat = t.cat;
+  card.dataset.lic = t.lic;
+  card.dataset.blob = tr.dataset.blob;
+  card.innerHTML = `
+    <div class="node" style="border-color:${catInfo.color}"></div>
+    <div class="card-inner">
+      <div class="card-head">
+        <div>
+          <h3>${t.name}</h3>
+          <div class="card-sub">${catInfo.label}</div>
+        </div>
+        <div class="badges-row">
+          <span class="badge ${licInfo.cls}">${licInfo.label}</span>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="field es"><div class="label">Qué es</div><p>${t.es}</p></div>
+        <div class="field notes"><div class="label">Qué NO es</div><p>${t.noes}</p></div>
+        <div class="field es"><div class="label">Qué hace</div><p>${t.hace}</p></div>
+        <div class="field notes"><div class="label">Qué NO hace</div><p>${t.nohace}</p></div>
+        <div class="field si"><div class="label">Usalo si</div><p>${t.usoSi}</p></div>
+        <div class="field no"><div class="label">Evitalo si</div><p>${t.usoNo}</p></div>
+      </div>
+
+      <div class="arte-box">
+        <div class="label">Estado del arte · agosto 2026</div>
+        <p>${t.arte}</p>
+      </div>
+
+      <div class="meta-line">
+        <span><b>Licencia/precio:</b> ${t.licTxt}</span>
+        <span><b>Creador:</b> ${t.creador}</span>
+        <span><b>Año:</b> ${t.anio}</span>
+      </div>
+    </div>
+  `;
+  cardsEl.appendChild(card);
+});
+
+function applyFilters(){
+  const q = searchEl.value.trim().toLowerCase();
+  let visible = 0;
+  document.querySelectorAll('#summary-body tr').forEach(row => {
+    const match = matches(row, q);
+    row.classList.toggle('hidden', !match);
+  });
+  document.querySelectorAll('.card').forEach(card => {
+    const match = matches(card, q);
+    card.classList.toggle('hidden', !match);
+    if(match) visible++;
+  });
+  countEl.textContent = visible;
+  emptyState.classList.toggle('hidden', visible !== 0);
+}
+
+function matches(el, q){
+  const catOk = activeCat === 'all' || el.dataset.cat === activeCat;
+  const licOk = activeLic === 'all' || el.dataset.lic === activeLic;
+  const searchOk = !q || el.dataset.blob.includes(q);
+  return catOk && licOk && searchOk;
+}
+</script>
+</body>
+</html>

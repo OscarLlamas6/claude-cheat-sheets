@@ -42,6 +42,7 @@ Cuadros comparativos y guías de referencia generados con Claude, centralizados 
 | Sistemas de Control de Versiones — Cuadro Comparativo | Dev Tools, Git |
 | Automatización de Infraestructura — Comparativo 2026 | DevOps, Infra |
 | Contexto, Caché y Tokens — Herramientas para Agentes de IA | AI, LLM, Agentes |
+| Orquestadores de Jobs & Workflows — Comparativa | DevOps, Data |
 
 ## Activar GitHub Pages
 
